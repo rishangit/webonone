@@ -265,9 +265,17 @@ export const formatAvatarUrl = (avatarUrl?: string | null, _firstName?: string, 
   
   // If avatar is already a full URL, extract the relative path if it's from our server
   if (avatarUrl.startsWith('http://') || avatarUrl.startsWith('https://')) {
-    const baseUrl = typeof window !== 'undefined' && (window as any).__API_URL__ 
-      ? (window as any).__API_URL__.replace('/api', '')
-      : 'http://localhost:5007';
+    // Auto-detect base URL from current hostname
+    let baseUrl = 'http://localhost:5007';
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname;
+      const protocol = window.location.protocol;
+      if (hostname === '185.116.237.5' || hostname.includes('185.116.237.5')) {
+        baseUrl = `${protocol}//${hostname}:5007`;
+      } else if ((window as any).__API_URL__) {
+        baseUrl = (window as any).__API_URL__.replace('/api', '');
+      }
+    }
     
     // If it's from our server, extract the relative path and reconstruct
     if (avatarUrl.startsWith(baseUrl)) {
@@ -281,10 +289,17 @@ export const formatAvatarUrl = (avatarUrl?: string | null, _firstName?: string, 
   }
   
   // If avatar is a relative path, construct the full URL
-  // Use config if available, otherwise default to localhost:5007
-  const baseUrl = typeof window !== 'undefined' && (window as any).__API_URL__ 
-    ? (window as any).__API_URL__.replace('/api', '')
-    : 'http://localhost:5007';
+  // Auto-detect base URL from current hostname
+  let baseUrl = 'http://localhost:5007';
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    const protocol = window.location.protocol;
+    if (hostname === '185.116.237.5' || hostname.includes('185.116.237.5')) {
+      baseUrl = `${protocol}//${hostname}:5007`;
+    } else if ((window as any).__API_URL__) {
+      baseUrl = (window as any).__API_URL__.replace('/api', '');
+    }
+  }
   
   // Normalize the path - remove leading slash if present
   let normalizedPath = avatarUrl.startsWith('/') ? avatarUrl.slice(1) : avatarUrl;

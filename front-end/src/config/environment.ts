@@ -21,11 +21,65 @@ const getEnvVar = (key: string, defaultValue: string = ''): string => {
   return import.meta.env[key] || defaultValue;
 };
 
+// Auto-detect API URL based on current hostname
+const getApiUrl = (): string => {
+  // If explicitly set in env, use it
+  const envApiUrl = getEnvVar('VITE_API_BASE_URL');
+  if (envApiUrl) {
+    return envApiUrl;
+  }
+  
+  // Auto-detect based on current hostname
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    const protocol = window.location.protocol;
+    
+    // If running on remote server (185.116.237.5)
+    if (hostname === '185.116.237.5' || hostname.includes('185.116.237.5')) {
+      // Use port 5007 for API (backend port)
+      return `${protocol}//${hostname}:5007/api`;
+    }
+    
+    // If running on localhost, use default localhost:5007
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return 'http://localhost:5007/api';
+    }
+  }
+  
+  // Default fallback
+  return 'http://localhost:5007/api';
+};
+
+const getApiBaseUrl = (): string => {
+  const envApiUrl = getEnvVar('VITE_API_URL');
+  if (envApiUrl) {
+    return envApiUrl;
+  }
+  
+  // Auto-detect based on current hostname
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    const protocol = window.location.protocol;
+    
+    // If running on remote server
+    if (hostname === '185.116.237.5' || hostname.includes('185.116.237.5')) {
+      return `${protocol}//${hostname}:5007`;
+    }
+    
+    // If running on localhost
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return 'http://localhost:5007';
+    }
+  }
+  
+  return 'http://localhost:5007';
+};
+
 // Environment configuration
 export const config: EnvironmentConfig = {
-  // API Configuration
-  apiBaseUrl: getEnvVar('VITE_API_BASE_URL', 'http://localhost:5007/api'),
-  apiUrl: getEnvVar('VITE_API_URL', 'http://localhost:5007'),
+  // API Configuration - auto-detects based on hostname
+  apiBaseUrl: getApiUrl(),
+  apiUrl: getApiBaseUrl(),
   
   // Application Configuration
   appName: getEnvVar('VITE_APP_NAME', 'AppointmentPro'),

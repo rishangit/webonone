@@ -1,9 +1,12 @@
+import { config } from '../config/environment';
+
 // API service for making HTTP requests
 class ApiService {
   private baseURL: string;
 
-  constructor(baseURL: string = 'http://localhost:5007/api') {
-    this.baseURL = baseURL;
+  constructor(baseURL?: string) {
+    // Use provided baseURL or fall back to environment config
+    this.baseURL = baseURL || config.apiBaseUrl;
   }
 
   private getToken(): string | null {

@@ -53,11 +53,26 @@ app.use(helmet({
 
 // CORS configuration
 const corsOptions = {
-  origin: [
-    'http://localhost:3007',  // Current frontend port
-    'http://localhost:5173',  // Default Vite port
-    process.env.FRONTEND_URL || 'http://localhost:3007'
-  ],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'http://localhost:3007',  // Current frontend port
+      'http://localhost:5173',  // Default Vite port
+      'http://185.116.237.5:3007',  // Remote server frontend
+      process.env.FRONTEND_URL || 'http://localhost:3007'
+    ];
+    
+    // Also allow any origin that matches the pattern for the remote server
+    const remoteServerPattern = /^http:\/\/185\.116\.237\.5:\d+$/;
+    
+    if (allowedOrigins.includes(origin) || remoteServerPattern.test(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
@@ -115,7 +130,14 @@ app.use('/uploads', (req, res, next) => {
   
   // Set CORS headers explicitly
   const origin = req.headers.origin;
-  if (origin && (origin.includes('localhost:3007') || origin.includes('localhost:5173'))) {
+  const allowedOrigins = [
+    'http://localhost:3007',
+    'http://localhost:5173',
+    'http://185.116.237.5:3007'
+  ];
+  const remoteServerPattern = /^http:\/\/185\.116\.237\.5:\d+$/;
+  
+  if (origin && (allowedOrigins.includes(origin) || remoteServerPattern.test(origin))) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   } else {
     res.setHeader('Access-Control-Allow-Origin', '*');
