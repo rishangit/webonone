@@ -1,4 +1,6 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5007/api';
+import { config } from '../config/environment';
+
+const API_BASE_URL = config.apiBaseUrl;
 
 export interface CompanySale {
   id: string;
@@ -155,5 +157,4 @@ class CompanySalesService {
 }
 
 export const companySalesService = new CompanySalesService();
-export type { PaginationMeta };
 

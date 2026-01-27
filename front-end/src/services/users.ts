@@ -1,8 +1,8 @@
 import { User } from '../types/user';
 import { PaginationMeta } from './products';
+import { config } from '../config/environment';
 
-// @ts-ignore - import.meta.env is available in Vite
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5007/api';
+const API_BASE_URL = config.apiBaseUrl;
 
 class UsersService {
   private getAuthHeaders(): HeadersInit {
