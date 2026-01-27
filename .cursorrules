@@ -1,0 +1,41 @@
+{
+    "ai": {
+      "instructions": [
+        "Always use arrow functions for all React components. Do not use function declarations.",
+        "All React components must be declared as const MyComponent = () => { ... }.",
+        "Always use Tailwind CSS classes for styling. Do not use inline styles, CSS modules, or external CSS files unless explicitly requested.",
+        "Prefer semantic HTML elements and responsive Tailwind utilities for layout.",
+        "Use Tailwind spacing, typography, and color classes instead of custom CSS.",
+        "When styling, prioritize clean, minimal, and consistent Tailwind class usage.",
+        "When implementing API calls, always use Redux actions integrated with RxJS observables for handling asynchronous data.",
+        "Use Redux to store API response data and access it first before making new API calls to minimize redundant network requests.",
+        "If the required data already exists in the Redux store, do not call the API again.",
+        "Structure the data flow so that components subscribe to Redux state changes via useSelector or connect.",
+        "Use RxJS operators such as switchMap, catchError, and debounceTime to handle side effects efficiently.",
+        "All API interactions should be encapsulated in Redux observables (epics) or async thunks, never directly inside components.",
+        "When creating forms, always use the react-hook-form library for form state management.",
+        "Use the Yup validation library for defining and validating form schemas.",
+        "Integrate Yup with react-hook-form using the yupResolver for consistent validation handling.",
+        "Form components must use proper Tailwind styling for inputs, labels, and buttons.",
+        "Avoid managing form state manually with useState; rely on react-hook-form’s useForm and Controller APIs.",
+        "Always design and implement components to be reusable and modular. Avoid duplicating similar UI or logic across files.",
+        "When creating new UIs, check for existing reusable components (buttons, inputs, modals, etc.) and reuse them instead of recreating.",
+        "Ensure reusable components accept props and children for flexibility and customization.",
+        "Group reusable UI components in a shared or components/common directory for consistent usage across the app.",
+        "Write all code in a clear, readable, and maintainable structure, following Next.js project conventions.",
+        "Organize files logically (pages, components, hooks, store, utils) and maintain consistent naming conventions.",
+        "Use proper indentation, spacing, and code comments where necessary to make the code user-friendly and easy to understand.",
+        "Prefer explicit imports over wildcards, and keep imports organized (React, third-party, internal).",
+        "When generating Next.js pages, use `getServerSideProps`, `getStaticProps`, or `getStaticPaths` appropriately and structure them clearly.",
+        "Separate UI, business logic, and API logic to make components focused and maintainable.",
+        "Always use `.env` files for storing secrets, API URLs, and environment-specific configuration.",
+        "Access environment variables using `process.env.NEXT_PUBLIC_...` in Next.js for frontend code and `process.env...` for backend/server code.",
+        "Do not hardcode sensitive or environment-specific values in the codebase; always reference the `.env` variables.",
+        "Keep dummy data in JSON files inside a `/json` folder at the project root.",
+        "Always fetch data from the server first; if the server endpoint is unavailable, use the JSON files as fallback data.",
+        "Structure the JSON data similar to API responses so that Redux and components can consume it without code changes.",
+        "Use try/catch or RxJS operators to handle server errors and switch to local JSON data automatically."
+      ]
+    }
+  }
+  

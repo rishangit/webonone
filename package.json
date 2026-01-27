@@ -1,0 +1,76 @@
+{
+  "name": "appointment-app",
+  "version": "1.0.0",
+  "description": "Full-stack appointment booking application",
+  "private": true,
+  "workspaces": [
+    "front-end",
+    "back-end"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:frontend": "cd front-end && npm run dev",
+    "dev:backend": "cd back-end && npm run dev",
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:frontend": "cd front-end && npm run build",
+    "build:backend": "cd back-end && npm run build",
+    "lint": "npm run lint:frontend && npm run lint:backend",
+    "lint:frontend": "cd front-end && npm run lint",
+    "lint:backend": "cd back-end && npm run lint",
+    "lint:fix": "npm run lint:fix:frontend && npm run lint:fix:backend",
+    "lint:fix:frontend": "cd front-end && npm run lint:fix",
+    "lint:fix:backend": "cd back-end && npm run lint:fix",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "type-check": "npm run type-check:frontend",
+    "type-check:frontend": "cd front-end && npm run type-check",
+    "test": "npm run test:frontend",
+    "test:frontend": "cd front-end && npm run test",
+    "clean": "npm run clean:frontend && npm run clean:backend",
+    "clean:frontend": "cd front-end && rm -rf node_modules dist",
+    "clean:backend": "cd back-end && rm -rf node_modules",
+    "install:all": "npm install && cd front-end && npm install && cd ../back-end && npm install",
+    "setup": "npm run install:all && npm run setup:frontend",
+    "setup:frontend": "cd front-end && npm run setup"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "eslint": "^8.57.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint-plugin-react": "^7.34.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-jsx-a11y": "^6.8.0",
+    "prettier": "^3.2.5",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,css,md}": [
+      "prettier --write"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "keywords": [
+    "appointment",
+    "booking",
+    "react",
+    "nodejs",
+    "typescript",
+    "mysql"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
