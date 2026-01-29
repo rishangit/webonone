@@ -118,3 +118,6 @@ pnpm-lock.yaml
 # Generated files
 *.min.js
 *.min.css
+
+# Upload directories
+back-end/uploads/
