@@ -121,3 +121,6 @@ pnpm-lock.yaml
 
 # Upload directories
 back-end/uploads/
+
+# IIS Node.js logs and runtime files
+back-end/iisnode/
