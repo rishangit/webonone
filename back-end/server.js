@@ -61,13 +61,18 @@ const corsOptions = {
       'http://localhost:3007',  // Current frontend port
       'http://localhost:5173',  // Default Vite port
       'http://185.116.237.5:3007',  // Remote server frontend
+      'http://www.webonone.com',
+      'https://www.webonone.com',
+      'http://webonone.com',
+      'https://webonone.com',
       process.env.FRONTEND_URL || 'http://localhost:3007'
     ];
     
     // Also allow any origin that matches the pattern for the remote server
-    const remoteServerPattern = /^http:\/\/185\.116\.237\.5:\d+$/;
+    const remoteServerPattern = /^http(s)?:\/\/185\.116\.237\.5(:\d+)?$/;
+    const webononePattern = /^http(s)?:\/\/(www\.)?webonone\.com$/;
     
-    if (allowedOrigins.includes(origin) || remoteServerPattern.test(origin)) {
+    if (allowedOrigins.includes(origin) || remoteServerPattern.test(origin) || webononePattern.test(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
@@ -133,11 +138,16 @@ app.use('/uploads', (req, res, next) => {
   const allowedOrigins = [
     'http://localhost:3007',
     'http://localhost:5173',
-    'http://185.116.237.5:3007'
+    'http://185.116.237.5:3007',
+    'http://www.webonone.com',
+    'https://www.webonone.com',
+    'http://webonone.com',
+    'https://webonone.com'
   ];
-  const remoteServerPattern = /^http:\/\/185\.116\.237\.5:\d+$/;
+  const remoteServerPattern = /^http(s)?:\/\/185\.116\.237\.5(:\d+)?$/;
+  const webononePattern = /^http(s)?:\/\/(www\.)?webonone\.com$/;
   
-  if (origin && (allowedOrigins.includes(origin) || remoteServerPattern.test(origin))) {
+  if (origin && (allowedOrigins.includes(origin) || remoteServerPattern.test(origin) || webononePattern.test(origin))) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   } else {
     res.setHeader('Access-Control-Allow-Origin', '*');

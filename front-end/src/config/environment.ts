@@ -34,13 +34,17 @@ const getApiUrl = (): string => {
     const hostname = window.location.hostname;
     const protocol = window.location.protocol;
     
-    // If running on remote server (185.116.237.5)
-    if (hostname === '185.116.237.5' || hostname.includes('185.116.237.5')) {
-      // Use port 5007 for API (backend port)
+    // Production domain: www.webonone.com / webonone.com (API on same host, port 5007)
+    if (hostname === 'www.webonone.com' || hostname === 'webonone.com') {
       return `${protocol}//${hostname}:5007/api`;
     }
     
-    // If running on localhost, use default localhost:5007
+    // If running on remote server (185.116.237.5)
+    if (hostname === '185.116.237.5' || hostname.includes('185.116.237.5')) {
+      return `${protocol}//${hostname}:5007/api`;
+    }
+    
+    // If running on localhost
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
       return 'http://localhost:5007/api';
     }
@@ -60,6 +64,11 @@ const getApiBaseUrl = (): string => {
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
     const protocol = window.location.protocol;
+    
+    // Production domain
+    if (hostname === 'www.webonone.com' || hostname === 'webonone.com') {
+      return `${protocol}//${hostname}:5007`;
+    }
     
     // If running on remote server
     if (hostname === '185.116.237.5' || hostname.includes('185.116.237.5')) {
