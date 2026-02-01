@@ -59,7 +59,7 @@ class FileUploadService {
    * Delete a file from the server
    */
   deleteFile(filePath: string): Observable<void> {
-    return apiService.delete<void>(`${this.baseUrl}/delete/${encodeURIComponent(filePath)}`).pipe(
+    return from(apiService.delete<void>(`${this.baseUrl}/delete/${encodeURIComponent(filePath)}`)).pipe(
       map(() => void 0),
       catchError((error) => {
         console.error('File deletion error:', error);
@@ -72,8 +72,8 @@ class FileUploadService {
    * Get file information
    */
   getFileInfo(filePath: string): Observable<FileInfo> {
-    return apiService.get<FileInfo>(`${this.baseUrl}/info/${encodeURIComponent(filePath)}`).pipe(
-      map((response) => response.data),
+    return from(apiService.get<FileInfo>(`${this.baseUrl}/info/${encodeURIComponent(filePath)}`)).pipe(
+      map((response: any) => response.data || response),
       catchError((error) => {
         console.error('Get file info error:', error);
         throw error;

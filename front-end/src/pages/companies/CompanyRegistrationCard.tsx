@@ -30,7 +30,7 @@ export function CompanyRegistrationCard({ onDismiss, showCloseButton = true }: C
                 Join our platform and start managing appointments for your business. Get access to powerful tools for scheduling, customer management, and analytics.
               </p>
               
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
                 <Button
                   onClick={() => setShowWizard(true)}
                   className="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-md hover:shadow-lg transition-all duration-200"

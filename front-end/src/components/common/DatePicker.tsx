@@ -128,13 +128,13 @@ export const DatePicker = ({
             id={id}
             name={name}
             className={cn(
-              "w-full h-9 justify-start text-left font-normal bg-[var(--input-background)] border-[var(--glass-border)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-border)] hover:text-[var(--accent-text)]",
+              "w-full h-12 md:h-9 justify-start text-left font-normal text-lg md:text-sm bg-[var(--input-background)] border-[var(--glass-border)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-border)] hover:text-[var(--accent-text)]",
               error && "border-red-500 focus:border-red-500 focus:ring-red-500",
               !isValidDate && "text-muted-foreground",
               isValidDate && "bg-[var(--accent-bg)] border-[var(--accent-border)] text-[var(--accent-text)]"
             )}
           >
-            <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+            <CalendarIcon className="mr-2 h-5 w-5 md:h-4 md:w-4 shrink-0" />
             <span className="flex-1 text-left">
               {isValidDate ? (
                 formatDisplayDate(dateValue)

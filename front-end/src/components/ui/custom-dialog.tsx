@@ -48,12 +48,12 @@ export function CustomDialog({
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" />
-        <div className="fixed top-[50%] left-[50%] z-50 w-full px-2 py-2 sm:px-0 sm:py-0 translate-x-[-50%] translate-y-[-50%] pointer-events-none flex justify-center items-start">
+        <div className="fixed inset-0 z-50 w-full h-full px-2 py-2 sm:px-0 sm:py-0 pointer-events-none flex justify-center items-center">
           <DialogPrimitive.Content
             className={cn(
               "bg-[var(--glass-bg)] border-[var(--glass-border)] backdrop-blur-sm rounded-lg shadow-lg",
               "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 border duration-200",
-              "max-h-[calc(100vh-1rem)] flex flex-col pointer-events-auto",
+              "h-[calc(100vh-1rem)] max-h-[calc(100vh-1rem)] flex flex-col pointer-events-auto",
               // Use w-full on mobile, but respect maxWidth on desktop
               "w-full sm:w-auto",
               maxWidth.includes('w-[') || maxWidth.includes('max-w-') 
@@ -61,6 +61,7 @@ export function CustomDialog({
                 : `sm:${maxWidth}`,
               className
             )}
+            style={{ height: 'calc(100vh - 1rem)', maxHeight: 'calc(100vh - 1rem)' }}
             aria-describedby={describedBy}
           >
           {/* Header */}
@@ -97,7 +98,7 @@ export function CustomDialog({
 
           {/* Content */}
           <div className={cn(
-            "flex-1",
+            "flex-1 min-h-0",
             noContentPadding ? "" : ((title || description || icon || customHeader) ? "p-6" : "p-6 pt-6"),
             disableContentScroll ? "overflow-hidden" : "overflow-y-auto custom-scrollbar"
           )}>

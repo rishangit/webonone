@@ -10,20 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { GoogleMapComponent } from "../../components/GoogleMapComponent";
 import { 
   Building, 
-  Phone, 
-  MapPin, 
   CheckCircle, 
-  X, 
   ChevronLeft, 
   ChevronRight,
-  Check,
-  Upload,
-  Camera,
-  Trash2,
-  Sparkles,
-  Users,
-  Mail,
-  Globe
+  Check
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
@@ -33,6 +23,7 @@ import {
   clearError as clearCompaniesError
 } from "../../store/slices/companiesSlice";
 import { TagSelector } from "../../components/tags/TagSelector";
+import { PhoneInput } from "../../components/common/PhoneInput";
 
 interface CompanyRegistrationWizardProps {
   open: boolean;
@@ -51,6 +42,8 @@ interface CompanyFormData {
   state: string;
   country: string;
   postalCode: string;
+  latitude?: number;
+  longitude?: number;
   tagIds: string[];
   employees: string;
   logo?: string;
@@ -85,18 +78,20 @@ export function CompanyRegistrationWizard({ open, onOpenChange }: CompanyRegistr
     state: "",
     country: "United States",
     postalCode: "",
+    latitude: undefined,
+    longitude: undefined,
     tagIds: [],
     employees: "",
     logo: ""
   });
 
-  const totalSteps = 4;
+  const totalSteps = 5;
   
   const { tags } = useAppSelector((state) => state.tags);
   
-  // Fetch tags when step 2 or 4 is active or dialog opens
+  // Fetch tags when step 2, 4, or 5 is active or dialog opens
   useEffect(() => {
-    if (open && (currentStep === 2 || currentStep === 4 || tags.length === 0)) {
+    if (open && (currentStep === 2 || currentStep === 4 || currentStep === 5 || tags.length === 0)) {
       dispatch(fetchTagsRequest({ active: true }));
     }
   }, [open, currentStep, dispatch, tags.length]);
@@ -142,6 +137,8 @@ export function CompanyRegistrationWizard({ open, onOpenChange }: CompanyRegistr
         return formData.email && formData.phone;
       case 4:
         return formData.address && formData.city && formData.state && formData.country;
+      case 5:
+        return true; // Review step - always can proceed
       default:
         return false;
     }
@@ -199,6 +196,8 @@ export function CompanyRegistrationWizard({ open, onOpenChange }: CompanyRegistr
         state: "",
         country: "United States",
         postalCode: "",
+        latitude: undefined,
+        longitude: undefined,
         tagIds: [],
         employees: "",
         logo: ""
@@ -224,19 +223,19 @@ export function CompanyRegistrationWizard({ open, onOpenChange }: CompanyRegistr
     <div className="flex items-center justify-center mb-6">
       {Array.from({ length: totalSteps }, (_, i) => i + 1).map((step) => (
         <div key={step} className="flex items-center">
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+          <div className={`w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm ${
             step <= currentStep 
               ? 'bg-[var(--accent-primary)] text-[var(--accent-button-text)]' 
               : 'bg-muted text-muted-foreground'
           }`}>
             {step < currentStep ? (
-              <Check className="w-4 h-4" />
+              <Check className="w-3 h-3 md:w-4 md:h-4" />
             ) : (
               step
             )}
           </div>
           {step < totalSteps && (
-            <div className={`w-12 h-0.5 mx-2 ${
+            <div className={`w-4 md:w-12 h-0.5 mx-0.5 md:mx-2 ${
               step < currentStep ? 'bg-[var(--accent-primary)]' : 'bg-muted'
             }`} />
           )}
@@ -357,12 +356,12 @@ export function CompanyRegistrationWizard({ open, onOpenChange }: CompanyRegistr
                 
                 <div className="space-y-2">
                   <Label htmlFor="phone" className="text-foreground">Phone Number *</Label>
-                  <Input
+                  <PhoneInput
                     id="phone"
-                    value={formData.phone}
-                    onChange={(e) => handleInputChange('phone', e.target.value)}
-                    placeholder="+1 (555) 123-4567"
-                    className="bg-[var(--input-background)] border-[var(--glass-border)] text-foreground"
+                    value={formData.phone || ""}
+                    onChange={(value) => handleInputChange('phone', value)}
+                    placeholder="Enter phone number"
+                    error={false}
                   />
                 </div>
               </div>
@@ -381,15 +380,56 @@ export function CompanyRegistrationWizard({ open, onOpenChange }: CompanyRegistr
           </div>
         );
 
-      case 4: // Location & Confirmation
+      case 4: // Location
         return (
           <div className="space-y-4">
             <div className="text-center">
-              <h3 className="text-lg font-semibold text-foreground mb-2">Location & Review</h3>
-              <p className="text-muted-foreground">Add your business location and review your information</p>
+              <h3 className="text-lg font-semibold text-foreground mb-2">Location Information</h3>
+              <p className="text-muted-foreground">Add your business location on the map and complete address details</p>
             </div>
             
             <div className="space-y-4">
+              {/* Map Integration */}
+              <div>
+                <Label className="text-foreground mb-2 block">Location on Map</Label>
+                <GoogleMapComponent 
+                  address={formData.address}
+                  city={formData.city}
+                  state={formData.state}
+                  country={formData.country}
+                  editMode={true}
+                  height="400px"
+                  initialLat={formData.latitude}
+                  initialLng={formData.longitude}
+                  onLocationChange={(location) => {
+                    // Save latitude and longitude when location changes
+                    setFormData(prev => ({
+                      ...prev,
+                      latitude: location.lat,
+                      longitude: location.lng
+                    }));
+                    
+                    // Update address fields with parsed location data
+                    if (location.streetAddress) {
+                      handleInputChange('address', location.streetAddress);
+                    }
+                    if (location.city) {
+                      handleInputChange('city', location.city);
+                    }
+                    if (location.state) {
+                      handleInputChange('state', location.state);
+                    }
+                    if (location.postalCode) {
+                      handleInputChange('postalCode', location.postalCode);
+                    }
+                    if (location.country) {
+                      handleInputChange('country', location.country);
+                    }
+                  }}
+                />
+              </div>
+
+              {/* Address Fields */}
               <div className="space-y-2">
                 <Label htmlFor="address" className="text-foreground">Street Address *</Label>
                 <Input
@@ -401,7 +441,7 @@ export function CompanyRegistrationWizard({ open, onOpenChange }: CompanyRegistr
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="city" className="text-foreground">City *</Label>
                   <Input
@@ -414,7 +454,7 @@ export function CompanyRegistrationWizard({ open, onOpenChange }: CompanyRegistr
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="state" className="text-foreground">State *</Label>
+                  <Label htmlFor="state" className="text-foreground">State/Province *</Label>
                   <Input
                     id="state"
                     value={formData.state}
@@ -423,68 +463,107 @@ export function CompanyRegistrationWizard({ open, onOpenChange }: CompanyRegistr
                     className="bg-[var(--input-background)] border-[var(--glass-border)] text-foreground"
                   />
                 </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="postalCode" className="text-foreground">Postal Code</Label>
+                  <Input
+                    id="postalCode"
+                    value={formData.postalCode}
+                    onChange={(e) => handleInputChange('postalCode', e.target.value)}
+                    placeholder="Postal code"
+                    className="bg-[var(--input-background)] border-[var(--glass-border)] text-foreground"
+                  />
+                </div>
               </div>
 
-              {/* Summary Card */}
-              <Card className="p-4 bg-[var(--glass-bg)] border border-[var(--glass-border)]">
-                <h4 className="font-medium text-foreground mb-3">Registration Summary</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Company:</span>
-                    <span className="text-foreground font-medium">{formData.companyName || "Not entered"}</span>
-                  </div>
-                  <div className="flex justify-between items-start">
-                    <span className="text-muted-foreground">Tags:</span>
-                    <div className="flex flex-wrap gap-1 justify-end max-w-[60%]">
-                      {formData.tagIds.length > 0 ? (
-                        tags
-                          .filter(tag => formData.tagIds.includes(tag.id))
-                          .map(tag => (
-                            <Badge
-                              key={tag.id}
-                              variant="secondary"
-                              className="text-xs"
-                              style={{ 
-                                backgroundColor: `${tag.color}20`, 
-                                color: tag.color,
-                                borderColor: `${tag.color}40`
-                              }}
-                            >
-                              {tag.icon && <span className="mr-1">{tag.icon}</span>}
-                              {tag.name}
-                            </Badge>
-                          ))
-                      ) : (
-                        <span className="text-foreground">Not selected</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Contact:</span>
-                    <span className="text-foreground">{formData.contactPerson || "Not entered"}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Location:</span>
-                    <span className="text-foreground">{formData.city && formData.state ? `${formData.city}, ${formData.state}` : "Not entered"}</span>
+              <div className="space-y-2">
+                <Label htmlFor="country" className="text-foreground">Country *</Label>
+                <Input
+                  id="country"
+                  value={formData.country}
+                  onChange={(e) => handleInputChange('country', e.target.value)}
+                  placeholder="Country"
+                  className="bg-[var(--input-background)] border-[var(--glass-border)] text-foreground"
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      case 5: // Review
+        return (
+          <div className="space-y-4">
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-foreground mb-2">Review & Submit</h3>
+              <p className="text-muted-foreground">Review your information before submitting</p>
+            </div>
+            
+            {/* Summary Card */}
+            <Card className="p-4 bg-[var(--glass-bg)] border border-[var(--glass-border)]">
+              <h4 className="font-medium text-foreground mb-3">Registration Summary</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Company:</span>
+                  <span className="text-foreground font-medium">{formData.companyName || "Not entered"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Contact Person:</span>
+                  <span className="text-foreground">{formData.contactPerson || "Not entered"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Email:</span>
+                  <span className="text-foreground">{formData.email || "Not entered"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Phone:</span>
+                  <span className="text-foreground">{formData.phone || "Not entered"}</span>
+                </div>
+                <div className="flex justify-between items-start">
+                  <span className="text-muted-foreground">Tags:</span>
+                  <div className="flex flex-wrap gap-1 justify-end max-w-[60%]">
+                    {formData.tagIds.length > 0 ? (
+                      tags
+                        .filter(tag => formData.tagIds.includes(tag.id))
+                        .map(tag => (
+                          <Badge
+                            key={tag.id}
+                            variant="secondary"
+                            className="text-xs"
+                            style={{ 
+                              backgroundColor: `${tag.color}20`, 
+                              color: tag.color,
+                              borderColor: `${tag.color}40`
+                            }}
+                          >
+                            {tag.icon && <span className="mr-1">{tag.icon}</span>}
+                            {tag.name}
+                          </Badge>
+                        ))
+                    ) : (
+                      <span className="text-foreground">Not selected</span>
+                    )}
                   </div>
                 </div>
-              </Card>
-            </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Company Size:</span>
+                  <span className="text-foreground">{formData.employees ? `${formData.employees} employees` : "Not selected"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Location:</span>
+                  <span className="text-foreground text-right">
+                    {formData.address ? `${formData.address}, ` : ''}
+                    {formData.city && formData.state ? `${formData.city}, ${formData.state}` : formData.city || formData.state || "Not entered"}
+                    {formData.postalCode ? ` ${formData.postalCode}` : ''}
+                    {formData.country ? `, ${formData.country}` : ''}
+                  </span>
+                </div>
+              </div>
+            </Card>
           </div>
         );
 
       default:
         return null;
-    }
-  };
-
-  const getStepTitle = () => {
-    switch (currentStep) {
-      case 1: return "Company Details";
-      case 2: return "Tags & Size";
-      case 3: return "Contact Information";
-      case 4: return "Location & Review";
-      default: return "";
     }
   };
 
@@ -499,12 +578,6 @@ export function CompanyRegistrationWizard({ open, onOpenChange }: CompanyRegistr
         <ChevronLeft className="w-4 h-4 mr-2" />
         Previous
       </Button>
-      
-      <div className="flex items-center gap-2">
-        <span className="text-sm text-muted-foreground">
-          Step {currentStep} of {totalSteps}: {getStepTitle()}
-        </span>
-      </div>
 
       {currentStep === totalSteps ? (
         <Button
@@ -545,7 +618,7 @@ export function CompanyRegistrationWizard({ open, onOpenChange }: CompanyRegistr
       <div className="space-y-6">
         <StepIndicator />
         
-        <div className="min-h-[400px]">
+        <div>
           {renderStepContent()}
         </div>
       </div>

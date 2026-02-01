@@ -118,7 +118,7 @@ router.delete('/delete/:filePath(*)',
   authenticateToken,
   asyncHandler(async (req, res) => {
     try {
-      const { filePath } = req.params;
+      let { filePath } = req.params;
       
       if (!filePath) {
         return res.status(400).json({
@@ -127,14 +127,57 @@ router.delete('/delete/:filePath(*)',
         });
       }
 
+      // Decode URL-encoded path
+      filePath = decodeURIComponent(filePath);
+
       const uploadsDir = path.join(__dirname, '..', 'uploads');
       const fullPath = path.join(uploadsDir, filePath.replace(/\//g, path.sep));
 
+      // Debug logging
+      console.log('Delete file request:', {
+        originalPath: req.params.filePath,
+        decodedPath: filePath,
+        fullPath: fullPath,
+        exists: fs.existsSync(fullPath)
+      });
+
       // Check if file exists
       if (!fs.existsSync(fullPath)) {
+        // Try alternative path formats
+        const altPath1 = path.join(uploadsDir, filePath);
+        const altPath2 = path.join(uploadsDir, ...filePath.split('/'));
+        
+        console.log('Trying alternative paths:', {
+          altPath1: altPath1,
+          altPath1Exists: fs.existsSync(altPath1),
+          altPath2: altPath2,
+          altPath2Exists: fs.existsSync(altPath2)
+        });
+
+        if (fs.existsSync(altPath1)) {
+          fs.unlinkSync(altPath1);
+          return res.status(200).json({
+            success: true,
+            message: 'File deleted successfully'
+          });
+        }
+
+        if (fs.existsSync(altPath2)) {
+          fs.unlinkSync(altPath2);
+          return res.status(200).json({
+            success: true,
+            message: 'File deleted successfully'
+          });
+        }
+
         return res.status(404).json({
           success: false,
-          message: 'File not found'
+          message: 'File not found',
+          debug: {
+            requestedPath: filePath,
+            fullPath: fullPath,
+            uploadsDir: uploadsDir
+          }
         });
       }
 
@@ -149,7 +192,8 @@ router.delete('/delete/:filePath(*)',
       console.error('File deletion error:', error);
       res.status(500).json({
         success: false,
-        message: 'Internal server error during file deletion'
+        message: 'Internal server error during file deletion',
+        error: error.message
       });
     }
   })
@@ -160,7 +204,7 @@ router.get('/info/:filePath(*)',
   authenticateToken,
   asyncHandler(async (req, res) => {
     try {
-      const { filePath } = req.params;
+      let { filePath } = req.params;
       
       if (!filePath) {
         return res.status(400).json({
@@ -168,6 +212,9 @@ router.get('/info/:filePath(*)',
           message: 'File path is required'
         });
       }
+
+      // Decode URL-encoded path
+      filePath = decodeURIComponent(filePath);
 
       const uploadsDir = path.join(__dirname, '..', 'uploads');
       const fullPath = path.join(uploadsDir, filePath.replace(/\//g, path.sep));

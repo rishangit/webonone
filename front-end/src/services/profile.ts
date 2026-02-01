@@ -12,6 +12,7 @@ export interface ProfileUpdateData {
   address?: string;
   dateOfBirth?: string;
   bio?: string;
+  avatar?: string;
   preferences?: {
     theme?: string;
     notifications?: boolean;

@@ -37,7 +37,6 @@ export function ProfilePage({ userId, onBack }: ProfilePageProps) {
   const { isUpdating, error } = useAppSelector((state) => state.profile);
   const { companies, loading: companiesLoading } = useAppSelector((state) => state.companies);
   const [isEditing, setIsEditing] = useState(false);
-  const [showCompanyRegistration, setShowCompanyRegistration] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [companyToDelete, setCompanyToDelete] = useState<{ id: string; name: string } | null>(null);
   
@@ -387,7 +386,7 @@ export function ProfilePage({ userId, onBack }: ProfilePageProps) {
           </h3>
           {isEditing && !userId ? (
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName" className="text-muted-foreground">First Name <span className="text-red-500">*</span></Label>
                   <Input
@@ -545,7 +544,7 @@ export function ProfilePage({ userId, onBack }: ProfilePageProps) {
             </form>
           ) : (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="text-muted-foreground">First Name</Label>
                   <p className="text-foreground">{user?.firstName || 'Not provided'}</p>
@@ -612,22 +611,9 @@ export function ProfilePage({ userId, onBack }: ProfilePageProps) {
                   <p className="text-muted-foreground text-sm mb-3">
                     Register your company to access business features and manage your team.
                   </p>
-                  {showCompanyRegistration ? (
-                    <div className="space-y-4">
-                      <CompanyRegistrationCard 
-                        onDismiss={() => setShowCompanyRegistration(false)}
-                      />
-                    </div>
-                  ) : (
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setShowCompanyRegistration(true)}
-                      className="w-full border-[var(--accent-border)] text-[var(--accent-text)] hover:bg-gradient-to-r hover:from-[var(--accent-primary)] hover:to-[var(--accent-primary-hover)] hover:text-[var(--accent-button-text)] hover:border-[var(--accent-primary)] shadow-lg transition-all duration-200"
-                    >
-                      <Building className="w-4 h-4 mr-2" />
-                      Register Your Company
-                    </Button>
-                  )}
+                  <div className="space-y-4">
+                    <CompanyRegistrationCard />
+                  </div>
                 </div>
               </>
             )}

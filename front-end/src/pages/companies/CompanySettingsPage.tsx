@@ -422,9 +422,6 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
                     {(companyInfo.name || '').slice(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                    {companyInfo.logo && (
-                      <p className="text-sm text-muted-foreground">Logo uploaded</p>
-                    )}
                   </div>
                 )}
               </div>

@@ -193,10 +193,10 @@ const FileUpload: React.FC<FileUploadProps> = ({
             ) : (
               <div className="space-y-2">
                 <Button
-                  variant="outline"
+                  variant="accent"
                   onClick={handleUploadClick}
                   disabled={disabled || uploading}
-                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white border-0 shadow-lg"
+                  className="shadow-lg"
                 >
                   <Upload className="h-4 w-4 mr-2" />
                   {hasImage ? 'Change Image' : label}

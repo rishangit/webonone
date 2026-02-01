@@ -652,18 +652,128 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
         </Card>
 
         <TabsContent value="appointments" className="space-y-4">
-          {/* Loading State */}
-          {loading && (
-            <Card className="p-8 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] text-center">
-              <div className="flex flex-col items-center gap-3">
-                <Clock className="w-12 h-12 text-muted-foreground animate-spin" />
-                <h3 className="text-lg font-semibold text-foreground">Loading appointments...</h3>
-              </div>
-            </Card>
-          )}
-
-          {/* Appointments List/Grid */}
-          {!loading && (viewMode === "list" ? (
+          {/* Loading State - Skeleton for Appointment Cards */}
+          {loading && reduxAppointments.length === 0 ? (
+            <>
+              {/* Skeleton for List View */}
+              {viewMode === "list" ? (
+                /* Skeleton for List View - Matching AppointmentCard structure */
+                <div className="space-y-3 sm:space-y-4">
+                  {[...Array(6)].map((_, index) => (
+                    <Card key={index} className="p-6 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                      {/* First Row: Avatar, Name, Status, Menu */}
+                      <div className="flex items-start gap-3 mb-4">
+                        <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                        <div className="flex-1 min-w-0 mr-2">
+                          <div className="h-5 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2" />
+                          <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                        </div>
+                        <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                          <div className="h-8 w-8 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+                          <div className="h-5 w-16 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+                        </div>
+                      </div>
+                      {/* Second Row: Details and Staff */}
+                      <div className="flex flex-col lg:flex-row lg:gap-6">
+                        {/* Left Side: Appointment Details */}
+                        <div className="flex-1 min-w-0">
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2 text-sm">
+                              <div className="h-4 w-4 rounded bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                              <div className="h-5 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                            </div>
+                            <div className="flex items-center gap-2 text-sm">
+                              <div className="h-4 w-4 rounded bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                              <div className="h-5 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                            </div>
+                            <div className="flex items-center gap-2 text-sm">
+                              <div className="h-4 w-4 rounded bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                              <div className="h-5 w-36 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                            </div>
+                            <div className="flex items-center gap-2 text-sm">
+                              <div className="h-4 w-4 rounded bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                              <div className="h-5 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                            </div>
+                          </div>
+                        </div>
+                        {/* Right Side: Staff Information */}
+                        <div className="lg:w-64 lg:flex-shrink-0 mt-4 lg:mt-0">
+                          <div className="p-4 rounded-lg border bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600">
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className="h-4 w-4 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+                              <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
+                              <div className="flex-1 space-y-2">
+                                <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                                <div className="h-3 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                /* Skeleton for Grid View - Matching AppointmentCard structure */
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
+                  {[...Array(8)].map((_, index) => (
+                    <Card key={index} className="p-6 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                      {/* First Row: Avatar, Name, Status, Menu */}
+                      <div className="flex items-start gap-3 mb-4">
+                        <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                        <div className="flex-1 min-w-0 mr-2">
+                          <div className="h-5 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2" />
+                          <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                        </div>
+                        <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                          <div className="h-8 w-8 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+                          <div className="h-5 w-16 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+                        </div>
+                      </div>
+                      {/* Second Row: Date, Time, Contact, Location */}
+                      <div className="space-y-3 mb-4">
+                        <div className="flex items-center gap-2 text-sm">
+                          <div className="h-4 w-4 rounded bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                          <div className="h-5 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <div className="h-4 w-4 rounded bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                          <div className="h-5 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <div className="h-4 w-4 rounded bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                          <div className="h-5 w-36 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <div className="h-4 w-4 rounded bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                          <div className="h-5 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                        </div>
+                      </div>
+                      {/* Third Row: Staff Information */}
+                      <div className="p-4 rounded-lg border bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="h-4 w-4 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+                          <div className="h-4 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
+                          <div className="flex-1 space-y-2">
+                            <div className="h-4 w-28 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                            <div className="h-3 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            /* Appointments List/Grid */
+            viewMode === "list" ? (
             <div className="space-y-3 sm:space-y-4">
               {filteredAppointments.length > 0 ? (
                 filteredAppointments.map((appointment) => (
@@ -741,7 +851,8 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
                 </div>
               )}
             </div>
-          ))}
+          )
+          )}
 
           {/* Pagination - Use Pagination component for company owners */}
           {isCompanyOwner && pagination ? (

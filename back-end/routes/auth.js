@@ -510,17 +510,58 @@ router.get('/me',
 // Update current user profile
 router.put('/me',
   authenticateToken,
-  validate(userSchemas.update),
   asyncHandler(async (req, res) => {
-    // Check if email is being changed and if it already exists
-    if (req.body.email && req.body.email !== req.user.email) {
-      const existingUser = await User.findByEmail(req.body.email);
-      if (existingUser) {
-        throw validationError('Email already exists');
+    // For partial updates (like avatar only), merge with existing user data
+    // Only validate fields that are being updated
+    const updateData = { ...req.body };
+    
+    // If only avatar is being updated, skip full validation
+    const isAvatarOnlyUpdate = Object.keys(updateData).length === 1 && updateData.hasOwnProperty('avatar');
+    
+    if (!isAvatarOnlyUpdate) {
+      // For full updates, validate all required fields
+      const { error, value } = userSchemas.update.validate(updateData, {
+        abortEarly: false,
+        stripUnknown: true
+      });
+
+      if (error) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation error',
+          errors: error.details.map(detail => ({
+            field: detail.path.join('.'),
+            message: detail.message
+          }))
+        });
+      }
+      
+      // Use validated data
+      Object.assign(updateData, value);
+    } else {
+      // For avatar-only updates, just validate avatar field
+      if (updateData.avatar !== undefined && updateData.avatar !== null && typeof updateData.avatar !== 'string') {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation error',
+          errors: [{ field: 'avatar', message: 'Avatar must be a string' }]
+        });
       }
     }
     
-    await req.user.update(req.body);
+    // Check if email is being changed and if it already exists
+    if (updateData.email && updateData.email !== req.user.email) {
+      const existingUser = await User.findByEmail(updateData.email);
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation error',
+          errors: [{ field: 'email', message: 'Email already exists' }]
+        });
+      }
+    }
+    
+    await req.user.update(updateData);
     
     res.json({
       success: true,

@@ -32,6 +32,8 @@ export const TagSelector = ({
   const [isCreatingTag, setIsCreatingTag] = useState(false);
   const [pendingTagName, setPendingTagName] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const [popoverWidth, setPopoverWidth] = useState<number | undefined>(undefined);
 
   // Fetch tags when component mounts or popover opens
   useEffect(() => {
@@ -49,12 +51,18 @@ export const TagSelector = ({
     }
   }, [isOpen]);
 
-  // Focus search input when popover opens
+  // Focus search input when popover opens and measure trigger width
   useEffect(() => {
-    if (isOpen && searchInputRef.current) {
-      setTimeout(() => {
-        searchInputRef.current?.focus();
-      }, 100);
+    if (isOpen) {
+      if (searchInputRef.current) {
+        setTimeout(() => {
+          searchInputRef.current?.focus();
+        }, 100);
+      }
+      // Measure trigger width when popover opens
+      if (triggerRef.current) {
+        setPopoverWidth(triggerRef.current.offsetWidth);
+      }
     }
   }, [isOpen]);
 
@@ -176,16 +184,19 @@ export const TagSelector = ({
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <Button
+            ref={triggerRef}
             variant="outline"
             role="combobox"
             disabled={disabled}
             className={`
-              w-full justify-between min-h-[42px] h-auto
+              w-full justify-between h-12 md:h-9
               bg-[var(--input-background)] 
               border-[var(--glass-border)] 
               text-foreground
               hover:bg-accent
-              ${selectedTags.length > 0 ? 'py-2' : ''}
+              text-lg md:text-sm
+              font-normal
+              ${selectedTags.length > 0 ? 'py-2 md:py-1' : ''}
             `}
           >
             <div className="flex flex-wrap gap-1 flex-1 min-w-0">
@@ -219,15 +230,19 @@ export const TagSelector = ({
                   </Badge>
                 ))
               ) : (
-                <span className="text-muted-foreground">{placeholder}</span>
+                <span className="text-muted-foreground font-normal">{placeholder}</span>
               )}
             </div>
-            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            <ChevronDown className="ml-2 h-5 w-5 md:h-4 md:w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
         <PopoverContent 
-          className="w-[var(--radix-popover-trigger-width)] p-0 bg-popover border-border"
+          className="p-0 bg-popover border-border"
           align="start"
+          style={{ 
+            width: popoverWidth ? `${popoverWidth}px` : 'var(--radix-popover-trigger-width)',
+            minWidth: popoverWidth ? `${popoverWidth}px` : 'var(--radix-popover-trigger-width)'
+          }}
         >
           <div className="p-2 border-b border-border">
             <div className="relative">

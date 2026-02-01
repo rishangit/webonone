@@ -437,7 +437,6 @@ router.put('/:id/reject',
 // Update company
 router.put('/:id',
   authenticateToken,
-  validate(companySchema.update),
   asyncHandler(async (req, res) => {
     try {
       const { id } = req.params;
@@ -450,10 +449,50 @@ router.put('/:id',
         });
       }
       
-      const updateData = {
-        ...req.body,
-        name: req.body.companyName || req.body.name,
-        companySize: req.body.companySize || req.body.employees || undefined // Support both companySize and employees for backward compatibility
+      // For partial updates (like logo only), skip full validation
+      // Only validate fields that are being updated
+      const updateData = { ...req.body };
+      
+      // Check if it's a single-field update (like logo only)
+      const updateKeys = Object.keys(updateData).filter(key => updateData[key] !== undefined && updateData[key] !== null);
+      const isPartialUpdate = updateKeys.length === 1 && (updateKeys[0] === 'logo' || updateKeys[0] === 'companySize' || updateKeys[0] === 'employees' || updateKeys[0] === 'currencyId' || updateKeys[0] === 'isActive');
+      
+      if (!isPartialUpdate) {
+        // For full updates, validate all required fields
+        const { error, value } = companySchema.update.validate(updateData, {
+          abortEarly: false,
+          stripUnknown: true
+        });
+
+        if (error) {
+          return res.status(400).json({
+            success: false,
+            message: 'Validation error',
+            errors: error.details.map(detail => ({
+              field: detail.path.join('.'),
+              message: detail.message
+            }))
+          });
+        }
+        
+        // Use validated data
+        Object.assign(updateData, value);
+      } else {
+        // For partial updates, just validate the specific field
+        if (updateData.logo !== undefined && updateData.logo !== null && typeof updateData.logo !== 'string') {
+          return res.status(400).json({
+            success: false,
+            message: 'Validation error',
+            errors: [{ field: 'logo', message: 'Logo must be a string' }]
+          });
+        }
+      }
+      
+      // Prepare update data
+      const finalUpdateData = {
+        ...updateData,
+        name: updateData.companyName || updateData.name,
+        companySize: updateData.companySize || updateData.employees || undefined // Support both companySize and employees for backward compatibility
       };
       
       // Store original isActive value before update
@@ -461,17 +500,17 @@ router.put('/:id',
       
       // Check if company is being approved (isActive changed from false/0 to true/1)
       // Handle both boolean and numeric values (database stores as 0/1)
-      const isBeingApproved = (updateData.isActive === true || updateData.isActive === 1) && 
+      const isBeingApproved = (finalUpdateData.isActive === true || finalUpdateData.isActive === 1) && 
                               (originalIsActive === false || originalIsActive === 0 || originalIsActive === null);
       
       console.log(`Company ${id} update check:`, {
         originalIsActive,
-        newIsActive: updateData.isActive,
+        newIsActive: finalUpdateData.isActive,
         isBeingApproved,
         ownerId: company.ownerId
       });
       
-      const updated = await company.update(updateData);
+      const updated = await company.update(finalUpdateData);
       
       // If company is being approved, update the owner's role to Company Owner
       if (isBeingApproved) {
