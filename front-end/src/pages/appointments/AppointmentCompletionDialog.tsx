@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Check, FileText, Clock, AlertCircle } from "lucide-react";
 import { Button } from "../../components/ui/button";
+import { Icon } from "../../components/common/Icon";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Textarea } from "../../components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../../components/ui/dialog";
+import { CustomDialog } from "../../components/ui/custom-dialog";
 import { Separator } from "../../components/ui/separator";
 import { Badge } from "../../components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
@@ -123,25 +124,51 @@ export function AppointmentCompletionDialog({
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "completed": return <Check className="w-4 h-4" />;
-      case "partially-completed": return <Clock className="w-4 h-4" />;
-      case "cancelled": return <AlertCircle className="w-4 h-4" />;
-      case "no-show": return <AlertCircle className="w-4 h-4" />;
-      default: return <FileText className="w-4 h-4" />;
+      case "completed": return <Icon icon={Check} size="sm" />;
+      case "partially-completed": return <Icon icon={Clock} size="sm" />;
+      case "cancelled": return <Icon icon={AlertCircle} size="sm" />;
+      case "no-show": return <Icon icon={AlertCircle} size="sm" />;
+      default: return <Icon icon={FileText} size="sm" />;
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
-        <DialogHeader>
-          <DialogTitle className="text-foreground">Complete Appointment</DialogTitle>
-          <DialogDescription className="text-muted-foreground">
-            Mark this appointment as completed and add relevant notes and details
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-6">
+    <CustomDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Complete Appointment"
+      description="Mark this appointment as completed and add relevant notes and details"
+      maxWidth="max-w-2xl"
+      className="backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]"
+      footer={
+        <>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={loading}
+            className="border-[var(--glass-border)] bg-[var(--glass-bg)] text-foreground hover:bg-accent"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={loading || !notes.trim()}
+            variant="accent"
+            className="font-medium"
+          >
+            {loading ? (
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                Completing...
+              </div>
+            ) : (
+              "Complete Appointment"
+            )}
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-6">
           {/* Appointment Details */}
           <div className="p-4 rounded-lg bg-[var(--glass-bg)] border border-[var(--glass-border)]">
             <div className="flex items-center gap-4">
@@ -315,37 +342,6 @@ export function AppointmentCompletionDialog({
             )}
           </div>
         </div>
-
-        <Separator className="bg-[var(--glass-border)]" />
-
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={loading}
-            className="bg-[var(--glass-bg)] border-[var(--glass-border)]"
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={loading || !notes.trim()}
-            className="bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] text-[var(--accent-button-text)]"
-          >
-            {loading ? (
-              <>
-                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
-                Completing...
-              </>
-            ) : (
-              <>
-                <Check className="w-4 h-4 mr-2" />
-                Complete Appointment
-              </>
-            )}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    </CustomDialog>
   );
 }

@@ -13,7 +13,7 @@ VITE_API_BASE_URL=http://localhost:5007/api
 VITE_API_URL=http://localhost:5007
 
 # Application Configuration
-VITE_APP_NAME=AppointmentPro
+VITE_APP_NAME=webonone
 VITE_APP_VERSION=1.0.0
 VITE_APP_DESCRIPTION=Full-stack appointment booking application
 

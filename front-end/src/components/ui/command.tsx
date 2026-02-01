@@ -5,13 +5,7 @@ import { Command as CommandPrimitive } from "cmdk";
 import { SearchIcon } from "lucide-react";
 
 import { cn } from "./utils";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "./dialog";
+import { CustomDialog } from "./custom-dialog";
 
 function Command({
   className,
@@ -33,33 +27,35 @@ function CommandDialog({
   title = "Command Palette",
   description = "Search for a command to run...",
   children,
+  open,
+  onOpenChange,
   ...props
-}: React.ComponentProps<typeof Dialog> & {
+}: {
   title?: string;
   description?: string;
-}) {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  children: React.ReactNode;
+} & Omit<React.ComponentProps<typeof CustomDialog>, 'open' | 'onOpenChange' | 'title' | 'description' | 'children'>) {
   return (
-    <Dialog {...props}>
-      <DialogContent 
-        className="overflow-hidden p-0"
-        aria-describedby="command-dialog-description"
-      >
-        <DialogHeader className="sr-only">
-          <DialogTitle>{title}</DialogTitle>
-          {description && (
-            <DialogDescription id="command-dialog-description">{description}</DialogDescription>
-          )}
-          {!description && (
-            <DialogDescription id="command-dialog-description" className="sr-only">
-              Command dialog
-            </DialogDescription>
-          )}
-        </DialogHeader>
-        <Command className="[&_[cmdk-group-heading]]:text-muted-foreground **:data-[slot=command-input-wrapper]:h-12 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group]]:px-2 [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5">
-          {children}
-        </Command>
-      </DialogContent>
-    </Dialog>
+    <CustomDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={title}
+      description={description}
+      className="overflow-hidden"
+      noContentPadding={true}
+      hideHeader={true}
+      {...props}
+    >
+      <div className="sr-only">
+        <h2>{title}</h2>
+        <p id="command-dialog-description">{description}</p>
+      </div>
+      <Command className="[&_[cmdk-group-heading]]:text-muted-foreground **:data-[slot=command-input-wrapper]:h-12 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group]]:px-2 [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5">
+        {children}
+      </Command>
+    </CustomDialog>
   );
 }
 

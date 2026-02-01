@@ -8,7 +8,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import FileUpload from "../../components/ui/file-upload";
 import { CustomDialog } from "../../components/ui/custom-dialog";
-import { DialogWithFixedHeader } from "../../components/ui/dialog-with-fixed-header";
 import { Label } from "../../components/ui/label";
 import { TagSelector } from "../../components/tags/TagSelector";
 import { Textarea } from "../../components/ui/textarea";
@@ -635,12 +634,13 @@ export const SpacesPage = () => {
 
       {/* View Space Dialog */}
       {selectedSpace && (
-        <DialogWithFixedHeader
+        <CustomDialog
           open={isViewDialogOpen}
           onOpenChange={setIsViewDialogOpen}
           title={selectedSpace.name}
           description={selectedSpace.description || "Space details"}
           maxWidth="max-w-4xl"
+          className="h-[90vh]"
         >
           <div className="space-y-6">
             <div className="w-full h-48 rounded-lg overflow-hidden">
@@ -683,7 +683,7 @@ export const SpacesPage = () => {
               </div>
             </div>
           </div>
-        </DialogWithFixedHeader>
+        </CustomDialog>
       )}
 
       {/* Delete Confirmation Dialog */}

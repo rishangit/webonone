@@ -1,8 +1,9 @@
-import { Calendar, Users, Clock, BarChart3, FileText, MessageSquare, Settings, CreditCard, Building, X, UserCheck, MapPin, Package, PackageCheck, DollarSign, ChevronRight, Tag } from "lucide-react";
+import { Calendar, Users, Clock, BarChart3, FileText, MessageSquare, Settings, CreditCard, Building, UserCheck, MapPin, Package, PackageCheck, DollarSign, ChevronRight, Tag } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { useIsMobile } from "../../components/ui/use-mobile";
 import { User as UserType, UserRole } from "../../types/user";
 import { useState, useEffect } from "react";
+import { Icon } from "../../components/common/Icon";
 
 const getNavigationItems = (role: UserRole) => {
   const baseItems = [
@@ -103,28 +104,15 @@ export function Sidebar({ currentPage, onPageChange, isOpen, onClose, currentUse
         ? `fixed top-16 left-0 bottom-0 z-40 w-64 transform transition-transform duration-300 ease-in-out ${
             isOpen ? 'translate-x-0' : '-translate-x-full'
           }` 
-        : 'w-64 relative min-h-[calc(100vh-4rem)]'
+        : 'fixed top-16 left-0 bottom-0 w-64 z-40'
       } 
-      backdrop-blur-xl bg-sidebar border-r border-sidebar-border
+      backdrop-blur-xl bg-sidebar border-r border-sidebar-border flex flex-col overflow-hidden
     `}>
-      <div className="p-6">
-        {/* Mobile close button */}
-        {isMobile && (
-          <div className="flex justify-end mb-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              className="hover:bg-sidebar-accent text-sidebar-foreground hover:text-sidebar-foreground"
-            >
-              <X className="w-5 h-5" />
-            </Button>
-          </div>
-        )}
+      <div className={`pt-3 ${isMobile ? 'p-2' : 'p-6'} flex-1 overflow-y-auto custom-scrollbar`}>
         {/* Navigation Menu */}
         <nav className="space-y-2">
           {navigationItems.map((item, index) => {
-            const Icon = item.icon;
+            const ItemIcon = item.icon;
             const itemAny = item as any;
             const hasSubmenu = itemAny.hasSubmenu && itemAny.submenu;
             const isActive = currentPage === item.id || (hasSubmenu && itemAny.submenu.some((sub: any) => sub.id === currentPage));
@@ -156,10 +144,10 @@ export function Sidebar({ currentPage, onPageChange, isOpen, onClose, currentUse
                     }}
                   >
                     <div className="flex items-center gap-3">
-                      <Icon className="w-5 h-5" />
+                      <Icon icon={ItemIcon} size="md" />
                       {item.label}
                     </div>
-                    <ChevronRight className={`w-4 h-4 transition-transform ${openSubmenu === item.id ? 'rotate-90' : ''}`} />
+                    <Icon icon={ChevronRight} size="sm" className={`transition-transform ${openSubmenu === item.id ? 'rotate-90' : ''}`} />
                   </Button>
                   {openSubmenu === item.id && (
                     <div className="ml-4 mt-1 space-y-1 border-l-2 border-[var(--accent-border)] pl-4">
@@ -200,7 +188,7 @@ export function Sidebar({ currentPage, onPageChange, isOpen, onClose, currentUse
                 }`}
                 onClick={() => onPageChange(item.id)}
               >
-                <Icon className="w-5 h-5" />
+                <Icon icon={ItemIcon} size="md" />
                 {item.label}
               </Button>
             );

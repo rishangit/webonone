@@ -8,7 +8,7 @@ import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
 import { Label } from "../../components/ui/label";
 import { Input } from "../../components/ui/input";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../../components/ui/dialog";
+import { CustomDialog } from "../../components/ui/custom-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../../components/ui/dropdown-menu";
 import { DatePicker } from "../../components/common/DatePicker";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
@@ -802,19 +802,42 @@ export const VariantStockDetailsPage = ({ productId, variantId, onBack }: Varian
       </div>
 
       {/* Add Stock Dialog */}
-      <Dialog open={isAddStockDialogOpen} onOpenChange={setIsAddStockDialogOpen}>
-        <DialogContent className="bg-[var(--glass-bg)] border-[var(--accent-border)]/30 backdrop-blur-xl max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-foreground flex items-center gap-2">
-              <Plus className="w-5 h-5 text-[var(--accent-primary)]" />
-              Add Stock Entry
-            </DialogTitle>
-            <DialogDescription className="text-muted-foreground">
-              Add a new stock entry for {variant.name}. Each stock entry can have different pricing and supplier information.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <form onSubmit={handleSubmit(onSubmitAddStock)} className="space-y-4">
+      <CustomDialog
+        open={isAddStockDialogOpen}
+        onOpenChange={setIsAddStockDialogOpen}
+        customHeader={
+          <div className="flex items-center gap-2">
+            <Plus className="w-5 h-5 text-[var(--accent-primary)]" />
+            <span>Add Stock Entry</span>
+          </div>
+        }
+        description={`Add a new stock entry for ${variant.name}. Each stock entry can have different pricing and supplier information.`}
+        className="bg-[var(--glass-bg)] border-[var(--accent-border)]/30 backdrop-blur-xl max-w-2xl max-h-[90vh] overflow-y-auto"
+        footer={
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setIsAddStockDialogOpen(false);
+                reset();
+              }}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              form="add-stock-form"
+              variant="accent"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Adding..." : "Add Stock"}
+            </Button>
+          </>
+        }
+      >
+          <form id="add-stock-form" onSubmit={handleSubmit(onSubmitAddStock)} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Quantity */}
               <div className="space-y-2">
@@ -1020,51 +1043,53 @@ export const VariantStockDetailsPage = ({ productId, variantId, onBack }: Varian
                 )}
               </div>
             </div>
-
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setIsAddStockDialogOpen(false);
-                  reset();
-                }}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                variant="accent"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "Adding..." : "Add Stock"}
-              </Button>
-            </DialogFooter>
           </form>
-        </DialogContent>
-      </Dialog>
+      </CustomDialog>
 
       {/* Edit Stock Dialog */}
-      <Dialog open={isEditStockDialogOpen} onOpenChange={(open) => {
-        setIsEditStockDialogOpen(open);
-        if (!open) {
-          setEditingStockEntry(null);
-          reset();
+      <CustomDialog
+        open={isEditStockDialogOpen}
+        onOpenChange={(open) => {
+          setIsEditStockDialogOpen(open);
+          if (!open) {
+            setEditingStockEntry(null);
+            reset();
+          }
+        }}
+        customHeader={
+          <div className="flex items-center gap-2">
+            <Edit className="w-5 h-5 text-[var(--accent-primary)]" />
+            <span>Edit Stock Entry</span>
+          </div>
         }
-      }}>
-        <DialogContent className="bg-[var(--glass-bg)] border-[var(--accent-border)]/30 backdrop-blur-xl max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-foreground flex items-center gap-2">
-              <Edit className="w-5 h-5 text-[var(--accent-primary)]" />
-              Edit Stock Entry
-            </DialogTitle>
-            <DialogDescription className="text-muted-foreground">
-              Update stock entry information for {variant.name}.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <form onSubmit={handleSubmit(onSubmitEditStock)} className="space-y-4">
+        description={`Update stock entry information for ${variant.name}.`}
+        className="bg-[var(--glass-bg)] border-[var(--accent-border)]/30 backdrop-blur-xl max-w-2xl max-h-[90vh] overflow-y-auto"
+        footer={
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setIsEditStockDialogOpen(false);
+                setEditingStockEntry(null);
+                reset();
+              }}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              form="edit-stock-form"
+              variant="accent"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Updating..." : "Update Stock"}
+            </Button>
+          </>
+        }
+      >
+          <form id="edit-stock-form" onSubmit={handleSubmit(onSubmitEditStock)} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Quantity */}
               <div className="space-y-2">
@@ -1270,31 +1295,8 @@ export const VariantStockDetailsPage = ({ productId, variantId, onBack }: Varian
                 )}
               </div>
             </div>
-
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setIsEditStockDialogOpen(false);
-                  setEditingStockEntry(null);
-                  reset();
-                }}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                variant="accent"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "Updating..." : "Update Stock"}
-              </Button>
-            </DialogFooter>
           </form>
-        </DialogContent>
-      </Dialog>
+      </CustomDialog>
     </div>
   );
 };

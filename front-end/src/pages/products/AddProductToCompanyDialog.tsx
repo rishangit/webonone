@@ -20,7 +20,6 @@ import { productsService } from "../../services/products";
 import { formatAvatarUrl } from "../../utils";
 import { companiesService } from "../../services/companies";
 import { Tag } from "../../services/tags";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../../components/ui/dialog";
 import FileUpload from "../../components/ui/file-upload";
 import { TagSelector } from "../../components/tags/TagSelector";
 import { VariantForm } from "../../components/products/VariantForm";
@@ -1332,79 +1331,14 @@ export function AddProductToCompanyDialog({
     </CustomDialog>
 
       {/* Add New System Product Dialog */}
-      <Dialog open={showAddSystemProductDialog} onOpenChange={setShowAddSystemProductDialog}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-[var(--glass-bg)] border-[var(--glass-border)]">
-          <DialogHeader>
-            <DialogTitle>Add New System Product</DialogTitle>
-            <p className="text-sm text-muted-foreground mt-2">
-              This product will be saved as unverified and will need to be verified by a system admin.
-            </p>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-4">
-            {/* Brand */}
-            <div className="space-y-2">
-              <Label>Brand</Label>
-              <Input
-                value={newSystemProductData.brand}
-                onChange={(e) => setNewSystemProductData(prev => ({ ...prev, brand: e.target.value }))}
-                placeholder="Enter brand name"
-                className="bg-[var(--input-background)] border-[var(--glass-border)] text-foreground"
-              />
-            </div>
-
-            {/* Product Name */}
-            <div className="space-y-2">
-              <Label>Product Name *</Label>
-              <Input
-                value={newSystemProductData.name}
-                onChange={(e) => setNewSystemProductData(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="Product name"
-                className="bg-[var(--input-background)] border-[var(--glass-border)] text-foreground"
-              />
-            </div>
-
-            {/* Description */}
-            <div className="space-y-2">
-              <Label>Description</Label>
-              <Textarea
-                value={newSystemProductData.description}
-                onChange={(e) => setNewSystemProductData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Product description"
-                className="bg-[var(--input-background)] border-[var(--glass-border)] text-foreground min-h-[80px]"
-                rows={3}
-              />
-            </div>
-
-            {/* Product Image */}
-            <div className="space-y-2">
-              <Label>Product Image</Label>
-              <FileUpload
-                onFileUploaded={(filePath) => setNewSystemProductData(prev => ({ ...prev, imageUrl: filePath }))}
-                onFileDeleted={() => setNewSystemProductData(prev => ({ ...prev, imageUrl: "" }))}
-                currentImagePath={newSystemProductData.imageUrl}
-                currentImageUrl={newSystemProductData.imageUrl ? formatAvatarUrl(newSystemProductData.imageUrl) : undefined}
-                folderPath="products"
-                label="Upload Product Image"
-                maxSize={5}
-                className="w-full"
-              />
-            </div>
-
-            {/* Tags */}
-            <div className="space-y-2">
-              <Label>Tags</Label>
-              <TagSelector
-                value={newSystemProductData.tagIds}
-                onChange={(tagIds) => {
-                  setNewSystemProductData(prev => ({ ...prev, tagIds }));
-                }}
-                placeholder="Select tags for this product"
-              />
-            </div>
-          </div>
-
-          <DialogFooter className="gap-3">
+      <CustomDialog
+        open={showAddSystemProductDialog}
+        onOpenChange={setShowAddSystemProductDialog}
+        title="Add New System Product"
+        description="This product will be saved as unverified and will need to be verified by a system admin."
+        className="max-w-2xl max-h-[90vh] overflow-y-auto bg-[var(--glass-bg)] border-[var(--glass-border)]"
+        footer={
+          <>
             <Button
               variant="outline"
               onClick={() => {
@@ -1474,9 +1408,72 @@ export function AddProductToCompanyDialog({
             >
               {isCreatingSystemProduct ? "Adding..." : "Add Product"}
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </>
+        }
+      >
+          <div className="space-y-4">
+            {/* Brand */}
+            <div className="space-y-2">
+              <Label>Brand</Label>
+              <Input
+                value={newSystemProductData.brand}
+                onChange={(e) => setNewSystemProductData(prev => ({ ...prev, brand: e.target.value }))}
+                placeholder="Enter brand name"
+                className="bg-[var(--input-background)] border-[var(--glass-border)] text-foreground"
+              />
+            </div>
+
+            {/* Product Name */}
+            <div className="space-y-2">
+              <Label>Product Name *</Label>
+              <Input
+                value={newSystemProductData.name}
+                onChange={(e) => setNewSystemProductData(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Product name"
+                className="bg-[var(--input-background)] border-[var(--glass-border)] text-foreground"
+              />
+            </div>
+
+            {/* Description */}
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Textarea
+                value={newSystemProductData.description}
+                onChange={(e) => setNewSystemProductData(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Product description"
+                className="bg-[var(--input-background)] border-[var(--glass-border)] text-foreground min-h-[80px]"
+                rows={3}
+              />
+            </div>
+
+            {/* Product Image */}
+            <div className="space-y-2">
+              <Label>Product Image</Label>
+              <FileUpload
+                onFileUploaded={(filePath) => setNewSystemProductData(prev => ({ ...prev, imageUrl: filePath }))}
+                onFileDeleted={() => setNewSystemProductData(prev => ({ ...prev, imageUrl: "" }))}
+                currentImagePath={newSystemProductData.imageUrl}
+                currentImageUrl={newSystemProductData.imageUrl ? formatAvatarUrl(newSystemProductData.imageUrl) : undefined}
+                folderPath="products"
+                label="Upload Product Image"
+                maxSize={5}
+                className="w-full"
+              />
+            </div>
+
+            {/* Tags */}
+            <div className="space-y-2">
+              <Label>Tags</Label>
+              <TagSelector
+                value={newSystemProductData.tagIds}
+                onChange={(tagIds) => {
+                  setNewSystemProductData(prev => ({ ...prev, tagIds }));
+                }}
+                placeholder="Select tags for this product"
+              />
+            </div>
+          </div>
+      </CustomDialog>
     </>
   );
 }

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
+import { CustomDialog } from "../ui/custom-dialog";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import { AlertCircle } from "lucide-react";
@@ -121,23 +121,61 @@ export const VariantDialog = ({
 
   const isReadOnly = mode === 'view';
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[var(--glass-bg)] border-[var(--glass-border)] backdrop-blur-xl max-w-3xl max-h-[90vh] overflow-y-auto p-0">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b border-[var(--glass-border)]">
-          <DialogTitle className="text-foreground text-lg font-semibold">
-            {mode === 'add' ? 'Add New Variant' : mode === 'edit' ? 'Edit Variant' : 'View Variant'}
-          </DialogTitle>
-          <DialogDescription className="text-muted-foreground text-sm mt-1.5">
-            {mode === 'add' 
-              ? 'Add a new variant to this product. Pricing and stock are managed separately in the Stock Details page.'
-              : mode === 'edit'
-              ? 'Edit variant details. Pricing and stock are managed separately in the Stock Details page.'
-              : 'View variant details. Pricing and stock are managed separately in the Stock Details page.'}
-          </DialogDescription>
-        </DialogHeader>
+  const dialogTitle = mode === 'add' ? 'Add New Variant' : mode === 'edit' ? 'Edit Variant' : 'View Variant';
+  const dialogDescription = mode === 'add' 
+    ? 'Add a new variant to this product. Pricing and stock are managed separately in the Stock Details page.'
+    : mode === 'edit'
+    ? 'Edit variant details. Pricing and stock are managed separately in the Stock Details page.'
+    : 'View variant details. Pricing and stock are managed separately in the Stock Details page.';
 
-        <div className="space-y-6 px-6 py-4">
+  const footerContent = (
+    <>
+      {mode !== 'view' && (
+        <>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleCancel}
+            disabled={isSubmitting}
+            className="border-[var(--glass-border)] bg-[var(--input-background)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-border)] hover:text-[var(--accent-text)] text-foreground transition-all duration-200"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            form="variant-form"
+            disabled={isSubmitting}
+            variant="accent"
+            className="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-lg shadow-[var(--accent-primary)]/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+          >
+            {isSubmitting ? 'Saving...' : mode === 'add' ? 'Add Variant' : 'Save Changes'}
+          </Button>
+        </>
+      )}
+      {mode === 'view' && (
+        <Button
+          type="button"
+          onClick={handleCancel}
+          variant="accent"
+          className="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-lg shadow-[var(--accent-primary)]/25 transition-all duration-200"
+        >
+          Close
+        </Button>
+      )}
+    </>
+  );
+
+  return (
+    <CustomDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={dialogTitle}
+      description={dialogDescription}
+      className="max-w-3xl max-h-[90vh] overflow-y-auto bg-[var(--glass-bg)] border-[var(--glass-border)] backdrop-blur-xl"
+      footer={footerContent}
+      disableContentScroll={true}
+    >
+      <div className="space-y-6">
           <form onSubmit={handleSubmit(onSubmit)} id="variant-form" className="space-y-6">
             {/* System Product Variant Selector - Only show for add mode with system product */}
             {mode === 'add' && systemProductId && (
@@ -246,44 +284,8 @@ export const VariantDialog = ({
               } as CompanyProductVariant : null)}
             />
           </form>
-        </div>
-
-        <DialogFooter className="px-6 pb-6 pt-4 border-t border-[var(--glass-border)]">
-          {mode !== 'view' && (
-            <>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleCancel}
-                disabled={isSubmitting}
-                className="border-[var(--glass-border)] bg-[var(--input-background)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-border)] hover:text-[var(--accent-text)] text-foreground transition-all duration-200"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                form="variant-form"
-                disabled={isSubmitting}
-                variant="accent"
-                className="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-lg shadow-[var(--accent-primary)]/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-              >
-                {isSubmitting ? 'Saving...' : mode === 'add' ? 'Add Variant' : 'Save Changes'}
-              </Button>
-            </>
-          )}
-          {mode === 'view' && (
-            <Button
-              type="button"
-              onClick={handleCancel}
-              variant="accent"
-              className="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-lg shadow-[var(--accent-primary)]/25 transition-all duration-200"
-            >
-              Close
-            </Button>
-          )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </CustomDialog>
   );
 };
 

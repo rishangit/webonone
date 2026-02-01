@@ -201,10 +201,9 @@ class CompaniesService {
    * Approve company (set isActive to true)
    */
   async approveCompany(companyId: string): Promise<Company> {
-    const response = await fetch(`${API_BASE_URL}/companies/${companyId}`, {
+    const response = await fetch(`${API_BASE_URL}/companies/${companyId}/approve`, {
       method: 'PUT',
       headers: this.getAuthHeaders(),
-      body: JSON.stringify({ isActive: true }),
     });
 
     if (!response.ok) {
@@ -220,12 +219,11 @@ class CompaniesService {
    * Reject company (set isActive to false)
    */
   async rejectCompany(companyId: string, rejectionReason?: string): Promise<Company> {
-    const response = await fetch(`${API_BASE_URL}/companies/${companyId}`, {
+    const response = await fetch(`${API_BASE_URL}/companies/${companyId}/reject`, {
       method: 'PUT',
       headers: this.getAuthHeaders(),
       body: JSON.stringify({ 
-        isActive: false,
-        rejectionReason: rejectionReason || null
+        reason: rejectionReason || null
       }),
     });
 

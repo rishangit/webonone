@@ -3,6 +3,7 @@ import { Search, X } from "lucide-react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { cn } from "../ui/utils";
+import { Icon } from "./Icon";
 
 interface SearchInputProps {
   placeholder?: string;
@@ -197,7 +198,7 @@ const SearchInputComponent = ({
 
   return (
     <div className={cn("relative", className)}>
-      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 pointer-events-none" />
+      <Icon icon={Search} size="sm" color="muted" className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none" />
       <Input
         ref={inputRef}
         type="text"
@@ -221,7 +222,7 @@ const SearchInputComponent = ({
           className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 hover:bg-transparent"
           disabled={disabled}
         >
-          <X className="w-4 h-4 text-muted-foreground hover:text-foreground" />
+          <Icon icon={X} size="sm" color="muted" className="hover:text-foreground" />
         </Button>
       )}
     </div>

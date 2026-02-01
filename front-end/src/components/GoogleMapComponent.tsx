@@ -72,6 +72,12 @@ export function GoogleMapComponent({
   const [searchQuery, setSearchQuery] = useState("");
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isSearchingRef = useRef(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
 
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
@@ -273,6 +279,36 @@ export function GoogleMapComponent({
     };
   }, [isScriptLoaded, editMode]);
 
+  // Cleanup search timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Handle clicks outside suggestions dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        suggestionsRef.current &&
+        !suggestionsRef.current.contains(event.target as Node) &&
+        searchInputRef.current &&
+        !searchInputRef.current.contains(event.target as Node)
+      ) {
+        setShowSuggestions(false);
+      }
+    };
+
+    if (showSuggestions) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [showSuggestions]);
+
   // Geocode address to coordinates
   const geocodeAddress = (addressString: string) => {
     if (!geocoderRef.current) return;
@@ -377,38 +413,89 @@ export function GoogleMapComponent({
     }
   }, [address, city, state, country, isMapLoaded, initialLat, initialLng]);
 
-  // Handle search with Places Autocomplete
-  const handleSearch = (query: string) => {
+  // Handle search input change - update state immediately for responsive typing
+  const handleSearchInputChange = (query: string) => {
     setSearchQuery(query);
     
-    if (!window.google || !window.google.maps || !window.google.maps.places) return;
+    // Clear any existing timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    
+    // Reset searching flag if query is cleared
+    if (query.length === 0) {
+      isSearchingRef.current = false;
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+    
+    // Show suggestions dropdown when typing
+    setShowSuggestions(true);
+    
+    // Debounce the actual search to avoid too many API calls
+    // Only search if query is long enough and we're not already searching
+    if (query.length > 2 && !isSearchingRef.current) {
+      searchTimeoutRef.current = setTimeout(() => {
+        performSearch(query);
+      }, 300); // 300ms debounce
+    } else if (query.length <= 2) {
+      setSuggestions([]);
+    }
+  };
 
-    if (query.length > 2) {
-      const service = new window.google.maps.places.AutocompleteService();
-      service.getPlacePredictions(
-        { input: query },
-        (predictions: any[], status: string) => {
-          if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
-            // Use first prediction to geocode
-            const placeId = predictions[0].place_id;
-            const placesService = new window.google.maps.places.PlacesService(mapInstanceRef.current);
-            
-            placesService.getDetails(
-              { placeId, fields: ['geometry', 'formatted_address', 'address_components'] },
-              (place: any, placeStatus: string) => {
-                if (placeStatus === window.google.maps.places.PlacesServiceStatus.OK && place.geometry) {
-                  const newLocation = parseAddressComponents(place);
-                  setCurrentLocation(newLocation);
-                  updateMarker(newLocation);
-                  onLocationChange?.(newLocation);
-                  setSearchQuery("");
-                }
-              }
-            );
+  // Perform the actual Places API search
+  const performSearch = (query: string) => {
+    if (!window.google || !window.google.maps || !window.google.maps.places || !mapInstanceRef.current) {
+      return;
+    }
+
+    if (query.length <= 2) {
+      setSuggestions([]);
+      return;
+    }
+
+    isSearchingRef.current = true;
+    const service = new window.google.maps.places.AutocompleteService();
+    service.getPlacePredictions(
+      { input: query },
+      (predictions: any[], status: string) => {
+        isSearchingRef.current = false;
+        if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions && predictions.length > 0) {
+          // Store all predictions for dropdown
+          setSuggestions(predictions);
+          setShowSuggestions(true);
+        } else {
+          setSuggestions([]);
+        }
+      }
+    );
+  };
+
+  // Handle selection from suggestions dropdown
+  const handleSuggestionSelect = (prediction: any) => {
+    if (!mapInstanceRef.current) return;
+
+    setSearchQuery(prediction.description);
+    setShowSuggestions(false);
+    setSuggestions([]);
+
+    const placesService = new window.google.maps.places.PlacesService(mapInstanceRef.current);
+    placesService.getDetails(
+      { placeId: prediction.place_id, fields: ['geometry', 'formatted_address', 'address_components'] },
+      (place: any, placeStatus: string) => {
+        if (placeStatus === window.google.maps.places.PlacesServiceStatus.OK && place.geometry) {
+          const newLocation = parseAddressComponents(place);
+          setCurrentLocation(newLocation);
+          updateMarker(newLocation);
+          onLocationChange?.(newLocation);
+          // Update search query with the formatted address
+          if (place.formatted_address) {
+            setSearchQuery(place.formatted_address);
           }
         }
-      );
-    }
+      }
+    );
   };
 
   const getCurrentLocation = () => {
@@ -451,14 +538,60 @@ export function GoogleMapComponent({
       {editMode && (
         <div className="relative">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground z-10" />
             <Input
+              ref={searchInputRef}
               placeholder="Search for an address or place..."
               value={searchQuery}
-              onChange={(e) => handleSearch(e.target.value)}
+              onChange={(e) => handleSearchInputChange(e.target.value)}
+              onFocus={() => {
+                if (suggestions.length > 0) {
+                  setShowSuggestions(true);
+                }
+              }}
+              onBlur={(e) => {
+                // Delay hiding suggestions to allow click on suggestion
+                setTimeout(() => {
+                  if (!suggestionsRef.current?.contains(e.relatedTarget as Node)) {
+                    setShowSuggestions(false);
+                  }
+                }, 200);
+              }}
               className="pl-10 bg-[var(--input-background)] border-[var(--glass-border)] text-foreground"
             />
           </div>
+          
+          {/* Suggestions Dropdown */}
+          {showSuggestions && suggestions.length > 0 && (
+            <div
+              ref={suggestionsRef}
+              className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-60 overflow-y-auto"
+            >
+              {suggestions.map((prediction, index) => (
+                <button
+                  key={prediction.place_id || index}
+                  type="button"
+                  onClick={() => handleSuggestionSelect(prediction)}
+                  className="w-full text-left px-4 py-3 hover:bg-accent hover:text-accent-foreground transition-colors border-b border-border last:border-b-0 first:rounded-t-lg last:rounded-b-lg"
+                  onMouseDown={(e) => e.preventDefault()} // Prevent input blur
+                >
+                  <div className="flex items-start gap-2">
+                    <MapPin className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">
+                        {prediction.structured_formatting?.main_text || prediction.description}
+                      </p>
+                      {prediction.structured_formatting?.secondary_text && (
+                        <p className="text-xs text-muted-foreground truncate">
+                          {prediction.structured_formatting.secondary_text}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

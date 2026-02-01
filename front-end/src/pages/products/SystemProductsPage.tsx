@@ -14,10 +14,8 @@ import { Pagination } from "../../components/common/Pagination";
 import { SearchInput } from "../../components/common/SearchInput";
 import { EmptyState } from "../../components/common/EmptyState";
 import { CreateSystemProductDialog } from "./CreateSystemProductDialog";
-import { DialogWithFixedHeader } from "../../components/ui/dialog-with-fixed-header";
 import { CustomDialog } from "../../components/ui/custom-dialog";
 import { TagSelector } from "../../components/tags/TagSelector";
-import { Separator } from "../../components/ui/separator";
 import { useIsMobile } from "../../components/ui/use-mobile";
 import { ViewSwitcher } from "../../components/ui/view-switcher";
 import { ImageWithFallback } from "../../components/figma/ImageWithFallback";
@@ -659,7 +657,7 @@ export function SystemProductsPage({ currentUser, onViewProduct }: SystemProduct
             )}
           </div>
 
-          <div className="pt-4 border-t border-border">
+          <div className="pt-4">
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span>Modified: <DateDisplay date={product.lastModified} /></span>
               <span>ID: {product.id}</span>

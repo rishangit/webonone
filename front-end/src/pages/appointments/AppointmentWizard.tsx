@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { AppointmentStatus } from "../../types/appointmentStatus";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../../components/ui/dialog";
+import { CustomDialog } from "../../components/ui/custom-dialog";
 import { VisuallyHidden } from "../../components/ui/visually-hidden";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
@@ -1931,47 +1931,53 @@ export function AppointmentWizard({ currentUser: currentUserProp, selectedDate, 
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <>
       {trigger && <div onClick={() => setOpen(true)}>{trigger}</div>}
       
-      <DialogContent 
-        hideCloseButton={false}
-        className="w-full max-w-none sm:max-w-[98vw] sm:w-[98vw] lg:max-w-[95vw] lg:w-[95vw] xl:max-w-[90vw] xl:w-[90vw] h-[100vh] sm:h-[92vh] max-h-[100vh] sm:max-h-[92vh] overflow-hidden backdrop-blur-sm bg-[var(--glass-bg)] border-0 sm:border border-[var(--glass-border)] custom-scrollbar p-0 sm:rounded-lg flex flex-col"
-        aria-describedby="appointment-wizard-description"
-      >
-        <VisuallyHidden>
-          <DialogDescription id="appointment-wizard-description">
-            Schedule a new appointment by completing each step of the booking process.
-          </DialogDescription>
-        </VisuallyHidden>
-        
-        {/* Fixed Header */}
-        <div className="shrink-0 backdrop-blur-md bg-[var(--glass-bg)]/95 border-b border-[var(--glass-border)] px-3 sm:px-4 py-3 sm:py-4 pr-12 sm:pr-16">
-          <DialogHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-[var(--accent-bg)] border border-[var(--accent-border)] flex items-center justify-center shrink-0">
-                  <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-[var(--accent-text)]" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <DialogTitle className="text-base sm:text-lg font-semibold text-foreground">
-                    Create Appointment
-                  </DialogTitle>
-                  <DialogDescription className="text-xs sm:text-sm text-muted-foreground mt-1">
-                    Schedule a new appointment by completing each step of the booking process.
-                  </DialogDescription>
-                </div>
+      <CustomDialog
+        open={open}
+        onOpenChange={setOpen}
+        title="Create Appointment"
+        description="Schedule a new appointment by completing each step of the booking process."
+        icon={
+          <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-[var(--accent-bg)] border border-[var(--accent-border)] flex items-center justify-center shrink-0">
+            <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-[var(--accent-text)]" />
+          </div>
+        }
+        customHeader={
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-[var(--accent-bg)] border border-[var(--accent-border)] flex items-center justify-center shrink-0">
+                <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-[var(--accent-text)]" />
               </div>
-              <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block whitespace-nowrap">
-                  Step {currentStep + 1} of {steps.length}: {steps[currentStep].title}
+              <div className="min-w-0 flex-1">
+                <h2 className="text-base sm:text-lg font-semibold text-foreground leading-none">
+                  Create Appointment
+                </h2>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                  Schedule a new appointment by completing each step of the booking process.
                 </p>
               </div>
             </div>
-          </DialogHeader>
-        </div>
-
-        {/* Progress Stepper - moved to body */}
+            <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+              <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block whitespace-nowrap">
+                Step {currentStep + 1} of {steps.length}: {steps[currentStep].title}
+              </p>
+            </div>
+          </div>
+        }
+        className="w-full max-w-none sm:max-w-[98vw] sm:w-[98vw] lg:max-w-[95vw] lg:w-[95vw] xl:max-w-[90vw] xl:w-[90vw] h-[100vh] sm:h-[92vh] max-h-[100vh] sm:max-h-[92vh] overflow-hidden backdrop-blur-sm bg-[var(--glass-bg)] border-0 sm:border border-[var(--glass-border)] custom-scrollbar p-0 sm:rounded-lg flex flex-col"
+        disableContentScroll={true}
+        hideCloseButton={false}
+        noContentPadding={true}
+      >
+        <VisuallyHidden>
+          <span id="appointment-wizard-description">
+            Schedule a new appointment by completing each step of the booking process.
+          </span>
+        </VisuallyHidden>
+        
+        {/* Progress Stepper */}
         <div className="shrink-0 px-3 sm:px-4 py-3 sm:py-4 border-b border-[var(--glass-border)]">
           {/* Mobile step indicator */}
           <div className="block sm:hidden mb-3">
@@ -2506,7 +2512,7 @@ export function AppointmentWizard({ currentUser: currentUserProp, selectedDate, 
             </div>
           </div>
         </div>
-      </DialogContent>
+      </CustomDialog>
       
       {/* Create User Dialog */}
       {isCompanyOwner && (
@@ -2528,6 +2534,6 @@ export function AppointmentWizard({ currentUser: currentUserProp, selectedDate, 
           }}
         />
       )}
-    </Dialog>
+    </>
   );
 }

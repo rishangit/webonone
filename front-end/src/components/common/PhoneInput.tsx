@@ -352,8 +352,8 @@ export const PhoneInput = ({
         >
           <SelectValue>
             <div className="flex items-center gap-2">
-              <span className="text-base">{currentCountry.flag}</span>
-              <span className="text-sm">{currentCountry.dialCode}</span>
+              <span className="text-lg md:text-base">{currentCountry.flag}</span>
+              <span className="text-lg md:text-sm">{currentCountry.dialCode}</span>
             </div>
           </SelectValue>
         </SelectTrigger>
@@ -361,9 +361,9 @@ export const PhoneInput = ({
           {COUNTRIES.map((country) => (
             <SelectItem key={country.code} value={country.code}>
               <div className="flex items-center gap-2">
-                <span className="text-base">{country.flag}</span>
-                <span className="text-sm">{country.dialCode}</span>
-                <span className="text-sm text-muted-foreground ml-1">{country.name}</span>
+                <span className="text-lg md:text-base">{country.flag}</span>
+                <span className="text-base md:text-sm">{country.dialCode}</span>
+                <span className="text-base md:text-sm text-muted-foreground ml-1">{country.name}</span>
               </div>
             </SelectItem>
           ))}

@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
+import { CustomDialog } from "../ui/custom-dialog";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { Building2, User, Shield, Briefcase, Users } from "lucide-react";
 import { UserRole, UserRoleNames } from "../../types/user";
 import { formatAvatarUrl } from "../../utils";
+import { Icon } from "../common/Icon";
 
 interface Role {
   id: string | null; // null for USER role since it's not stored in users_role table
@@ -70,18 +71,38 @@ export const RoleSelectionDialog = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={() => onCancel?.()}>
-      <DialogContent className="w-full max-w-md backdrop-blur-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] shadow-2xl">
-        <DialogHeader>
-          <DialogTitle className="text-foreground">Select Account</DialogTitle>
-          <DialogDescription className="text-muted-foreground">
-            You have multiple accounts. Please select which account you want to use.
-          </DialogDescription>
-        </DialogHeader>
-        
-        <div className="space-y-3 mt-4">
+    <CustomDialog
+      open={open}
+      onOpenChange={() => onCancel?.()}
+      title="Select Account"
+      description="You have multiple accounts. Please select which account you want to use."
+      maxWidth="md:max-w-md"
+      className="backdrop-blur-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] shadow-2xl"
+      footer={
+        <div className="flex gap-3 w-full">
+          {onCancel && (
+            <Button
+              variant="outline"
+              onClick={onCancel}
+              className="flex-1 border-[var(--glass-border)] bg-[var(--glass-bg)] text-foreground hover:bg-accent hover:border-[var(--accent-border)]"
+            >
+              Cancel
+            </Button>
+          )}
+          <Button
+            onClick={handleSelect}
+            disabled={selectedRoleId === undefined}
+            variant="accent"
+            className="flex-1 font-medium"
+          >
+            Continue
+          </Button>
+        </div>
+      }
+    >
+      <div className="space-y-3">
           {roles.map((role, index) => {
-            const Icon = getRoleIcon(role.role);
+            const RoleIcon = getRoleIcon(role.role);
             const colorClass = getRoleColor(role.role);
             // Use role.id or index as key (since USER role has id: null)
             const roleKey = role.id ?? `user-role-${index}`;
@@ -107,12 +128,12 @@ export const RoleSelectionDialog = ({
                         alt={role.companyName || 'Company'} 
                       />
                       <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)]">
-                        {role.companyName ? role.companyName.slice(0, 2).toUpperCase() : <Icon className="w-5 h-5" />}
+                        {role.companyName ? role.companyName.slice(0, 2).toUpperCase() : <Icon icon={RoleIcon} size="md" />}
                       </AvatarFallback>
                     </Avatar>
                   ) : (
                     <div className={`p-2.5 rounded-lg ${colorClass} flex-shrink-0`}>
-                      <Icon className="w-5 h-5" />
+                      <Icon icon={RoleIcon} size="md" />
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
@@ -136,29 +157,8 @@ export const RoleSelectionDialog = ({
               </Card>
             );
           })}
-        </div>
-
-        <div className="flex gap-3 mt-6">
-          {onCancel && (
-            <Button
-              variant="outline"
-              onClick={onCancel}
-              className="flex-1 border-[var(--glass-border)] bg-[var(--glass-bg)] text-foreground hover:bg-accent hover:border-[var(--accent-border)]"
-            >
-              Cancel
-            </Button>
-          )}
-          <Button
-            onClick={handleSelect}
-            disabled={selectedRoleId === undefined}
-            variant="accent"
-            className="flex-1 font-medium w-full"
-          >
-            Continue
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </CustomDialog>
   );
 };
 

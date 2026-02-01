@@ -6,7 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../components/ui/dropdown-menu";
 import { formatAvatarUrl } from "../../utils";
 import { DateDisplay } from "../../components/common/DateDisplay";
-import { useAppSelector } from "../../store/hooks";
+import { useAppSelector, useAppDispatch } from "../../store/hooks";
+import { approveCompanyRequest, rejectCompanyRequest, fetchCompaniesRequest } from "../../store/slices/companiesSlice";
 import { isRole, UserRole } from "../../types/user";
 
 interface Tag {
@@ -55,6 +56,7 @@ interface CompanyListItemProps {
 
 export const CompanyListItem = ({ company, onViewCompany }: CompanyListItemProps) => {
   // Get current user from Redux to check if super admin
+  const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
   const isSuperAdmin = isRole(user?.role, UserRole.SYSTEM_ADMIN);
   
@@ -241,13 +243,33 @@ export const CompanyListItem = ({ company, onViewCompany }: CompanyListItemProps
                     <Eye className="w-4 h-4 mr-2" />
                     View Full Profile
                   </DropdownMenuItem>
-                  {actualStatus === 'pending' && (
+                  {actualStatus === 'pending' && isSuperAdmin && (
                     <>
-                      <DropdownMenuItem className="text-green-600 dark:text-green-400">
+                      <DropdownMenuItem 
+                        className="text-green-600 dark:text-green-400"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          dispatch(approveCompanyRequest(company.id));
+                          setTimeout(() => {
+                            dispatch(fetchCompaniesRequest({}));
+                          }, 1000);
+                        }}
+                      >
                         <CheckCircle className="w-4 h-4 mr-2" />
                         Approve Company
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="text-red-600 dark:text-red-400">
+                      <DropdownMenuItem 
+                        className="text-red-600 dark:text-red-400"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (window.confirm('Are you sure you want to reject this company registration?')) {
+                            dispatch(rejectCompanyRequest({ id: company.id }));
+                            setTimeout(() => {
+                              dispatch(fetchCompaniesRequest({}));
+                            }, 1000);
+                          }
+                        }}
+                      >
                         <XCircle className="w-4 h-4 mr-2" />
                         Reject Company
                       </DropdownMenuItem>

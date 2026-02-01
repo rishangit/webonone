@@ -3,12 +3,13 @@ import { Card } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
-import { Separator } from "../../components/ui/separator";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../components/ui/dropdown-menu";
 import { formatAvatarUrl } from "../../utils";
 import { DateDisplay } from "../../components/common/DateDisplay";
-import { useAppSelector } from "../../store/hooks";
+import { useAppSelector, useAppDispatch } from "../../store/hooks";
+import { approveCompanyRequest, rejectCompanyRequest, fetchCompaniesRequest } from "../../store/slices/companiesSlice";
 import { isRole, UserRole } from "../../types/user";
+import { toast } from "sonner";
 
 interface Tag {
   id: number;
@@ -56,6 +57,7 @@ interface CompanyCardProps {
 
 export const CompanyCard = ({ company, onViewCompany }: CompanyCardProps) => {
   // Get current user from Redux to check if super admin
+  const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
   const isSuperAdmin = isRole(user?.role, UserRole.SYSTEM_ADMIN);
   
@@ -149,18 +151,32 @@ export const CompanyCard = ({ company, onViewCompany }: CompanyCardProps) => {
                     <Eye className="w-4 h-4 mr-2" />
                     View Full Profile
                   </DropdownMenuItem>
-                  {actualStatus === 'pending' && (
+                  {actualStatus === 'pending' && isSuperAdmin && (
                     <>
                       <DropdownMenuItem 
                         className="text-green-600 dark:text-green-400"
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          dispatch(approveCompanyRequest(company.id));
+                          setTimeout(() => {
+                            dispatch(fetchCompaniesRequest({}));
+                          }, 1000);
+                        }}
                       >
                         <CheckCircle className="w-4 h-4 mr-2" />
                         Approve Company
                       </DropdownMenuItem>
                       <DropdownMenuItem 
                         className="text-red-600 dark:text-red-400"
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (window.confirm('Are you sure you want to reject this company registration?')) {
+                            dispatch(rejectCompanyRequest({ id: company.id }));
+                            setTimeout(() => {
+                              dispatch(fetchCompaniesRequest({}));
+                            }, 1000);
+                          }
+                        }}
                       >
                         <XCircle className="w-4 h-4 mr-2" />
                         Reject Company
@@ -172,8 +188,6 @@ export const CompanyCard = ({ company, onViewCompany }: CompanyCardProps) => {
             </div>
           </div>
         </div>
-        
-        <Separator className="border-border" />
         
         <div className="space-y-2">
           {company.contactPerson && (

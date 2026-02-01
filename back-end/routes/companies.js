@@ -275,6 +275,165 @@ router.post('/',
   })
 );
 
+// Approve company (set isActive to true)
+router.put('/:id/approve',
+  authenticateToken,
+  asyncHandler(async (req, res) => {
+    try {
+      const { id } = req.params;
+      const company = await Company.findById(id);
+      
+      if (!company) {
+        return res.status(404).json({
+          success: false,
+          message: 'Company not found'
+        });
+      }
+      
+      // Store original isActive value before update
+      const originalIsActive = company.isActive;
+      
+      // Update isActive to true
+      const updated = await company.update({ isActive: true });
+      
+      // Check if company is being approved (isActive changed from false/0 to true/1)
+      const isBeingApproved = (originalIsActive === false || originalIsActive === 0 || originalIsActive === null);
+      
+      // If company is being approved, update the owner's role to Company Owner
+      if (isBeingApproved) {
+        try {
+          let owner = null;
+          
+          // First, try to find owner by ownerId if it exists
+          if (company.ownerId) {
+            const ownerIdInt = typeof company.ownerId === 'string' ? parseInt(company.ownerId, 10) : company.ownerId;
+            
+            if (!isNaN(ownerIdInt)) {
+              console.log(`Attempting to find owner by ID ${ownerIdInt} (from ${company.ownerId}) for company ${id}`);
+              owner = await User.findById(ownerIdInt);
+            } else {
+              console.warn(`Invalid ownerId format for company ${id}: ${company.ownerId}`);
+            }
+          }
+          
+          // If owner not found by ID, try to find by email (for companies registered without auth)
+          if (!owner && company.email) {
+            console.log(`Owner not found by ID, trying to find by email ${company.email} for company ${id}`);
+            owner = await User.findByEmail(company.email);
+          }
+          
+          if (owner) {
+            console.log(`Found owner: ${owner.id}, email: ${owner.email}, current role: ${owner.role}, current companyId: ${owner.companyId}`);
+            
+            // Add COMPANY_OWNER role to users_role table
+            try {
+              const UserRoleModel = require('../models/UserRole');
+              const hasRole = await UserRoleModel.hasRole(owner.id, UserRole.COMPANY_OWNER, company.id);
+              if (!hasRole) {
+                await UserRoleModel.create({
+                  userId: owner.id,
+                  role: UserRole.COMPANY_OWNER,
+                  companyId: company.id,
+                  isActive: true,
+                  isDefault: false
+                });
+                console.log(`[Company Approval] Added COMPANY_OWNER role for user ${owner.id} in company ${id}`);
+              }
+            } catch (roleError) {
+              console.error('[Company Approval] Error adding COMPANY_OWNER role:', roleError);
+            }
+            
+            // Update user role if column exists (for backward compatibility)
+            const updateData = {};
+            try {
+              const pool = require('../config/database');
+              const [columns] = await pool.execute(`
+                SELECT COLUMN_NAME 
+                FROM INFORMATION_SCHEMA.COLUMNS 
+                WHERE TABLE_SCHEMA = DATABASE() 
+                AND TABLE_NAME = 'users'
+                AND COLUMN_NAME = 'role'
+              `);
+              if (columns.length > 0) {
+                updateData.role = UserRole.COMPANY_OWNER;
+              }
+            } catch (e) {
+              // Role column doesn't exist, that's fine
+            }
+            
+            await owner.update(updateData);
+            
+            // Also update the company's ownerId if it wasn't set
+            if (!company.ownerId) {
+              await updated.update({ ownerId: owner.id.toString() });
+              console.log(`Updated company ${id} ownerId to ${owner.id}`);
+            }
+          } else {
+            console.warn(`Owner not found for company ${id}. ownerId: ${company.ownerId}, email: ${company.email}`);
+          }
+        } catch (userUpdateError) {
+          console.error('Error updating owner role:', userUpdateError);
+        }
+      }
+      
+      res.json({
+        success: true,
+        message: 'Company approved successfully',
+        data: updated.toJSON()
+      });
+    } catch (error) {
+      console.error('Error approving company:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error approving company',
+        error: error.message
+      });
+    }
+  })
+);
+
+// Reject company (set isActive to false)
+router.put('/:id/reject',
+  authenticateToken,
+  asyncHandler(async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { reason } = req.body; // Optional rejection reason
+      
+      const company = await Company.findById(id);
+      
+      if (!company) {
+        return res.status(404).json({
+          success: false,
+          message: 'Company not found'
+        });
+      }
+      
+      // Update isActive to false
+      const updateData = { isActive: false };
+      if (reason) {
+        // Store rejection reason if your schema supports it
+        // updateData.rejectionReason = reason;
+      }
+      
+      const updated = await company.update(updateData);
+      
+      res.json({
+        success: true,
+        message: 'Company rejected successfully',
+        data: updated.toJSON()
+      });
+    } catch (error) {
+      console.error('Error rejecting company:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error rejecting company',
+        error: error.message
+      });
+    }
+  })
+);
+
 // Update company
 router.put('/:id',
   authenticateToken,

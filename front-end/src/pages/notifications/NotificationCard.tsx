@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { MoreVertical, Bell, Check, X, Clock, Users, Calendar, AlertTriangle, Info, CheckCircle, Star, Eye } from "lucide-react";
 import { Card } from "../../components/ui/card";
+import { Icon } from "../../components/common/Icon";
 import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
@@ -47,42 +48,21 @@ export function NotificationCard({
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'appointment':
-        return <Calendar className="w-5 h-5" />;
+        return <Icon icon={Calendar} size="md" color="info" />;
       case 'staff':
-        return <Users className="w-5 h-5" />;
+        return <Icon icon={Users} size="md" color="success" />;
       case 'system':
-        return <Info className="w-5 h-5" />;
+        return <Icon icon={Info} size="md" color="muted" />;
       case 'payment':
-        return <CheckCircle className="w-5 h-5" />;
+        return <Icon icon={CheckCircle} size="md" color="success" />;
       case 'reminder':
-        return <Clock className="w-5 h-5" />;
+        return <Icon icon={Clock} size="md" color="warning" />;
       case 'update':
-        return <Star className="w-5 h-5" />;
+        return <Icon icon={Star} size="md" className="text-purple-600 dark:text-purple-400" />;
       case 'alert':
-        return <AlertTriangle className="w-5 h-5" />;
+        return <Icon icon={AlertTriangle} size="md" color="error" />;
       default:
-        return <Bell className="w-5 h-5" />;
-    }
-  };
-
-  const getNotificationIconColor = (type: string) => {
-    switch (type) {
-      case 'appointment':
-        return "text-blue-600 dark:text-blue-400";
-      case 'staff':
-        return "text-green-600 dark:text-green-400";
-      case 'system':
-        return "text-gray-600 dark:text-gray-400";
-      case 'payment':
-        return "text-emerald-600 dark:text-emerald-400";
-      case 'reminder':
-        return "text-yellow-600 dark:text-yellow-400";
-      case 'update':
-        return "text-purple-600 dark:text-purple-400";
-      case 'alert':
-        return "text-red-600 dark:text-red-400";
-      default:
-        return "text-[var(--accent-text)]";
+        return <Icon icon={Bell} size="md" color="accent" />;
     }
   };
 
@@ -153,7 +133,7 @@ export function NotificationCard({
         {/* Top row for mobile: Icon + Title + Actions */}
         <div className="flex items-start gap-3 w-full md:w-auto">
           {/* Notification Icon */}
-          <div className={`p-2 md:p-3 rounded-full shrink-0 transition-all duration-200 bg-[var(--accent-bg)] border border-[var(--accent-border)] ${getNotificationIconColor(notification.type)} group-hover:scale-110`}>
+          <div className="p-2 md:p-3 rounded-full shrink-0 transition-all duration-200 bg-[var(--accent-bg)] border border-[var(--accent-border)] group-hover:scale-110">
             {getNotificationIcon(notification.type)}
           </div>
 
@@ -181,18 +161,18 @@ export function NotificationCard({
                   size="icon" 
                   className="h-8 w-8 transition-all duration-200 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)]"
                 >
-                  <MoreVertical className="h-4 w-4" />
+                  <Icon icon={MoreVertical} size="sm" />
                 </Button>
               </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
                   {notification.isRead ? (
                     <DropdownMenuItem onClick={() => onMarkAsUnread(notification.id)} className="hover:bg-accent/50">
-                      <Bell className="h-4 w-4 mr-2" />
+                      <Icon icon={Bell} size="sm" className="mr-2" />
                       Mark as Unread
                     </DropdownMenuItem>
                   ) : (
                     <DropdownMenuItem onClick={() => onMarkAsRead(notification.id)} className="hover:bg-accent/50">
-                      <Check className="h-4 w-4 mr-2" />
+                      <Icon icon={Check} size="sm" className="mr-2" />
                       Mark as Read
                     </DropdownMenuItem>
                   )}
@@ -201,7 +181,7 @@ export function NotificationCard({
                     className="text-red-600 dark:text-red-400 hover:bg-red-500/10"
                     onClick={() => onDelete(notification.id)}
                   >
-                    <X className="h-4 w-4 mr-2" />
+                    <Icon icon={X} size="sm" className="mr-2" />
                     Delete
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -242,18 +222,18 @@ export function NotificationCard({
                     size="icon" 
                     className="h-8 w-8 transition-all duration-200 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)]"
                   >
-                    <MoreVertical className="h-4 w-4" />
+                    <Icon icon={MoreVertical} size="sm" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
                   {notification.isRead ? (
                     <DropdownMenuItem onClick={() => onMarkAsUnread(notification.id)} className="hover:bg-accent/50">
-                      <Bell className="h-4 w-4 mr-2" />
+                      <Icon icon={Bell} size="sm" className="mr-2" />
                       Mark as Unread
                     </DropdownMenuItem>
                   ) : (
                     <DropdownMenuItem onClick={() => onMarkAsRead(notification.id)} className="hover:bg-accent/50">
-                      <Check className="h-4 w-4 mr-2" />
+                      <Icon icon={Check} size="sm" className="mr-2" />
                       Mark as Read
                     </DropdownMenuItem>
                   )}
@@ -262,7 +242,7 @@ export function NotificationCard({
                     className="text-red-600 dark:text-red-400 hover:bg-red-500/10"
                     onClick={() => onDelete(notification.id)}
                   >
-                    <X className="h-4 w-4 mr-2" />
+                    <Icon icon={X} size="sm" className="mr-2" />
                     Delete
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -313,7 +293,7 @@ export function NotificationCard({
                   onClick={() => onAction(notification.id, 'secondary')}
                   className="bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-[var(--accent-bg)]"
                 >
-                  <Eye className="w-4 h-4 mr-1" />
+                  <Icon icon={Eye} size="sm" className="mr-1" />
                   View Details
                 </Button>
               )}
@@ -376,7 +356,7 @@ export function NotificationCard({
                   onClick={() => onAction(notification.id, 'secondary')}
                   className="w-full sm:w-auto bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-[var(--accent-bg)]"
                 >
-                  <Eye className="w-4 h-4 mr-1" />
+                  <Icon icon={Eye} size="sm" className="mr-1" />
                   View Details
                 </Button>
               )}

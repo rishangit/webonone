@@ -21,6 +21,11 @@ export const signUpSchema = yup.object({
     .email('Please enter a valid email address')
     .max(255, 'Email must be less than 255 characters'),
   
+  mobileNumber: yup
+    .string()
+    .required('Mobile number is required')
+    .matches(/^\+\d{1,4}\d{6,14}$/, 'Please enter a valid mobile number with country code'),
+  
   password: yup
     .string()
     .required('Password is required')

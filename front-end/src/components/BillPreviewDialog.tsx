@@ -1,7 +1,7 @@
 import { Download, Printer, Mail, Calendar, User, Clock, Receipt, Package, FileText, Check } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
+import { CustomDialog } from "./ui/custom-dialog";
 import { Separator } from "./ui/separator";
 import { Badge } from "./ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -177,37 +177,67 @@ export function BillPreviewDialog({ open, onOpenChange, appointmentId, billData 
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent 
-        className="bg-popover border-border max-w-4xl max-h-[90vh] overflow-hidden"
-        aria-describedby="bill-preview-description"
-      >
-        <DialogHeader className="pb-4">
-          <DialogTitle className="flex items-center gap-2 text-foreground">
+    <CustomDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      maxWidth="max-w-4xl"
+      className="bg-popover border-border max-h-[90vh] overflow-hidden"
+      disableContentScroll={false}
+      customHeader={
+        <div className="pb-4">
+          <div className="flex items-center gap-2 text-foreground text-lg font-semibold leading-none">
             <Receipt className="w-5 h-5 text-[var(--accent-primary)]" />
             Bill Preview - #{displayBillData.billNumber}
-            {loading && <span className="text-sm text-muted-foreground">(Loading...)</span>}
-          </DialogTitle>
-          <DialogDescription id="bill-preview-description" className="text-muted-foreground">
+            {loading && <span className="text-sm text-muted-foreground font-normal">(Loading...)</span>}
+          </div>
+          <p id="bill-preview-description" className="text-muted-foreground text-sm mt-1">
             Review and download the generated bill for this appointment
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="overflow-y-auto custom-scrollbar max-h-[calc(90vh-200px)]">
+          </p>
+        </div>
+      }
+      footer={
+        <>
+          <Button 
+            variant="outline" 
+            onClick={handleEmail}
+            className="bg-transparent border-border text-foreground hover:bg-accent"
+          >
+            <Mail className="w-4 h-4 mr-2" />
+            Email to Patient
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={handlePrint}
+            className="bg-transparent border-border text-foreground hover:bg-accent"
+          >
+            <Printer className="w-4 h-4 mr-2" />
+            Print
+          </Button>
+          <Button 
+            onClick={handleDownload}
+            variant="accent"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Download PDF
+          </Button>
+        </>
+      }
+    >
+      <div className="overflow-y-auto custom-scrollbar max-h-[calc(90vh-200px)]">
           {/* Company Header */}
           <div className="text-center mb-8 p-6 bg-gradient-to-br from-[var(--accent-bg)] to-[var(--accent-bg)]/50 border border-[var(--accent-border)] rounded-lg shadow-lg">
             <div className="flex items-center justify-center gap-3 mb-3">
               <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[var(--accent-primary)] to-[var(--accent-secondary)] flex items-center justify-center shadow-lg">
-                <span className="text-[var(--accent-button-text)] font-bold text-xl">A</span>
+                <span className="text-[var(--accent-button-text)] font-bold text-xl">W</span>
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-foreground">AppointmentPro</h1>
-                <p className="text-sm text-muted-foreground font-medium">Professional Healthcare Services</p>
+                <h1 className="text-2xl font-bold text-foreground">WebOnOne</h1>
+                <p className="text-sm text-muted-foreground font-medium">All Your Web Solutions in One</p>
               </div>
             </div>
             <div className="text-sm text-muted-foreground space-y-1">
               <p>123 Healthcare Ave, Medical District</p>
-              <p>Phone: <span className="font-medium">(555) 123-4567</span> | Email: <span className="font-medium">billing@appointmentpro.com</span></p>
+              <p>Phone: <span className="font-medium">(555) 123-4567</span> | Email: <span className="font-medium">billing@webonone.com</span></p>
             </div>
           </div>
 
@@ -404,44 +434,17 @@ export function BillPreviewDialog({ open, onOpenChange, appointmentId, billData 
           {/* Footer */}
           <div className="mt-4 text-center">
             <div className="p-3 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg">
-              <p className="text-foreground font-medium mb-1">Thank you for choosing AppointmentPro!</p>
+              <p className="text-foreground font-medium mb-1">Thank you for choosing WebOnOne!</p>
               <p className="text-sm text-muted-foreground mb-2">
-                We appreciate your trust in our healthcare services. 
+                We appreciate your trust in our services. 
               </p>
               <Separator className="my-2" />
               <p className="text-xs text-muted-foreground">
-                Questions about this bill? Contact us at <span className="font-medium text-[var(--accent-text)]">billing@appointmentpro.com</span> or <span className="font-medium text-[var(--accent-text)]">(555) 123-4567</span>
+                Questions about this bill? Contact us at <span className="font-medium text-[var(--accent-text)]">billing@webonone.com</span> or <span className="font-medium text-[var(--accent-text)]">(555) 123-4567</span>
               </p>
             </div>
           </div>
         </div>
-
-        <DialogFooter className="pt-4 border-t border-border">
-          <Button 
-            variant="outline" 
-            onClick={handleEmail}
-            className="bg-transparent border-border text-foreground hover:bg-accent"
-          >
-            <Mail className="w-4 h-4 mr-2" />
-            Email to Patient
-          </Button>
-          <Button 
-            variant="outline" 
-            onClick={handlePrint}
-            className="bg-transparent border-border text-foreground hover:bg-accent"
-          >
-            <Printer className="w-4 h-4 mr-2" />
-            Print
-          </Button>
-          <Button 
-            onClick={handleDownload}
-            variant="accent"
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Download PDF
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    </CustomDialog>
   );
 }

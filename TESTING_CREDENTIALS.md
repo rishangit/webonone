@@ -1,6 +1,6 @@
 # 🔐 Testing Credentials & Login Information
 
-This document contains all the testing credentials and login information for the AppointmentPro platform.
+This document contains all the testing credentials and login information for the WebOnOne platform.
 
 ## 🚀 Super Admin Access
 

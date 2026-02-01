@@ -1,13 +1,14 @@
 import React, { useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Eye, EyeOff, Lock, Mail, Shield, Zap, User, UserPlus, Check } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, Shield, Zap, User, UserPlus, Check, Phone } from "lucide-react";
 import { Card } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Checkbox } from "../../components/ui/checkbox";
+import { PhoneInput } from "../../components/common/PhoneInput";
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { signUpRequest, clearError } from "../../store/slices/authSlice";
@@ -25,13 +26,15 @@ export function SignUpPage() {
     formState: { errors, isSubmitting },
     watch,
     setValue,
-    trigger
+    trigger,
+    control
   } = useForm<SignUpFormData>({
     resolver: yupResolver(signUpSchema),
     defaultValues: {
       firstName: '',
       lastName: '',
       email: '',
+      mobileNumber: '',
       password: '',
       confirmPassword: '',
       agreeToTerms: false
@@ -58,7 +61,7 @@ export function SignUpPage() {
 
   useEffect(() => {
     if (signUpStep === 'complete' && user) {
-      toast.success("Account created successfully! Welcome to AppointmentPro!");
+      toast.success("Account created successfully! Welcome to WebOnOne!");
       
     // Reset submission flag on success
     submissionInProgress.current = false;
@@ -127,7 +130,7 @@ export function SignUpPage() {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:bg-gradient-to-br dark:from-gray-900 dark:via-black dark:to-gray-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:bg-gradient-to-br dark:from-gray-900 dark:via-black dark:to-gray-800 flex items-center justify-center p-2 md:p-4">
       {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[var(--accent-primary)]/10 rounded-full blur-3xl"></div>
@@ -141,7 +144,7 @@ export function SignUpPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-primary-hover)] shadow-lg shadow-[var(--accent-primary)]/25 mb-4">
             <Zap className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-semibold text-foreground mb-2">AppointmentPro</h1>
+          <h1 className="text-2xl font-semibold text-foreground mb-2">WebOnOne</h1>
           <p className="text-muted-foreground">Create your user account to get started</p>
         </div>
 
@@ -156,16 +159,8 @@ export function SignUpPage() {
 
             {/* Signup Form */}
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              {/* Debug info */}
-              <div className="text-xs text-gray-500">
-                Form state: {isSubmitting ? 'Submitting...' : 'Ready'} | 
-                Loading: {isLoading ? 'Yes' : 'No'} |
-                Errors: {Object.keys(errors).length} |
-                AgreeToTerms: {watch('agreeToTerms') ? 'Yes' : 'No'} |
-                Checkbox checked: {watch('agreeToTerms') ? 'Yes' : 'No'}
-              </div>
               {/* Name Fields */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <Label htmlFor="firstName" className="text-foreground">First Name</Label>
                   <div className="relative">
@@ -216,6 +211,32 @@ export function SignUpPage() {
                 </div>
                 {errors.email && (
                   <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
+                )}
+              </div>
+
+              {/* Mobile Number Field */}
+              <div className="space-y-2">
+                <Label htmlFor="mobileNumber" className="text-foreground">Mobile Number</Label>
+                <Controller
+                  name="mobileNumber"
+                  control={control}
+                  render={({ field }) => (
+                    <PhoneInput
+                      id="mobileNumber"
+                      value={field.value || ''}
+                      onChange={(value) => {
+                        field.onChange(value);
+                        trigger('mobileNumber');
+                      }}
+                      onBlur={field.onBlur}
+                      placeholder="Enter your mobile number"
+                      error={!!errors.mobileNumber}
+                      className="w-full"
+                    />
+                  )}
+                />
+                {errors.mobileNumber && (
+                  <p className="text-red-500 text-xs mt-1">{errors.mobileNumber.message}</p>
                 )}
               </div>
 
@@ -292,7 +313,7 @@ export function SignUpPage() {
               </div>
 
               {/* Terms and Conditions */}
-              <div className="flex items-start space-x-2">
+              <div className="flex items-start gap-2">
                 <Checkbox 
                   id="terms"
                   checked={!!watch('agreeToTerms')}
@@ -307,15 +328,15 @@ export function SignUpPage() {
                     await trigger('agreeToTerms');
                     console.log('Validation triggered for agreeToTerms');
                   }}
-                  className="border-border data-[state=checked]:bg-[var(--accent-primary)] data-[state=checked]:border-[var(--accent-primary)] mt-1"
+                  className="border-border data-[state=checked]:bg-[var(--accent-primary)] data-[state=checked]:border-[var(--accent-primary)] mt-1 flex-shrink-0"
                 />
-                <Label htmlFor="terms" className="text-sm text-muted-foreground leading-relaxed">
+                <Label htmlFor="terms" className="text-sm text-muted-foreground leading-relaxed flex-1 block">
                   I agree to the{" "}
-                  <Button variant="link" className="text-[var(--accent-text)] hover:text-[var(--accent-primary-hover)] p-0 h-auto text-sm">
+                  <Button variant="link" className="text-[var(--accent-text)] hover:text-[var(--accent-primary-hover)] p-0 h-auto text-sm inline-block">
                     Terms and Conditions
                   </Button>
                   {" "}and{" "}
-                  <Button variant="link" className="text-[var(--accent-text)] hover:text-[var(--accent-primary-hover)] p-0 h-auto text-sm">
+                  <Button variant="link" className="text-[var(--accent-text)] hover:text-[var(--accent-primary-hover)] p-0 h-auto text-sm inline-block">
                     Privacy Policy
                   </Button>
                 </Label>
@@ -323,11 +344,6 @@ export function SignUpPage() {
               {errors.agreeToTerms && (
                 <p className="text-red-500 text-xs mt-1">
                   {errors.agreeToTerms.message}
-                  <br />
-                  <span className="text-xs text-gray-400">
-                    Debug: agreeToTerms value = {String(watch('agreeToTerms'))} | 
-                    Type: {typeof watch('agreeToTerms')}
-                  </span>
                 </p>
               )}
 
@@ -385,7 +401,7 @@ export function SignUpPage() {
         {/* Footer */}
         <div className="text-center mt-6 space-y-2">
           <p className="text-muted-foreground text-xs">
-            © 2024 AppointmentPro. All rights reserved.
+            © 2024 WebOnOne. All rights reserved.
           </p>
           <p className="text-muted-foreground text-xs">
             By creating an account, you agree to our terms and privacy policy.

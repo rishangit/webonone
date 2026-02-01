@@ -7,6 +7,7 @@ import {
 
 import { cn } from "./utils";
 import { Button, buttonVariants } from "./button";
+import { Icon } from "../common/Icon";
 
 function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
   return (
@@ -76,7 +77,7 @@ function PaginationPrevious({
       className={cn("gap-1 px-2.5 sm:pl-2.5", className)}
       {...props}
     >
-      <ChevronLeftIcon />
+      <Icon icon={ChevronLeftIcon} size="sm" />
       <span className="hidden sm:block">Previous</span>
     </PaginationLink>
   );
@@ -94,7 +95,7 @@ function PaginationNext({
       {...props}
     >
       <span className="hidden sm:block">Next</span>
-      <ChevronRightIcon />
+      <Icon icon={ChevronRightIcon} size="sm" />
     </PaginationLink>
   );
 }
@@ -110,7 +111,7 @@ function PaginationEllipsis({
       className={cn("flex size-9 items-center justify-center", className)}
       {...props}
     >
-      <MoreHorizontalIcon className="size-4" />
+      <Icon icon={MoreHorizontalIcon} size="sm" />
       <span className="sr-only">More pages</span>
     </span>
   );

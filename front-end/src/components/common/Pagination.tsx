@@ -113,13 +113,9 @@ export const Pagination = ({
 
   return (
     <div className={cn("flex flex-col sm:flex-row items-center justify-between gap-4 pt-4", className)}>
-      {showItemCount && (
-        <p className="text-sm text-muted-foreground order-2 sm:order-1">
-          Showing {startItem}-{endItem} of {totalItems} items
-        </p>
-      )}
-
-      <div className="flex items-center gap-2 order-1 sm:order-2">
+      {/* Mobile: Row 1 - Pagination Controls */}
+      {/* Desktop: Right side with pagination and per page */}
+      <div className="flex items-center justify-center sm:justify-end gap-2 w-full sm:w-auto order-1 sm:order-2">
         {totalPages > 1 && (
           <PaginationRoot>
             <PaginationContent>
@@ -175,8 +171,9 @@ export const Pagination = ({
           </PaginationRoot>
         )}
 
+        {/* Desktop: Per Page Selector (shown inline with pagination) */}
         {showItemsPerPageSelector && onItemsPerPageChange && (
-          <div className="flex items-center gap-2 ml-4 flex-shrink-0">
+          <div className="hidden sm:flex items-center gap-2 ml-4 flex-shrink-0">
             <span className="text-sm text-muted-foreground whitespace-nowrap">Per page:</span>
             <Select
               value={String(itemsPerPage)}
@@ -196,6 +193,36 @@ export const Pagination = ({
           </div>
         )}
       </div>
+
+      {/* Mobile: Row 2 - Per Page Selector */}
+      {showItemsPerPageSelector && onItemsPerPageChange && (
+        <div className="flex items-center justify-center gap-2 w-full sm:hidden order-2">
+          <span className="text-sm text-muted-foreground whitespace-nowrap">Per page:</span>
+          <Select
+            value={String(itemsPerPage)}
+            onValueChange={(value) => onItemsPerPageChange(Number(value))}
+          >
+            <SelectTrigger className="w-20 h-9 bg-[var(--input-background)] border-[var(--glass-border)] text-foreground">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-popover border-border">
+              {itemsPerPageOptions.map((option) => (
+                <SelectItem key={option} value={String(option)}>
+                  {option}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {/* Mobile: Row 3 - Item Count */}
+      {/* Desktop: Left side */}
+      {showItemCount && (
+        <p className="text-sm text-muted-foreground text-center sm:text-left w-full sm:w-auto order-3 sm:order-1">
+          Showing {startItem}-{endItem} of {totalItems} items
+        </p>
+      )}
     </div>
   );
 };

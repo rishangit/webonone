@@ -16,11 +16,11 @@ import { WeekView } from "./WeekView";
 import { MonthView } from "./MonthView";
 import { useState, useMemo, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { 
-  fetchAppointmentsRequest, 
+import {
+  fetchAppointmentsRequest,
   updateAppointmentStatusRequest,
   deleteAppointmentRequest,
-  clearError 
+  clearError
 } from "../../store/slices/appointmentsSlice";
 import { fetchUsersRequest, fetchUserRequest } from "../../store/slices/usersSlice";
 import { fetchServicesRequest } from "../../store/slices/servicesSlice";
@@ -35,6 +35,7 @@ import { DeleteConfirmationDialog } from "../../components/common/DeleteConfirma
 import { SearchInput } from "../../components/common/SearchInput";
 import { Pagination } from "../../components/common/Pagination";
 import { isRole, UserRole } from "../../types/user";
+import { Carousel, CarouselContent, CarouselItem } from "../../components/ui/carousel";
 
 interface User {
   email: string;
@@ -111,7 +112,7 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
         // For non-company owners: fetch all appointments (client-side filtering)
         dispatch(fetchAppointmentsRequest({ companyId }));
       }
-      
+
       dispatch(fetchUsersRequest({}));
       dispatch(fetchServicesRequest({ companyId }));
       dispatch(fetchStaffRequest({ companyId }));
@@ -183,7 +184,7 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
       // Find staff/provider data
       let staffData = null;
       let preferredStaffData = null;
-      
+
       if (appointment.staffId) {
         const provider = staff.find(s => s.id === appointment.staffId);
         if (provider) {
@@ -231,7 +232,7 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
         if (!duration) return 'N/A';
         return `${duration} min`;
       };
-      
+
       // Get duration from service first, then fall back to appointment duration
       const appointmentDuration = service?.duration || appointment.duration;
 
@@ -324,7 +325,7 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
           const appointmentDate = new Date(appointment.date);
           const now = new Date();
           const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-          
+
           switch (timeFilter) {
             case "today":
               const appointmentToday = new Date(appointmentDate.getFullYear(), appointmentDate.getMonth(), appointmentDate.getDate());
@@ -356,62 +357,62 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
       return transformedAppointments.filter(appointment => {
         // Search filter
         if (searchQuery && !appointment.patientName.toLowerCase().includes(searchQuery.toLowerCase()) &&
-            !appointment.type.toLowerCase().includes(searchQuery.toLowerCase()) &&
-            !(appointment.service || '').toLowerCase().includes(searchQuery.toLowerCase())) {
+          !appointment.type.toLowerCase().includes(searchQuery.toLowerCase()) &&
+          !(appointment.service || '').toLowerCase().includes(searchQuery.toLowerCase())) {
           return false;
         }
 
-      // Status filter - normalize both values for comparison
-      if (statusFilter !== "all-status") {
-        const appointmentStatus = normalizeAppointmentStatus(appointment.status);
-        const filterStatus = normalizeAppointmentStatus(statusFilter);
-        if (appointmentStatus !== filterStatus) {
-          return false;
+        // Status filter - normalize both values for comparison
+        if (statusFilter !== "all-status") {
+          const appointmentStatus = normalizeAppointmentStatus(appointment.status);
+          const filterStatus = normalizeAppointmentStatus(statusFilter);
+          if (appointmentStatus !== filterStatus) {
+            return false;
+          }
         }
-      }
 
-      // Time filter
-      if (timeFilter !== "all-time") {
-        const appointmentDate = new Date(appointment.date);
-        const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        
-        switch (timeFilter) {
-          case "today":
-            const appointmentToday = new Date(appointmentDate.getFullYear(), appointmentDate.getMonth(), appointmentDate.getDate());
-            if (appointmentToday.getTime() !== today.getTime()) return false;
-            break;
-          case "week":
-            const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-            if (appointmentDate < weekAgo) return false;
-            break;
-          case "month":
-            const monthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
-            if (appointmentDate < monthAgo) return false;
-            break;
+        // Time filter
+        if (timeFilter !== "all-time") {
+          const appointmentDate = new Date(appointment.date);
+          const now = new Date();
+          const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+          switch (timeFilter) {
+            case "today":
+              const appointmentToday = new Date(appointmentDate.getFullYear(), appointmentDate.getMonth(), appointmentDate.getDate());
+              if (appointmentToday.getTime() !== today.getTime()) return false;
+              break;
+            case "week":
+              const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+              if (appointmentDate < weekAgo) return false;
+              break;
+            case "month":
+              const monthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+              if (appointmentDate < monthAgo) return false;
+              break;
+          }
         }
-      }
 
-      // Staff filter - match by staff ID
-      if (selectedStaff.length > 0) {
-        const appointmentStaffId = appointment._originalAppointment?.staffId;
-        const appointmentPreferredStaffIds = appointment._originalAppointment?.preferredStaffIds || [];
-        const allStaffIds = appointmentStaffId ? [appointmentStaffId, ...appointmentPreferredStaffIds] : appointmentPreferredStaffIds;
-        
-        if (!allStaffIds.some(id => selectedStaff.includes(id))) {
-          return false;
+        // Staff filter - match by staff ID
+        if (selectedStaff.length > 0) {
+          const appointmentStaffId = appointment._originalAppointment?.staffId;
+          const appointmentPreferredStaffIds = appointment._originalAppointment?.preferredStaffIds || [];
+          const allStaffIds = appointmentStaffId ? [appointmentStaffId, ...appointmentPreferredStaffIds] : appointmentPreferredStaffIds;
+
+          if (!allStaffIds.some(id => selectedStaff.includes(id))) {
+            return false;
+          }
         }
-      }
 
-      // Space filter - match by space ID
-      if (selectedSpaces.length > 0) {
-        const appointmentSpaceId = appointment._originalAppointment?.spaceId;
-        if (!appointmentSpaceId || !selectedSpaces.includes(appointmentSpaceId)) {
-          return false;
+        // Space filter - match by space ID
+        if (selectedSpaces.length > 0) {
+          const appointmentSpaceId = appointment._originalAppointment?.spaceId;
+          if (!appointmentSpaceId || !selectedSpaces.includes(appointmentSpaceId)) {
+            return false;
+          }
         }
-      }
 
-      return true;
+        return true;
       });
     }
   }, [transformedAppointments, isCompanyOwner, searchQuery, statusFilter, timeFilter, selectedStaff, selectedSpaces]);
@@ -423,8 +424,8 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
         <div>
           <h1 className="text-xl sm:text-2xl font-semibold text-foreground">Appointments</h1>
           <p className="text-muted-foreground mt-1 text-sm sm:text-base">
-            {currentUser?.role === "User" 
-              ? "View your appointments and book new ones" 
+            {currentUser?.role === "User"
+              ? "View your appointments and book new ones"
               : "Manage and track all your appointments"
             }
           </p>
@@ -432,11 +433,11 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Desktop Add Button - Available for all users */}
           <div className="hidden sm:block">
-            <AppointmentWizard 
+            <AppointmentWizard
               currentUser={currentUser}
               trigger={
-                <Button 
-                  variant="accent" 
+                <Button
+                  variant="accent"
                   className="text-sm bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-md hover:shadow-lg transition-all duration-200"
                 >
                   <Plus className="w-4 h-4 mr-2" />
@@ -445,7 +446,7 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
               }
             />
           </div>
-          
+
           {/* Filter/View Toggle for larger screens */}
           <Button variant="outline" className="hidden lg:flex bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent text-foreground hover:text-foreground text-sm">
             <Filter className="w-4 h-4 sm:mr-2" />
@@ -455,21 +456,53 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        {appointmentStats.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-            <Card key={index} className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
-                  <p className="text-xl font-semibold text-foreground">{stat.count}</p>
+      <div className="hidden md:block">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          {appointmentStats.map((stat, index) => {
+            const Icon = stat.icon;
+            return (
+              <Card key={index} className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
+                    <p className="text-xl font-semibold text-foreground">{stat.count}</p>
+                  </div>
+                  <Icon className={`w-8 h-8 ${stat.color} dark:text-${stat.color.split('-')[1]}-400`} />
                 </div>
-                <Icon className={`w-8 h-8 ${stat.color} dark:text-${stat.color.split('-')[1]}-400`} />
-              </div>
-            </Card>
-          );
-        })}
+              </Card>
+            );
+          })}
+        </div>
+      </div>
+      {/* Mobile: Carousel - Horizontal scroll with same layout as desktop */}
+      <div className="block md:hidden">
+        <Carousel
+          opts={{
+            align: "start",
+            slidesToScroll: 1,
+            containScroll: "trimSnaps",
+          }}
+          className="w-full"
+        >
+          <CarouselContent className="-ml-2">
+            {appointmentStats.map((stat, index) => {
+              const Icon = stat.icon;
+              return (
+                <CarouselItem key={index} className="pl-2 flex-shrink-0" style={{  minWidth: 'calc(100vw / 3.3)' }}>
+                  <Card className="p-4 w-full backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
+                        <p className="text-xl font-semibold text-foreground">{stat.count}</p>
+                      </div>
+                      <Icon className={`w-8 h-8 ${stat.color} dark:text-${stat.color.split('-')[1]}-400`} />
+                    </div>
+                  </Card>
+                </CarouselItem>
+              );
+            })}
+          </CarouselContent>
+        </Carousel>
       </div>
 
       {/* Main Content with Tabs */}
@@ -486,7 +519,7 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
                 Calendar View
               </TabsTrigger>
             </TabsList>
-            
+
             {/* Search Bar - Use SearchInput for company owners, regular Input for others */}
             {isCompanyOwner ? (
               <SearchInput
@@ -499,124 +532,124 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
             ) : (
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                <Input 
-                  placeholder="Search patients, appointments..." 
+                <Input
+                  placeholder="Search patients, appointments..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10 bg-[var(--input-background)] border-[var(--glass-border)] text-foreground placeholder:text-muted-foreground"
                 />
               </div>
             )}
-          
-          {/* Filters and View Mode */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
-            <div className="flex flex-col lg:flex-row gap-3 lg:items-center">
-              <Select value={timeFilter} onValueChange={setTimeFilter}>
-                <SelectTrigger className="w-full lg:w-32 bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border">
-                  <SelectItem value="all-time">All Time</SelectItem>
-                  <SelectItem value="today">Today</SelectItem>
-                  <SelectItem value="week">This Week</SelectItem>
-                  <SelectItem value="month">This Month</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full lg:w-32 bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border">
-                  <SelectItem value="all-status">All Status</SelectItem>
-                  {AppointmentStatusValues.map(status => (
-                    <SelectItem key={status} value={String(status)}>
-                      {getAppointmentStatusLabel(status)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <MultiSelect
-                options={staffOptions}
-                value={selectedStaff}
-                onValueChange={setSelectedStaff}
-                placeholder="All Staff"
-                className="w-full lg:w-40"
-                maxCount={2}
-              />
-              <MultiSelect
-                options={spaceOptions}
-                value={selectedSpaces}
-                onValueChange={setSelectedSpaces}
-                placeholder="All Spaces"
-                className="w-full lg:w-40"
-                maxCount={2}
-              />
-              
-              {/* Clear Filters & Filter Count */}
-              {(selectedStaff.length > 0 || selectedSpaces.length > 0 || searchQuery || statusFilter !== "all-status" || timeFilter !== "all-time") && (
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="bg-[var(--accent-bg)] text-[var(--accent-text)] border-[var(--accent-border)]">
-                    {filteredAppointments.length} results
-                  </Badge>
+
+            {/* Filters and View Mode */}
+            <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
+              <div className="flex flex-col lg:flex-row gap-3 lg:items-center">
+                <Select value={timeFilter} onValueChange={setTimeFilter}>
+                  <SelectTrigger className="w-full lg:w-32 bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border-border">
+                    <SelectItem value="all-time">All Time</SelectItem>
+                    <SelectItem value="today">Today</SelectItem>
+                    <SelectItem value="week">This Week</SelectItem>
+                    <SelectItem value="month">This Month</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-full lg:w-32 bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border-border">
+                    <SelectItem value="all-status">All Status</SelectItem>
+                    {AppointmentStatusValues.map(status => (
+                      <SelectItem key={status} value={String(status)}>
+                        {getAppointmentStatusLabel(status)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <MultiSelect
+                  options={staffOptions}
+                  value={selectedStaff}
+                  onValueChange={setSelectedStaff}
+                  placeholder="All Staff"
+                  className="w-full lg:w-40"
+                  maxCount={2}
+                />
+                <MultiSelect
+                  options={spaceOptions}
+                  value={selectedSpaces}
+                  onValueChange={setSelectedSpaces}
+                  placeholder="All Spaces"
+                  className="w-full lg:w-40"
+                  maxCount={2}
+                />
+
+                {/* Clear Filters & Filter Count */}
+                {(selectedStaff.length > 0 || selectedSpaces.length > 0 || searchQuery || statusFilter !== "all-status" || timeFilter !== "all-time") && (
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="bg-[var(--accent-bg)] text-[var(--accent-text)] border-[var(--accent-border)]">
+                      {filteredAppointments.length} results
+                    </Badge>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedStaff([]);
+                        setSelectedSpaces([]);
+                        setSearchQuery("");
+                        setStatusFilter("all-status");
+                        setTimeFilter("all-time");
+                      }}
+                      className="bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground hover:bg-accent hover:text-foreground"
+                    >
+                      Clear Filters
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* View Mode Toggle - Show based on active tab */}
+              {activeTab === "appointments" && (
+                <ViewSwitcher
+                  viewMode={viewMode}
+                  onViewModeChange={setViewMode}
+                />
+              )}
+              {activeTab === "calendar" && (
+                <div className="flex items-center backdrop-blur-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg p-1">
                   <Button
-                    variant="outline"
+                    variant={calendarViewMode === "day" ? "accent" : "ghost"}
                     size="sm"
-                    onClick={() => {
-                      setSelectedStaff([]);
-                      setSelectedSpaces([]);
-                      setSearchQuery("");
-                      setStatusFilter("all-status");
-                      setTimeFilter("all-time");
-                    }}
-                    className="bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground hover:bg-accent hover:text-foreground"
+                    onClick={() => setCalendarViewMode("day")}
+                    className="h-8 px-3"
                   >
-                    Clear Filters
+                    <CalendarDays className="w-4 h-4 mr-1" />
+                    Day
+                  </Button>
+                  <Button
+                    variant={calendarViewMode === "week" ? "accent" : "ghost"}
+                    size="sm"
+                    onClick={() => setCalendarViewMode("week")}
+                    className="h-8 px-3"
+                  >
+                    <Calendar className="w-4 h-4 mr-1" />
+                    Week
+                  </Button>
+                  <Button
+                    variant={calendarViewMode === "month" ? "accent" : "ghost"}
+                    size="sm"
+                    onClick={() => setCalendarViewMode("month")}
+                    className="h-8 px-3"
+                  >
+                    <Calendar className="w-4 h-4 mr-1" />
+                    Month
                   </Button>
                 </div>
               )}
             </div>
-            
-            {/* View Mode Toggle - Show based on active tab */}
-            {activeTab === "appointments" && (
-              <ViewSwitcher 
-                viewMode={viewMode} 
-                onViewModeChange={setViewMode} 
-              />
-            )}
-            {activeTab === "calendar" && (
-              <div className="flex items-center backdrop-blur-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg p-1">
-                <Button
-                  variant={calendarViewMode === "day" ? "accent" : "ghost"}
-                  size="sm"
-                  onClick={() => setCalendarViewMode("day")}
-                  className="h-8 px-3"
-                >
-                  <CalendarDays className="w-4 h-4 mr-1" />
-                  Day
-                </Button>
-                <Button
-                  variant={calendarViewMode === "week" ? "accent" : "ghost"}
-                  size="sm"
-                  onClick={() => setCalendarViewMode("week")}
-                  className="h-8 px-3"
-                >
-                  <Calendar className="w-4 h-4 mr-1" />
-                  Week
-                </Button>
-                <Button
-                  variant={calendarViewMode === "month" ? "accent" : "ghost"}
-                  size="sm"
-                  onClick={() => setCalendarViewMode("month")}
-                  className="h-8 px-3"
-                >
-                  <Calendar className="w-4 h-4 mr-1" />
-                  Month
-                </Button>
-              </div>
-            )}
           </div>
-        </div>
-      </Card>
+        </Card>
 
         <TabsContent value="appointments" className="space-y-4">
           {/* Loading State */}
@@ -634,14 +667,14 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
             <div className="space-y-3 sm:space-y-4">
               {filteredAppointments.length > 0 ? (
                 filteredAppointments.map((appointment) => (
-                  <AppointmentCard 
-                    key={appointment.id} 
-                    {...appointment} 
+                  <AppointmentCard
+                    key={appointment.id}
+                    {...appointment}
                     viewMode="list"
                     onStatusUpdate={(status, completionData) => {
                       if (appointment._originalAppointment) {
-                        dispatch(updateAppointmentStatusRequest({ 
-                          id: appointment._originalAppointment.id, 
+                        dispatch(updateAppointmentStatusRequest({
+                          id: appointment._originalAppointment.id,
                           status: status as Appointment['status'],
                           completionData: completionData
                         }));
@@ -672,14 +705,14 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
               {filteredAppointments.length > 0 ? (
                 filteredAppointments.map((appointment) => (
-                  <AppointmentCard 
-                    key={appointment.id} 
-                    {...appointment} 
+                  <AppointmentCard
+                    key={appointment.id}
+                    {...appointment}
                     viewMode="card"
                     onStatusUpdate={(status, completionData) => {
                       if (appointment._originalAppointment) {
-                        dispatch(updateAppointmentStatusRequest({ 
-                          id: appointment._originalAppointment.id, 
+                        dispatch(updateAppointmentStatusRequest({
+                          id: appointment._originalAppointment.id,
                           status: status as Appointment['status'],
                           completionData: completionData
                         }));
@@ -776,9 +809,9 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
 
               {/* Timeline Day View */}
               <div className="lg:col-span-3 space-y-4">
-                <TimelineView 
+                <TimelineView
                   currentUser={currentUser}
-                  selectedDate={selectedDate} 
+                  selectedDate={selectedDate}
                   appointments={filteredAppointments}
                   onDateChange={setSelectedDate}
                 />
@@ -790,11 +823,11 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
 
       {/* Mobile Floating Action Button */}
       <div className="fixed bottom-6 right-6 sm:hidden z-50">
-        <AppointmentWizard 
+        <AppointmentWizard
           currentUser={currentUser}
           trigger={
-            <Button 
-              variant="accent" 
+            <Button
+              variant="accent"
               size="lg"
               className="w-14 h-14 rounded-full shadow-lg hover:shadow-xl active:scale-95 transform hover:scale-105 transition-all duration-200 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-primary-hover)] border-0 touch-manipulation"
               aria-label={currentUser?.role === "User" ? "Book new appointment" : "Create new appointment"}

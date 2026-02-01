@@ -2,6 +2,7 @@ import React, { ReactNode } from "react";
 import { Card } from "../ui/card";
 import { Button } from "../ui/button";
 import { LucideIcon } from "lucide-react";
+import { Icon } from "./Icon";
 
 interface EmptyStateProps {
   icon: LucideIcon | ReactNode;
@@ -28,10 +29,10 @@ export const EmptyState = ({
   const renderIcon = () => {
     if (!Icon) return null;
     
-    // If Icon is a function (Lucide icon component), render it as JSX
+    // If Icon is a function (Lucide icon component), render it using Icon component
     if (typeof Icon === "function") {
-      const IconComponent = Icon as React.ComponentType<{ className?: string }>;
-      return <IconComponent className="w-12 h-12 text-muted-foreground mx-auto mb-4" />;
+      const IconComponent = Icon as LucideIcon;
+      return <Icon icon={IconComponent} size="xl" color="muted" className="mx-auto mb-4" />;
     }
     
     // If it's already a React element, use it directly
@@ -57,10 +58,10 @@ export const EmptyState = ({
     
     const ActionIcon = action.icon;
     
-    // If ActionIcon is a function (Lucide icon component), render it as JSX
+    // If ActionIcon is a function (Lucide icon component), render it using Icon component
     if (typeof ActionIcon === "function") {
-      const ActionIconComponent = ActionIcon as React.ComponentType<{ className?: string }>;
-      return <ActionIconComponent className="w-4 h-4 mr-2" />;
+      const ActionIconComponent = ActionIcon as LucideIcon;
+      return <Icon icon={ActionIconComponent} size="sm" className="mr-2" />;
     }
     
     // If it's already a React element, use it directly

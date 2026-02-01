@@ -91,7 +91,7 @@ export const config: EnvironmentConfig = {
   apiUrl: getApiBaseUrl(),
   
   // Application Configuration
-  appName: getEnvVar('VITE_APP_NAME', 'AppointmentPro'),
+  appName: getEnvVar('VITE_APP_NAME', 'webonone'),
   appVersion: getEnvVar('VITE_APP_VERSION', '1.0.0'),
   appDescription: getEnvVar('VITE_APP_DESCRIPTION', 'Full-stack appointment booking application'),
   

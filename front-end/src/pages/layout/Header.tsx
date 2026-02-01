@@ -7,6 +7,7 @@ import { Badge } from "../../components/ui/badge";
 import { User as UserType } from "../../types/user";
 import { formatAvatarUrl } from "../../utils";
 import { UserRoleBadge } from "../../components/UserRoleBadge";
+import { Icon } from "../../components/common/Icon";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -83,23 +84,23 @@ export function Header({ onMenuClick, onNavigate, onLogout, currentUser }: Heade
             variant="ghost"
             size="icon"
             onClick={onMenuClick}
-            className="hover:bg-sidebar-accent text-card-foreground hover:text-card-foreground"
+            className="hover:bg-sidebar-accent text-card-foreground hover:text-card-foreground md:size-9 h-11 w-11 md:h-9 md:w-9"
           >
-            <Menu className="w-5 h-5" />
+            <Icon icon={Menu} size="md" />
           </Button>
           
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--accent-primary)] to-[var(--accent-primary-hover)] flex items-center justify-center shadow-lg shadow-[var(--accent-primary)]/25">
-              <span className="text-white font-bold text-sm">A</span>
+              <span className="text-white font-bold text-sm">W</span>
             </div>
-            <span className="hidden sm:block font-semibold text-card-foreground">AppointmentPro</span>
+            <span className="hidden sm:block font-semibold text-card-foreground">WebOnOne</span>
           </div>
         </div>
 
         {/* Center - Search (Desktop) */}
         <div className="hidden md:flex flex-1 max-w-md mx-8">
           <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+            <Icon icon={Search} size="sm" className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground pointer-events-none" />
             <Input
               placeholder="Search anything... (Press Enter)"
               value={searchQuery}
@@ -114,7 +115,7 @@ export function Header({ onMenuClick, onNavigate, onLogout, currentUser }: Heade
                 className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 hover:bg-accent/50"
                 onClick={() => setSearchQuery("")}
               >
-                <X className="h-3 w-3" />
+                <Icon icon={X} size="xs" />
               </Button>
             )}
           </div>
@@ -128,7 +129,7 @@ export function Header({ onMenuClick, onNavigate, onLogout, currentUser }: Heade
             className="md:hidden hover:bg-sidebar-accent text-card-foreground hover:text-card-foreground transition-all duration-200"
             onClick={() => setShowMobileSearch(true)}
           >
-            <Search className="w-5 h-5" />
+            <Icon icon={Search} size="md" />
           </Button>
           
           <Button
@@ -137,7 +138,7 @@ export function Header({ onMenuClick, onNavigate, onLogout, currentUser }: Heade
             className="relative hover:bg-sidebar-accent text-card-foreground hover:text-card-foreground transition-all duration-200"
             onClick={() => onNavigate?.("notifications")}
           >
-            <Bell className="w-5 h-5" />
+            <Icon icon={Bell} size="md" />
             {unreadCount > 0 && (
               <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)] text-xs transition-all duration-200 animate-pulse">
                 {unreadCount > 99 ? "99+" : unreadCount}
@@ -205,7 +206,7 @@ export function Header({ onMenuClick, onNavigate, onLogout, currentUser }: Heade
                     }}
                     className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-popover-foreground rounded-lg hover:bg-[var(--accent-bg)] border border-transparent hover:border-[var(--accent-border)] transition-all duration-200 group"
                   >
-                    <User className="w-4 h-4 text-muted-foreground group-hover:text-[var(--accent-text)] transition-colors" />
+                    <Icon icon={User} size="sm" className="text-muted-foreground group-hover:text-[var(--accent-text)] transition-colors" />
                     <span>Profile Settings</span>
                   </button>
                   
@@ -216,7 +217,7 @@ export function Header({ onMenuClick, onNavigate, onLogout, currentUser }: Heade
                     }}
                     className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-popover-foreground rounded-lg hover:bg-[var(--accent-bg)] border border-transparent hover:border-[var(--accent-border)] transition-all duration-200 group"
                   >
-                    <Settings className="w-4 h-4 text-muted-foreground group-hover:text-[var(--accent-text)] transition-colors" />
+                    <Icon icon={Settings} size="sm" className="text-muted-foreground group-hover:text-[var(--accent-text)] transition-colors" />
                     <span>Application Settings</span>
                   </button>
                   
@@ -252,10 +253,10 @@ export function Header({ onMenuClick, onNavigate, onLogout, currentUser }: Heade
               }}
               className="shrink-0"
             >
-              <X className="w-5 h-5" />
+              <Icon icon={X} size="md" />
             </Button>
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+              <Icon icon={Search} size="sm" className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground pointer-events-none" />
               <Input
                 autoFocus
                 placeholder="Search anything..."
@@ -276,7 +277,7 @@ export function Header({ onMenuClick, onNavigate, onLogout, currentUser }: Heade
                   className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 hover:bg-accent/50"
                   onClick={() => setSearchQuery("")}
                 >
-                  <X className="h-3 w-3" />
+                  <Icon icon={X} size="xs" />
                 </Button>
               )}
             </div>

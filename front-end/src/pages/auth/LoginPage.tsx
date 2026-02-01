@@ -83,18 +83,6 @@ export function LoginPage() {
     dispatch(loginRequest({ email, password }));
   };
 
-  const handleQuickLogin = (userEmail: string, userPassword: string) => {
-    dispatch(clearError());
-    // Clear any previous role selection state
-    setShowRoleSelection(false);
-    setPendingUser(null);
-    setPendingRoles([]);
-    
-    // Just fill the email and password fields - user will click Sign In manually
-    setEmail(userEmail);
-    setPassword(userPassword);
-  };
-
   const handleRoleSelect = (roleId: string | null) => {
     if (!pendingUser || !email) return;
     
@@ -129,7 +117,7 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:bg-gradient-to-br dark:from-gray-900 dark:via-black dark:to-gray-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:bg-gradient-to-br dark:from-gray-900 dark:via-black dark:to-gray-800 flex items-center justify-center p-2 md:p-4">
       {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[var(--accent-primary)]/10 rounded-full blur-3xl"></div>
@@ -139,25 +127,12 @@ export function LoginPage() {
 
       <div className="w-full max-w-md relative z-10">
         {/* Logo/Brand Section */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-10 md:mb-12">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-primary-hover)] shadow-lg shadow-[var(--accent-primary)]/25 mb-4">
             <Zap className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-semibold text-foreground mb-2">AppointmentPro</h1>
-          <p className="text-muted-foreground">Advanced Appointment Management System</p>
-        </div>
-
-        {/* Demo Info Card */}
-        <div className="mb-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/30 backdrop-blur-sm">
-          <div className="flex items-start gap-2">
-            <Zap className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
-            <div className="text-sm">
-              <p className="text-blue-600 dark:text-blue-400 font-medium">Test Account Available</p>
-              <p className="text-blue-600/80 dark:text-blue-400/80 text-xs">
-                Click the quick login button below to fill in test credentials, then click Sign In.
-              </p>
-            </div>
-          </div>
+          <h1 className="text-2xl font-semibold text-foreground mb-2">WebOnOne</h1>
+          <p className="text-muted-foreground mb-4">All Your Web Solutions in One</p>
         </div>
 
         {/* Login Card */}
@@ -234,7 +209,7 @@ export function LoginPage() {
               <Button 
                 type="submit" 
                 variant="accent"
-                className="w-full font-medium"
+                className="w-full font-medium mb-4"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -247,38 +222,11 @@ export function LoginPage() {
                 )}
               </Button>
             </form>
-
-            {/* Divider */}
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border"></div>
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-[var(--glass-bg)] px-2 text-muted-foreground">Or continue with test account</span>
-              </div>
-            </div>
-
-            {/* Quick Login Options */}
-            <div className="space-y-2">
-              <Button 
-                type="button"
-                variant="outline"
-                onClick={() => handleQuickLogin("admin@appointmentpro.com", "SuperAdmin2024!")}
-                className="w-full border-border bg-accent/30 text-foreground hover:bg-accent hover:text-foreground hover:border-[var(--accent-border)] transition-all"
-                disabled={isLoading}
-              >
-                <Shield className="w-4 h-4 mr-2" />
-                Super Admin
-              </Button>
-              <p className="text-xs text-center text-muted-foreground">
-                Click to fill credentials, then click Sign In
-              </p>
-            </div>
           </div>
         </Card>
 
         {/* Footer */}
-        <div className="text-center mt-6 space-y-2">
+        <div className="text-center mt-8 md:mt-10 space-y-2">
           <p className="text-muted-foreground text-sm">
             Don't have an account? 
             <Button 
@@ -292,7 +240,7 @@ export function LoginPage() {
             </Button>
           </p>
           <p className="text-muted-foreground text-xs">
-            © 2024 AppointmentPro. All rights reserved.
+            © 2024 WebOnOne. All rights reserved.
           </p>
         </div>
 

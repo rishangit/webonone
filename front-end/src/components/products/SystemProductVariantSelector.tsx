@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { Search, X, Check, ChevronDown, CheckCircle2, XCircle, Plus } from "lucide-react";
 import { Button } from "../ui/button";
+import { Icon } from "../common/Icon";
 import { Input } from "../ui/input";
 import { Badge } from "../ui/badge";
 import { Label } from "../ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../ui/dialog";
+import { CustomDialog } from "../ui/custom-dialog";
 import { productVariantsService, ProductVariant, CreateProductVariantData } from "../../services/productVariants";
 import { VariantForm } from "./VariantForm";
 import { VariantFormData } from "../../schemas/variantValidation";
@@ -253,7 +254,7 @@ export const SystemProductVariantSelector = ({
         >
           <div className="p-2 border-b border-border">
             <div className="relative">
-              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Icon icon={Search} size="sm" color="muted" className="absolute left-2 top-1/2 transform -translate-y-1/2" />
               <Input
                 ref={searchInputRef}
                 type="text"
@@ -300,11 +301,11 @@ export const SystemProductVariantSelector = ({
                         <Badge className={variant.isVerified ? "bg-purple-500/20 text-purple-600 dark:text-purple-400 border-purple-500/30 text-xs" : "bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border-yellow-500/30 text-xs"}>
                           {variant.isVerified ? (
                             <>
-                              <CheckCircle2 className="w-3 h-3 mr-1" /> Verified
+                              <Icon icon={CheckCircle2} size="xs" className="mr-1" /> Verified
                             </>
                           ) : (
                             <>
-                              <XCircle className="w-3 h-3 mr-1" /> Pending
+                              <Icon icon={XCircle} size="xs" className="mr-1" /> Pending
                             </>
                           )}
                         </Badge>
@@ -316,7 +317,7 @@ export const SystemProductVariantSelector = ({
                       </div>
                     </div>
                     {value === variant.id && (
-                      <Check className="h-4 w-4 text-primary" />
+                      <Icon icon={Check} size="sm" color="primary" />
                     )}
                   </div>
                 ))}
@@ -334,7 +335,7 @@ export const SystemProductVariantSelector = ({
                   setIsOpen(false);
                 }}
               >
-                <Plus className="w-4 h-4 mr-2" />
+                <Icon icon={Plus} size="sm" className="mr-2" />
                 Add New Variant
               </Button>
             </div>
@@ -343,64 +344,62 @@ export const SystemProductVariantSelector = ({
       </Popover>
 
       {/* Add New Variant Dialog */}
-      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-[var(--glass-bg)] border-[var(--glass-border)]">
-          <DialogHeader>
-            <DialogTitle>Add New System Product Variant</DialogTitle>
-            <p className="text-sm text-muted-foreground mt-2">
-              This variant will be saved as unverified and will need to be verified by a system admin.
-            </p>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-4">
-            <VariantForm
-              variant={newVariantData}
-              onChange={handleVariantDataChange}
-              onDefaultChange={(isDefault) => {
-                setNewVariantData(prev => ({ ...prev, isDefault }));
-              }}
-              showDefaultCheckbox={true}
-              skuLabel="SKU * (Auto-generated)"
-              mode="system"
-              hideSku={false}
-            />
-          </div>
+      <CustomDialog
+        open={showAddDialog}
+        onOpenChange={setShowAddDialog}
+        title="Add New System Product Variant"
+        description="This variant will be saved as unverified and will need to be verified by a system admin."
+        maxWidth="max-w-lg"
+        className="max-h-[90vh] overflow-y-auto bg-[var(--glass-bg)] border-[var(--glass-border)]"
+      >
+        <div className="space-y-4 py-4">
+          <VariantForm
+            variant={newVariantData}
+            onChange={handleVariantDataChange}
+            onDefaultChange={(isDefault) => {
+              setNewVariantData(prev => ({ ...prev, isDefault }));
+            }}
+            showDefaultCheckbox={true}
+            skuLabel="SKU * (Auto-generated)"
+            mode="system"
+            hideSku={false}
+          />
+        </div>
 
-          <DialogFooter className="gap-3">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowAddDialog(false);
-                setNewVariantData({
-                  name: '',
-                  sku: '',
-                  color: '',
-                  size: '',
-                  sizeUnit: 'ml',
-                  weight: '',
-                  weightUnit: 'g',
-                  material: '',
-                  type: 'service',
-                  isDefault: false,
-                  price: { cost: 0, sell: 0 },
-                  stock: { current: 0, minimum: 10, maximum: 100, unit: 'pieces' }
-                });
-              }}
-              disabled={isCreating}
-              className="flex-1 border-[var(--glass-border)] hover:border-[var(--accent-border)] hover:bg-[var(--accent-bg)] text-foreground"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleAddNewVariant}
-              disabled={isCreating || !newVariantData.name || !newVariantData.sku}
-              className="flex-1 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-lg shadow-[var(--accent-primary)]/25 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isCreating ? "Adding..." : "Add Variant"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            onClick={() => {
+              setShowAddDialog(false);
+              setNewVariantData({
+                name: '',
+                sku: '',
+                color: '',
+                size: '',
+                sizeUnit: 'ml',
+                weight: '',
+                weightUnit: 'g',
+                material: '',
+                type: 'service',
+                isDefault: false,
+                price: { cost: 0, sell: 0 },
+                stock: { current: 0, minimum: 10, maximum: 100, unit: 'pieces' }
+              });
+            }}
+            disabled={isCreating}
+            className="flex-1 border-[var(--glass-border)] hover:border-[var(--accent-border)] hover:bg-[var(--accent-bg)] text-foreground"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleAddNewVariant}
+            disabled={isCreating || !newVariantData.name || !newVariantData.sku}
+            className="flex-1 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-lg shadow-[var(--accent-primary)]/25 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isCreating ? "Adding..." : "Add Variant"}
+          </Button>
+        </div>
+      </CustomDialog>
     </div>
   );
 };

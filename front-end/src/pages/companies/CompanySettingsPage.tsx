@@ -23,7 +23,7 @@ import { UserRoleNames, UserRole } from "../../types/user";
 import { companyUpdateSchema, CompanyUpdateFormData } from "../../schemas/companyValidation";
 import { PhoneInput } from "../../components/common/PhoneInput";
 import { currenciesService, Currency } from "../../services/currencies";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../../components/ui/dialog";
+import { CustomDialog } from "../../components/ui/custom-dialog";
 
 interface CompanySettingsPageProps {
   onBack?: () => void;
@@ -960,105 +960,106 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
       </div>
 
       {/* Add Currency Dialog */}
-      <Dialog open={isAddCurrencyDialogOpen} onOpenChange={setIsAddCurrencyDialogOpen}>
-        <DialogContent className="bg-[var(--glass-bg)] border-[var(--glass-border)]">
-          <DialogHeader>
-            <DialogTitle>Add New Currency</DialogTitle>
-            <DialogDescription>
-              Create a new currency that will be available for selection.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleSubmitCurrency(onCreateCurrency)} className="space-y-4">
+      <CustomDialog
+        open={isAddCurrencyDialogOpen}
+        onOpenChange={setIsAddCurrencyDialogOpen}
+        title="Add New Currency"
+        description="Create a new currency that will be available for selection."
+        className="bg-[var(--glass-bg)] border-[var(--glass-border)]"
+        footer={
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setIsAddCurrencyDialogOpen(false);
+                resetCurrency();
+              }}
+              disabled={isCreatingCurrency}
+              className="bg-[var(--glass-bg)] border-[var(--glass-border)]"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              form="currency-form"
+              disabled={isCreatingCurrency}
+              className="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)]"
+            >
+              {isCreatingCurrency ? 'Creating...' : 'Create Currency'}
+            </Button>
+          </>
+        }
+      >
+        <form id="currency-form" onSubmit={handleSubmitCurrency(onCreateCurrency)} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="currency-name">Currency Name <span className="text-red-500">*</span></Label>
+            <Input
+              id="currency-name"
+              {...registerCurrency('name', { required: 'Currency name is required' })}
+              placeholder="e.g., USD, EUR, GBP"
+              className="bg-[var(--input-background)] border-[var(--glass-border)]"
+              disabled={isCreatingCurrency}
+            />
+            {currencyErrors.name && (
+              <p className="text-sm text-red-500">{currencyErrors.name.message as string}</p>
+            )}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="currency-symbol">Symbol <span className="text-red-500">*</span></Label>
+            <Input
+              id="currency-symbol"
+              {...registerCurrency('symbol', { required: 'Symbol is required' })}
+              placeholder="e.g., $, €, £"
+              className="bg-[var(--input-background)] border-[var(--glass-border)]"
+              disabled={isCreatingCurrency}
+            />
+            {currencyErrors.symbol && (
+              <p className="text-sm text-red-500">{currencyErrors.symbol.message as string}</p>
+            )}
+          </div>
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="currency-name">Currency Name <span className="text-red-500">*</span></Label>
-              <Input
-                id="currency-name"
-                {...registerCurrency('name', { required: 'Currency name is required' })}
-                placeholder="e.g., USD, EUR, GBP"
-                className="bg-[var(--input-background)] border-[var(--glass-border)]"
-                disabled={isCreatingCurrency}
+              <Label htmlFor="currency-decimals">Decimal Places</Label>
+              <Controller
+                name="decimals"
+                control={controlCurrency}
+                render={({ field }) => (
+                  <Input
+                    id="currency-decimals"
+                    type="number"
+                    min="0"
+                    max="10"
+                    {...field}
+                    onChange={(e) => field.onChange(parseInt(e.target.value) || 2)}
+                    className="bg-[var(--input-background)] border-[var(--glass-border)]"
+                    disabled={isCreatingCurrency}
+                  />
+                )}
               />
-              {currencyErrors.name && (
-                <p className="text-sm text-red-500">{currencyErrors.name.message as string}</p>
-              )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="currency-symbol">Symbol <span className="text-red-500">*</span></Label>
-              <Input
-                id="currency-symbol"
-                {...registerCurrency('symbol', { required: 'Symbol is required' })}
-                placeholder="e.g., $, €, £"
-                className="bg-[var(--input-background)] border-[var(--glass-border)]"
-                disabled={isCreatingCurrency}
+              <Label htmlFor="currency-rounding">Rounding</Label>
+              <Controller
+                name="rounding"
+                control={controlCurrency}
+                render={({ field }) => (
+                  <Input
+                    id="currency-rounding"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    {...field}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0.01)}
+                    className="bg-[var(--input-background)] border-[var(--glass-border)]"
+                    disabled={isCreatingCurrency}
+                  />
+                )}
               />
-              {currencyErrors.symbol && (
-                <p className="text-sm text-red-500">{currencyErrors.symbol.message as string}</p>
-              )}
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="currency-decimals">Decimal Places</Label>
-                <Controller
-                  name="decimals"
-                  control={controlCurrency}
-                  render={({ field }) => (
-                    <Input
-                      id="currency-decimals"
-                      type="number"
-                      min="0"
-                      max="10"
-                      {...field}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || 2)}
-                      className="bg-[var(--input-background)] border-[var(--glass-border)]"
-                      disabled={isCreatingCurrency}
-                    />
-                  )}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="currency-rounding">Rounding</Label>
-                <Controller
-                  name="rounding"
-                  control={controlCurrency}
-                  render={({ field }) => (
-                    <Input
-                      id="currency-rounding"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      {...field}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0.01)}
-                      className="bg-[var(--input-background)] border-[var(--glass-border)]"
-                      disabled={isCreatingCurrency}
-                    />
-                  )}
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setIsAddCurrencyDialogOpen(false);
-                  resetCurrency();
-                }}
-                disabled={isCreatingCurrency}
-                className="bg-[var(--glass-bg)] border-[var(--glass-border)]"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={isCreatingCurrency}
-                className="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)]"
-              >
-                {isCreatingCurrency ? 'Creating...' : 'Create Currency'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+          </div>
+        </form>
+      </CustomDialog>
     </div>
   );
 }

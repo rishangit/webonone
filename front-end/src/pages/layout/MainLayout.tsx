@@ -43,7 +43,7 @@ export function MainLayout({
         currentUser={currentUser}
       />
       
-      <div className="flex pt-16">
+      <div className="pt-16">
         <Sidebar 
           currentPage={currentPage} 
           onPageChange={handlePageChange}
@@ -52,7 +52,10 @@ export function MainLayout({
           currentUser={currentUser}
         />
         
-        <div className="flex-1 min-w-0">
+        <div 
+          className="pb-8"
+          style={!isMobile ? { marginLeft: '256px', width: 'calc(100% - 256px)' } : { width: '100%' }}
+        >
           {children}
         </div>
       </div>

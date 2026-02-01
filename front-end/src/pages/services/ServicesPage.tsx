@@ -10,7 +10,7 @@ import { EmptyState } from "../../components/common/EmptyState";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "../../components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import FileUpload from "../../components/ui/file-upload";
-import { DialogWithFixedHeader } from "../../components/ui/dialog-with-fixed-header";
+import { CustomDialog } from "../../components/ui/custom-dialog";
 import { Label } from "../../components/ui/label";
 import { Textarea } from "../../components/ui/textarea";
 import { TagSelector } from "../../components/tags/TagSelector";
@@ -858,12 +858,13 @@ export function ServicesPage() {
       )}
 
       {/* Add Service Dialog */}
-      <DialogWithFixedHeader
+      <CustomDialog
         open={isAddDialogOpen}
         onOpenChange={setIsAddDialogOpen}
         title="Add New Service"
         description="Create a new service for your company"
         maxWidth="max-w-4xl"
+        className="h-[90vh]"
       >
         <div className="space-y-6">
           {/* Image Upload */}
@@ -972,15 +973,16 @@ export function ServicesPage() {
             </Button>
           </div>
         </div>
-      </DialogWithFixedHeader>
+      </CustomDialog>
 
       {/* Edit Service Dialog */}
-      <DialogWithFixedHeader
+      <CustomDialog
         open={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
         title="Edit Service"
         description="Update service information and settings"
         maxWidth="max-w-4xl"
+        className="h-[90vh]"
       >
         <div className="space-y-6">
           {/* Image Upload */}
@@ -1073,7 +1075,7 @@ export function ServicesPage() {
             </Button>
           </div>
         </div>
-      </DialogWithFixedHeader>
+      </CustomDialog>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
