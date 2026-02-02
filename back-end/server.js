@@ -133,8 +133,12 @@ app.use('/uploads', (req, res, next) => {
   res.removeHeader('Cross-Origin-Embedder-Policy');
   res.removeHeader('Cross-Origin-Opener-Policy');
   
-  // Set CORS headers explicitly
+  // For image requests (GET requests to image files), be more permissive
+  // Images loaded in <img> tags don't send Origin header, so we need to allow all origins
   const origin = req.headers.origin;
+  const referer = req.headers.referer;
+  
+  // Determine allowed origins
   const allowedOrigins = [
     'http://localhost:3007',
     'http://localhost:5173',
@@ -147,14 +151,38 @@ app.use('/uploads', (req, res, next) => {
   const remoteServerPattern = /^http(s)?:\/\/185\.116\.237\.5(:\d+)?$/;
   const webononePattern = /^http(s)?:\/\/(www\.)?webonone\.com$/;
   
-  if (origin && (allowedOrigins.includes(origin) || remoteServerPattern.test(origin) || webononePattern.test(origin))) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
+  // Check if request is from allowed origin
+  let allowedOrigin = null;
+  if (origin) {
+    if (allowedOrigins.includes(origin) || remoteServerPattern.test(origin) || webononePattern.test(origin)) {
+      allowedOrigin = origin;
+    }
+  } else if (referer) {
+    // If no origin header (common for image requests), check referer
+    try {
+      const refererUrl = new URL(referer);
+      const refererOrigin = `${refererUrl.protocol}//${refererUrl.host}`;
+      if (allowedOrigins.includes(refererOrigin) || remoteServerPattern.test(refererOrigin) || webononePattern.test(refererOrigin)) {
+        allowedOrigin = refererOrigin;
+      }
+    } catch (e) {
+      // Invalid referer URL, ignore
+    }
+  }
+  
+  // Set CORS headers - for images, allow all origins to prevent CORS errors
+  // This is safe because images are public resources
+  if (allowedOrigin) {
+    res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
   } else {
+    // Allow all origins for image requests to prevent CORS issues
     res.setHeader('Access-Control-Allow-Origin', '*');
   }
+  
   res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS, HEAD');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Range');
+  res.setHeader('Access-Control-Expose-Headers', 'Content-Length, Content-Type, Content-Range');
   
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
@@ -162,13 +190,19 @@ app.use('/uploads', (req, res, next) => {
   }
   
   next();
-}, cors(corsOptions), express.static(path.join(__dirname, 'uploads'), {
+}, express.static(path.join(__dirname, 'uploads'), {
   setHeaders: (res, filePath) => {
     // Set content type for image files
     const ext = filePath.split('.').pop()?.toLowerCase();
     if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext || '')) {
-      res.setHeader('Content-Type', `image/${ext}`);
+      // Fix content type for jpg files
+      const contentType = ext === 'jpg' ? 'image/jpeg' : `image/${ext}`;
+      res.setHeader('Content-Type', contentType);
       res.setHeader('Cache-Control', 'public, max-age=31536000');
+      
+      // Ensure CORS headers are set for images
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS, HEAD');
     }
   }
 }));

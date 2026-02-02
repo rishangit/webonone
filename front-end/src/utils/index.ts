@@ -263,43 +263,66 @@ export const formatAvatarUrl = (avatarUrl?: string | null, _firstName?: string, 
     return '';
   }
   
-  // If avatar is already a full URL, extract the relative path if it's from our server
-  if (avatarUrl.startsWith('http://') || avatarUrl.startsWith('https://')) {
-    // Auto-detect base URL from current hostname
-    let baseUrl = 'http://localhost:5007';
-    if (typeof window !== 'undefined') {
-      const hostname = window.location.hostname;
-      const protocol = window.location.protocol;
-      if (hostname === '185.116.237.5' || hostname.includes('185.116.237.5')) {
-        baseUrl = `${protocol}//${hostname}:5007`;
-      } else if ((window as any).__API_URL__) {
-        baseUrl = (window as any).__API_URL__.replace('/api', '');
-      }
+  // Helper function to get the correct base URL
+  const getBaseUrl = (): string => {
+    if (typeof window === 'undefined') {
+      return 'http://localhost:5007';
     }
     
-    // If it's from our server, extract the relative path and reconstruct
-    if (avatarUrl.startsWith(baseUrl)) {
-      const relativePath = avatarUrl.replace(baseUrl, '').replace(/^\/+/, '');
-      // Remove 'uploads/' prefix if present (we'll add it back)
+    const hostname = window.location.hostname;
+    const protocol = window.location.protocol;
+    
+    // Production domain: www.webonone.com / webonone.com
+    if (hostname === 'www.webonone.com' || hostname === 'webonone.com') {
+      return `${protocol}//${hostname}:5007`;
+    }
+    
+    // Remote server IP
+    if (hostname === '185.116.237.5' || hostname.includes('185.116.237.5')) {
+      return `${protocol}//${hostname}:5007`;
+    }
+    
+    // Check for API URL in window (set by environment config)
+    if ((window as any).__API_URL__) {
+      return (window as any).__API_URL__.replace('/api', '');
+    }
+    
+    // Default to localhost
+    return 'http://localhost:5007';
+  };
+  
+  // If avatar is already a full URL, check if it needs to be updated
+  if (avatarUrl.startsWith('http://') || avatarUrl.startsWith('https://')) {
+    const baseUrl = getBaseUrl();
+    
+    // Check if URL is from localhost but we're on production (or vice versa)
+    const isLocalhostUrl = avatarUrl.includes('localhost') || avatarUrl.includes('127.0.0.1');
+    const isProductionHost = typeof window !== 'undefined' && 
+      (window.location.hostname === 'www.webonone.com' || window.location.hostname === 'webonone.com');
+    
+    // If URL is from localhost but we're on production, update it
+    if (isLocalhostUrl && isProductionHost) {
+      // Extract relative path
+      const urlObj = new URL(avatarUrl);
+      const relativePath = urlObj.pathname.replace(/^\/+/, '');
       const cleanPath = relativePath.startsWith('uploads/') ? relativePath.slice(8) : relativePath;
       return `${baseUrl}/uploads/${cleanPath}`;
     }
+    
+    // If it's from our server, extract the relative path and reconstruct
+    if (avatarUrl.includes('/uploads/')) {
+      const urlObj = new URL(avatarUrl);
+      const relativePath = urlObj.pathname.replace(/^\/+/, '');
+      const cleanPath = relativePath.startsWith('uploads/') ? relativePath.slice(8) : relativePath;
+      return `${baseUrl}/uploads/${cleanPath}`;
+    }
+    
     // If it's an external URL, use it as is
     return avatarUrl;
   }
   
   // If avatar is a relative path, construct the full URL
-  // Auto-detect base URL from current hostname
-  let baseUrl = 'http://localhost:5007';
-  if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
-    const protocol = window.location.protocol;
-    if (hostname === '185.116.237.5' || hostname.includes('185.116.237.5')) {
-      baseUrl = `${protocol}//${hostname}:5007`;
-    } else if ((window as any).__API_URL__) {
-      baseUrl = (window as any).__API_URL__.replace('/api', '');
-    }
-  }
+  const baseUrl = getBaseUrl();
   
   // Normalize the path - remove leading slash if present
   let normalizedPath = avatarUrl.startsWith('/') ? avatarUrl.slice(1) : avatarUrl;

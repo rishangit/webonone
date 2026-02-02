@@ -87,7 +87,27 @@ router.post('/upload',
       const relativePath = path.join(folderPath, fileName).replace(/\\/g, '/');
       
       // Create full URL path for frontend access
-      const baseUrl = `${req.protocol}://${req.get('host')}`;
+      // Use the host from the request, but ensure we use the correct protocol
+      const host = req.get('host');
+      const protocol = req.protocol || (req.secure ? 'https' : 'http');
+      
+      // For production domain, ensure we use the correct host
+      let baseUrl = `${protocol}://${host}`;
+      
+      // If request is from production domain but host doesn't match, use the referer or origin
+      const origin = req.get('origin') || req.get('referer');
+      if (origin) {
+        try {
+          const originUrl = new URL(origin);
+          // If origin is from webonone.com, use that hostname
+          if (originUrl.hostname === 'www.webonone.com' || originUrl.hostname === 'webonone.com') {
+            baseUrl = `${originUrl.protocol}//${originUrl.hostname}:5007`;
+          }
+        } catch (e) {
+          // Invalid origin, use default
+        }
+      }
+      
       const fileUrl = `${baseUrl}/uploads/${relativePath}`;
 
       res.status(200).json({
