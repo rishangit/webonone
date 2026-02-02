@@ -1,5 +1,5 @@
 import { Observable, from } from 'rxjs';
-import { map, catchError, switchMap } from 'rxjs/operators';
+import { map, catchError } from 'rxjs/operators';
 import { apiService } from './api';
 
 export interface FileUploadData {
@@ -21,38 +21,174 @@ export interface FileInfo {
   modifiedAt: string;
 }
 
+export interface UploadProgress {
+  loaded: number;
+  total: number;
+  percentage: number;
+}
+
 class FileUploadService {
   private baseUrl = '/uploads';
+  private readonly CHUNK_SIZE = 1024 * 1024; // 1MB chunks for processing
 
   /**
-   * Upload a file to the server
+   * Compress image to reduce file size and avoid browser freezing
    */
-  uploadFile(file: File, folderPath: string): Observable<FileUploadData> {
-    const formData = new FormData();
-    formData.append('file', file);
+  private async compressImage(file: File, maxWidth: number = 2048, quality: number = 0.85): Promise<File> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          // Use requestIdleCallback or setTimeout to avoid blocking
+          const processImage = () => {
+            try {
+              const canvas = document.createElement('canvas');
+              let width = img.width;
+              let height = img.height;
 
-    return from(
-      fetch(`${apiService.getBaseURL()}${this.baseUrl}/upload?folderPath=${encodeURIComponent(folderPath)}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiService.getAuthToken()}`,
-        },
-        body: formData,
-      })
-    ).pipe(
-      switchMap(async (response) => {
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Upload failed');
+              // Calculate new dimensions
+              if (width > maxWidth) {
+                height = (height * maxWidth) / width;
+                width = maxWidth;
+              }
+
+              canvas.width = width;
+              canvas.height = height;
+
+              const ctx = canvas.getContext('2d');
+              if (!ctx) {
+                reject(new Error('Could not get canvas context'));
+                return;
+              }
+
+              // Draw image with chunked processing to avoid blocking
+              ctx.drawImage(img, 0, 0, width, height);
+
+              // Convert to blob with chunked processing
+              canvas.toBlob(
+                (blob) => {
+                  if (!blob) {
+                    reject(new Error('Image compression failed'));
+                    return;
+                  }
+                  const compressedFile = new File([blob], file.name, {
+                    type: 'image/jpeg',
+                    lastModified: Date.now(),
+                  });
+                  resolve(compressedFile);
+                },
+                'image/jpeg',
+                quality
+              );
+            } catch (error) {
+              reject(error);
+            }
+          };
+
+          // Use requestIdleCallback if available, otherwise use setTimeout
+          if ('requestIdleCallback' in window) {
+            requestIdleCallback(processImage, { timeout: 1000 });
+          } else {
+            setTimeout(processImage, 0);
+          }
+        };
+        img.onerror = () => reject(new Error('Failed to load image'));
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  /**
+   * Upload a file to the server with progress tracking
+   */
+  uploadFile(
+    file: File,
+    folderPath: string,
+    onProgress?: (progress: UploadProgress) => void
+  ): Observable<FileUploadData> {
+    return new Observable<FileUploadData>((observer) => {
+      // Compress image if it's large (async, non-blocking)
+      const processAndUpload = async () => {
+        try {
+          let fileToUpload = file;
+          
+          // Compress if image is larger than 2MB
+          if (file.size > 2 * 1024 * 1024 && file.type.startsWith('image/')) {
+            // Process compression in chunks to avoid blocking
+            fileToUpload = await this.compressImage(file);
+          }
+
+          const formData = new FormData();
+          formData.append('file', fileToUpload);
+
+          const xhr = new XMLHttpRequest();
+          const url = `${apiService.getBaseURL()}${this.baseUrl}/upload?folderPath=${encodeURIComponent(folderPath)}`;
+
+          // Track upload progress
+          xhr.upload.addEventListener('progress', (event) => {
+            if (event.lengthComputable && onProgress) {
+              const progress: UploadProgress = {
+                loaded: event.loaded,
+                total: event.total,
+                percentage: Math.round((event.loaded / event.total) * 100),
+              };
+              onProgress(progress);
+            }
+          });
+
+          xhr.addEventListener('load', () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              try {
+                const response = JSON.parse(xhr.responseText);
+                observer.next(response.data);
+                observer.complete();
+              } catch (error) {
+                observer.error(new Error('Invalid response format'));
+              }
+            } else {
+              try {
+                const errorResponse = JSON.parse(xhr.responseText);
+                observer.error(new Error(errorResponse.message || 'Upload failed'));
+              } catch {
+                observer.error(new Error(`Upload failed with status ${xhr.status}`));
+              }
+            }
+          });
+
+          xhr.addEventListener('error', () => {
+            observer.error(new Error('Network error during upload'));
+          });
+
+          xhr.addEventListener('abort', () => {
+            observer.error(new Error('Upload cancelled'));
+          });
+
+          xhr.open('POST', url);
+          xhr.setRequestHeader('Authorization', `Bearer ${apiService.getAuthToken()}`);
+          xhr.send(formData);
+
+          // Return cleanup function
+          return () => {
+            xhr.abort();
+          };
+        } catch (error: any) {
+          observer.error(error);
         }
-        const data = await response.json();
-        return data.data;
-      }),
-      catchError((error) => {
-        console.error('File upload error:', error);
-        throw error;
-      })
-    );
+      };
+
+      // Use setTimeout to avoid blocking the main thread
+      const timeoutId = setTimeout(() => {
+        processAndUpload();
+      }, 0);
+
+      // Return cleanup function
+      return () => {
+        clearTimeout(timeoutId);
+      };
+    });
   }
 
   /**

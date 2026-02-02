@@ -24,6 +24,7 @@ import {
 } from "../../store/slices/companiesSlice";
 import { TagSelector } from "../../components/tags/TagSelector";
 import { PhoneInput } from "../../components/common/PhoneInput";
+import { ImageCropDialog } from "../../components/ui/image-crop-dialog";
 
 interface CompanyRegistrationWizardProps {
   open: boolean;
@@ -66,6 +67,8 @@ export function CompanyRegistrationWizard({ open, onOpenChange }: CompanyRegistr
   
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [cropDialogOpen, setCropDialogOpen] = useState(false);
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
   const [formData, setFormData] = useState<CompanyFormData>({
     companyName: "",
     description: "",
@@ -117,13 +120,42 @@ export function CompanyRegistrationWizard({ open, onOpenChange }: CompanyRegistr
 
   const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+
+    // Read file and open crop dialog
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const imageSrc = e.target?.result as string;
+      setImageToCrop(imageSrc);
+      setCropDialogOpen(true);
+    };
+    reader.readAsDataURL(file);
+
+    // Reset file input
+    event.target.value = '';
+  };
+
+  const handleCropComplete = async (croppedImageBlob: Blob) => {
+    try {
+      // Convert blob to base64 string
       const reader = new FileReader();
       reader.onload = (e) => {
-        setFormData(prev => ({ ...prev, logo: e.target?.result as string }));
+        const base64String = e.target?.result as string;
+        setFormData(prev => ({ ...prev, logo: base64String }));
+        toast.success("Logo uploaded successfully!");
       };
-      reader.readAsDataURL(file);
-      toast.success("Logo uploaded successfully!");
+      reader.readAsDataURL(croppedImageBlob);
+    } catch (error) {
+      console.error('Error processing cropped image:', error);
+      toast.error('Failed to process image');
+    } finally {
+      setImageToCrop(null);
     }
   };
 
@@ -606,22 +638,32 @@ export function CompanyRegistrationWizard({ open, onOpenChange }: CompanyRegistr
   );
 
   return (
-    <CustomDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      title="Company Registration"
-      description="Register your company on our appointment management platform"
-      icon={<Building className="w-5 h-5" />}
-      maxWidth="max-w-2xl"
-      footer={footer}
-    >
-      <div className="space-y-6">
-        <StepIndicator />
-        
-        <div>
-          {renderStepContent()}
+    <>
+      <CustomDialog
+        open={open}
+        onOpenChange={onOpenChange}
+        title="Company Registration"
+        description="Register your company on our appointment management platform"
+        icon={<Building className="w-5 h-5" />}
+        maxWidth="max-w-2xl"
+        footer={footer}
+      >
+        <div className="space-y-6">
+          <StepIndicator />
+          
+          <div>
+            {renderStepContent()}
+          </div>
         </div>
-      </div>
-    </CustomDialog>
+      </CustomDialog>
+      {imageToCrop && (
+        <ImageCropDialog
+          open={cropDialogOpen}
+          onOpenChange={setCropDialogOpen}
+          imageSrc={imageToCrop}
+          onCropComplete={handleCropComplete}
+        />
+      )}
+    </>
   );
 }

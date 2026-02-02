@@ -7,6 +7,7 @@ import { Label } from "../../components/ui/label";
 import { Textarea } from "../../components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { toast } from "sonner";
+import { ImageCropDialog } from "../../components/ui/image-crop-dialog";
 
 interface CompanyFormData {
   companyName: string;
@@ -85,6 +86,8 @@ const employeeSizes = [
 ];
 
 export function CompanyRegistrationForm({ onSubmit, onCancel }: CompanyRegistrationFormProps) {
+  const [cropDialogOpen, setCropDialogOpen] = useState(false);
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
   const [formData, setFormData] = useState<CompanyFormData>({
     companyName: "",
     description: "",
@@ -121,14 +124,42 @@ export function CompanyRegistrationForm({ onSubmit, onCancel }: CompanyRegistrat
 
   const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      // In a real app, you would upload to a file storage service
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+
+    // Read file and open crop dialog
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const imageSrc = e.target?.result as string;
+      setImageToCrop(imageSrc);
+      setCropDialogOpen(true);
+    };
+    reader.readAsDataURL(file);
+
+    // Reset file input
+    event.target.value = '';
+  };
+
+  const handleCropComplete = async (croppedImageBlob: Blob) => {
+    try {
+      // Convert blob to base64 string
       const reader = new FileReader();
       reader.onload = (e) => {
-        setFormData(prev => ({ ...prev, logo: e.target?.result as string }));
+        const base64String = e.target?.result as string;
+        setFormData(prev => ({ ...prev, logo: base64String }));
+        toast.success("Logo uploaded successfully!");
       };
-      reader.readAsDataURL(file);
-      toast.success("Logo uploaded successfully!");
+      reader.readAsDataURL(croppedImageBlob);
+    } catch (error) {
+      console.error('Error processing cropped image:', error);
+      toast.error('Failed to process image');
+    } finally {
+      setImageToCrop(null);
     }
   };
 
@@ -433,6 +464,14 @@ export function CompanyRegistrationForm({ onSubmit, onCancel }: CompanyRegistrat
           </Button>
         </div>
       </form>
+      {imageToCrop && (
+        <ImageCropDialog
+          open={cropDialogOpen}
+          onOpenChange={setCropDialogOpen}
+          imageSrc={imageToCrop}
+          onCropComplete={handleCropComplete}
+        />
+      )}
     </div>
   );
 }

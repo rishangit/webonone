@@ -6,6 +6,7 @@ import { Upload, X, Loader2 } from 'lucide-react';
 import { fileUploadService, FileUploadData } from '../../services/fileUploadService';
 import { toast } from 'sonner';
 import { formatAvatarUrl } from '../../utils';
+import { ImageCropDialog } from './image-crop-dialog';
 
 interface FileUploadProps {
   onFileUploaded: (filePath: string, fileUrl: string) => void;
@@ -33,8 +34,11 @@ const FileUpload: React.FC<FileUploadProps> = ({
   disabled = false
 }) => {
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState('');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [cropDialogOpen, setCropDialogOpen] = useState(false);
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Update preview URL when currentImageUrl or currentImagePath changes
@@ -55,7 +59,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
     }
   }, [currentImageUrl, currentImagePath]);
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -63,6 +67,10 @@ const FileUpload: React.FC<FileUploadProps> = ({
     if (file.size > maxSize * 1024 * 1024) {
       setError(`File size must be less than ${maxSize}MB`);
       toast.error(`File size must be less than ${maxSize}MB`);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
       return;
     }
 
@@ -70,24 +78,58 @@ const FileUpload: React.FC<FileUploadProps> = ({
     if (!file.type.startsWith('image/')) {
       setError('Please select an image file');
       toast.error('Please select an image file');
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
       return;
     }
 
     setError('');
+
+    // Read file and open crop dialog
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const imageSrc = e.target?.result as string;
+      setImageToCrop(imageSrc);
+      setCropDialogOpen(true);
+    };
+    reader.readAsDataURL(file);
+
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleCropComplete = async (croppedImageBlob: Blob) => {
     setUploading(true);
+    setUploadProgress(0);
+    setError('');
 
     try {
-      // Create preview immediately
+      // Convert blob to File
+      const croppedFile = new File([croppedImageBlob], 'cropped-image.jpg', {
+        type: 'image/jpeg'
+      });
+
+      // Create preview from cropped image
       const reader = new FileReader();
       reader.onload = (e) => {
         setPreviewUrl(e.target?.result as string);
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(croppedFile);
 
-      const response = await fileUploadService.uploadFile(file, folderPath).toPromise();
+      // Upload the cropped image with progress tracking
+      const response = await fileUploadService
+        .uploadFile(croppedFile, folderPath, (progress) => {
+          setUploadProgress(progress.percentage);
+        })
+        .toPromise();
       
       if (response) {
         setError('');
+        setUploadProgress(100);
         // Update preview with the uploaded URL
         setPreviewUrl(response.fileUrl);
         onFileUploaded(response.filePath, response.fileUrl);
@@ -107,8 +149,16 @@ const FileUpload: React.FC<FileUploadProps> = ({
       const errorMessage = error.message || 'Failed to upload file. Please try again.';
       setError(errorMessage);
       toast.error(errorMessage);
+      // Revert preview on error
+      if (currentImageUrl || currentImagePath) {
+        setPreviewUrl(currentImageUrl || formatAvatarUrl(currentImagePath));
+      } else {
+        setPreviewUrl(null);
+      }
     } finally {
       setUploading(false);
+      setUploadProgress(0);
+      setImageToCrop(null);
     }
   };
 
@@ -184,11 +234,25 @@ const FileUpload: React.FC<FileUploadProps> = ({
           )}
 
           {/* Upload Area */}
-          <div className="text-center space-y-2">
+          <div className="text-center space-y-2 w-full">
             {uploading ? (
-              <div className="flex items-center justify-center space-x-2">
-                <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
-                <span className="text-sm text-muted-foreground">Uploading...</span>
+              <div className="space-y-3 w-full">
+                <div className="flex items-center justify-center space-x-2">
+                  <Loader2 className="h-5 w-5 animate-spin text-[var(--accent-primary)]" />
+                  <span className="text-sm text-foreground font-medium">
+                    Uploading... {uploadProgress}%
+                  </span>
+                </div>
+                {/* Progress Bar */}
+                <div className="w-full bg-[var(--input-background)] rounded-full h-2 overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] transition-all duration-300 ease-out rounded-full"
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Please wait while your image is being uploaded...
+                </p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -220,6 +284,16 @@ const FileUpload: React.FC<FileUploadProps> = ({
         className="hidden"
         disabled={disabled || uploading}
       />
+
+      {/* Image Crop Dialog */}
+      {imageToCrop && (
+        <ImageCropDialog
+          open={cropDialogOpen}
+          onOpenChange={setCropDialogOpen}
+          imageSrc={imageToCrop}
+          onCropComplete={handleCropComplete}
+        />
+      )}
     </div>
   );
 };
