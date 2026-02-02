@@ -279,72 +279,187 @@ export function CompaniesPage({ onViewCompany }: CompaniesPageProps) {
         </div>
       </Card>
 
-      {/* Loading State */}
-      {loading && (
-        <Card className="p-8 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] text-center">
-          <div className="flex flex-col items-center gap-3">
-            <Building className="w-12 h-12 text-muted-foreground animate-pulse" />
-            <h3 className="text-lg font-semibold text-foreground">Loading companies...</h3>
-            <p className="text-muted-foreground">Please wait while we fetch the data</p>
-          </div>
-        </Card>
-      )}
-
-      {/* Companies List/Grid */}
-      {!loading && (
+      {/* Loading State - Skeleton for Company Cards */}
+      {loading && displayedCompanies.length === 0 ? (
         <>
-          {displayedCompanies.length > 0 ? (
-            <>
-              {viewMode === "list" ? (
-                <div className="space-y-4">
-                  {displayedCompanies.map((company) => (
-                    <CompanyListItem
-                      key={company.id}
-                      company={company}
-                      onViewCompany={onViewCompany}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {displayedCompanies.map((company) => (
-                    <CompanyCard
-                      key={company.id}
-                      company={company}
-                      onViewCompany={onViewCompany}
-                    />
-                  ))}
-                </div>
-              )}
-
-              {/* Pagination */}
-              {pagination && (
-                <Pagination
-                  totalItems={pagination.total}
-                  itemsPerPage={itemsPerPage}
-                  currentPage={currentPage}
-                  onPageChange={setCurrentPage}
-                  showItemsPerPageSelector={true}
-                  itemsPerPageOptions={[12, 24, 48, 96]}
-                  onItemsPerPageChange={(newItemsPerPage) => {
-                    setItemsPerPage(newItemsPerPage);
-                    setCurrentPage(1);
-                  }}
-                />
-              )}
-            </>
+          {/* Skeleton for List View */}
+          {viewMode === "list" ? (
+            /* Skeleton for List View - Matching CompanyListItem structure */
+            <div className="space-y-4">
+              {[...Array(6)].map((_, index) => (
+                <Card key={index} className="p-6 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                  <div className="flex items-start gap-4">
+                    {/* Avatar */}
+                    <div className="h-20 w-20 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 min-w-0">
+                          {/* Name and Description */}
+                          <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2" />
+                          <div className="h-4 w-full max-w-md bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2" />
+                          <div className="h-4 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-3" />
+                          
+                          {/* Two-column grid for contact info */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2">
+                                <div className="h-4 w-4 rounded bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                                <div className="h-4 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                                <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <div className="h-4 w-4 rounded bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                                <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                                <div className="h-4 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <div className="h-4 w-4 rounded bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                                <div className="h-4 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                                <div className="h-4 w-28 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                              </div>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2">
+                                <div className="h-4 w-4 rounded bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                                <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                                <div className="h-4 w-36 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                              </div>
+                              <div className="flex items-start gap-2">
+                                <div className="h-4 w-4 rounded bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0 mt-0.5" />
+                                <div className="h-4 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                                <div className="flex flex-wrap gap-1.5 flex-1">
+                                  <div className="h-5 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                                  <div className="h-5 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Status badge and date */}
+                          <div className="flex items-center gap-3">
+                            <div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                            <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                          </div>
+                        </div>
+                        
+                        {/* Buttons */}
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <div className="h-9 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                          <div className="h-9 w-9 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
           ) : (
-            <EmptyState
-              icon={Building}
-              title="No companies found"
-              description={
-                debouncedSearchTerm || statusFilter !== "all"
-                  ? "Try adjusting your filters or search query"
-                  : "No companies have been registered yet"
-              }
+            /* Skeleton for Grid View - Matching CompanyCard structure */
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {[...Array(8)].map((_, index) => (
+                <Card key={index} className="p-6 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                  <div className="space-y-4">
+                    {/* Avatar, Name, Description, Status, Menu */}
+                    <div className="flex items-start gap-3">
+                      <div className="h-20 w-20 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <div className="h-5 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-1" />
+                            <div className="h-4 w-full max-w-xs bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2" />
+                            <div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                          </div>
+                          
+                          <div className="h-8 w-8 rounded bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Contact, Location, Tags */}
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <div className="h-4 w-4 rounded bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                        <div className="h-4 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                        <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="h-4 w-4 rounded bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                        <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                        <div className="h-4 w-36 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <div className="h-4 w-4 rounded bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0 mt-0.5" />
+                        <div className="flex flex-wrap gap-1.5 flex-1">
+                          <div className="h-5 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                          <div className="h-5 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Date and View button */}
+                    <div className="flex items-center justify-between pt-2">
+                      <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                      <div className="h-9 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </>
+      ) : displayedCompanies.length > 0 ? (
+        <>
+          {viewMode === "list" ? (
+            <div className="space-y-4">
+              {displayedCompanies.map((company) => (
+                <CompanyListItem
+                  key={company.id}
+                  company={company}
+                  onViewCompany={onViewCompany}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {displayedCompanies.map((company) => (
+                <CompanyCard
+                  key={company.id}
+                  company={company}
+                  onViewCompany={onViewCompany}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Pagination */}
+          {pagination && (
+            <Pagination
+              totalItems={pagination.total}
+              itemsPerPage={itemsPerPage}
+              currentPage={currentPage}
+              onPageChange={setCurrentPage}
+              showItemsPerPageSelector={true}
+              itemsPerPageOptions={[12, 24, 48, 96]}
+              onItemsPerPageChange={(newItemsPerPage) => {
+                setItemsPerPage(newItemsPerPage);
+                setCurrentPage(1);
+              }}
             />
           )}
         </>
+      ) : (
+        <EmptyState
+          icon={Building}
+          title="No companies found"
+          description={
+            debouncedSearchTerm || statusFilter !== "all"
+              ? "Try adjusting your filters or search query"
+              : "No companies have been registered yet"
+          }
+        />
       )}
     </div>
   );

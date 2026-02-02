@@ -402,14 +402,75 @@ export function TagsPage({ currentUser }: TagsPageProps) {
         </div>
       </Card>
 
-      {/* Tags List/Grid */}
-      {loading ? (
-        <div className="flex items-center justify-center p-12">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading tags...</p>
-          </div>
-        </div>
+      {/* Loading State - Skeleton for Tag Cards */}
+      {loading && displayedTags.length === 0 ? (
+        <>
+          {/* Skeleton for List View */}
+          {viewMode === "list" ? (
+            /* Skeleton for List View - Matching renderTagListItem structure */
+            <div className="space-y-4">
+              {[...Array(6)].map((_, index) => (
+                <Card key={index} className="p-4 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4 flex-1">
+                      {/* Icon */}
+                      <div className="h-10 w-10 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                      
+                      <div className="flex-1 min-w-0">
+                        {/* Name and Badge */}
+                        <div className="flex items-center gap-2 mb-1">
+                          <div className="h-5 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                          <div className="h-6 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                        </div>
+                        {/* Description */}
+                        <div className="h-4 w-full max-w-md bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                      </div>
+                      
+                      {/* Usage Count */}
+                      <div className="h-4 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                    </div>
+                    
+                    {/* Menu Button */}
+                    <div className="h-8 w-8 rounded bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                  </div>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            /* Skeleton for Grid View - Matching renderTagCard structure */
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[...Array(8)].map((_, index) => (
+                <Card key={index} className="p-6 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3 flex-1">
+                      {/* Icon */}
+                      <div className="h-12 w-12 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                      
+                      <div className="flex-1 min-w-0">
+                        {/* Name */}
+                        <div className="h-5 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-1" />
+                        {/* Description */}
+                        <div className="h-4 w-full max-w-xs bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-1" />
+                        <div className="h-4 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                      </div>
+                    </div>
+                    
+                    {/* Menu Button */}
+                    <div className="h-8 w-8 rounded bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                  </div>
+                  
+                  {/* Status Badge and Usage Count */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                      <div className="h-4 w-28 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </>
       ) : displayedTags.length === 0 ? (
         <EmptyState
           icon={TagIcon}

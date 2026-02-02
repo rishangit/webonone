@@ -53,7 +53,7 @@ export function CustomDialog({
             className={cn(
               "bg-[var(--glass-bg)] border-[var(--glass-border)] backdrop-blur-sm rounded-lg shadow-lg",
               "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 border duration-200",
-              "h-[calc(100vh-1rem)] max-h-[calc(100vh-1rem)] flex flex-col pointer-events-auto",
+              "max-h-[calc(100vh-1rem)] flex flex-col pointer-events-auto",
               // Use w-full on mobile, but respect maxWidth on desktop
               "w-full sm:w-auto",
               maxWidth.includes('w-[') || maxWidth.includes('max-w-') 
@@ -61,7 +61,7 @@ export function CustomDialog({
                 : `sm:${maxWidth}`,
               className
             )}
-            style={{ height: 'calc(100vh - 1rem)', maxHeight: 'calc(100vh - 1rem)' }}
+            style={{ maxHeight: 'calc(100vh - 1rem)' }}
             aria-describedby={describedBy}
           >
           {/* Header */}
