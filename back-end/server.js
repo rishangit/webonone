@@ -90,23 +90,49 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 
 if (!isDevelopment) {
   const rateLimitWindow = parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000; // 15 minutes
-  const rateLimitMax = parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 2000; // 2000 requests in production
+  // Increased default from 2000 to 5000 to handle normal web app usage
+  // Static files are excluded, so this is mainly for API calls
+  const rateLimitMax = parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 5000; // 5000 requests in production
 
   const limiter = rateLimit({
     windowMs: rateLimitWindow,
     max: rateLimitMax,
     message: {
       success: false,
-      message: 'Too many requests from this IP, please try again later.'
+      message: 'Too many requests from this IP, please try again later.',
+      retryAfter: Math.ceil(rateLimitWindow / 1000) // Retry after window in seconds
     },
     standardHeaders: true,
     legacyHeaders: false,
-    // Skip rate limiting for health check endpoint
-    skip: (req) => req.path === '/health',
+    // Skip rate limiting for:
+    // - Health check endpoint
+    // - Static file requests (images, uploads)
+    // - OPTIONS requests (CORS preflight)
+    skip: (req) => {
+      const shouldSkip = req.path === '/health' || 
+                        req.path.startsWith('/uploads/') ||
+                        req.method === 'OPTIONS';
+      
+      // Log if rate limiting is being applied (for debugging)
+      if (!shouldSkip && process.env.DEBUG_RATE_LIMIT === 'true') {
+        console.log(`[Rate Limit] Checking: ${req.method} ${req.path} from IP: ${req.ip}`);
+      }
+      
+      return shouldSkip;
+    },
+    // Handler for when rate limit is exceeded
+    handler: (req, res) => {
+      console.warn(`[Rate Limit] Blocked request from IP: ${req.ip}, Path: ${req.path}`);
+      res.status(429).json({
+        success: false,
+        message: 'Too many requests from this IP, please try again later.',
+        retryAfter: Math.ceil(rateLimitWindow / 1000)
+      });
+    }
   });
 
   app.use(limiter);
-  console.log('✅ Rate limiting enabled for production environment');
+  console.log(`✅ Rate limiting enabled for production environment: ${rateLimitMax} requests per ${rateLimitWindow / 1000 / 60} minutes`);
 } else {
   console.log('⚠️  Rate limiting disabled for development environment');
 }
