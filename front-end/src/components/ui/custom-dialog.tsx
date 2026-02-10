@@ -51,7 +51,7 @@ export function CustomDialog({
         <div className="fixed inset-0 z-50 w-full h-full px-2 py-2 sm:px-0 sm:py-0 pointer-events-none flex justify-center items-center">
           <DialogPrimitive.Content
             className={cn(
-              "bg-[var(--glass-bg)] border-[var(--glass-border)] backdrop-blur-sm rounded-lg shadow-lg",
+              "bg-background dark:bg-[var(--glass-bg)] border-[var(--glass-border)] backdrop-blur-sm rounded-lg shadow-lg",
               "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 border duration-200",
               "max-h-[calc(100vh-1rem)] flex flex-col pointer-events-auto",
               // Use w-full on mobile, but respect maxWidth on desktop

@@ -10,7 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 
 import { Label } from "../../components/ui/label";
 import { Textarea } from "../../components/ui/textarea";
-import { AddStaffDialog } from "./AddStaffDialog";
+import { AddStaffDialog } from "./addStaff/AddStaffDialog";
 import { StaffDetailDialog } from "./StaffDetailDialog";
 import { StaffDetailPage } from "./StaffDetailPage";
 import { ViewSwitcher } from "../../components/ui/view-switcher";

@@ -134,9 +134,11 @@ router.post('/',
       }
       
       // Check if user is already staff for this company
-      const existingStaff = await CompanyStaff.findAll({ companyId: value.companyId });
-      const isAlreadyStaff = existingStaff.some(s => s.userId === value.userId);
-      if (isAlreadyStaff) {
+      const [existingStaffRows] = await pool.execute(
+        'SELECT id FROM company_staff WHERE companyId = ? AND userId = ?',
+        [value.companyId, value.userId]
+      );
+      if (existingStaffRows.length > 0) {
         throw validationError('User is already a staff member for this company');
       }
     }

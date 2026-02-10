@@ -50,22 +50,38 @@ class UsersService {
     }
 
     const url = `${API_BASE_URL}/users${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: this.getAuthHeaders(),
-    });
+    
+    // Create an AbortController for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: this.getAuthHeaders(),
+        signal: controller.signal,
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return {
+        users: data.data,
+        pagination: data.pagination,
+        stats: data.stats || undefined
+      };
+    } catch (error: any) {
+      clearTimeout(timeoutId);
+      if (error.name === 'AbortError') {
+        throw new Error('Request timeout: The server took too long to respond. Please try again.');
+      }
+      throw error;
     }
-
-    const data = await response.json();
-    return {
-      users: data.data,
-      pagination: data.pagination,
-      stats: data.stats || undefined
-    };
   }
 
   /**

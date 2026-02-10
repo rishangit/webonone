@@ -210,6 +210,7 @@ const SearchInputComponent = ({
         disabled={disabled}
         className={cn(
           "pl-10 bg-[var(--input-background)] border-[var(--glass-border)] text-foreground placeholder:text-muted-foreground",
+          "focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[var(--glass-border)]",
           showClearButton && value && "pr-10"
         )}
       />
