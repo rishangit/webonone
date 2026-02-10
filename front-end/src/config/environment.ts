@@ -21,7 +21,7 @@ const getEnvVar = (key: string, defaultValue: string = ''): string => {
   return import.meta.env[key] || defaultValue;
 };
 
-// Auto-detect API URL based on current hostname
+// Get API URL from environment variable
 const getApiUrl = (): string => {
   // If explicitly set in env, use it
   const envApiUrl = getEnvVar('VITE_API_BASE_URL');
@@ -29,29 +29,30 @@ const getApiUrl = (): string => {
     return envApiUrl;
   }
   
-  // Auto-detect based on current hostname
+  // Fallback: Auto-detect based on current hostname (only if env var not set)
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
     const protocol = window.location.protocol;
+    const port = getEnvVar('VITE_API_PORT', '5007');
     
-    // Production domain: www.webonone.com / webonone.com (API on same host, port 5007)
-    if (hostname === 'www.webonone.com' || hostname === 'webonone.com') {
-      return `${protocol}//${hostname}:5007/api`;
-    }
-    
-    // If running on remote server (185.116.237.5)
-    if (hostname === '185.116.237.5' || hostname.includes('185.116.237.5')) {
-      return `${protocol}//${hostname}:5007/api`;
+    // Use environment variable for production domain if set
+    const productionDomain = getEnvVar('VITE_PRODUCTION_DOMAIN');
+    if (productionDomain && (hostname === productionDomain || hostname === `www.${productionDomain}`)) {
+      return `${protocol}//${hostname}:${port}/api`;
     }
     
     // If running on localhost
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return 'http://localhost:5007/api';
+      return `http://localhost:${port}/api`;
     }
+    
+    // For other hostnames, construct from current location
+    return `${protocol}//${hostname}:${port}/api`;
   }
   
-  // Default fallback
-  return 'http://localhost:5007/api';
+  // Default fallback (should not be reached if env var is set)
+  const defaultPort = getEnvVar('VITE_API_PORT', '5007');
+  return `http://localhost:${defaultPort}/api`;
 };
 
 const getApiBaseUrl = (): string => {
@@ -60,28 +61,30 @@ const getApiBaseUrl = (): string => {
     return envApiUrl;
   }
   
-  // Auto-detect based on current hostname
+  // Fallback: Auto-detect based on current hostname (only if env var not set)
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
     const protocol = window.location.protocol;
+    const port = getEnvVar('VITE_API_PORT', '5007');
     
-    // Production domain
-    if (hostname === 'www.webonone.com' || hostname === 'webonone.com') {
-      return `${protocol}//${hostname}:5007`;
-    }
-    
-    // If running on remote server
-    if (hostname === '185.116.237.5' || hostname.includes('185.116.237.5')) {
-      return `${protocol}//${hostname}:5007`;
+    // Use environment variable for production domain if set
+    const productionDomain = getEnvVar('VITE_PRODUCTION_DOMAIN');
+    if (productionDomain && (hostname === productionDomain || hostname === `www.${productionDomain}`)) {
+      return `${protocol}//${hostname}:${port}`;
     }
     
     // If running on localhost
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return 'http://localhost:5007';
+      return `http://localhost:${port}`;
     }
+    
+    // For other hostnames, construct from current location
+    return `${protocol}//${hostname}:${port}`;
   }
   
-  return 'http://localhost:5007';
+  // Default fallback (should not be reached if env var is set)
+  const defaultPort = getEnvVar('VITE_API_PORT', '5007');
+  return `http://localhost:${defaultPort}`;
 };
 
 // Environment configuration

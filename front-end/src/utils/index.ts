@@ -1,4 +1,5 @@
 import type { Theme, AccentColor } from '../types';
+import { config } from '../config/environment';
 
 // Export data seeder
 export { seedDatabase } from './seedData';
@@ -264,31 +265,25 @@ export const formatAvatarUrl = (avatarUrl?: string | null, _firstName?: string, 
   }
   
   // Helper function to get the correct base URL
+  // Uses environment configuration instead of hardcoded values
   const getBaseUrl = (): string => {
-    if (typeof window === 'undefined') {
-      return 'http://localhost:5007';
+    // Use the API URL from environment config (without /api suffix)
+    const apiUrl = config.apiUrl;
+    if (apiUrl) {
+      return apiUrl;
     }
     
-    const hostname = window.location.hostname;
-    const protocol = window.location.protocol;
-    
-    // Production domain: www.webonone.com / webonone.com
-    if (hostname === 'www.webonone.com' || hostname === 'webonone.com') {
-      return `${protocol}//${hostname}:5007`;
+    // Fallback: construct from current location if config is not available
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname;
+      const protocol = window.location.protocol;
+      const port = import.meta.env.VITE_API_PORT || '5007';
+      return `${protocol}//${hostname}:${port}`;
     }
     
-    // Remote server IP
-    if (hostname === '185.116.237.5' || hostname.includes('185.116.237.5')) {
-      return `${protocol}//${hostname}:5007`;
-    }
-    
-    // Check for API URL in window (set by environment config)
-    if ((window as any).__API_URL__) {
-      return (window as any).__API_URL__.replace('/api', '');
-    }
-    
-    // Default to localhost
-    return 'http://localhost:5007';
+    // Server-side fallback
+    const defaultPort = import.meta.env.VITE_API_PORT || '5007';
+    return `http://localhost:${defaultPort}`;
   };
   
   // If avatar is already a full URL, check if it needs to be updated
@@ -297,8 +292,9 @@ export const formatAvatarUrl = (avatarUrl?: string | null, _firstName?: string, 
     
     // Check if URL is from localhost but we're on production (or vice versa)
     const isLocalhostUrl = avatarUrl.includes('localhost') || avatarUrl.includes('127.0.0.1');
-    const isProductionHost = typeof window !== 'undefined' && 
-      (window.location.hostname === 'www.webonone.com' || window.location.hostname === 'webonone.com');
+    const productionDomain = import.meta.env.VITE_PRODUCTION_DOMAIN;
+    const isProductionHost = typeof window !== 'undefined' && productionDomain &&
+      (window.location.hostname === productionDomain || window.location.hostname === `www.${productionDomain}`);
     
     // If URL is from localhost but we're on production, update it
     if (isLocalhostUrl && isProductionHost) {
