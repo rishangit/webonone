@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CustomDialog } from "../ui/custom-dialog";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
@@ -24,6 +24,7 @@ interface RoleSelectionDialogProps {
   roles: Role[];
   onRoleSelect: (roleId: string | null) => void; // Allow null for USER role
   onCancel?: () => void;
+  isLoading?: boolean; // Show loading state during role selection
 }
 
 const getRoleIcon = (role: number) => {
@@ -59,11 +60,21 @@ export const RoleSelectionDialog = ({
   user, 
   roles, 
   onRoleSelect,
-  onCancel 
+  onCancel,
+  isLoading = false
 }: RoleSelectionDialogProps) => {
   const [selectedRoleId, setSelectedRoleId] = useState<string | null>(
     roles.find(r => r.isDefault)?.id ?? roles[0]?.id ?? null
   );
+
+  // Update selectedRoleId when roles change (e.g., dialog reopened with different roles)
+  useEffect(() => {
+    if (open && roles.length > 0) {
+      const defaultRole = roles.find(r => r.isDefault);
+      const initialRole = defaultRole ?? roles[0];
+      setSelectedRoleId(initialRole?.id ?? null);
+    }
+  }, [open, roles]);
 
   const handleSelect = () => {
     // selectedRoleId can be null for USER role
@@ -91,11 +102,18 @@ export const RoleSelectionDialog = ({
           )}
           <Button
             onClick={handleSelect}
-            disabled={selectedRoleId === undefined}
+            disabled={selectedRoleId === undefined || isLoading}
             variant="accent"
             className="flex-1 font-medium"
           >
-            Continue
+            {isLoading ? (
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                Processing...
+              </div>
+            ) : (
+              "Continue"
+            )}
           </Button>
         </div>
       }

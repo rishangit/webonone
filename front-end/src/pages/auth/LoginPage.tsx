@@ -8,7 +8,7 @@ import { Label } from "../../components/ui/label";
 import { Checkbox } from "../../components/ui/checkbox";
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { loginRequest, clearError } from "../../store/slices/authSlice";
+import { loginRequest, clearError, setLoading } from "../../store/slices/authSlice";
 import { RoleSelectionDialog } from "../../components/auth/RoleSelectionDialog";
 
 export function LoginPage() {
@@ -74,13 +74,19 @@ export function LoginPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authState, email]);
 
-  // Handle authentication success
+  // Handle authentication success - navigate after role selection completes
   useEffect(() => {
-    if (isAuthenticated && !showRoleSelection) {
+    if (isAuthenticated) {
+      // Clear role selection state when authenticated
+      if (showRoleSelection) {
+        setShowRoleSelection(false);
+        setPendingUser(null);
+        setPendingRoles([]);
+      }
       toast.success("Login successful! Welcome back!");
       navigate('/system/dashboard');
     }
-  }, [isAuthenticated, showRoleSelection, navigate]);
+  }, [isAuthenticated, navigate]);
 
   // Handle errors
   useEffect(() => {
@@ -104,7 +110,11 @@ export function LoginPage() {
   };
 
   const handleRoleSelect = (roleId: string | null) => {
-    if (!pendingUser || !email) return;
+    if (!pendingUser || !email) {
+      console.error('[Role Selection] Missing pendingUser or email');
+      toast.error('Unable to complete login. Please try again.');
+      return;
+    }
     
     // Validate that the selected role belongs to the current user
     if (roleId !== null) {
@@ -115,18 +125,26 @@ export function LoginPage() {
         return;
       }
       console.log('[Role Selection] Selected role:', selectedRole);
+    } else {
+      // USER role selected (roleId is null)
+      const userRole = pendingRoles.find(r => r.id === null && r.role === 3);
+      if (userRole) {
+        console.log('[Role Selection] Selected USER role (default)');
+      }
     }
+    
+    console.log('[Role Selection] Dispatching completeLoginWithRoleRequest with:', { email, roleId });
+    
+    // Set loading state
+    dispatch(setLoading(true));
     
     // Dispatch action to complete login with selected role
     // roleId can be null for USER role
+    // Don't clear local state here - let Redux state and useEffect handle it after successful login
     dispatch({ 
       type: 'auth/completeLoginWithRoleRequest', 
       payload: { email, roleId: roleId ?? null } 
     });
-    
-    setShowRoleSelection(false);
-    setPendingUser(null);
-    setPendingRoles([]);
   };
 
   const handleRoleSelectionCancel = () => {
@@ -285,6 +303,7 @@ export function LoginPage() {
           roles={pendingRoles}
           onRoleSelect={handleRoleSelect}
           onCancel={handleRoleSelectionCancel}
+          isLoading={isLoading}
         />
       )}
     </div>

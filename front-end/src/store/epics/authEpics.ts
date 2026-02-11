@@ -138,6 +138,7 @@ export const completeLoginWithRoleEpic: Epic<any, any, RootState> = (action$) =>
           });
         }),
         catchError((error) => {
+          console.error('[CompleteLogin Epic] Error:', error);
           return of(loginFailure(error.message || 'Login failed'));
         })
       );
