@@ -110,15 +110,41 @@ export function LoginPage() {
   };
 
   const handleRoleSelect = (roleId: string | null) => {
-    if (!pendingUser || !email) {
-      console.error('[Role Selection] Missing pendingUser or email');
-      toast.error('Unable to complete login. Please try again.');
+    // Use Redux state as primary source, fallback to local state
+    const reduxPendingUser = (authState as any).pendingUser;
+    const reduxPendingRoles = (authState as any).pendingRoles;
+    
+    // Get user and roles from Redux state (source of truth) or local state (fallback)
+    const userToUse = reduxPendingUser || pendingUser;
+    const rolesToUse = reduxPendingRoles || pendingRoles;
+    const emailToUse = userToUse?.email || email;
+    
+    if (!userToUse || !emailToUse) {
+      console.error('[Role Selection] Missing pendingUser or email', {
+        hasReduxUser: !!reduxPendingUser,
+        hasLocalUser: !!pendingUser,
+        reduxUserEmail: reduxPendingUser?.email,
+        localEmail: email,
+        emailToUse
+      });
+      toast.error('Unable to complete login. Please try logging in again.');
+      return;
+    }
+    
+    if (!rolesToUse || rolesToUse.length === 0) {
+      console.error('[Role Selection] Missing roles', {
+        hasReduxRoles: !!reduxPendingRoles,
+        hasLocalRoles: !!pendingRoles,
+        reduxRolesCount: reduxPendingRoles?.length,
+        localRolesCount: pendingRoles?.length
+      });
+      toast.error('No roles available. Please try logging in again.');
       return;
     }
     
     // Validate that the selected role belongs to the current user
     if (roleId !== null) {
-      const selectedRole = pendingRoles.find(r => r.id === roleId);
+      const selectedRole = rolesToUse.find((r: any) => r.id === roleId);
       if (!selectedRole) {
         console.error('[Role Selection] Selected role not found in available roles:', roleId);
         toast.error('Invalid role selection. Please try again.');
@@ -127,23 +153,28 @@ export function LoginPage() {
       console.log('[Role Selection] Selected role:', selectedRole);
     } else {
       // USER role selected (roleId is null)
-      const userRole = pendingRoles.find(r => r.id === null && r.role === 3);
+      const userRole = rolesToUse.find((r: any) => r.id === null && r.role === 3);
       if (userRole) {
         console.log('[Role Selection] Selected USER role (default)');
+      } else {
+        console.warn('[Role Selection] USER role not found in available roles');
       }
     }
     
-    console.log('[Role Selection] Dispatching completeLoginWithRoleRequest with:', { email, roleId });
+    console.log('[Role Selection] Dispatching completeLoginWithRoleRequest with:', { 
+      email: emailToUse, 
+      roleId,
+      userEmail: userToUse.email 
+    });
     
     // Set loading state
     dispatch(setLoading(true));
     
     // Dispatch action to complete login with selected role
-    // roleId can be null for USER role
-    // Don't clear local state here - let Redux state and useEffect handle it after successful login
+    // Use email from user object (most reliable source)
     dispatch({ 
       type: 'auth/completeLoginWithRoleRequest', 
-      payload: { email, roleId: roleId ?? null } 
+      payload: { email: emailToUse, roleId: roleId ?? null } 
     });
   };
 
