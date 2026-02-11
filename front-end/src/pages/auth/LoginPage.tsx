@@ -37,21 +37,41 @@ export function LoginPage() {
     });
     
     if (pendingUser && pendingRoles && pendingRoles.length > 0) {
-      // Verify that the pending user matches the current email
-      if (pendingUser.email !== email) {
-        console.warn('[LoginPage] Pending user email mismatch. Clearing role selection state.');
+      // Normalize emails for comparison (trim and lowercase)
+      const normalizedPendingEmail = pendingUser.email?.trim().toLowerCase();
+      const normalizedCurrentEmail = email?.trim().toLowerCase();
+      
+      // Verify that the pending user matches the current email (case-insensitive)
+      // If current email is empty (edge case), still show dialog since user just submitted form
+      if (normalizedPendingEmail && normalizedCurrentEmail && normalizedPendingEmail !== normalizedCurrentEmail) {
+        console.warn('[LoginPage] Pending user email mismatch. Clearing role selection state.', {
+          pendingEmail: normalizedPendingEmail,
+          currentEmail: normalizedCurrentEmail
+        });
         setShowRoleSelection(false);
         setPendingUser(null);
         setPendingRoles([]);
         return;
       }
       
+      // If emails match or current email is empty (user just submitted), proceed to show dialog
+      
+      // Show dialog when Redux state has pending data
+      // Always update local state from Redux state to ensure consistency
       console.log('[LoginPage] Showing role selection dialog');
       console.log('[LoginPage] Available roles:', pendingRoles.map((r: any) => ({ id: r.id, role: r.roleName, companyId: r.companyId })));
       setPendingUser(pendingUser);
       setPendingRoles(pendingRoles);
       setShowRoleSelection(true);
+    } else {
+      // If Redux state doesn't have pending data, ensure dialog is closed
+      if (showRoleSelection) {
+        setShowRoleSelection(false);
+        setPendingUser(null);
+        setPendingRoles([]);
+      }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authState, email]);
 
   // Handle authentication success
