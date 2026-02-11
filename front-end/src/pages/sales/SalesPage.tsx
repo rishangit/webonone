@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Filter, Calendar, TrendingUp, DollarSign, Package, Users, FileText, MoreVertical, Eye, RefreshCw, Clock, CreditCard, Plus, Trash2 } from "lucide-react";
+import { Filter, Calendar, TrendingUp, DollarSign, Package, Users, FileText, MoreVertical, Eye, Clock, CreditCard, Plus, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
@@ -24,6 +24,7 @@ import { POSSalesPage } from "./POSSalesPage";
 import { companySalesService } from "../../services/companySales";
 import { CustomDialog } from "../../components/ui/custom-dialog";
 import { currenciesService, Currency } from "../../services/currencies";
+import { Carousel, CarouselContent, CarouselItem } from "../../components/ui/carousel";
 
 interface SaleItem {
   id?: string; // Item ID from company_sales_items table
@@ -569,80 +570,123 @@ export function SalesPage() {
           <h1 className="text-foreground mb-1">Sales Overview</h1>
           <p className="text-muted-foreground">Track your revenue from appointments and product sales</p>
         </div>
-        <div className="flex items-center gap-2">
-          {isCompanyOwner && (
-            <Button 
-              size="sm" 
-              className="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-lg shadow-[var(--accent-primary)]/25"
-              onClick={() => setShowPOS(true)}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Sale
-            </Button>
-          )}
+        {isCompanyOwner && (
           <Button 
             size="sm" 
             className="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-lg shadow-[var(--accent-primary)]/25"
-            onClick={() => {
-              if (companyId) {
-                const { dateFrom, dateTo } = getDateRange(dateRange);
-                dispatch(fetchAppointmentHistoryRequest({
-                  companyId,
-                  limit: 1000,
-                  dateFrom,
-                  dateTo
-                }));
-              }
-            }}
-            disabled={loading}
+            onClick={() => setShowPOS(true)}
           >
-            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
+            <Plus className="w-4 h-4 mr-2" />
+            Add Sale
           </Button>
+        )}
+      </div>
+
+      {/* Stats Cards - Desktop Only */}
+      <div className="hidden lg:block">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Total Revenue</p>
+                <p className="text-xl font-semibold text-foreground">{formatCurrency(totalRevenue)}</p>
+              </div>
+              <DollarSign className="w-8 h-8 text-[var(--accent-text)]" />
+            </div>
+          </Card>
+
+          <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Appointments</p>
+                <p className="text-xl font-semibold text-foreground">{formatCurrency(appointmentRevenue)}</p>
+              </div>
+              <Users className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+            </div>
+          </Card>
+
+          <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Products</p>
+                <p className="text-xl font-semibold text-foreground">{formatCurrency(productRevenue)}</p>
+              </div>
+              <Package className="w-8 h-8 text-green-600 dark:text-green-400" />
+            </div>
+          </Card>
+
+          <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Transactions</p>
+                <p className="text-xl font-semibold text-foreground">{totalTransactions}</p>
+              </div>
+              <TrendingUp className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+            </div>
+          </Card>
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Total Revenue</p>
-              <p className="text-xl font-semibold text-foreground">{formatCurrency(totalRevenue)}</p>
-            </div>
-            <DollarSign className="w-8 h-8 text-[var(--accent-text)]" />
-          </div>
-        </Card>
+      {/* Mobile & Tablet: Carousel - Horizontal scroll with same layout as desktop */}
+      <div className="block lg:hidden">
+        <Carousel
+          opts={{
+            align: "start",
+            slidesToScroll: 1,
+            containScroll: "trimSnaps",
+          }}
+          className="w-full"
+        >
+          <CarouselContent className="ml-0">
+            <CarouselItem className="pl-0 pr-2 flex-shrink-0" style={{ minWidth: '40vw', width: 'auto' }}>
+              <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Total Revenue</p>
+                    <p className="text-xl font-semibold text-foreground">{formatCurrency(totalRevenue)}</p>
+                  </div>
+                  <DollarSign className="w-8 h-8 text-[var(--accent-text)]" />
+                </div>
+              </Card>
+            </CarouselItem>
 
-        <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Appointments</p>
-              <p className="text-xl font-semibold text-foreground">{formatCurrency(appointmentRevenue)}</p>
-            </div>
-            <Users className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-          </div>
-        </Card>
+            <CarouselItem className="pl-0 pr-2 flex-shrink-0" style={{ minWidth: '40vw', width: 'auto' }}>
+              <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Appointments</p>
+                    <p className="text-xl font-semibold text-foreground">{formatCurrency(appointmentRevenue)}</p>
+                  </div>
+                  <Users className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                </div>
+              </Card>
+            </CarouselItem>
 
-        <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Products</p>
-              <p className="text-xl font-semibold text-foreground">{formatCurrency(productRevenue)}</p>
-            </div>
-            <Package className="w-8 h-8 text-green-600 dark:text-green-400" />
-          </div>
-        </Card>
+            <CarouselItem className="pl-0 pr-2 flex-shrink-0" style={{ minWidth: '40vw', width: 'auto' }}>
+              <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Products</p>
+                    <p className="text-xl font-semibold text-foreground">{formatCurrency(productRevenue)}</p>
+                  </div>
+                  <Package className="w-8 h-8 text-green-600 dark:text-green-400" />
+                </div>
+              </Card>
+            </CarouselItem>
 
-        <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Transactions</p>
-              <p className="text-xl font-semibold text-foreground">{totalTransactions}</p>
-            </div>
-            <TrendingUp className="w-8 h-8 text-purple-600 dark:text-purple-400" />
-          </div>
-        </Card>
+            <CarouselItem className="pl-0 pr-4 flex-shrink-0" style={{ minWidth: '40vw', width: 'auto' }}>
+              <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Transactions</p>
+                    <p className="text-xl font-semibold text-foreground">{totalTransactions}</p>
+                  </div>
+                  <TrendingUp className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+                </div>
+              </Card>
+            </CarouselItem>
+          </CarouselContent>
+        </Carousel>
       </div>
 
       {/* Filters and Search */}

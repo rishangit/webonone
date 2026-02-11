@@ -430,22 +430,20 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
             }
           </p>
         </div>
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* Desktop Add Button - Available for all users */}
-          <div className="hidden sm:block">
-            <AppointmentWizard
-              currentUser={currentUser}
-              trigger={
-                <Button
-                  variant="accent"
-                  className="text-sm bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-md hover:shadow-lg transition-all duration-200"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  {currentUser?.role === "User" ? "Book Appointment" : "New Appointment"}
-                </Button>
-              }
-            />
-          </div>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+          {/* Add Button - Full width on mobile, auto on desktop */}
+          <AppointmentWizard
+            currentUser={currentUser}
+            trigger={
+              <Button
+                variant="accent"
+                className="w-full sm:w-auto text-sm bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-md hover:shadow-lg transition-all duration-200"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                {currentUser?.role === "User" ? "Book Appointment" : "New Appointment"}
+              </Button>
+            }
+          />
 
           {/* Filter/View Toggle for larger screens */}
           <Button variant="outline" className="hidden lg:flex bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent text-foreground hover:text-foreground text-sm">
@@ -455,8 +453,8 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="hidden md:block">
+      {/* Stats Cards - Desktop Only */}
+      <div className="hidden lg:block">
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
           {appointmentStats.map((stat, index) => {
             const Icon = stat.icon;
@@ -474,8 +472,8 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
           })}
         </div>
       </div>
-      {/* Mobile: Carousel - Horizontal scroll with same layout as desktop */}
-      <div className="block md:hidden">
+      {/* Mobile & Tablet: Carousel - Horizontal scroll with same layout as desktop */}
+      <div className="block lg:hidden">
         <Carousel
           opts={{
             align: "start",
@@ -484,12 +482,13 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
           }}
           className="w-full"
         >
-          <CarouselContent className="-ml-2">
+          <CarouselContent className="ml-0">
             {appointmentStats.map((stat, index) => {
               const Icon = stat.icon;
+              const isLast = index === appointmentStats.length - 1;
               return (
-                <CarouselItem key={index} className="pl-2 flex-shrink-0" style={{  minWidth: 'calc(100vw / 3.3)' }}>
-                  <Card className="p-4 w-full backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+                <CarouselItem key={index} className={`pl-0 ${isLast ? 'pr-4' : 'pr-2'} flex-shrink-0`} style={{ minWidth: '40vw', width: 'auto' }}>
+                  <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
@@ -932,22 +931,6 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
         </TabsContent>
       </Tabs>
 
-      {/* Mobile Floating Action Button */}
-      <div className="fixed bottom-6 right-6 sm:hidden z-50">
-        <AppointmentWizard
-          currentUser={currentUser}
-          trigger={
-            <Button
-              variant="accent"
-              size="lg"
-              className="w-14 h-14 rounded-full shadow-lg hover:shadow-xl active:scale-95 transform hover:scale-105 transition-all duration-200 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-primary-hover)] border-0 touch-manipulation"
-              aria-label={currentUser?.role === "User" ? "Book new appointment" : "Create new appointment"}
-            >
-              <Plus className="w-6 h-6 text-[var(--accent-button-text)]" />
-            </Button>
-          }
-        />
-      </div>
 
       {/* Delete Confirmation Dialog */}
       <DeleteConfirmationDialog

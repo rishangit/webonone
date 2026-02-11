@@ -13,6 +13,7 @@ import { fetchAppointmentsRequest } from "../../store/slices/appointmentsSlice";
 import { fetchServicesRequest } from "../../store/slices/servicesSlice";
 import { companySalesService, CompanySale } from "../../services/companySales";
 import { toast } from "sonner";
+import { Carousel, CarouselContent, CarouselItem } from "../../components/ui/carousel";
 
 interface AnalyticsPageProps {
   currentUser?: {
@@ -525,72 +526,161 @@ export const AnalyticsPage = ({ currentUser }: AnalyticsPageProps) => {
   // Company Owner Analytics
   const CompanyOwnerAnalytics = () => (
     <>
-      {/* Revenue Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Total Revenue</p>
-              <p className="text-2xl font-semibold text-foreground">{formatCurrency(metrics.totalRevenue)}</p>
-              <div className="flex items-center gap-1 mt-1">
-                <ArrowUp className="w-4 h-4 text-green-600 dark:text-green-400" />
-                <span className="text-sm text-green-600 dark:text-green-400">{formatPercentage(mockGrowthRate * 100)}</span>
+      {/* Revenue Overview - Desktop Only */}
+      <div className="hidden lg:block">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Total Revenue</p>
+                <p className="text-2xl font-semibold text-foreground">{formatCurrency(metrics.totalRevenue)}</p>
+                <div className="flex items-center gap-1 mt-1">
+                  <ArrowUp className="w-4 h-4 text-green-600 dark:text-green-400" />
+                  <span className="text-sm text-green-600 dark:text-green-400">{formatPercentage(mockGrowthRate * 100)}</span>
+                </div>
               </div>
+              <DollarSign className="w-8 h-8 text-[var(--accent-text)]" />
             </div>
-            <DollarSign className="w-8 h-8 text-[var(--accent-text)]" />
-          </div>
-        </Card>
+          </Card>
 
-        <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Estimated Profit</p>
-              <p className="text-2xl font-semibold text-foreground">{formatCurrency(metrics.totalProfit)}</p>
-              <div className="flex items-center gap-1 mt-1">
-                <ArrowUp className="w-4 h-4 text-green-600 dark:text-green-400" />
-                <span className="text-sm text-green-600 dark:text-green-400">{formatPercentage(mockGrowthRate * 80)}</span>
+          <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Estimated Profit</p>
+                <p className="text-2xl font-semibold text-foreground">{formatCurrency(metrics.totalProfit)}</p>
+                <div className="flex items-center gap-1 mt-1">
+                  <ArrowUp className="w-4 h-4 text-green-600 dark:text-green-400" />
+                  <span className="text-sm text-green-600 dark:text-green-400">{formatPercentage(mockGrowthRate * 80)}</span>
+                </div>
               </div>
+              <TrendingUp className="w-8 h-8 text-green-600 dark:text-green-400" />
             </div>
-            <TrendingUp className="w-8 h-8 text-green-600 dark:text-green-400" />
-          </div>
-        </Card>
+          </Card>
 
-        <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Service Bookings</p>
-              <p className="text-2xl font-semibold text-foreground">{metrics.totalBookings}</p>
-              <div className="flex items-center gap-1 mt-1">
-                <ArrowUp className="w-4 h-4 text-green-600 dark:text-green-400" />
-                <span className="text-sm text-green-600 dark:text-green-400">+{Math.round(metrics.totalBookings * 0.15)}</span>
+          <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Service Bookings</p>
+                <p className="text-2xl font-semibold text-foreground">{metrics.totalBookings}</p>
+                <div className="flex items-center gap-1 mt-1">
+                  <ArrowUp className="w-4 h-4 text-green-600 dark:text-green-400" />
+                  <span className="text-sm text-green-600 dark:text-green-400">+{Math.round(metrics.totalBookings * 0.15)}</span>
+                </div>
               </div>
+              <Calendar className="w-8 h-8 text-blue-600 dark:text-blue-400" />
             </div>
-            <Calendar className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-          </div>
-        </Card>
+          </Card>
 
-        <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Product Sales</p>
-              <p className="text-2xl font-semibold text-foreground">{formatCurrency(metrics.productSales)}</p>
-              <div className="flex items-center gap-1 mt-1">
-                {metrics.productSales > 0 ? (
-                  <>
-                    <ArrowUp className="w-4 h-4 text-green-600 dark:text-green-400" />
-                    <span className="text-sm text-green-600 dark:text-green-400">Active</span>
-                  </>
-                ) : (
-                  <>
-                    <ArrowDown className="w-4 h-4 text-red-600 dark:text-red-400" />
-                    <span className="text-sm text-red-600 dark:text-red-400">No sales</span>
-                  </>
-                )}
+          <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Product Sales</p>
+                <p className="text-2xl font-semibold text-foreground">{formatCurrency(metrics.productSales)}</p>
+                <div className="flex items-center gap-1 mt-1">
+                  {metrics.productSales > 0 ? (
+                    <>
+                      <ArrowUp className="w-4 h-4 text-green-600 dark:text-green-400" />
+                      <span className="text-sm text-green-600 dark:text-green-400">Active</span>
+                    </>
+                  ) : (
+                    <>
+                      <ArrowDown className="w-4 h-4 text-red-600 dark:text-red-400" />
+                      <span className="text-sm text-red-600 dark:text-red-400">No sales</span>
+                    </>
+                  )}
+                </div>
               </div>
+              <Package className="w-8 h-8 text-purple-600 dark:text-purple-400" />
             </div>
-            <Package className="w-8 h-8 text-purple-600 dark:text-purple-400" />
-          </div>
-        </Card>
+          </Card>
+        </div>
+      </div>
+
+      {/* Mobile & Tablet: Carousel - Horizontal scroll with same layout as desktop */}
+      <div className="block lg:hidden">
+        <Carousel
+          opts={{
+            align: "start",
+            slidesToScroll: 1,
+            containScroll: "trimSnaps",
+          }}
+          className="w-full"
+        >
+          <CarouselContent className="ml-0">
+            <CarouselItem className="pl-0 pr-2 flex-shrink-0" style={{ minWidth: '40vw', width: 'auto' }}>
+              <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Revenue</p>
+                    <p className="text-2xl font-semibold text-foreground">{formatCurrency(metrics.totalRevenue)}</p>
+                    <div className="flex items-center gap-1 mt-1">
+                      <ArrowUp className="w-4 h-4 text-green-600 dark:text-green-400" />
+                      <span className="text-sm text-green-600 dark:text-green-400">{formatPercentage(mockGrowthRate * 100)}</span>
+                    </div>
+                  </div>
+                  <DollarSign className="w-8 h-8 text-[var(--accent-text)]" />
+                </div>
+              </Card>
+            </CarouselItem>
+
+            <CarouselItem className="pl-0 pr-2 flex-shrink-0" style={{ minWidth: '40vw', width: 'auto' }}>
+              <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Estimated Profit</p>
+                    <p className="text-2xl font-semibold text-foreground">{formatCurrency(metrics.totalProfit)}</p>
+                    <div className="flex items-center gap-1 mt-1">
+                      <ArrowUp className="w-4 h-4 text-green-600 dark:text-green-400" />
+                      <span className="text-sm text-green-600 dark:text-green-400">{formatPercentage(mockGrowthRate * 80)}</span>
+                    </div>
+                  </div>
+                  <TrendingUp className="w-8 h-8 text-green-600 dark:text-green-400" />
+                </div>
+              </Card>
+            </CarouselItem>
+
+            <CarouselItem className="pl-0 pr-2 flex-shrink-0" style={{ minWidth: '40vw', width: 'auto' }}>
+              <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Service Bookings</p>
+                    <p className="text-2xl font-semibold text-foreground">{metrics.totalBookings}</p>
+                    <div className="flex items-center gap-1 mt-1">
+                      <ArrowUp className="w-4 h-4 text-green-600 dark:text-green-400" />
+                      <span className="text-sm text-green-600 dark:text-green-400">+{Math.round(metrics.totalBookings * 0.15)}</span>
+                    </div>
+                  </div>
+                  <Calendar className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                </div>
+              </Card>
+            </CarouselItem>
+
+            <CarouselItem className="pl-0 pr-4 flex-shrink-0" style={{ minWidth: '40vw', width: 'auto' }}>
+              <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Product Sales</p>
+                    <p className="text-2xl font-semibold text-foreground">{formatCurrency(metrics.productSales)}</p>
+                    <div className="flex items-center gap-1 mt-1">
+                      {metrics.productSales > 0 ? (
+                        <>
+                          <ArrowUp className="w-4 h-4 text-green-600 dark:text-green-400" />
+                          <span className="text-sm text-green-600 dark:text-green-400">Active</span>
+                        </>
+                      ) : (
+                        <>
+                          <ArrowDown className="w-4 h-4 text-red-600 dark:text-red-400" />
+                          <span className="text-sm text-red-600 dark:text-red-400">No sales</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <Package className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+                </div>
+              </Card>
+            </CarouselItem>
+          </CarouselContent>
+        </Carousel>
       </div>
 
       {/* Revenue Trend Chart */}
@@ -815,16 +905,6 @@ export const AnalyticsPage = ({ currentUser }: AnalyticsPageProps) => {
           <p className="text-muted-foreground">{getPageDescription()}</p>
         </div>
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="border-[var(--glass-border)]"
-            onClick={handleRefresh}
-            disabled={loading}
-          >
-            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
           <Select value={timeRange} onValueChange={setTimeRange}>
             <SelectTrigger className="w-32 bg-[var(--glass-bg)] border-[var(--glass-border)]">
               <SelectValue />

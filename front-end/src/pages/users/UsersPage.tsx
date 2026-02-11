@@ -13,6 +13,7 @@ import { fetchUsersRequest } from "../../store/slices/usersSlice";
 import { SearchInput } from "../../components/common/SearchInput";
 import { Pagination } from "../../components/common/Pagination";
 import { EmptyState } from "../../components/common/EmptyState";
+import { Carousel, CarouselContent, CarouselItem } from "../../components/ui/carousel";
 // Note: We don't update Redux state during impersonation to avoid double render
 // The page reload will restore user from localStorage and trigger refreshUserRequest in App initialization
 import { RoleSelectionDialog } from "../../components/auth/RoleSelectionDialog";
@@ -485,11 +486,11 @@ UsersList.displayName = "UsersList";
           <p className="text-muted-foreground mt-1">{pageDescription}</p>
         </div>
         {!isSystemAdmin && isCompanyOwner && companyId && (
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
             <Button
               variant="outline"
               size="sm"
-              className="inline-flex items-center gap-2"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2"
               onClick={() => {
                 setIsCreateUserDialogOpen(true);
               }}
@@ -500,7 +501,7 @@ UsersList.displayName = "UsersList";
             <Button
               variant="accent"
               size="sm"
-              className="inline-flex items-center gap-2"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2"
               onClick={() => {
                 setIsAddCompanyUserDialogOpen(true);
               }}
@@ -512,55 +513,127 @@ UsersList.displayName = "UsersList";
         )}
       </div>
 
-      {/* Stats Cards - Simple JSX, no memoization needed */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="p-4 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-[var(--accent-bg)]">
-              <Users className="w-5 h-5 text-[var(--accent-text)]" />
+      {/* Stats Cards - Desktop Only */}
+      <div className="hidden lg:block">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="p-4 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-[var(--accent-bg)]">
+                <Users className="w-5 h-5 text-[var(--accent-text)]" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Total Users</p>
+                <p className="text-2xl font-semibold text-foreground">{pageStats.totalUsers}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Total Users</p>
-              <p className="text-2xl font-semibold text-foreground">{pageStats.totalUsers}</p>
-            </div>
-          </div>
-        </Card>
+          </Card>
 
-        <Card className="p-4 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-green-500/20">
-              <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400" />
+          <Card className="p-4 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-green-500/20">
+                <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Active Users</p>
+                <p className="text-2xl font-semibold text-foreground">{pageStats.activeUsers}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Active Users</p>
-              <p className="text-2xl font-semibold text-foreground">{pageStats.activeUsers}</p>
-            </div>
-          </div>
-        </Card>
+          </Card>
 
-        <Card className="p-4 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-blue-500/20">
-              <Building2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          <Card className="p-4 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-blue-500/20">
+                <Building2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Total Company Owners</p>
+                <p className="text-2xl font-semibold text-foreground">{pageStats.totalCompanyOwners}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Total Company Owners</p>
-              <p className="text-2xl font-semibold text-foreground">{pageStats.totalCompanyOwners}</p>
-            </div>
-          </div>
-        </Card>
+          </Card>
 
-        <Card className="p-4 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-purple-500/20">
-              <Briefcase className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+          <Card className="p-4 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-purple-500/20">
+                <Briefcase className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Total Staff Members</p>
+                <p className="text-2xl font-semibold text-foreground">{pageStats.totalStaffMembers}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Total Staff Members</p>
-              <p className="text-2xl font-semibold text-foreground">{pageStats.totalStaffMembers}</p>
-            </div>
-          </div>
-        </Card>
+          </Card>
+        </div>
+      </div>
+
+      {/* Mobile & Tablet: Carousel - Horizontal scroll with same layout as desktop */}
+      <div className="block lg:hidden">
+        <Carousel
+          opts={{
+            align: "start",
+            slidesToScroll: 1,
+            containScroll: "trimSnaps",
+          }}
+          className="w-full"
+        >
+          <CarouselContent className="ml-0">
+            <CarouselItem className="pl-0 pr-2 flex-shrink-0" style={{ minWidth: '40vw', width: 'auto' }}>
+              <Card className="p-4 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-[var(--accent-bg)]">
+                    <Users className="w-5 h-5 text-[var(--accent-text)]" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Users</p>
+                    <p className="text-2xl font-semibold text-foreground">{pageStats.totalUsers}</p>
+                  </div>
+                </div>
+              </Card>
+            </CarouselItem>
+
+            <CarouselItem className="pl-0 pr-2 flex-shrink-0" style={{ minWidth: '40vw', width: 'auto' }}>
+              <Card className="p-4 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-green-500/20">
+                    <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Active Users</p>
+                    <p className="text-2xl font-semibold text-foreground">{pageStats.activeUsers}</p>
+                  </div>
+                </div>
+              </Card>
+            </CarouselItem>
+
+            <CarouselItem className="pl-0 pr-2 flex-shrink-0" style={{ minWidth: '40vw', width: 'auto' }}>
+              <Card className="p-4 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-blue-500/20">
+                    <Building2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Company Owners</p>
+                    <p className="text-2xl font-semibold text-foreground">{pageStats.totalCompanyOwners}</p>
+                  </div>
+                </div>
+              </Card>
+            </CarouselItem>
+
+            <CarouselItem className="pl-0 pr-4 flex-shrink-0" style={{ minWidth: '40vw', width: 'auto' }}>
+              <Card className="p-4 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-purple-500/20">
+                    <Briefcase className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Staff Members</p>
+                    <p className="text-2xl font-semibold text-foreground">{pageStats.totalStaffMembers}</p>
+                  </div>
+                </div>
+              </Card>
+            </CarouselItem>
+          </CarouselContent>
+        </Carousel>
       </div>
 
       {/* Search and Filters Section - Simple JSX, SearchInput handles its own memoization */}

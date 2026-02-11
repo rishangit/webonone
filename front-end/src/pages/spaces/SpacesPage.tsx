@@ -27,6 +27,7 @@ import { formatAvatarUrl } from "../../utils";
 import { SearchInput } from "../../components/common/SearchInput";
 import { Pagination } from "../../components/common/Pagination";
 import { EmptyState } from "../../components/common/EmptyState";
+import { Carousel, CarouselContent, CarouselItem } from "../../components/ui/carousel";
 
 export const SpacesPage = () => {
   const dispatch = useAppDispatch();
@@ -363,46 +364,99 @@ export const SpacesPage = () => {
           <h1 className="text-xl sm:text-2xl font-semibold text-foreground">Spaces Management</h1>
           <p className="text-muted-foreground mt-1 text-sm sm:text-base">Manage your company's rooms, sections, and facilities</p>
         </div>
-        <div className="flex items-center gap-2 sm:gap-3">
-          <Button variant="accent" className="text-sm" onClick={openAddDialog}>
-            <Plus className="w-4 h-4 sm:mr-2" />
-            <span className="hidden sm:inline">Add Space</span>
-          </Button>
+        <Button 
+          variant="accent" 
+          className="w-full sm:w-auto text-sm" 
+          onClick={openAddDialog}
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Add Space
+        </Button>
+      </div>
+
+      {/* Stats Cards - Desktop Only */}
+      <div className="hidden lg:block">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Total Spaces</p>
+                <p className="text-xl font-semibold text-foreground">{spaces.length}</p>
+              </div>
+              <MapPin className="w-8 h-8 text-orange-600 dark:text-orange-400" />
+            </div>
+          </Card>
+          
+          <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Active Spaces</p>
+                <p className="text-xl font-semibold text-foreground">{spaces.filter(s => s.status === "Active").length}</p>
+              </div>
+              <Users className="w-8 h-8 text-green-600 dark:text-green-400" />
+            </div>
+          </Card>
+          
+          <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Today's Bookings</p>
+                <p className="text-xl font-semibold text-foreground">{spaces.reduce((acc, space) => acc + space.appointments.today, 0)}</p>
+              </div>
+              <Calendar className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+            </div>
+          </Card>
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Total Spaces</p>
-              <p className="text-xl font-semibold text-foreground">{spaces.length}</p>
-            </div>
-            <MapPin className="w-8 h-8 text-orange-600 dark:text-orange-400" />
-          </div>
-        </Card>
-        
-        <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Active Spaces</p>
-              <p className="text-xl font-semibold text-foreground">{spaces.filter(s => s.status === "Active").length}</p>
-            </div>
-            <Users className="w-8 h-8 text-green-600 dark:text-green-400" />
-          </div>
-        </Card>
-        
-        <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Today's Bookings</p>
-              <p className="text-xl font-semibold text-foreground">{spaces.reduce((acc, space) => acc + space.appointments.today, 0)}</p>
-            </div>
-            <Calendar className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-          </div>
-        </Card>
-        
+      {/* Mobile & Tablet: Carousel - Horizontal scroll with same layout as desktop */}
+      <div className="block lg:hidden">
+        <Carousel
+          opts={{
+            align: "start",
+            slidesToScroll: 1,
+            containScroll: "trimSnaps",
+          }}
+          className="w-full"
+        >
+          <CarouselContent className="ml-0">
+            <CarouselItem className="pl-0 pr-2 flex-shrink-0" style={{ minWidth: '40vw', width: 'auto' }}>
+              <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Total Spaces</p>
+                    <p className="text-xl font-semibold text-foreground">{spaces.length}</p>
+                  </div>
+                  <MapPin className="w-8 h-8 text-orange-600 dark:text-orange-400" />
+                </div>
+              </Card>
+            </CarouselItem>
+            
+            <CarouselItem className="pl-0 pr-2 flex-shrink-0" style={{ minWidth: '40vw', width: 'auto' }}>
+              <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Active Spaces</p>
+                    <p className="text-xl font-semibold text-foreground">{spaces.filter(s => s.status === "Active").length}</p>
+                  </div>
+                  <Users className="w-8 h-8 text-green-600 dark:text-green-400" />
+                </div>
+              </Card>
+            </CarouselItem>
+            
+            <CarouselItem className="pl-0 pr-4 flex-shrink-0" style={{ minWidth: '40vw', width: 'auto' }}>
+              <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Today's Bookings</p>
+                    <p className="text-xl font-semibold text-foreground">{spaces.reduce((acc, space) => acc + space.appointments.today, 0)}</p>
+                  </div>
+                  <Calendar className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                </div>
+              </Card>
+            </CarouselItem>
+          </CarouselContent>
+        </Carousel>
       </div>
 
       {/* Filters and Search */}
