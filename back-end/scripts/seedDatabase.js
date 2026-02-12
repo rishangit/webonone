@@ -1,302 +1,138 @@
 const { pool } = require('../config/database');
-const fs = require('fs');
-const path = require('path');
+const bcrypt = require('bcryptjs');
+const { nanoid } = require('nanoid');
 
-// Load seed data from JSON files
-const loadSeedData = () => {
-  const dataPath = path.join(__dirname, '../../front-end/src/jsondb');
-  
-  const usersData = JSON.parse(fs.readFileSync(path.join(dataPath, 'users.json'), 'utf8'));
-  const appointmentsData = JSON.parse(fs.readFileSync(path.join(dataPath, 'appointments.json'), 'utf8'));
-  const servicesData = JSON.parse(fs.readFileSync(path.join(dataPath, 'services.json'), 'utf8'));
-  const categoriesData = JSON.parse(fs.readFileSync(path.join(dataPath, 'categories.json'), 'utf8'));
-  
-  return { usersData, appointmentsData, servicesData, categoriesData };
-};
-
-const seedUsers = async (users) => {
+const seedSuperAdmin = async () => {
   try {
-    console.log('Seeding users...');
+    console.log('Creating superadmin user...');
     
-    for (const user of users) {
-      const query = `
+    // Check if superadmin already exists
+    const [existingUsers] = await pool.execute(
+      'SELECT id FROM users WHERE email = ?',
+      ['admin@appointmentapp.com']
+    );
+
+    if (existingUsers.length > 0) {
+      console.log('⚠️  Superadmin user already exists. Skipping creation.');
+      return;
+    }
+
+    // Hash the default password
+    const defaultPassword = 'SuperAdmin2024!';
+    const hashedPassword = await bcrypt.hash(defaultPassword, 12);
+
+    // Generate ID using nanoid (consistent with User model)
+    const superAdminId = nanoid(10);
+
+    // Superadmin user data
+    const superAdminData = {
+      id: superAdminId,
+      email: 'admin@appointmentapp.com',
+      password: hashedPassword,
+      firstName: 'System',
+      lastName: 'Administrator',
+      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
+      phone: '+1 (555) 000-0001',
+      address: '1 Admin Plaza, Tech City, TC 12345',
+      dateOfBirth: null,
+      preferences: JSON.stringify({
+        theme: 'dark',
+        notifications: true,
+        language: 'en'
+      }),
+      isActive: true,
+      isVerified: true
+    };
+
+    // Check if role column exists
+    const [columns] = await pool.execute(`
+      SELECT COLUMN_NAME 
+      FROM INFORMATION_SCHEMA.COLUMNS 
+      WHERE TABLE_SCHEMA = DATABASE() 
+      AND TABLE_NAME = 'users' 
+      AND COLUMN_NAME = 'role'
+    `);
+
+    const hasRoleColumn = columns.length > 0;
+
+    let query, values;
+    if (hasRoleColumn) {
+      query = `
         INSERT INTO users (
-          email, firstName, lastName, role, avatar,
+          id, email, password, firstName, lastName, role, avatar,
           phone, address, dateOfBirth, preferences,
-          isActive, isVerified, createdAt, lastLogin
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          isActive, isVerified, createdAt
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
       `;
-
-      const values = [
-        user.email,
-        user.firstName,
-        user.lastName,
-        user.role,
-        user.avatar,
-        user.phone,
-        user.address,
-        user.dateOfBirth,
-        JSON.stringify(user.preferences || {}),
-        user.isActive,
-        user.isVerified,
-        user.createdAt,
-        user.lastLogin
+      values = [
+        superAdminData.id,
+        superAdminData.email,
+        superAdminData.password,
+        superAdminData.firstName,
+        superAdminData.lastName,
+        0, // Role level 0 for Super Admin
+        superAdminData.avatar,
+        superAdminData.phone,
+        superAdminData.address,
+        superAdminData.dateOfBirth,
+        superAdminData.preferences,
+        superAdminData.isActive,
+        superAdminData.isVerified
       ];
-
-      await pool.execute(query, values);
-    }
-    
-    console.log(`✅ Seeded ${users.length} users`);
-  } catch (error) {
-    console.error('❌ Error seeding users:', error.message);
-    throw error;
-  }
-};
-
-const seedCategories = async (categories) => {
-  try {
-    console.log('Seeding categories...');
-    
-    for (const category of categories) {
-      const query = `
-        INSERT INTO categories (
-          name, description, icon, isActive, companyCount, subcategories,
-          createdDate, lastModified
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    } else {
+      query = `
+        INSERT INTO users (
+          id, email, password, firstName, lastName, avatar,
+          phone, address, dateOfBirth, preferences,
+          isActive, isVerified, createdAt
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
       `;
-
-      const values = [
-        category.name,
-        category.description,
-        category.icon,
-        category.isActive,
-        category.companyCount,
-        JSON.stringify(category.subcategories || []),
-        category.createdDate,
-        category.lastModified
+      values = [
+        superAdminData.id,
+        superAdminData.email,
+        superAdminData.password,
+        superAdminData.firstName,
+        superAdminData.lastName,
+        superAdminData.avatar,
+        superAdminData.phone,
+        superAdminData.address,
+        superAdminData.dateOfBirth,
+        superAdminData.preferences,
+        superAdminData.isActive,
+        superAdminData.isVerified
       ];
-
-      await pool.execute(query, values);
     }
-    
-    console.log(`✅ Seeded ${categories.length} categories`);
-  } catch (error) {
-    console.error('❌ Error seeding categories:', error.message);
-    throw error;
-  }
-};
 
-const seedServices = async (services) => {
-  try {
-    console.log('Seeding services...');
-    
-    for (const service of services) {
-      const query = `
-        INSERT INTO services (
-          name, description, duration, price, category, subcategory,
-          status, companyId, provider, bookings, tags, image
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `;
+    await pool.execute(query, values);
 
-      const values = [
-        service.name,
-        service.description,
-        service.duration,
-        service.price,
-        service.category,
-        service.subcategory,
-        service.status,
-        service.companyId,
-        JSON.stringify(service.provider || null),
-        JSON.stringify(service.bookings || {}),
-        JSON.stringify(service.tags || []),
-        service.image
-      ];
+    // If users_role table exists, add role entry
+    try {
+      const [roleTables] = await pool.execute(`
+        SELECT TABLE_NAME 
+        FROM INFORMATION_SCHEMA.TABLES 
+        WHERE TABLE_SCHEMA = DATABASE() 
+        AND TABLE_NAME = 'users_role'
+      `);
 
-      await pool.execute(query, values);
-    }
-    
-    console.log(`✅ Seeded ${services.length} services`);
-  } catch (error) {
-    console.error('❌ Error seeding services:', error.message);
-    throw error;
-  }
-};
-
-const seedAppointments = async (appointments) => {
-  try {
-    console.log('Seeding appointments...');
-    
-    for (const appointment of appointments) {
-      const query = `
-        INSERT INTO appointments (
-          title, description, clientId, clientName, clientEmail, clientPhone,
-          companyId, companyName, serviceId, serviceName, providerId, providerName,
-          spaceId, spaceName, date, time, duration, status, type, priority,
-          price, paymentStatus, paymentMethod, notes, reminderSent, createdAt, updatedAt
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `;
-
-      const values = [
-        appointment.title,
-        appointment.description,
-        appointment.clientId,
-        appointment.clientName,
-        appointment.clientEmail,
-        appointment.clientPhone,
-        appointment.companyId,
-        appointment.companyName,
-        appointment.serviceId,
-        appointment.serviceName,
-        appointment.providerId,
-        appointment.providerName,
-        appointment.spaceId,
-        appointment.spaceName,
-        appointment.date,
-        appointment.time,
-        appointment.duration,
-        appointment.status,
-        appointment.type,
-        appointment.priority,
-        appointment.price,
-        appointment.paymentStatus,
-        appointment.paymentMethod,
-        appointment.notes,
-        appointment.reminderSent,
-        appointment.createdAt,
-        appointment.updatedAt
-      ];
-
-      await pool.execute(query, values);
-    }
-    
-    console.log(`✅ Seeded ${appointments.length} appointments`);
-  } catch (error) {
-    console.error('❌ Error seeding appointments:', error.message);
-    throw error;
-  }
-};
-
-const seedCompanies = async () => {
-  try {
-    console.log('Seeding companies...');
-    
-    const companies = [
-      {
-        id: 'comp_1',
-        name: 'Beauty & Wellness Spa',
-        description: 'Full-service beauty and wellness spa offering facials, massages, and aromatherapy treatments.',
-        category: 'Beauty & Wellness',
-        subcategory: 'Spa & Massage',
-        address: '123 Beauty Avenue, Los Angeles, CA 90210',
-        phone: '+1 (555) 123-4567',
-        email: 'info@beautyspace.com',
-        website: 'https://beautyspace.com',
-        ownerId: 'user_2',
-        isActive: true
-      },
-      {
-        id: 'comp_2',
-        name: 'DentalCare Pro',
-        description: 'Professional dental clinic providing comprehensive dental care and cosmetic treatments.',
-        category: 'Healthcare & Medical',
-        subcategory: 'Dental Services',
-        address: '456 Health Street, San Francisco, CA 94105',
-        phone: '+1 (555) 987-6543',
-        email: 'info@dentalcare.com',
-        website: 'https://dentalcare.com',
-        ownerId: 'user_3',
-        isActive: true
-      },
-      {
-        id: 'comp_3',
-        name: 'Fitness Plus',
-        description: 'Modern fitness center with personal training and group classes.',
-        category: 'Beauty & Wellness',
-        subcategory: 'Fitness & Gyms',
-        address: '100 Fitness Way, Austin, TX 78701',
-        phone: '+1 (555) 678-9012',
-        email: 'info@fitnessplus.com',
-        website: 'https://fitnessplus.com',
-        ownerId: 'user_8',
-        isActive: true
+      if (roleTables.length > 0) {
+        await pool.execute(
+          `INSERT INTO users_role (userId, role, roleLevel, companyId) 
+           VALUES (?, ?, ?, ?)
+           ON DUPLICATE KEY UPDATE role = ?, roleLevel = ?`,
+          [superAdminData.id, 'Super Admin', 0, null, 'Super Admin', 0]
+        );
+        console.log('✅ Added superadmin role to users_role table');
       }
-    ];
-
-    for (const company of companies) {
-      const query = `
-        INSERT INTO companies (
-          id, name, description, category, subcategory, address, phone, email, website, ownerId, isActive
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `;
-
-      const values = [
-        company.id, company.name, company.description, company.category,
-        company.subcategory, company.address, company.phone, company.email,
-        company.website, company.ownerId, company.isActive
-      ];
-
-      await pool.execute(query, values);
+    } catch (roleError) {
+      console.log('ℹ️  users_role table not found or error adding role (this is okay)');
     }
-    
-    console.log(`✅ Seeded ${companies.length} companies`);
+
+    console.log('✅ Superadmin user created successfully!');
+    console.log(`🆔 User ID: ${superAdminId}`);
+    console.log('📧 Email: admin@appointmentapp.com');
+    console.log('🔑 Password: SuperAdmin2024!');
   } catch (error) {
-    console.error('❌ Error seeding companies:', error.message);
-    throw error;
-  }
-};
-
-const seedSpaces = async () => {
-  try {
-    console.log('Seeding spaces...');
-    
-    const spaces = [
-      {
-        id: 'space_1',
-        name: 'Treatment Room A',
-        description: 'Private treatment room for facials and skincare treatments',
-        type: 'Treatment Room',
-        capacity: 1,
-        companyId: 'comp_1',
-        isActive: true
-      },
-      {
-        id: 'space_2',
-        name: 'Massage Room B',
-        description: 'Relaxing massage room with aromatherapy',
-        type: 'Massage Room',
-        capacity: 1,
-        companyId: 'comp_1',
-        isActive: true
-      },
-      {
-        id: 'space_3',
-        name: 'Dental Chair 1',
-        description: 'Standard dental examination chair',
-        type: 'Dental Chair',
-        capacity: 1,
-        companyId: 'comp_2',
-        isActive: true
-      }
-    ];
-
-    for (const space of spaces) {
-      const query = `
-        INSERT INTO spaces (id, name, description, type, capacity, companyId, isActive)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-      `;
-
-      const values = [
-        space.id, space.name, space.description, space.type,
-        space.capacity, space.companyId, space.isActive
-      ];
-
-      await pool.execute(query, values);
-    }
-    
-    console.log(`✅ Seeded ${spaces.length} spaces`);
-  } catch (error) {
-    console.error('❌ Error seeding spaces:', error.message);
+    console.error('❌ Error creating superadmin user:', error.message);
     throw error;
   }
 };
@@ -304,17 +140,7 @@ const seedSpaces = async () => {
 const seedDatabase = async () => {
   try {
     console.log('🌱 Starting database seeding...');
-    
-    const { usersData, appointmentsData, servicesData, categoriesData } = loadSeedData();
-    
-    // Seed in order to respect foreign key constraints
-    await seedUsers(usersData.users);
-    await seedCategories(categoriesData.categories);
-    await seedCompanies();
-    await seedSpaces();
-    await seedServices(servicesData.services);
-    await seedAppointments(appointmentsData.appointments);
-    
+    await seedSuperAdmin();
     console.log('✅ Database seeding completed successfully!');
   } catch (error) {
     console.error('❌ Database seeding failed:', error.message);
@@ -337,11 +163,5 @@ if (require.main === module) {
 
 module.exports = {
   seedDatabase,
-  seedUsers,
-  seedCategories,
-  seedServices,
-  seedAppointments,
-  seedCompanies,
-  seedSpaces
+  seedSuperAdmin
 };
-

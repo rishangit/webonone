@@ -10,13 +10,13 @@ console.log('🚀 Starting Appointment App Backend...');
 const envPath = path.join(__dirname, '../.env');
 if (!fs.existsSync(envPath)) {
   console.log('📝 Creating .env file from template...');
-  
+
   const envContent = `# Database Configuration
-DB_HOST=mysql-1f0279f2-thinira-9435.b.aivencloud.com
-DB_PORT=20513
-DB_USER=avnadmin
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
 DB_PASSWORD=your-database-password
-DB_NAME=appapp
+DB_NAME=app-app
 
 # Server Configuration
 PORT=5007
@@ -27,7 +27,7 @@ JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
 JWT_EXPIRES_IN=7d
 
 # CORS Configuration
-FRONTEND_URL=http://localhost:3007
+FRONTEND_URL=http://localhost:5173
 
 # Rate Limiting
 RATE_LIMIT_WINDOW_MS=900000

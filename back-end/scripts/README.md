@@ -7,7 +7,7 @@ This directory contains essential database management scripts for the appointmen
 ### `initDatabase.js`
 - **Purpose**: Initializes the database schema
 - **Usage**: `node scripts/initDatabase.js`
-- **Description**: Creates all necessary tables (users, categories, subcategories, appointments, etc.)
+- **Description**: Creates all necessary tables (users, appointments, services, companies, etc.)
 
 ### `seedDatabase.js`
 - **Purpose**: Seeds the database with initial data
@@ -24,35 +24,32 @@ This directory contains essential database management scripts for the appointmen
 - **Usage**: `node scripts/start.js`
 - **Description**: Starts the application server with proper configuration
 
-### `removeProductColumns.js`
-- **Purpose**: Migration script to remove deprecated columns from products table
-- **Usage**: `node scripts/removeProductColumns.js`
-- **Description**: Removes categoryId, subcategoryId, baseCostPrice, suggestedSellPrice, currentStock, minimumStock, and maximumStock columns from the products table
+## Utility Scripts
 
-### `removeProductTagsColumn.js`
-- **Purpose**: Migration script to remove tags JSON column from products table
-- **Usage**: `node scripts/removeProductTagsColumn.js`
-- **Description**: Removes the tags JSON column from the products table. Tags are now stored in the product_tags junction table (similar to company_tags)
+### `verifyDatabase.js`
+- **Purpose**: Verify database structure and tables
+- **Usage**: `node scripts/verifyDatabase.js`
+- **Description**: Checks if all required tables exist and verifies their structure
 
-### `removeProductUnitNotesColumns.js`
-- **Purpose**: Migration script to remove unit and notes columns from products table
-- **Usage**: `node scripts/removeProductUnitNotesColumns.js`
-- **Description**: Removes the unit and notes columns from the products table
+### `generateRandomUsers.js`
+- **Purpose**: Generate random test users
+- **Usage**: `node scripts/generateRandomUsers.js`
+- **Description**: Creates a specified number of random users for testing purposes
 
-### `migrateProductsToUUID.js`
-- **Purpose**: Migration script to convert products table primary key from INT to UUID (deprecated - use migrateProductsToNanoID.js instead)
-- **Usage**: `node scripts/migrateProductsToUUID.js`
-- **Description**: Converts the products table id column from INT AUTO_INCREMENT to VARCHAR(36) UUID. Also updates the product_tags junction table to use VARCHAR(36) for productId. Generates UUIDs for all existing products.
+### `cleanupOrphanedRows.js`
+- **Purpose**: Clean up orphaned database rows
+- **Usage**: `node scripts/cleanupOrphanedRows.js`
+- **Description**: Removes orphaned records that violate referential integrity
 
-### `migrateProductsToNanoID.js`
-- **Purpose**: Migration script to convert products table primary key to NanoID (8-10 characters)
-- **Usage**: `node scripts/migrateProductsToNanoID.js`
-- **Description**: Converts the products table id column from UUID (VARCHAR(36)) or INT to NanoID (VARCHAR(10)). Also updates the product_tags junction table to use VARCHAR(10) for productId. Generates NanoIDs (10 characters) for all existing products. NanoID is shorter and more URL-friendly than UUID.
+### `addDummyCompanyLogos.js`
+- **Purpose**: Add dummy logos to companies
+- **Usage**: `node scripts/addDummyCompanyLogos.js`
+- **Description**: Updates companies with placeholder logo URLs for testing
 
-### `removeCategoryTables.js`
-- **Purpose**: Migration script to remove category tables (company_categories and product_categories)
-- **Usage**: `node scripts/removeCategoryTables.js`
-- **Description**: Drops the company_categories and product_categories tables from the database. This migration is run when transitioning from categories to tags. Categories are no longer used in the application.
+### `updateMielleVariants.js`
+- **Purpose**: Update specific product variants
+- **Usage**: `node scripts/updateMielleVariants.js`
+- **Description**: Updates Mielle product variants with specific data
 
 ## Usage
 
@@ -71,18 +68,14 @@ node scripts/seedDatabase.js
 node scripts/start.js
 ```
 
-## Database Schema
-
-The application uses the following main tables:
-- `users` - User accounts and authentication
-- `categories` - Service categories
-- `subcategories` - Category subcategories
-- `appointments` - Booking appointments
-- `services` - Available services
-- `companies` - Business entities
+### Verifying Database
+```bash
+node scripts/verifyDatabase.js
+```
 
 ## Notes
 
-- All migration scripts have been removed as they were one-time operations
-- The database schema is now stable and production-ready
+- All one-time migration scripts have been removed as the local and live databases are now in sync
+- The database schema is stable and production-ready
 - Always backup your database before running any scripts in production
+- Utility scripts can be run as needed for maintenance and testing

@@ -4,17 +4,26 @@ const verifyDatabase = async () => {
   try {
     console.log('🔍 Verifying database tables...\n');
 
-    // Expected tables based on models and routes
+    // Expected tables based on initDatabase.js
+    // Note: categories and subcategories tables have been removed
     const expectedTables = [
       'users',
-      'categories',
-      'subcategories',
-      'services',
-      'appointments',
+      'users_role',
       'companies',
+      'company_users',
+      'services',
       'spaces',
+      'appointments',
+      'company_appointments',
       'notifications',
-      'sales'
+      'sales',
+      'products',
+      'product_variants',
+      'tags',
+      'company_tags',
+      'product_tags',
+      'company_products',
+      'company_product_tags'
     ];
 
     const missingTables = [];
@@ -48,7 +57,7 @@ const verifyDatabase = async () => {
       missingTables.forEach(table => {
         console.log(`   - ${table}`);
       });
-      console.log('\n💡 Run: node scripts/runInit.js to create missing tables\n');
+      console.log('\n💡 Run: node scripts/initDatabase.js to create missing tables\n');
       return false;
     } else {
       console.log('✅ All required tables exist!\n');
@@ -66,16 +75,25 @@ const verifyDatabase = async () => {
 };
 
 const verifyTableStructures = async () => {
+  // Table structure checks based on actual schema from initDatabase.js
   const tableChecks = {
-    users: ['id', 'email', 'password', 'firstName', 'lastName', 'role'],
-    categories: ['id', 'name', 'description', 'icon', 'isActive'],
-    subcategories: ['id', 'categoryId', 'name', 'isActive'],
+    users: ['id', 'email', 'password', 'firstName', 'lastName', 'isActive', 'isVerified'],
+    users_role: ['id', 'userId', 'role', 'companyId', 'isActive'],
+    companies: ['id', 'name', 'isActive', 'ownerId'],
+    company_users: ['id', 'companyId', 'userId', 'totalAppointments', 'totalSpent'],
     services: ['id', 'name', 'duration', 'price', 'companyId', 'status'],
-    appointments: ['id', 'clientId', 'companyId', 'date', 'time', 'status'],
-    companies: ['id', 'name', 'isActive'],
     spaces: ['id', 'name', 'companyId', 'isActive'],
+    appointments: ['id', 'clientId', 'companyId', 'date', 'time', 'status'],
+    company_appointments: ['id', 'clientId', 'companyId', 'date', 'time', 'status'],
     notifications: ['id', 'userId', 'title', 'message', 'isRead'],
-    sales: ['id', 'companyId', 'clientId', 'amount', 'paymentStatus']
+    sales: ['id', 'companyId', 'clientId', 'amount', 'paymentStatus'],
+    products: ['id', 'name', 'isActive', 'isVerified'],
+    product_variants: ['id', 'productId', 'name', 'sku', 'isActive'],
+    tags: ['id', 'name', 'isActive'],
+    company_tags: ['id', 'companyId', 'tagId'],
+    product_tags: ['id', 'productId', 'tagId'],
+    company_products: ['id', 'companyId', 'systemProductId', 'sellPrice', 'currentStock'],
+    company_product_tags: ['id', 'companyProductId', 'tagId']
   };
 
   for (const [table, requiredColumns] of Object.entries(tableChecks)) {
@@ -117,4 +135,3 @@ if (require.main === module) {
 }
 
 module.exports = { verifyDatabase, verifyTableStructures };
-
