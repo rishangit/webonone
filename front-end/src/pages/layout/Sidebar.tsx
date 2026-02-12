@@ -4,6 +4,7 @@ import { useIsMobile } from "../../components/ui/use-mobile";
 import { User as UserType, UserRole } from "../../types/user";
 import { useState, useEffect } from "react";
 import { Icon } from "../../components/common/Icon";
+import { config } from "../../config/environment";
 
 const getNavigationItems = (role: UserRole) => {
   const baseItems = [
@@ -212,6 +213,13 @@ export function Sidebar({ currentPage, onPageChange, isOpen, onClose, currentUse
               <span className="font-medium text-[var(--accent-text)]">4</span>
             </div>
           </div>
+        </div>
+
+        {/* App Version */}
+        <div className={`mt-8 py-2`}>
+          <p className="text-xs text-muted-foreground text-center">
+            Version {config.appVersion}
+          </p>
         </div>
       </div>
     </div>

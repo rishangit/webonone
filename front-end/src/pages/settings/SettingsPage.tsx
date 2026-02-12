@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Separator } from "../../components/ui/separator";
 import { Badge } from "../../components/ui/badge";
 import { useIsMobile } from "../../components/ui/use-mobile";
+import { config } from "../../config/environment";
 
 interface SettingsPageProps {
   onThemeChange: (theme: "light" | "dark" | "system") => void;
@@ -498,7 +499,7 @@ export function SettingsPage({ onThemeChange, currentTheme, onAccentColorChange,
           <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
             <div className="text-center space-y-2">
               <h3 className="text-foreground font-medium">WebOnOne</h3>
-              <p className="text-sm text-muted-foreground">Version 2.1.0</p>
+              <p className="text-sm text-muted-foreground">Version {config.appVersion}</p>
               <p className="text-xs text-muted-foreground">© 2024 All rights reserved</p>
             </div>
           </Card>
