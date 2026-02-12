@@ -1,6 +1,7 @@
-import { Users, TrendingUp, Building2, Briefcase, UserPlus } from "lucide-react";
+import { Users, TrendingUp, Building2, Briefcase, UserPlus, Filter } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
+import { Badge } from "../../components/ui/badge";
 import { UserCard } from "./UserCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { useState, useEffect, useMemo, memo } from "react";
@@ -13,6 +14,8 @@ import { fetchUsersRequest } from "../../store/slices/usersSlice";
 import { SearchInput } from "../../components/common/SearchInput";
 import { Pagination } from "../../components/common/Pagination";
 import { EmptyState } from "../../components/common/EmptyState";
+import { RightPanel } from "../../components/common/RightPanel";
+import { cn } from "../../components/ui/utils";
 import { Carousel, CarouselContent, CarouselItem } from "../../components/ui/carousel";
 // Note: We don't update Redux state during impersonation to avoid double render
 // The page reload will restore user from localStorage and trigger refreshUserRequest in App initialization
@@ -61,6 +64,7 @@ export function UsersPage({ currentUser, onViewProfile, onViewAppointments }: Us
   const [selectedCompanyUserId, setSelectedCompanyUserId] = useState<string | null>(null);
   const [allUsersForSelection, setAllUsersForSelection] = useState<User[]>([]);
   const [loadingAllUsers, setLoadingAllUsers] = useState(false);
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
 
   // Get company ID from user (like ProductsPage)
   const companyId = user?.companyId || (currentUser as any)?.companyId;
@@ -648,51 +652,27 @@ UsersList.displayName = "UsersList";
               debounceDelay={500}
             />
 
-            <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
-              <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
-                <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                  <SelectTrigger className="sm:w-32 bg-[var(--glass-bg)] border-[var(--glass-border)]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    {uniqueStatuses.map(status => (
-                      <SelectItem key={status} value={status}>{status}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                {/* Role Filter - Only for Super Admin */}
-                {isSystemAdmin && uniqueRoles.length > 0 && (
-                  <Select value={selectedRole} onValueChange={setSelectedRole}>
-                    <SelectTrigger className="sm:w-40 bg-[var(--glass-bg)] border-[var(--glass-border)]">
-                      <SelectValue placeholder="All Roles" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Roles</SelectItem>
-                      {uniqueRoles.map(role => (
-                        <SelectItem key={role} value={role}>{role}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+            {/* Filter Button and View Switcher - All aligned to right */}
+            <div className="flex items-center justify-end gap-3 flex-wrap">
+              {/* Filter Button */}
+              <Button 
+                variant="outline" 
+                onClick={() => setIsFilterPanelOpen(true)}
+                className={cn(
+                  "h-9",
+                  (debouncedSearchTerm || selectedStatus !== "all" || (isSystemAdmin && selectedRole !== "all"))
+                    ? "bg-[var(--accent-bg)] border-[var(--accent-border)] text-[var(--accent-text)] hover:bg-[var(--accent-primary)] hover:border-[var(--accent-primary)]"
+                    : "bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent text-foreground hover:text-foreground"
                 )}
+              >
+                <Filter className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Filter</span>
+              </Button>
 
-                {(debouncedSearchTerm || selectedStatus !== "all" || (isSystemAdmin && selectedRole !== "all")) && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleClearFilters}
-                    className="bg-[var(--glass-bg)] border-[var(--glass-border)]"
-                  >
-                    Clear Filters
-                  </Button>
-                )}
-              </div>
-
-              {/* View Mode Toggle */}
-              <ViewSwitcher 
-                viewMode={viewMode} 
-                onViewModeChange={setViewMode} 
+              {/* View Switcher */}
+              <ViewSwitcher
+                viewMode={viewMode}
+                onViewModeChange={setViewMode}
               />
             </div>
           </div>
@@ -957,6 +937,70 @@ UsersList.displayName = "UsersList";
           error={false}
         />
       )}
+
+      {/* Filter Right Panel */}
+      <RightPanel
+        open={isFilterPanelOpen}
+        onOpenChange={setIsFilterPanelOpen}
+        title="Filters"
+        contentClassName="bg-background"
+      >
+        <div className="space-y-4">
+          {/* Status Filter */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Status</label>
+            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+              <SelectTrigger className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border-border">
+                <SelectItem value="all">All Status</SelectItem>
+                {uniqueStatuses.map(status => (
+                  <SelectItem key={status} value={status}>{status}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Role Filter - Only for Super Admin */}
+          {isSystemAdmin && uniqueRoles.length > 0 && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Role</label>
+              <Select value={selectedRole} onValueChange={setSelectedRole}>
+                <SelectTrigger className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
+                  <SelectValue placeholder="All Roles" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border">
+                  <SelectItem value="all">All Roles</SelectItem>
+                  {uniqueRoles.map(role => (
+                    <SelectItem key={role} value={role}>{role}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* Filter Results Count */}
+          {(debouncedSearchTerm || selectedStatus !== "all" || (isSystemAdmin && selectedRole !== "all")) && (
+            <div className="pt-4 border-t border-border space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Results</span>
+                <Badge variant="outline" className="bg-[var(--accent-bg)] text-[var(--accent-text)] border-[var(--accent-border)]">
+                  {users.length} users
+                </Badge>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleClearFilters}
+                className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground hover:bg-accent hover:text-foreground"
+              >
+                Clear All Filters
+              </Button>
+            </div>
+          )}
+        </div>
+      </RightPanel>
     </div>
   );
 }

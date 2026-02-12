@@ -29,6 +29,8 @@ import { formatAvatarUrl, formatDate } from "../../utils";
 import { SearchInput } from "../../components/common/SearchInput";
 import { Pagination } from "../../components/common/Pagination";
 import { EmptyState } from "../../components/common/EmptyState";
+import { RightPanel } from "../../components/common/RightPanel";
+import { cn } from "../../components/ui/utils";
 
 // Use Staff type from services
 type StaffMember = Staff;
@@ -63,6 +65,7 @@ export function StaffPage({ currentUser }: StaffPageProps) {
   const [isStaffDetailDialogOpen, setIsStaffDetailDialogOpen] = useState(false);
   const [staffToDelete, setStaffToDelete] = useState<StaffMember | null>(null);
   const [isDeleteConfirmDialogOpen, setIsDeleteConfirmDialogOpen] = useState(false);
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
 
   // Get company ID from user (like ProductsPage)
   const companyId = user?.companyId || currentUser?.companyId;
@@ -478,66 +481,27 @@ export function StaffPage({ currentUser }: StaffPageProps) {
             debounceDelay={500}
           />
 
-          <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
-            <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
-              <Select value={filterRole} onValueChange={setFilterRole}>
-                <SelectTrigger className="sm:w-48 bg-[var(--glass-bg)] border-[var(--glass-border)]">
-                  <SelectValue placeholder="Filter by role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Roles</SelectItem>
-                  {uniqueRoles.map(role => (
-                    <SelectItem key={role} value={role}>{role}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger className="sm:w-32 bg-[var(--glass-bg)] border-[var(--glass-border)]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="Active">Active</SelectItem>
-                  <SelectItem value="Inactive">Inactive</SelectItem>
-                  <SelectItem value="Pending">Pending</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={filterDepartment} onValueChange={setFilterDepartment}>
-                <SelectTrigger className="sm:w-48 bg-[var(--glass-bg)] border-[var(--glass-border)]">
-                  <SelectValue placeholder="Filter by department" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Departments</SelectItem>
-                  {uniqueDepartments.map(dept => (
-                    <SelectItem key={dept} value={dept}>{dept}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              {(debouncedSearchTerm || filterRole !== "all" || filterStatus !== "all" || filterDepartment !== "all") && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setSearchTerm("");
-                    setDebouncedSearchTerm("");
-                    setFilterRole("all");
-                    setFilterStatus("all");
-                    setFilterDepartment("all");
-                  }}
-                  className="bg-[var(--glass-bg)] border-[var(--glass-border)]"
-                >
-                  Clear Filters
-                </Button>
+          {/* Filter Button and View Switcher - All aligned to right */}
+          <div className="flex items-center justify-end gap-3 flex-wrap">
+            {/* Filter Button */}
+            <Button 
+              variant="outline" 
+              onClick={() => setIsFilterPanelOpen(true)}
+              className={cn(
+                "h-9",
+                (debouncedSearchTerm || filterRole !== "all" || filterStatus !== "all" || filterDepartment !== "all")
+                  ? "bg-[var(--accent-bg)] border-[var(--accent-border)] text-[var(--accent-text)] hover:bg-[var(--accent-primary)] hover:border-[var(--accent-primary)]"
+                  : "bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent text-foreground hover:text-foreground"
               )}
-            </div>
+            >
+              <Filter className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Filter</span>
+            </Button>
 
-            {/* View Mode Toggle */}
-            <ViewSwitcher 
-              viewMode={viewMode} 
-              onViewModeChange={setViewMode} 
+            {/* View Switcher */}
+            <ViewSwitcher
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
             />
           </div>
         </div>
@@ -740,6 +704,90 @@ export function StaffPage({ currentUser }: StaffPageProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Filter Right Panel */}
+      <RightPanel
+        open={isFilterPanelOpen}
+        onOpenChange={setIsFilterPanelOpen}
+        title="Filters"
+        contentClassName="bg-background"
+      >
+        <div className="space-y-4">
+          {/* Role Filter */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Role</label>
+            <Select value={filterRole} onValueChange={setFilterRole}>
+              <SelectTrigger className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
+                <SelectValue placeholder="All Roles" />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border-border">
+                <SelectItem value="all">All Roles</SelectItem>
+                {uniqueRoles.map(role => (
+                  <SelectItem key={role} value={role}>{role}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Status Filter */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Status</label>
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border-border">
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="Active">Active</SelectItem>
+                <SelectItem value="Inactive">Inactive</SelectItem>
+                <SelectItem value="Pending">Pending</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Department Filter */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Department</label>
+            <Select value={filterDepartment} onValueChange={setFilterDepartment}>
+              <SelectTrigger className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
+                <SelectValue placeholder="All Departments" />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border-border">
+                <SelectItem value="all">All Departments</SelectItem>
+                {uniqueDepartments.map(dept => (
+                  <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Filter Results Count */}
+          {(debouncedSearchTerm || filterRole !== "all" || filterStatus !== "all" || filterDepartment !== "all") && (
+            <div className="pt-4 border-t border-border space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Results</span>
+                <Badge variant="outline" className="bg-[var(--accent-bg)] text-[var(--accent-text)] border-[var(--accent-border)]">
+                  {displayedStaff.length} staff members
+                </Badge>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSearchTerm("");
+                  setDebouncedSearchTerm("");
+                  setFilterRole("all");
+                  setFilterStatus("all");
+                  setFilterDepartment("all");
+                }}
+                className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground hover:bg-accent hover:text-foreground"
+              >
+                Clear All Filters
+              </Button>
+            </div>
+          )}
+        </div>
+      </RightPanel>
     </div>
   );
 }

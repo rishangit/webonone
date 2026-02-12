@@ -98,6 +98,7 @@ function ProtectedRouteWrapper({ children }: { children: React.ReactNode }) {
     if (path.includes('/appointments')) return 'appointments';
     if (path.includes('/users')) return 'users';
     if (path.includes('/system-products')) return 'system-products';
+    if (path.includes('/company-products')) return 'products';
     if (path.includes('/products')) return 'products';
     if (path.includes('/tags')) return 'tags';
     if (path.includes('/sales')) return 'sales';

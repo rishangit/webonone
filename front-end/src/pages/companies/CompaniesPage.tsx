@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { Building, CheckCircle, Clock, XCircle } from "lucide-react";
+import { Building, CheckCircle, Clock, XCircle, Filter } from "lucide-react";
 import { Card } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
@@ -13,6 +13,9 @@ import { CompanyListItem } from "./CompanyListItem";
 import { SearchInput } from "../../components/common/SearchInput";
 import { Pagination } from "../../components/common/Pagination";
 import { EmptyState } from "../../components/common/EmptyState";
+import { RightPanel } from "../../components/common/RightPanel";
+import { cn } from "../../components/ui/utils";
+import { Carousel, CarouselContent, CarouselItem } from "../../components/ui/carousel";
 
 interface Tag {
   id: number;
@@ -58,6 +61,7 @@ export function CompaniesPage({ onViewCompany }: CompaniesPageProps) {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
 
   // Memoize handlers to prevent SearchInput re-renders when parent re-renders
   const handleSearchChange = useCallback((value: string) => {
@@ -212,22 +216,56 @@ export function CompaniesPage({ onViewCompany }: CompaniesPageProps) {
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-            <Card key={index} className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
-                  <p className="text-xl font-semibold text-foreground">{stat.count}</p>
+      {/* Stats Cards - Desktop Only */}
+      <div className="hidden lg:block">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {stats.map((stat, index) => {
+            const Icon = stat.icon;
+            return (
+              <Card key={index} className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
+                    <p className="text-xl font-semibold text-foreground">{stat.count}</p>
+                  </div>
+                  <Icon className={`w-8 h-8 ${stat.color} dark:text-${stat.color.split('-')[1]}-400`} />
                 </div>
-                <Icon className={`w-8 h-8 ${stat.color} dark:text-${stat.color.split('-')[1]}-400`} />
-              </div>
-            </Card>
-          );
-        })}
+              </Card>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Mobile & Tablet: Carousel - Horizontal scroll with same layout as desktop */}
+      <div className="block lg:hidden">
+        <Carousel
+          opts={{
+            align: "start",
+            slidesToScroll: 1,
+            containScroll: "trimSnaps",
+          }}
+          className="w-full"
+        >
+          <CarouselContent className="ml-0">
+            {stats.map((stat, index) => {
+              const Icon = stat.icon;
+              const isLast = index === stats.length - 1;
+              return (
+                <CarouselItem key={index} className={`pl-0 ${isLast ? 'pr-4' : 'pr-2'} flex-shrink-0`} style={{ minWidth: '40vw', width: 'auto' }}>
+                  <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
+                        <p className="text-xl font-semibold text-foreground">{stat.count}</p>
+                      </div>
+                      <Icon className={`w-8 h-8 ${stat.color} dark:text-${stat.color.split('-')[1]}-400`} />
+                    </div>
+                  </Card>
+                </CarouselItem>
+              );
+            })}
+          </CarouselContent>
+        </Carousel>
       </div>
 
       {/* Filters */}
@@ -242,38 +280,27 @@ export function CompaniesPage({ onViewCompany }: CompaniesPageProps) {
             debounceDelay={500}
           />
           
-          {/* Filter Controls */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
-            <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-32 bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border">
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="approved">Approved</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              {/* Clear Filters */}
-              {(debouncedSearchTerm || statusFilter !== "all") && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleClearFilters}
-                  className="bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground hover:bg-accent hover:text-foreground"
-                >
-                  Clear Filters
-                </Button>
+          {/* Filter Button and View Switcher - All aligned to right */}
+          <div className="flex items-center justify-end gap-3 flex-wrap">
+            {/* Filter Button */}
+            <Button 
+              variant="outline" 
+              onClick={() => setIsFilterPanelOpen(true)}
+              className={cn(
+                "h-9",
+                (debouncedSearchTerm || statusFilter !== "all")
+                  ? "bg-[var(--accent-bg)] border-[var(--accent-border)] text-[var(--accent-text)] hover:bg-[var(--accent-primary)] hover:border-[var(--accent-primary)]"
+                  : "bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent text-foreground hover:text-foreground"
               )}
-            </div>
-            
-            {/* View Mode Toggle */}
-            <ViewSwitcher 
-              viewMode={viewMode} 
-              onViewModeChange={setViewMode} 
+            >
+              <Filter className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Filter</span>
+            </Button>
+
+            {/* View Switcher */}
+            <ViewSwitcher
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
             />
           </div>
         </div>
@@ -461,6 +488,52 @@ export function CompaniesPage({ onViewCompany }: CompaniesPageProps) {
           }
         />
       )}
+
+      {/* Filter Right Panel */}
+      <RightPanel
+        open={isFilterPanelOpen}
+        onOpenChange={setIsFilterPanelOpen}
+        title="Filters"
+        contentClassName="bg-background"
+      >
+        <div className="space-y-4">
+          {/* Status Filter */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Status</label>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border-border">
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="approved">Approved</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="rejected">Rejected</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Filter Results Count */}
+          {(debouncedSearchTerm || statusFilter !== "all") && (
+            <div className="pt-4 border-t border-border space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Results</span>
+                <Badge variant="outline" className="bg-[var(--accent-bg)] text-[var(--accent-text)] border-[var(--accent-border)]">
+                  {displayedCompanies.length} companies
+                </Badge>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleClearFilters}
+                className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground hover:bg-accent hover:text-foreground"
+              >
+                Clear All Filters
+              </Button>
+            </div>
+          )}
+        </div>
+      </RightPanel>
     </div>
   );
 }

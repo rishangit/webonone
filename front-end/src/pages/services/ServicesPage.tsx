@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Plus, Clock, MoreVertical, Edit, Trash2, Eye, Copy, Archive, Stethoscope } from "lucide-react";
+import { Plus, Clock, MoreVertical, Edit, Trash2, Eye, Copy, Archive, Stethoscope, Filter } from "lucide-react";
 import { Card } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -7,6 +7,8 @@ import { Badge } from "../../components/ui/badge";
 import { SearchInput } from "../../components/common/SearchInput";
 import { Pagination } from "../../components/common/Pagination";
 import { EmptyState } from "../../components/common/EmptyState";
+import { RightPanel } from "../../components/common/RightPanel";
+import { cn } from "../../components/ui/utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "../../components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import FileUpload from "../../components/ui/file-upload";
@@ -67,6 +69,7 @@ export function ServicesPage() {
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [selectedService, setSelectedService] = useState<ServiceType | null>(null);
   const [companyCurrency, setCompanyCurrency] = useState<Currency | null>(null);
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
   
   // Get company ID from user
   const companyId = user?.companyId;
@@ -748,54 +751,27 @@ export function ServicesPage() {
             debounceDelay={500}
           />
 
-          <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
-            <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
-              <Select value={filterCategory} onValueChange={setFilterCategory}>
-                <SelectTrigger className="sm:w-48 bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border">
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {[...new Set(services.map(s => s.category))].map(category => (
-                    <SelectItem key={category} value={category}>{category}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger className="sm:w-32 bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border">
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="Active">Active</SelectItem>
-                  <SelectItem value="Inactive">Inactive</SelectItem>
-                  <SelectItem value="Draft">Draft</SelectItem>
-                </SelectContent>
-              </Select>
-
-              {(searchTerm || filterCategory !== "all" || filterStatus !== "all") && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setSearchTerm("");
-                    setDebouncedSearchTerm("");
-                    setFilterCategory("all");
-                    setFilterStatus("all");
-                    setCurrentPage(1);
-                  }}
-                  className="bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground hover:bg-accent"
-                >
-                  Clear Filters
-                </Button>
+          {/* Filter Button and View Switcher - All aligned to right */}
+          <div className="flex items-center justify-end gap-3 flex-wrap">
+            {/* Filter Button */}
+            <Button 
+              variant="outline" 
+              onClick={() => setIsFilterPanelOpen(true)}
+              className={cn(
+                "h-9",
+                (debouncedSearchTerm || filterCategory !== "all" || filterStatus !== "all")
+                  ? "bg-[var(--accent-bg)] border-[var(--accent-border)] text-[var(--accent-text)] hover:bg-[var(--accent-primary)] hover:border-[var(--accent-primary)]"
+                  : "bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent text-foreground hover:text-foreground"
               )}
-            </div>
+            >
+              <Filter className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Filter</span>
+            </Button>
 
-            {/* View Mode Toggle */}
-            <ViewSwitcher 
-              viewMode={viewMode} 
-              onViewModeChange={setViewMode} 
+            {/* View Switcher */}
+            <ViewSwitcher
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
             />
           </div>
         </div>
@@ -1168,6 +1144,74 @@ export function ServicesPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Filter Right Panel */}
+      <RightPanel
+        open={isFilterPanelOpen}
+        onOpenChange={setIsFilterPanelOpen}
+        title="Filters"
+        contentClassName="bg-background"
+      >
+        <div className="space-y-4">
+          {/* Category Filter */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Category</label>
+            <Select value={filterCategory} onValueChange={setFilterCategory}>
+              <SelectTrigger className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
+                <SelectValue placeholder="All Categories" />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border-border">
+                <SelectItem value="all">All Categories</SelectItem>
+                {[...new Set(services.map(s => s.category))].map(category => (
+                  <SelectItem key={category} value={category}>{category}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Status Filter */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Status</label>
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border-border">
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="Active">Active</SelectItem>
+                <SelectItem value="Inactive">Inactive</SelectItem>
+                <SelectItem value="Draft">Draft</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Filter Results Count */}
+          {(debouncedSearchTerm || filterCategory !== "all" || filterStatus !== "all") && (
+            <div className="pt-4 border-t border-border space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Results</span>
+                <Badge variant="outline" className="bg-[var(--accent-bg)] text-[var(--accent-text)] border-[var(--accent-border)]">
+                  {filteredServices.length} services
+                </Badge>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSearchTerm("");
+                  setDebouncedSearchTerm("");
+                  setFilterCategory("all");
+                  setFilterStatus("all");
+                  setCurrentPage(1);
+                }}
+                className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground hover:bg-accent hover:text-foreground"
+              >
+                Clear All Filters
+              </Button>
+            </div>
+          )}
+        </div>
+      </RightPanel>
     </div>
   );
 }

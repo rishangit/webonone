@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Plus, MapPin, Users, Calendar, MoreVertical, Edit, Trash2, Eye } from "lucide-react";
+import { Plus, MapPin, Users, Calendar, MoreVertical, Edit, Trash2, Eye, Filter } from "lucide-react";
 import { Card } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -28,6 +28,8 @@ import { SearchInput } from "../../components/common/SearchInput";
 import { Pagination } from "../../components/common/Pagination";
 import { EmptyState } from "../../components/common/EmptyState";
 import { Carousel, CarouselContent, CarouselItem } from "../../components/ui/carousel";
+import { RightPanel } from "../../components/common/RightPanel";
+import { cn } from "../../components/ui/utils";
 
 export const SpacesPage = () => {
   const dispatch = useAppDispatch();
@@ -45,6 +47,7 @@ export const SpacesPage = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     capacity: "",
@@ -470,40 +473,27 @@ export const SpacesPage = () => {
             debounceDelay={500}
           />
           
-          {/* Filters and View Mode */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
-            <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
-              <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger className="w-40 bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border">
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="Active">Active</SelectItem>
-                  <SelectItem value="Inactive">Inactive</SelectItem>
-                  <SelectItem value="Maintenance">Maintenance</SelectItem>
-                </SelectContent>
-              </Select>
-              {(debouncedSearchTerm || filterStatus !== "all") && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setSearchTerm("");
-                    setDebouncedSearchTerm("");
-                    setFilterStatus("all");
-                  }}
-                  className="bg-[var(--glass-bg)] border-[var(--glass-border)]"
-                >
-                  Clear Filters
-                </Button>
+          {/* Filter Button and View Switcher - All aligned to right */}
+          <div className="flex items-center justify-end gap-3 flex-wrap">
+            {/* Filter Button */}
+            <Button 
+              variant="outline" 
+              onClick={() => setIsFilterPanelOpen(true)}
+              className={cn(
+                "h-9",
+                (debouncedSearchTerm || filterStatus !== "all")
+                  ? "bg-[var(--accent-bg)] border-[var(--accent-border)] text-[var(--accent-text)] hover:bg-[var(--accent-primary)] hover:border-[var(--accent-primary)]"
+                  : "bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent text-foreground hover:text-foreground"
               )}
-            </div>
-            
-            {/* View Mode Toggle */}
-            <ViewSwitcher 
-              viewMode={viewMode} 
-              onViewModeChange={setViewMode} 
+            >
+              <Filter className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Filter</span>
+            </Button>
+
+            {/* View Switcher */}
+            <ViewSwitcher
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
             />
           </div>
         </div>
@@ -823,6 +813,56 @@ export const SpacesPage = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Filter Right Panel */}
+      <RightPanel
+        open={isFilterPanelOpen}
+        onOpenChange={setIsFilterPanelOpen}
+        title="Filters"
+        contentClassName="bg-background"
+      >
+        <div className="space-y-4">
+          {/* Status Filter */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Status</label>
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
+                <SelectValue placeholder="All Status" />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border-border">
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="Active">Active</SelectItem>
+                <SelectItem value="Inactive">Inactive</SelectItem>
+                <SelectItem value="Maintenance">Maintenance</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Filter Results Count */}
+          {(debouncedSearchTerm || filterStatus !== "all") && (
+            <div className="pt-4 border-t border-border space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Results</span>
+                <Badge variant="outline" className="bg-[var(--accent-bg)] text-[var(--accent-text)] border-[var(--accent-border)]">
+                  {spaces.length} spaces
+                </Badge>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSearchTerm("");
+                  setDebouncedSearchTerm("");
+                  setFilterStatus("all");
+                }}
+                className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground hover:bg-accent hover:text-foreground"
+              >
+                Clear All Filters
+              </Button>
+            </div>
+          )}
+        </div>
+      </RightPanel>
     </div>
   );
 }

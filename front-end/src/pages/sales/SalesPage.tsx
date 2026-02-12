@@ -8,6 +8,8 @@ import { Badge } from "../../components/ui/badge";
 import { SearchInput } from "../../components/common/SearchInput";
 import { Pagination } from "../../components/common/Pagination";
 import { EmptyState } from "../../components/common/EmptyState";
+import { RightPanel } from "../../components/common/RightPanel";
+import { cn } from "../../components/ui/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
@@ -90,6 +92,7 @@ export function SalesPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteSaleDialog, setShowDeleteSaleDialog] = useState(false);
   const [showDeleteItemDialog, setShowDeleteItemDialog] = useState(false);
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
   const isMobile = useIsMobile();
 
   const isCompanyOwner = isRole(user?.role, UserRole.COMPANY_OWNER);
@@ -701,92 +704,48 @@ export function SalesPage() {
             debounceDelay={500}
           />
           
-          {/* Tab Buttons and Filters */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
-            <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
-              {/* Tab Navigation */}
-              <div className="flex bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg p-1">
-                <Button
-                  variant={activeTab === "sales" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setActiveTab("sales")}
-                  className={activeTab === "sales" 
-                    ? "bg-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-sm" 
-                    : "text-muted-foreground hover:text-foreground"
-                  }
-                >
-                  Sales History
-                </Button>
-                <Button
-                  variant={activeTab === "products" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setActiveTab("products")}
-                  className={activeTab === "products" 
-                    ? "bg-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-sm" 
-                    : "text-muted-foreground hover:text-foreground"
-                  }
-                >
-                  Product Performance
-                </Button>
-              </div>
-              
-              {/* Filters */}
-              {activeTab === "sales" && (
-                <>
-                  <Select value={filterType} onValueChange={setFilterType}>
-                    <SelectTrigger className="w-full sm:w-32 bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-popover border-border">
-                      <SelectItem value="all">All Types</SelectItem>
-                      <SelectItem value="appointment">Appointment Sales</SelectItem>
-                      <SelectItem value="product">Direct Sales</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <Select value={filterStatus} onValueChange={setFilterStatus}>
-                    <SelectTrigger className="w-full sm:w-32 bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-popover border-border">
-                      <SelectItem value="all">All Status</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                      <SelectItem value="processing">Processing</SelectItem>
-                      <SelectItem value="refunded">Refunded</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </>
-              )}
-
-              <Select value={dateRange} onValueChange={setDateRange}>
-                <SelectTrigger className="w-full sm:w-32 bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border">
-                  <SelectItem value="7days">Last 7 Days</SelectItem>
-                  <SelectItem value="30days">Last 30 Days</SelectItem>
-                  <SelectItem value="90days">Last 90 Days</SelectItem>
-                  <SelectItem value="year">This Year</SelectItem>
-                </SelectContent>
-              </Select>
-
-              {(debouncedSearchTerm || (activeTab === "sales" && (filterType !== "all" || filterStatus !== "all"))) && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setSearchTerm("");
-                    setDebouncedSearchTerm("");
-                    setFilterType("all");
-                    setFilterStatus("all");
-                    setCurrentPage(1);
-                  }}
-                  className="bg-[var(--glass-bg)] border-[var(--glass-border)]"
-                >
-                  Clear Filters
-                </Button>
-              )}
+          {/* Tab Navigation, Filter Button - All aligned to right */}
+          <div className="flex items-center justify-end gap-3 flex-wrap">
+            {/* Tab Navigation */}
+            <div className="flex bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg p-1">
+              <Button
+                variant={activeTab === "sales" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setActiveTab("sales")}
+                className={activeTab === "sales" 
+                  ? "bg-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-sm" 
+                  : "text-muted-foreground hover:text-foreground"
+                }
+              >
+                Sales History
+              </Button>
+              <Button
+                variant={activeTab === "products" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setActiveTab("products")}
+                className={activeTab === "products" 
+                  ? "bg-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-sm" 
+                  : "text-muted-foreground hover:text-foreground"
+                }
+              >
+                Product Performance
+              </Button>
             </div>
+
+            {/* Filter Button */}
+            <Button 
+              variant="outline" 
+              onClick={() => setIsFilterPanelOpen(true)}
+              className={cn(
+                "h-9",
+                (debouncedSearchTerm || (activeTab === "sales" && (filterType !== "all" || filterStatus !== "all")))
+                  ? "bg-[var(--accent-bg)] border-[var(--accent-border)] text-[var(--accent-text)] hover:bg-[var(--accent-primary)] hover:border-[var(--accent-primary)]"
+                  : "bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent text-foreground hover:text-foreground"
+              )}
+            >
+              <Filter className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Filter</span>
+            </Button>
           </div>
         </div>
       </Card>
@@ -1164,6 +1123,93 @@ export function SalesPage() {
           </Button>
         </div>
       </CustomDialog>
+
+      {/* Filter Right Panel */}
+      <RightPanel
+        open={isFilterPanelOpen}
+        onOpenChange={setIsFilterPanelOpen}
+        title="Filters"
+        contentClassName="bg-background"
+      >
+        <div className="space-y-4">
+          {/* Date Range Filter */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Date Range</label>
+            <Select value={dateRange} onValueChange={setDateRange}>
+              <SelectTrigger className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border-border">
+                <SelectItem value="7days">Last 7 Days</SelectItem>
+                <SelectItem value="30days">Last 30 Days</SelectItem>
+                <SelectItem value="90days">Last 90 Days</SelectItem>
+                <SelectItem value="year">This Year</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Type Filter - Only show for Sales tab */}
+          {activeTab === "sales" && (
+            <>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Type</label>
+                <Select value={filterType} onValueChange={setFilterType}>
+                  <SelectTrigger className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border-border">
+                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="appointment">Appointment Sales</SelectItem>
+                    <SelectItem value="product">Direct Sales</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Status Filter */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Status</label>
+                <Select value={filterStatus} onValueChange={setFilterStatus}>
+                  <SelectTrigger className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border-border">
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="processing">Processing</SelectItem>
+                    <SelectItem value="refunded">Refunded</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </>
+          )}
+
+          {/* Filter Results Count */}
+          {(debouncedSearchTerm || (activeTab === "sales" && (filterType !== "all" || filterStatus !== "all"))) && (
+            <div className="pt-4 border-t border-border space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Results</span>
+                <Badge variant="outline" className="bg-[var(--accent-bg)] text-[var(--accent-text)] border-[var(--accent-border)]">
+                  {filteredSales.length} sales
+                </Badge>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSearchTerm("");
+                  setDebouncedSearchTerm("");
+                  setFilterType("all");
+                  setFilterStatus("all");
+                  setCurrentPage(1);
+                }}
+                className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground hover:bg-accent hover:text-foreground"
+              >
+                Clear All Filters
+              </Button>
+            </div>
+          )}
+        </div>
+      </RightPanel>
     </div>
   );
 }

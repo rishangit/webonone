@@ -36,6 +36,8 @@ import { SearchInput } from "../../components/common/SearchInput";
 import { Pagination } from "../../components/common/Pagination";
 import { isRole, UserRole } from "../../types/user";
 import { Carousel, CarouselContent, CarouselItem } from "../../components/ui/carousel";
+import { RightPanel } from "../../components/common/RightPanel";
+import { cn } from "../../components/ui/utils";
 
 interface User {
   email: string;
@@ -76,6 +78,7 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
   const [itemsPerPage, setItemsPerPage] = useState(12);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [appointmentToDelete, setAppointmentToDelete] = useState<{ id: string; patientName: string } | null>(null);
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
 
   // Get company ID from user
   const companyId = user?.companyId || currentUser?.companyId;
@@ -444,12 +447,6 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
               </Button>
             }
           />
-
-          {/* Filter/View Toggle for larger screens */}
-          <Button variant="outline" className="hidden lg:flex bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent text-foreground hover:text-foreground text-sm">
-            <Filter className="w-4 h-4 sm:mr-2" />
-            <span className="hidden sm:inline">Filter</span>
-          </Button>
         </div>
       </div>
 
@@ -509,16 +506,6 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
         {/* Filters and Search */}
         <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]">
           <div className="space-y-4">
-            {/* Tabs */}
-            <TabsList className="bg-[var(--glass-bg)] backdrop-blur-sm border border-[var(--glass-border)] w-full sm:w-auto">
-              <TabsTrigger value="appointments" className="data-[state=active]:bg-[var(--accent-bg)] data-[state=active]:text-[var(--accent-text)] text-muted-foreground flex-1 sm:flex-initial">
-                Appointments
-              </TabsTrigger>
-              <TabsTrigger value="calendar" className="data-[state=active]:bg-[var(--accent-bg)] data-[state=active]:text-[var(--accent-text)] text-muted-foreground flex-1 sm:flex-initial">
-                Calendar View
-              </TabsTrigger>
-            </TabsList>
-
             {/* Search Bar - Use SearchInput for company owners, regular Input for others */}
             {isCompanyOwner ? (
               <SearchInput
@@ -540,73 +527,32 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
               </div>
             )}
 
-            {/* Filters and View Mode */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
-              <div className="flex flex-col lg:flex-row gap-3 lg:items-center">
-                <Select value={timeFilter} onValueChange={setTimeFilter}>
-                  <SelectTrigger className="w-full lg:w-32 bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border">
-                    <SelectItem value="all-time">All Time</SelectItem>
-                    <SelectItem value="today">Today</SelectItem>
-                    <SelectItem value="week">This Week</SelectItem>
-                    <SelectItem value="month">This Month</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-full lg:w-32 bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border">
-                    <SelectItem value="all-status">All Status</SelectItem>
-                    {AppointmentStatusValues.map(status => (
-                      <SelectItem key={status} value={String(status)}>
-                        {getAppointmentStatusLabel(status)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <MultiSelect
-                  options={staffOptions}
-                  value={selectedStaff}
-                  onValueChange={setSelectedStaff}
-                  placeholder="All Staff"
-                  className="w-full lg:w-40"
-                  maxCount={2}
-                />
-                <MultiSelect
-                  options={spaceOptions}
-                  value={selectedSpaces}
-                  onValueChange={setSelectedSpaces}
-                  placeholder="All Spaces"
-                  className="w-full lg:w-40"
-                  maxCount={2}
-                />
-
-                {/* Clear Filters & Filter Count */}
-                {(selectedStaff.length > 0 || selectedSpaces.length > 0 || searchQuery || statusFilter !== "all-status" || timeFilter !== "all-time") && (
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="bg-[var(--accent-bg)] text-[var(--accent-text)] border-[var(--accent-border)]">
-                      {filteredAppointments.length} results
-                    </Badge>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setSelectedStaff([]);
-                        setSelectedSpaces([]);
-                        setSearchQuery("");
-                        setStatusFilter("all-status");
-                        setTimeFilter("all-time");
-                      }}
-                      className="bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground hover:bg-accent hover:text-foreground"
-                    >
-                      Clear Filters
-                    </Button>
-                  </div>
+            {/* Filter, Tabs, and View Switcher - All aligned to right */}
+            <div className="flex items-center justify-end gap-3 flex-wrap">
+              {/* Filter Button */}
+              <Button 
+                variant="outline" 
+                onClick={() => setIsFilterPanelOpen(true)}
+                className={cn(
+                  "h-9",
+                  (selectedStaff.length > 0 || selectedSpaces.length > 0 || searchQuery || statusFilter !== "all-status" || timeFilter !== "all-time")
+                    ? "bg-[var(--accent-bg)] border-[var(--accent-border)] text-[var(--accent-text)] hover:bg-[var(--accent-primary)] hover:border-[var(--accent-primary)]"
+                    : "bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent text-foreground hover:text-foreground"
                 )}
-              </div>
+              >
+                <Filter className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Filter</span>
+              </Button>
+
+              {/* Tabs - Appointments/Calendar View */}
+              <TabsList className="bg-[var(--glass-bg)] backdrop-blur-sm border border-[var(--glass-border)] rounded-lg w-auto p-1 h-9">
+                <TabsTrigger value="appointments" className="data-[state=active]:bg-[var(--accent-bg)] data-[state=active]:text-[var(--accent-text)] text-muted-foreground h-7">
+                  Appointments
+                </TabsTrigger>
+                <TabsTrigger value="calendar" className="data-[state=active]:bg-[var(--accent-bg)] data-[state=active]:text-[var(--accent-text)] text-muted-foreground h-7">
+                  Calendar View
+                </TabsTrigger>
+              </TabsList>
 
               {/* View Mode Toggle - Show based on active tab */}
               {activeTab === "appointments" && (
@@ -616,30 +562,27 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
                 />
               )}
               {activeTab === "calendar" && (
-                <div className="flex items-center backdrop-blur-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg p-1">
+                <div className="flex items-center backdrop-blur-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg p-1 h-9">
                   <Button
                     variant={calendarViewMode === "day" ? "accent" : "ghost"}
-                    size="sm"
                     onClick={() => setCalendarViewMode("day")}
-                    className="h-8 px-3"
+                    className="h-7 px-3"
                   >
                     <CalendarDays className="w-4 h-4 mr-1" />
                     Day
                   </Button>
                   <Button
                     variant={calendarViewMode === "week" ? "accent" : "ghost"}
-                    size="sm"
                     onClick={() => setCalendarViewMode("week")}
-                    className="h-8 px-3"
+                    className="h-7 px-3"
                   >
                     <Calendar className="w-4 h-4 mr-1" />
                     Week
                   </Button>
                   <Button
                     variant={calendarViewMode === "month" ? "accent" : "ghost"}
-                    size="sm"
                     onClick={() => setCalendarViewMode("month")}
-                    className="h-8 px-3"
+                    className="h-7 px-3"
                   >
                     <Calendar className="w-4 h-4 mr-1" />
                     Month
@@ -931,6 +874,101 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
         </TabsContent>
       </Tabs>
 
+
+      {/* Filter Right Panel */}
+      <RightPanel
+        open={isFilterPanelOpen}
+        onOpenChange={setIsFilterPanelOpen}
+        title="Filters"
+        contentClassName="bg-background"
+      >
+        <div className="space-y-4">
+          {/* Time Filter */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Time Period</label>
+            <Select value={timeFilter} onValueChange={setTimeFilter}>
+              <SelectTrigger className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border-border">
+                <SelectItem value="all-time">All Time</SelectItem>
+                <SelectItem value="today">Today</SelectItem>
+                <SelectItem value="week">This Week</SelectItem>
+                <SelectItem value="month">This Month</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Status Filter */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Status</label>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border-border">
+                <SelectItem value="all-status">All Status</SelectItem>
+                {AppointmentStatusValues.map(status => (
+                  <SelectItem key={status} value={String(status)}>
+                    {getAppointmentStatusLabel(status)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Staff Filter */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Staff</label>
+            <MultiSelect
+              options={staffOptions}
+              value={selectedStaff}
+              onValueChange={setSelectedStaff}
+              placeholder="All Staff"
+              className="w-full"
+              maxCount={2}
+            />
+          </div>
+
+          {/* Spaces Filter */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Spaces</label>
+            <MultiSelect
+              options={spaceOptions}
+              value={selectedSpaces}
+              onValueChange={setSelectedSpaces}
+              placeholder="All Spaces"
+              className="w-full"
+              maxCount={2}
+            />
+          </div>
+
+          {/* Filter Results Count */}
+          {(selectedStaff.length > 0 || selectedSpaces.length > 0 || statusFilter !== "all-status" || timeFilter !== "all-time") && (
+            <div className="pt-4 border-t border-border space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Results</span>
+                <Badge variant="outline" className="bg-[var(--accent-bg)] text-[var(--accent-text)] border-[var(--accent-border)]">
+                  {filteredAppointments.length} appointments
+                </Badge>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSelectedStaff([]);
+                  setSelectedSpaces([]);
+                  setStatusFilter("all-status");
+                  setTimeFilter("all-time");
+                }}
+                className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground hover:bg-accent hover:text-foreground"
+              >
+                Clear All Filters
+              </Button>
+            </div>
+          )}
+        </div>
+      </RightPanel>
 
       {/* Delete Confirmation Dialog */}
       <DeleteConfirmationDialog

@@ -13,12 +13,15 @@ import { DeleteConfirmationDialog } from "../../components/common/DeleteConfirma
 import { Pagination } from "../../components/common/Pagination";
 import { SearchInput } from "../../components/common/SearchInput";
 import { EmptyState } from "../../components/common/EmptyState";
+import { RightPanel } from "../../components/common/RightPanel";
+import { cn } from "../../components/ui/utils";
 import { CreateSystemProductDialog } from "./CreateSystemProductDialog";
 import { CustomDialog } from "../../components/ui/custom-dialog";
 import { TagSelector } from "../../components/tags/TagSelector";
 import { useIsMobile } from "../../components/ui/use-mobile";
 import { ViewSwitcher } from "../../components/ui/view-switcher";
 import { ImageWithFallback } from "../../components/figma/ImageWithFallback";
+import { Carousel, CarouselContent, CarouselItem } from "../../components/ui/carousel";
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import FileUpload from "../../components/ui/file-upload";
@@ -152,6 +155,7 @@ export function SystemProductsPage({ currentUser, onViewProduct }: SystemProduct
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
   const [selectedProduct, setSelectedProduct] = useState<SystemProduct | null>(null);
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -693,44 +697,83 @@ export function SystemProductsPage({ currentUser, onViewProduct }: SystemProduct
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-        <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-[var(--accent-primary)] to-[var(--accent-secondary)] flex items-center justify-center">
-              <Package className="w-6 h-6 text-[var(--accent-button-text)]" />
+      {/* Stats Cards - Desktop Only */}
+      <div className="hidden lg:block">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+          <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-[var(--accent-primary)] to-[var(--accent-secondary)] flex items-center justify-center">
+                <Package className="w-6 h-6 text-[var(--accent-button-text)]" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Total Products</p>
+                <p className="text-xl font-semibold text-foreground">{totalProducts}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Total Products</p>
-              <p className="text-xl font-semibold text-foreground">{totalProducts}</p>
-            </div>
-          </div>
-        </Card>
+          </Card>
 
-        <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
-              <CheckCircle className="w-6 h-6 text-white" />
+          <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                <CheckCircle className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Active</p>
+                <p className="text-xl font-semibold text-foreground">{activeProducts}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Active</p>
-              <p className="text-xl font-semibold text-foreground">{activeProducts}</p>
-            </div>
-          </div>
-        </Card>
+          </Card>
 
-        <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
-              <Users className="w-6 h-6 text-white" />
+          <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                <Users className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Total Usage</p>
+                <p className="text-xl font-semibold text-foreground">{totalUsage}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Total Usage</p>
-              <p className="text-xl font-semibold text-foreground">{totalUsage}</p>
-            </div>
-          </div>
-        </Card>
+          </Card>
+        </div>
+      </div>
 
+      {/* Mobile & Tablet: Carousel - Horizontal scroll with same layout as desktop */}
+      <div className="block lg:hidden">
+        <Carousel
+          opts={{
+            align: "start",
+            slidesToScroll: 1,
+            containScroll: "trimSnaps",
+          }}
+          className="w-full"
+        >
+          <CarouselContent className="ml-0">
+            {[
+              { label: "Total Products", value: totalProducts, icon: Package, gradient: "from-[var(--accent-primary)] to-[var(--accent-secondary)]", iconColor: "text-[var(--accent-button-text)]" },
+              { label: "Active", value: activeProducts, icon: CheckCircle, gradient: "from-green-500 to-green-600", iconColor: "text-white" },
+              { label: "Total Usage", value: totalUsage, icon: Users, gradient: "from-purple-500 to-purple-600", iconColor: "text-white" },
+            ].map((stat, index) => {
+              const Icon = stat.icon;
+              const isLast = index === 2;
+              return (
+                <CarouselItem key={index} className={`pl-0 ${isLast ? 'pr-4' : 'pr-2'} flex-shrink-0`} style={{ minWidth: '40vw', width: 'auto' }}>
+                  <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${stat.gradient} flex items-center justify-center`}>
+                        <Icon className={`w-6 h-6 ${stat.iconColor}`} />
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">{stat.label}</p>
+                        <p className="text-xl font-semibold text-foreground">{stat.value}</p>
+                      </div>
+                    </div>
+                  </Card>
+                </CarouselItem>
+              );
+            })}
+          </CarouselContent>
+        </Carousel>
       </div>
 
       {/* Search and Filters */}
@@ -745,52 +788,27 @@ export function SystemProductsPage({ currentUser, onViewProduct }: SystemProduct
             debounceDelay={500}
           />
 
-          {/* Filters */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
-            <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-32 bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border">
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={verifiedFilter} onValueChange={setVerifiedFilter}>
-                <SelectTrigger className="w-full sm:w-32 bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border">
-                  <SelectItem value="all">All Verified</SelectItem>
-                  <SelectItem value="verified">Verified</SelectItem>
-                  <SelectItem value="unverified">Unverified</SelectItem>
-                </SelectContent>
-              </Select>
-
-              {(searchTerm || statusFilter !== "all" || verifiedFilter !== "all" || selectedTagIds.length > 0) && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setSearchTerm("");
-                    setStatusFilter("all");
-                    setVerifiedFilter("all");
-                    setSelectedTagIds([]);
-                  }}
-                  className="bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground hover:bg-accent"
-                >
-                  Clear Filters
-                </Button>
+          {/* Filter Button and View Switcher - All aligned to right */}
+          <div className="flex items-center justify-end gap-3 flex-wrap">
+            {/* Filter Button */}
+            <Button 
+              variant="outline" 
+              onClick={() => setIsFilterPanelOpen(true)}
+              className={cn(
+                "h-9",
+                (debouncedSearchTerm || statusFilter !== "all" || verifiedFilter !== "all" || selectedTagIds.length > 0)
+                  ? "bg-[var(--accent-bg)] border-[var(--accent-border)] text-[var(--accent-text)] hover:bg-[var(--accent-primary)] hover:border-[var(--accent-primary)]"
+                  : "bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent text-foreground hover:text-foreground"
               )}
-            </div>
-            
-            {/* View Mode Toggle */}
-            <ViewSwitcher 
-              viewMode={viewMode} 
-              onViewModeChange={setViewMode} 
+            >
+              <Filter className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Filter</span>
+            </Button>
+
+            {/* View Switcher */}
+            <ViewSwitcher
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
             />
           </div>
         </div>
@@ -1055,6 +1073,82 @@ export function SystemProductsPage({ currentUser, onViewProduct }: SystemProduct
         itemName={productToDelete?.name}
         isLoading={loading}
       />
+
+      {/* Filter Right Panel */}
+      <RightPanel
+        open={isFilterPanelOpen}
+        onOpenChange={setIsFilterPanelOpen}
+        title="Filters"
+        contentClassName="bg-background"
+      >
+        <div className="space-y-4">
+          {/* Status Filter */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Status</label>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border-border">
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="inactive">Inactive</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Verified Filter */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Verified</label>
+            <Select value={verifiedFilter} onValueChange={setVerifiedFilter}>
+              <SelectTrigger className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border-border">
+                <SelectItem value="all">All Verified</SelectItem>
+                <SelectItem value="verified">Verified</SelectItem>
+                <SelectItem value="unverified">Unverified</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Tags Filter */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Tags</label>
+            <TagSelector
+              value={selectedTagIds}
+              onChange={setSelectedTagIds}
+              placeholder="Select tags"
+            />
+          </div>
+
+          {/* Filter Results Count */}
+          {(debouncedSearchTerm || statusFilter !== "all" || verifiedFilter !== "all" || selectedTagIds.length > 0) && (
+            <div className="pt-4 border-t border-border space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Results</span>
+                <Badge variant="outline" className="bg-[var(--accent-bg)] text-[var(--accent-text)] border-[var(--accent-border)]">
+                  {displayedProducts.length} products
+                </Badge>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSearchTerm("");
+                  setDebouncedSearchTerm("");
+                  setStatusFilter("all");
+                  setVerifiedFilter("all");
+                  setSelectedTagIds([]);
+                }}
+                className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground hover:bg-accent hover:text-foreground"
+              >
+                Clear All Filters
+              </Button>
+            </div>
+          )}
+        </div>
+      </RightPanel>
     </div>
   );
 }

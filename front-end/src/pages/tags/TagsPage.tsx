@@ -4,6 +4,7 @@ import { Card } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "../../components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { ViewSwitcher } from "../../components/ui/view-switcher";
 import { toast } from "sonner";
 import { UserRole, isRole } from "../../types/user";
@@ -20,6 +21,10 @@ import { TagFormDialog } from './TagFormDialog';
 import { SearchInput } from "../../components/common/SearchInput";
 import { Pagination } from "../../components/common/Pagination";
 import { EmptyState } from "../../components/common/EmptyState";
+import { RightPanel } from "../../components/common/RightPanel";
+import { Filter } from "lucide-react";
+import { cn } from "../../components/ui/utils";
+import { Carousel, CarouselContent, CarouselItem } from "../../components/ui/carousel";
 
 interface TagsPageProps {
   currentUser?: {
@@ -44,6 +49,8 @@ export function TagsPage({ currentUser }: TagsPageProps) {
   const [tagToDelete, setTagToDelete] = useState<Tag | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+  const [filterStatus, setFilterStatus] = useState<string>("active");
 
   // Only Super Admin can access this page
   if (!isRole(currentUser?.role, UserRole.SYSTEM_ADMIN)) {
@@ -75,16 +82,21 @@ export function TagsPage({ currentUser }: TagsPageProps) {
       filters.search = debouncedSearchTerm.trim();
     }
 
-    // Add active filter (default to active tags only)
-    filters.isActive = true;
+    // Add active filter based on filterStatus
+    if (filterStatus === "active") {
+      filters.isActive = true;
+    } else if (filterStatus === "inactive") {
+      filters.isActive = false;
+    }
+    // If filterStatus is "all", don't add isActive filter
 
     dispatch(fetchTagsRequest(filters));
-  }, [dispatch, currentPage, itemsPerPage, debouncedSearchTerm]);
+  }, [dispatch, currentPage, itemsPerPage, debouncedSearchTerm, filterStatus]);
 
-  // Reset to page 1 when search changes (but not when pagination changes)
+  // Reset to page 1 when search or filter changes (but not when pagination changes)
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearchTerm]);
+  }, [debouncedSearchTerm, filterStatus]);
 
   // Handle errors
   useEffect(() => {
@@ -324,44 +336,83 @@ export function TagsPage({ currentUser }: TagsPageProps) {
         </Button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Total Tags</p>
-              <p className="text-2xl font-semibold text-foreground">{stats.total}</p>
+      {/* Stats Cards - Desktop Only */}
+      <div className="hidden lg:block">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Total Tags</p>
+                <p className="text-2xl font-semibold text-foreground">{stats.total}</p>
+              </div>
+              <TagIcon className="w-8 h-8 text-muted-foreground" />
             </div>
-            <TagIcon className="w-8 h-8 text-muted-foreground" />
-          </div>
-        </Card>
-        <Card className="backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Active Tags</p>
-              <p className="text-2xl font-semibold text-green-600 dark:text-green-400">{stats.active}</p>
+          </Card>
+          <Card className="backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Active Tags</p>
+                <p className="text-2xl font-semibold text-green-600 dark:text-green-400">{stats.active}</p>
+              </div>
+              <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
             </div>
-            <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
-          </div>
-        </Card>
-        <Card className="backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Inactive Tags</p>
-              <p className="text-2xl font-semibold text-muted-foreground">{stats.inactive}</p>
+          </Card>
+          <Card className="backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Inactive Tags</p>
+                <p className="text-2xl font-semibold text-muted-foreground">{stats.inactive}</p>
+              </div>
+              <X className="w-8 h-8 text-muted-foreground" />
             </div>
-            <X className="w-8 h-8 text-muted-foreground" />
-          </div>
-        </Card>
-        <Card className="backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Total Usage</p>
-              <p className="text-2xl font-semibold text-foreground">{stats.usage}</p>
+          </Card>
+          <Card className="backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Total Usage</p>
+                <p className="text-2xl font-semibold text-foreground">{stats.usage}</p>
+              </div>
+              <TagIcon className="w-8 h-8 text-muted-foreground" />
             </div>
-            <TagIcon className="w-8 h-8 text-muted-foreground" />
-          </div>
-        </Card>
+          </Card>
+        </div>
+      </div>
+
+      {/* Mobile & Tablet: Carousel - Horizontal scroll with same layout as desktop */}
+      <div className="block lg:hidden">
+        <Carousel
+          opts={{
+            align: "start",
+            slidesToScroll: 1,
+            containScroll: "trimSnaps",
+          }}
+          className="w-full"
+        >
+          <CarouselContent className="ml-0">
+            {[
+              { label: "Total Tags", value: stats.total, icon: TagIcon, color: "text-muted-foreground" },
+              { label: "Active Tags", value: stats.active, icon: CheckCircle, color: "text-green-600 dark:text-green-400" },
+              { label: "Inactive Tags", value: stats.inactive, icon: X, color: "text-muted-foreground" },
+              { label: "Total Usage", value: stats.usage, icon: TagIcon, color: "text-muted-foreground" },
+            ].map((stat, index) => {
+              const Icon = stat.icon;
+              const isLast = index === 3;
+              return (
+                <CarouselItem key={index} className={`pl-0 ${isLast ? 'pr-4' : 'pr-2'} flex-shrink-0`} style={{ minWidth: '40vw', width: 'auto' }}>
+                  <Card className="backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">{stat.label}</p>
+                        <p className={`text-2xl font-semibold ${stat.color}`}>{stat.value}</p>
+                      </div>
+                      <Icon className={`w-8 h-8 ${stat.color}`} />
+                    </div>
+                  </Card>
+                </CarouselItem>
+              );
+            })}
+          </CarouselContent>
+        </Carousel>
       </div>
 
       {/* Search and Filters */}
@@ -375,25 +426,24 @@ export function TagsPage({ currentUser }: TagsPageProps) {
             debounceDelay={500}
           />
 
-          <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
-            <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
-              {debouncedSearchTerm && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setSearchTerm("");
-                    setDebouncedSearchTerm("");
-                    setCurrentPage(1);
-                  }}
-                  className="bg-[var(--glass-bg)] border-[var(--glass-border)]"
-                >
-                  Clear Filters
-                </Button>
+          {/* Filter Button and View Switcher - All aligned to right */}
+          <div className="flex items-center justify-end gap-3 flex-wrap">
+            {/* Filter Button */}
+            <Button 
+              variant="outline" 
+              onClick={() => setIsFilterPanelOpen(true)}
+              className={cn(
+                "h-9",
+                (debouncedSearchTerm || filterStatus !== "active")
+                  ? "bg-[var(--accent-bg)] border-[var(--accent-border)] text-[var(--accent-text)] hover:bg-[var(--accent-primary)] hover:border-[var(--accent-primary)]"
+                  : "bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent text-foreground hover:text-foreground"
               )}
-            </div>
+            >
+              <Filter className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Filter</span>
+            </Button>
 
-            {/* View Mode Toggle */}
+            {/* View Switcher */}
             <ViewSwitcher
               viewMode={viewMode}
               onViewModeChange={setViewMode}
@@ -535,10 +585,63 @@ export function TagsPage({ currentUser }: TagsPageProps) {
           if (debouncedSearchTerm.trim()) {
             filters.search = debouncedSearchTerm.trim();
           }
-          filters.isActive = true;
+          if (filterStatus === "active") {
+            filters.isActive = true;
+          } else if (filterStatus === "inactive") {
+            filters.isActive = false;
+          }
           dispatch(fetchTagsRequest(filters));
         }}
       />
+
+      {/* Filter Right Panel */}
+      <RightPanel
+        open={isFilterPanelOpen}
+        onOpenChange={setIsFilterPanelOpen}
+        title="Filters"
+        contentClassName="bg-background"
+      >
+        <div className="space-y-4">
+          {/* Status Filter */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Status</label>
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border-border">
+                <SelectItem value="all">All Tags</SelectItem>
+                <SelectItem value="active">Active Only</SelectItem>
+                <SelectItem value="inactive">Inactive Only</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Filter Results Count */}
+          {(debouncedSearchTerm || filterStatus !== "active") && (
+            <div className="pt-4 border-t border-border space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Results</span>
+                <Badge variant="outline" className="bg-[var(--accent-bg)] text-[var(--accent-text)] border-[var(--accent-border)]">
+                  {displayedTags.length} tags
+                </Badge>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSearchTerm("");
+                  setDebouncedSearchTerm("");
+                  setFilterStatus("active");
+                }}
+                className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground hover:bg-accent hover:text-foreground"
+              >
+                Clear All Filters
+              </Button>
+            </div>
+          )}
+        </div>
+      </RightPanel>
 
       {/* Delete Confirmation Dialog */}
       {showDeleteDialog && tagToDelete && (

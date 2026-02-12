@@ -4,7 +4,9 @@ import { cn } from "./utils";
 import { Badge } from "./badge";
 import { Button } from "./button";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "./command";
+import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "./command";
+import { SearchInput } from "../common/SearchInput";
+import { selectTriggerClasses, selectIconClasses } from "./select";
 
 export interface Option {
   label: string;
@@ -47,7 +49,20 @@ export const MultiSelect = React.forwardRef<
   ) => {
     const [internalSelectedValues, setInternalSelectedValues] = React.useState<string[]>(() => defaultValue);
     const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
-    const [isAnimating, setIsAnimating] = React.useState(false);
+    const [searchTerm, setSearchTerm] = React.useState("");
+    const triggerRef = React.useRef<HTMLButtonElement>(null);
+    const [popoverWidth, setPopoverWidth] = React.useState<number | undefined>(undefined);
+
+    // Merge refs
+    const setRefs = React.useCallback((node: HTMLButtonElement | null) => {
+      triggerRef.current = node;
+      if (typeof ref === 'function') {
+        ref(node);
+      } else if (ref && 'current' in ref) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (ref as any).current = node;
+      }
+    }, [ref]);
 
     // Use controlled or uncontrolled pattern
     const selectedValues = value !== undefined ? value : internalSelectedValues;
@@ -61,15 +76,19 @@ export const MultiSelect = React.forwardRef<
       onValueChange(newValues);
     }, [value, onValueChange]);
 
-    const handleInputKeyDown = React.useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === "Enter") {
-        setIsPopoverOpen(true);
-      } else if (event.key === "Backspace" && !event.currentTarget.value && selectedValues.length > 0) {
-        const newSelectedValues = [...selectedValues];
-        newSelectedValues.pop();
-        updateValues(newSelectedValues);
+    // Measure trigger width when popover opens
+    React.useEffect(() => {
+      if (isPopoverOpen && triggerRef.current) {
+        setPopoverWidth(triggerRef.current.offsetWidth);
       }
-    }, [selectedValues, updateValues]);
+    }, [isPopoverOpen]);
+
+    // Reset search when popover closes
+    React.useEffect(() => {
+      if (!isPopoverOpen) {
+        setSearchTerm("");
+      }
+    }, [isPopoverOpen]);
 
     const toggleOption = React.useCallback((option: string) => {
       const newSelectedValues = selectedValues.includes(option)
@@ -110,57 +129,71 @@ export const MultiSelect = React.forwardRef<
       >
         <PopoverTrigger asChild>
           <Button
-            ref={ref}
+            ref={setRefs}
             {...props}
             onClick={handleTogglePopover}
             className={cn(
-              "flex w-full p-1 rounded-md border min-h-10 h-auto items-center justify-between bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground hover:bg-[var(--accent-bg)] hover:border-[var(--accent-border)] transition-all duration-200",
+              selectTriggerClasses,
+              "bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground hover:bg-[var(--accent-bg)] hover:border-[var(--accent-border)] font-normal",
               className
             )}
           >
             {selectedValues.length > 0 ? (
-              <div className="flex items-center justify-between w-full mx-3">
-                <div className="flex items-center gap-2">
-                  <Badge className="bg-[var(--accent-bg)] text-[var(--accent-text)] border-[var(--accent-border)] hover:bg-[var(--accent-bg)]">
+              <>
+                <div className="flex items-center gap-2 flex-1 min-w-0" data-slot="select-value" style={{ pointerEvents: 'none' }}>
+                  <Badge className="bg-[var(--accent-bg)] text-[var(--accent-text)] border-[var(--accent-border)] hover:bg-[var(--accent-bg)] text-xs whitespace-nowrap">
                     {selectedValues.length} Selected
                   </Badge>
-                </div>
-                <div className="flex items-center gap-2">
                   <X
-                    className="h-4 w-4 cursor-pointer text-muted-foreground hover:text-foreground"
+                    className="h-4 w-4 cursor-pointer text-muted-foreground hover:text-foreground pointer-events-auto shrink-0"
                     onClick={(event) => {
                       event.stopPropagation();
                       handleClear();
                     }}
+                    style={{ pointerEvents: 'auto' }}
                   />
-                  <ChevronDown className={cn(
-                    "h-4 w-4 cursor-pointer text-muted-foreground transition-transform duration-200",
-                    isPopoverOpen && "rotate-180"
-                  )} />
                 </div>
-              </div>
-            ) : (
-              <div className="flex items-center justify-between w-full mx-3">
-                <span className="text-sm text-muted-foreground">{placeholder}</span>
                 <ChevronDown className={cn(
-                  "h-4 w-4 cursor-pointer text-muted-foreground transition-transform duration-200",
+                  selectIconClasses,
                   isPopoverOpen && "rotate-180"
-                )} />
-              </div>
+                )} aria-hidden="true" />
+              </>
+            ) : (
+              <>
+                <span 
+                  data-slot="select-value"
+                  data-placeholder
+                  style={{ pointerEvents: 'none' }}
+                >
+                  {placeholder}
+                </span>
+                <ChevronDown className={cn(
+                  selectIconClasses,
+                  isPopoverOpen && "rotate-180"
+                )} aria-hidden="true" />
+              </>
             )}
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="w-auto p-0 bg-popover border-border backdrop-blur-sm"
+          className="p-0 bg-popover border-border backdrop-blur-sm"
           align="start"
           onEscapeKeyDown={() => setIsPopoverOpen(false)}
+          style={{ 
+            width: popoverWidth ? `${popoverWidth}px` : undefined,
+            minWidth: popoverWidth ? `${popoverWidth}px` : undefined
+          }}
         >
-          <Command>
-            <CommandInput
+          <div className="p-2 border-b border-border">
+            <SearchInput
               placeholder="Search..."
-              onKeyDown={handleInputKeyDown}
-              className="bg-[var(--input-background)] border-none text-foreground placeholder:text-muted-foreground focus:bg-[var(--input-background)] transition-colors"
+              value={searchTerm}
+              onChange={setSearchTerm}
+              debounceDelay={0}
+              className="w-full"
             />
+          </div>
+          <Command>
             <CommandList>
               <CommandEmpty>No results found.</CommandEmpty>
               <CommandGroup>
@@ -181,14 +214,19 @@ export const MultiSelect = React.forwardRef<
                   </div>
                   <span>(Select All {options.length})</span>
                 </CommandItem>
-                {options.map((option) => {
-                  const isSelected = selectedValues.includes(option.value);
-                  return (
-                    <CommandItem
-                      key={option.value}
-                      onSelect={() => toggleOption(option.value)}
-                      className="cursor-pointer text-foreground hover:bg-[var(--accent-bg)] transition-colors"
-                    >
+                {options
+                  .filter((option) => {
+                    if (!searchTerm) return true;
+                    return option.label.toLowerCase().includes(searchTerm.toLowerCase());
+                  })
+                  .map((option) => {
+                    const isSelected = selectedValues.includes(option.value);
+                    return (
+                      <CommandItem
+                        key={option.value}
+                        onSelect={() => toggleOption(option.value)}
+                        className="cursor-pointer text-foreground hover:bg-[var(--accent-bg)] transition-colors"
+                      >
                       <div
                         className={cn(
                           "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border transition-all",
