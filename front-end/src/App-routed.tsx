@@ -67,6 +67,9 @@ import { AnalyticsPage } from "./pages/analytics";
 // Website
 import { WebsiteSetupPage, ThemeFormPage } from "./pages/website";
 
+// Showcase
+import { ShowcasePage } from "./pages/showcase";
+
 // State management
 import { useAppDispatch, useAppSelector } from "./store/hooks";
 import { loginSuccess, logout, refreshUserRequest } from "./store/slices/authSlice";
@@ -111,6 +114,7 @@ function ProtectedRouteWrapper({ children }: { children: React.ReactNode }) {
     if (path.includes('/search')) return 'search';
     if (path.includes('/analytics')) return 'analytics';
     if (path.includes('/settings')) return 'settings';
+    if (path.includes('/showcase')) return 'showcase';
     return 'dashboard';
   };
 
@@ -1011,6 +1015,24 @@ function App() {
               isAuthenticated ? (
                 <ProtectedRouteWrapper>
                   <AnalyticsPage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+
+          <Route 
+            path="/showcase" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <ShowcasePage 
+                    onThemeChange={handleThemeChange}
+                    currentTheme={theme}
+                    onAccentColorChange={handleAccentColorChange}
+                    currentAccentColor={accentColor}
+                  />
                 </ProtectedRouteWrapper>
               ) : (
                 <Navigate to="/system/login" replace />
