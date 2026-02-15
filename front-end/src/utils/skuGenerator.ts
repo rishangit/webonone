@@ -102,3 +102,54 @@ export const generateVariantSKU = (
   return sku;
 };
 
+/**
+ * Generates SKU from product and attribute values
+ * Format: {PRODUCT_PREFIX}-{ATTRIBUTE1_VALUE}-{ATTRIBUTE2_VALUE}-...
+ * Example: PRD-RED-500ML or PRD-LARGE-BLUE
+ */
+export const generateVariantSKUFromAttributes = (
+  productName: string,
+  productSKU?: string,
+  attributeValues: Array<{ attributeName: string; value: string }> = []
+): string => {
+  // Get base prefix from product SKU or product name
+  let basePrefix = 'PRD';
+  if (productSKU) {
+    const skuParts = productSKU.split('-');
+    basePrefix = skuParts[0] || 'PRD';
+  } else if (productName) {
+    const words = productName.trim().split(/\s+/);
+    if (words.length > 0) {
+      basePrefix = words[0].substring(0, 4).toUpperCase().replace(/[^A-Z0-9]/g, '');
+      if (basePrefix.length < 3) {
+        basePrefix = productName.substring(0, 3).toUpperCase().replace(/[^A-Z0-9]/g, '') || 'PRD';
+      }
+    }
+  }
+
+  // Extract codes from attribute values
+  const attributeCodes = attributeValues
+    .filter(attr => attr.value && attr.value.trim() !== '')
+    .map(attr => {
+      const value = attr.value.trim();
+      // For numeric values, keep as is (e.g., "500" -> "500")
+      if (/^\d+$/.test(value)) {
+        return value;
+      }
+      // For text values, take first 3-4 characters, uppercase
+      const code = value.substring(0, 4).toUpperCase().replace(/[^A-Z0-9]/g, '');
+      return code;
+    })
+    .filter(code => code.length > 0);
+
+  // Build SKU parts
+  const parts = [basePrefix, ...attributeCodes];
+
+  // Join and ensure max length of 50 characters
+  let sku = parts.join('-');
+  if (sku.length > 50) {
+    sku = sku.substring(0, 50);
+  }
+
+  return sku || `${basePrefix}-VAR`;
+};

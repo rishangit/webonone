@@ -80,7 +80,7 @@ export function CreateSystemProductDialog({
   }, [isCreating, productsLoading, productsError, onProductCreated, onOpenChange]);
 
   const [formData, setFormData] = useState({
-    brand: "",
+    // Removed brand field
     name: "",
     description: "",
     imageUrl: "", // Will store relative path
@@ -92,7 +92,7 @@ export function CreateSystemProductDialog({
   useEffect(() => {
     if (!open) {
       setFormData({
-        brand: "",
+        // Removed brand field
         name: "",
         description: "",
         imageUrl: "",
@@ -120,7 +120,7 @@ export function CreateSystemProductDialog({
 
     // Prepare product data for API
     const productData = {
-      brand: formData.brand.trim() || undefined,
+      // Removed brand field
       name: formData.name.trim(),
       description: formData.description || undefined,
       imageUrl: formData.imageUrl || undefined,
@@ -137,7 +137,7 @@ export function CreateSystemProductDialog({
 
   const resetForm = () => {
     setFormData({
-      brand: "",
+      // Removed brand field
       name: "",
       description: "",
       imageUrl: "",
@@ -182,17 +182,6 @@ export function CreateSystemProductDialog({
       }
     >
       <div className="space-y-6">
-          {/* Brand */}
-          <div className="space-y-2">
-            <Label className="text-foreground">Brand</Label>
-            <Input
-              value={formData.brand}
-              onChange={(e) => setFormData(prev => ({ ...prev, brand: e.target.value }))}
-              placeholder="Enter brand name"
-              className="bg-[var(--input-background)] border-[var(--glass-border)] text-foreground"
-            />
-          </div>
-
           {/* Product Name */}
           <div className="space-y-2">
             <Label className="text-foreground">Product Name *</Label>

@@ -4,7 +4,7 @@ const { nanoid } = require('nanoid');
 class Product {
   constructor(data) {
     this.id = data.id;
-    this.brand = data.brand;
+    // Removed brand field
     this.name = data.name;
     this.description = data.description;
     this.imageUrl = data.imageUrl;
@@ -18,7 +18,7 @@ class Product {
   toJSON() {
     return {
       id: this.id,
-      brand: this.brand,
+      // Removed brand field
       name: this.name,
       description: this.description,
       imageUrl: this.imageUrl,
@@ -34,7 +34,7 @@ class Product {
   static async create(productData) {
     try {
       const {
-        brand, name, description, imageUrl, isActive
+        name, description, imageUrl, isActive
       } = productData;
 
       // Generate NanoID for new product (8-10 characters)
@@ -42,9 +42,9 @@ class Product {
 
       const query = `
         INSERT INTO products (
-          id, brand, name, description, imageUrl, isActive, isVerified,
+          id, name, description, imageUrl, isActive, isVerified,
           createdDate, lastModified
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+        ) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())
       `;
 
       // isVerified defaults to true for super admin (will be set by route based on user role)
@@ -52,7 +52,7 @@ class Product {
 
       const values = [
         productId,
-        brand || null, name, description, imageUrl || null, 
+        name, description, imageUrl || null, 
         isActive !== undefined ? isActive : true,
         isVerified
       ];
@@ -118,9 +118,9 @@ class Product {
 
       // Search filter
       if (search && search.trim()) {
-        whereConditions.push(`(p.name LIKE ? OR p.description LIKE ? OR p.brand LIKE ?)`);
+        whereConditions.push(`(p.name LIKE ? OR p.description LIKE ?)`);
         const searchPattern = `%${search.trim()}%`;
-        params.push(searchPattern, searchPattern, searchPattern);
+        params.push(searchPattern, searchPattern);
       }
 
       // Status filters
@@ -203,7 +203,7 @@ class Product {
   static async update(id, productData) {
     try {
       const allowedFields = [
-        'name', 'description', 'imageUrl', 'isActive', 'brand', 'isVerified'
+        'name', 'description', 'imageUrl', 'isActive', 'isVerified'
       ];
 
       const updates = [];

@@ -22,6 +22,7 @@ const verifyDatabase = async () => {
       'tags',
       'company_tags',
       'product_tags',
+      'product_attributes',
       'company_products',
       'company_product_tags'
     ];
@@ -91,9 +92,10 @@ const verifyTableStructures = async () => {
     product_variants: ['id', 'productId', 'name', 'sku', 'isActive'],
     tags: ['id', 'name', 'isActive'],
     company_tags: ['id', 'companyId', 'tagId'],
-    product_tags: ['id', 'productId', 'tagId'],
-    company_products: ['id', 'companyId', 'systemProductId', 'sellPrice', 'currentStock'],
-    company_product_tags: ['id', 'companyProductId', 'tagId']
+      product_tags: ['id', 'productId', 'tagId'],
+      product_attributes: ['id', 'name', 'description', 'valueDataType', 'unit_of_measure', 'isActive'],
+      company_products: ['id', 'companyId', 'systemProductId', 'sellPrice', 'currentStock'],
+      company_product_tags: ['id', 'companyProductId', 'tagId']
   };
 
   for (const [table, requiredColumns] of Object.entries(tableChecks)) {

@@ -1000,7 +1000,7 @@ export function ProductsPage({ currentUser, onNavigate, onViewProduct }: Product
         <div className="space-y-4">
             <SearchInput
             placeholder={isCompanyOwner 
-              ? "Search products by name, description, or brand..."
+              ? "Search products by name or description..."
               : "Search products by name, category, SKU, or tags..."
             }
               value={searchTerm}

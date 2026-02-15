@@ -6,6 +6,8 @@ import usersReducer from './slices/usersSlice';
 import companiesReducer from './slices/companiesSlice';
 import productsReducer from './slices/productsSlice';
 import systemProductsReducer from './slices/systemProductsSlice';
+import systemProductAttributesReducer from './slices/systemProductAttributesSlice';
+import unitsOfMeasureReducer from './slices/unitsOfMeasureSlice';
 import companyProductsReducer from './slices/companyProductsSlice';
 import companyProductVariantsReducer from './slices/companyProductVariantsSlice';
 import tagsReducer from './slices/tagsSlice';
@@ -30,6 +32,8 @@ export const store = configureStore({
     companies: companiesReducer,
     products: productsReducer,
     systemProducts: systemProductsReducer,
+    systemProductAttributes: systemProductAttributesReducer,
+    unitsOfMeasure: unitsOfMeasureReducer,
     companyProducts: companyProductsReducer,
     companyProductVariants: companyProductVariantsReducer,
     tags: tagsReducer,

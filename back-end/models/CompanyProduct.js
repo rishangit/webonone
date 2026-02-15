@@ -14,7 +14,7 @@ class CompanyProduct {
     this.name = data.name;
     this.description = data.description;
     this.imageUrl = data.imageUrl;
-    this.brand = data.brand;
+    // Removed brand field
   }
 
   toJSON() {
@@ -30,7 +30,7 @@ class CompanyProduct {
       name: this.name,
       description: this.description,
       imageUrl: this.imageUrl,
-      brand: this.brand,
+      // Removed brand field
     };
   }
 
@@ -105,8 +105,8 @@ class CompanyProduct {
         `SELECT cp.*, 
                 p.name, 
                 p.description, 
-                p.imageUrl AS systemProductImageUrl, 
-                p.brand
+                p.imageUrl AS systemProductImageUrl
+                -- Removed brand field
          FROM company_products cp
          LEFT JOIN products p ON cp.systemProductId = p.id
          WHERE cp.id = ?`,
@@ -141,8 +141,8 @@ class CompanyProduct {
       let query = `SELECT cp.*, 
                           p.name, 
                           p.description, 
-                          p.imageUrl AS systemProductImageUrl, 
-                          p.brand
+                          p.imageUrl AS systemProductImageUrl
+                          -- Removed brand field
                    FROM company_products cp
                    LEFT JOIN products p ON cp.systemProductId = p.id
                    WHERE 1=1`;
@@ -202,8 +202,8 @@ class CompanyProduct {
       let query = `SELECT cp.*, 
                           p.name, 
                           p.description, 
-                          p.imageUrl AS systemProductImageUrl, 
-                          p.brand
+                          p.imageUrl AS systemProductImageUrl
+                          -- Removed brand field
                    FROM company_products cp
                    LEFT JOIN products p ON cp.systemProductId = p.id
                    WHERE 1=1`;
@@ -223,11 +223,10 @@ class CompanyProduct {
       if (search && search.trim()) {
         query += ` AND (
           p.name LIKE ? OR 
-          p.description LIKE ? OR 
-          p.brand LIKE ?
+          p.description LIKE ?
         )`;
         const searchPattern = `%${search.trim()}%`;
-        params.push(searchPattern, searchPattern, searchPattern);
+        params.push(searchPattern, searchPattern);
       }
 
       // Count total matching products

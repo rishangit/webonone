@@ -17,7 +17,17 @@ const getNavigationItems = (role: UserRole) => {
       ...baseItems,
       { icon: Users, label: "Users", id: "users" },
       { icon: Building, label: "Companies", id: "companies" },
-      { icon: PackageCheck, label: "System Products", id: "system-products" },
+      { 
+        icon: PackageCheck, 
+        label: "System Products", 
+        id: "system-products",
+        hasSubmenu: true,
+        submenu: [
+          { label: "System Products", id: "system-products" },
+          { label: "Product Attributes", id: "system-product-attributes" },
+          { label: "Units of Measure", id: "units-of-measure" }
+        ]
+      },
       { icon: Tag, label: "Tags", id: "tags" },
       { icon: BarChart3, label: "Analytics", id: "analytics" },
       { icon: FileText, label: "Reports", id: "reports" },

@@ -11,6 +11,8 @@ import { usersEpics } from './usersEpics';
 import { companiesEpics } from './companiesEpics';
 import { productsEpics } from './productsEpics';
 import { systemProductsEpics } from './systemProductsEpics';
+import { systemProductAttributesEpics } from './systemProductAttributesEpics';
+import { unitsOfMeasureEpics } from './unitsOfMeasureEpics';
 import { companyProductsEpics } from './companyProductsEpics';
 import { companyProductVariantsEpics } from './companyProductVariantsEpics';
 import {
@@ -42,6 +44,8 @@ export const rootEpic = combineEpics(
   ...companiesEpics,
   ...productsEpics,
   ...systemProductsEpics,
+  ...systemProductAttributesEpics,
+  ...unitsOfMeasureEpics,
   ...companyProductsEpics,
   ...companyProductVariantsEpics,
   fetchTagsEpic,

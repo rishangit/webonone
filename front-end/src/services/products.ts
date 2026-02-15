@@ -11,7 +11,7 @@ export interface Tag {
 
 export interface Product {
   id: string;
-  brand?: string;
+  // Removed brand field
   name: string;
   description?: string;
   imageUrl?: string;
@@ -24,7 +24,7 @@ export interface Product {
 }
 
 export interface CreateProductData {
-  brand?: string;
+  // Removed brand field
   name: string;
   description?: string;
   imageUrl?: string;

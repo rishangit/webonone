@@ -7,10 +7,8 @@ class ProductVariant {
     this.productId = data.productId;
     this.name = data.name;
     this.sku = data.sku;
-    this.color = data.color;
-    this.size = data.size;
-    this.weight = data.weight;
-    this.material = data.material;
+    // Removed hardcoded fields: color, size, weight, material
+    // These are now stored in product_related_attributes_values
     this.isDefault = Boolean(data.isDefault);
     this.isActive = Boolean(data.isActive !== undefined ? data.isActive : true);
     this.isVerified = Boolean(data.isVerified !== undefined ? data.isVerified : false);
@@ -24,10 +22,7 @@ class ProductVariant {
       productId: this.productId,
       name: this.name,
       sku: this.sku,
-      color: this.color,
-      size: this.size,
-      weight: this.weight,
-      material: this.material,
+      // Removed hardcoded fields from JSON output
       isDefault: this.isDefault,
       isActive: this.isActive,
       isVerified: this.isVerified,
@@ -43,10 +38,6 @@ class ProductVariant {
         productId,
         name,
         sku,
-        color,
-        size,
-        weight,
-        material,
         isDefault,
         isActive,
         isVerified
@@ -74,10 +65,9 @@ class ProductVariant {
       const query = `
         INSERT INTO product_variants (
           id, productId, name, sku,
-          color, size, weight, material,
           isDefault, isActive, isVerified,
           createdAt, updatedAt
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
       `;
 
       // isVerified defaults to true for super admin (will be set by route based on user role)
@@ -88,10 +78,6 @@ class ProductVariant {
         productId,
         name,
         sku,
-        color || null,
-        size || null,
-        weight || null,
-        material || null,
         shouldBeDefault,
         isActive !== undefined ? isActive : true,
         shouldBeVerified
@@ -135,7 +121,7 @@ class ProductVariant {
   static async update(id, variantData) {
     try {
       const allowedFields = [
-        'name', 'sku', 'color', 'size', 'weight', 'material', 'isDefault', 'isActive', 'isVerified'
+        'name', 'sku', 'isDefault', 'isActive', 'isVerified'
       ];
 
       const updates = [];

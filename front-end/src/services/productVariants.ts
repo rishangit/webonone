@@ -7,10 +7,8 @@ export interface ProductVariant {
   productId: string;
   name: string;
   sku: string;
-  color?: string;
-  size?: string;
-  weight?: string;
-  material?: string;
+  // Removed hardcoded fields: color, size, weight, material
+  // These are now stored in product_related_attributes_values
   isDefault: boolean;
   isActive: boolean;
   isVerified: boolean;
@@ -22,10 +20,8 @@ export interface CreateProductVariantData {
   productId: string;
   name: string;
   sku: string;
-  color?: string;
-  size?: string;
-  weight?: string;
-  material?: string;
+  // Removed hardcoded fields: color, size, weight, material
+  // These are now stored in product_related_attributes_values
   isDefault?: boolean;
   isActive?: boolean;
   isVerified?: boolean;

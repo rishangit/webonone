@@ -29,7 +29,7 @@ import { AppointmentsPage, UserAppointmentHistoryPage } from "./pages/appointmen
 import { CompaniesPage, CompanyProfilePage, CompanySettingsPage } from "./pages/companies";
 
 // Products
-import { ProductsPage, SystemProductsPage, ProductDetailPage, CompanyProductDetailPage } from "./pages/products";
+import { ProductsPage, SystemProductsPage, SystemProductAttributesPage, UnitsOfMeasurePage, ProductDetailPage, CompanyProductDetailPage } from "./pages/products";
 import { VariantStockDetailsPage } from "./pages/products/VariantStockDetailsPage";
 
 // Tags
@@ -100,6 +100,8 @@ function ProtectedRouteWrapper({ children }: { children: React.ReactNode }) {
     if (path.includes('/companies')) return 'companies';
     if (path.includes('/appointments')) return 'appointments';
     if (path.includes('/users')) return 'users';
+    if (path.includes('/system-product-attributes')) return 'system-product-attributes';
+    if (path.includes('/units-of-measure')) return 'units-of-measure';
     if (path.includes('/system-products')) return 'system-products';
     if (path.includes('/company-products')) return 'products';
     if (path.includes('/products')) return 'products';
@@ -179,6 +181,12 @@ function ProtectedRouteWrapper({ children }: { children: React.ReactNode }) {
         break;
       case 'system-products':
         navigate('/system/system-products');
+        break;
+      case 'system-product-attributes':
+        navigate('/system/system-product-attributes');
+        break;
+      case 'units-of-measure':
+        navigate('/system/units-of-measure');
         break;
       case 'tags':
         navigate('/system/tags');
@@ -751,6 +759,32 @@ function App() {
               isAuthenticated ? (
                 <ProtectedRouteWrapper>
                   <SystemProductsPageWrapper />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/system-product-attributes" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <SystemProductAttributesPage currentUser={user as any} />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/units-of-measure" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <UnitsOfMeasurePage currentUser={user as any} />
                 </ProtectedRouteWrapper>
               ) : (
                 <Navigate to="/system/login" replace />

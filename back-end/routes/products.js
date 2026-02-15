@@ -104,7 +104,7 @@ router.post('/',
     const finalIsVerified = isSuperAdmin ? requestedIsVerified : false; // Force unverified for non-super admins
     
     const productData = {
-      brand: req.body.brand || null,
+      // Removed brand field
       name: req.body.name,
       description: req.body.description || null,
       imageUrl: req.body.imageUrl || null,
@@ -175,7 +175,7 @@ router.put('/:id',
 
     const updateData = {};
     
-    if (req.body.brand !== undefined) updateData.brand = req.body.brand || null;
+    // Removed brand field
     if (req.body.name !== undefined) updateData.name = req.body.name;
     if (req.body.description !== undefined) updateData.description = req.body.description;
     if (req.body.imageUrl !== undefined) updateData.imageUrl = req.body.imageUrl;

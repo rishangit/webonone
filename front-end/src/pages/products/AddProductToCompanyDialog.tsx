@@ -107,7 +107,7 @@ const mapProductToSystemProduct = (product: Product): SystemProduct => {
     image: imageUrl,
     tags: product.tags || [],
     supplier: {
-      name: product.brand || "System Supplier",
+      name: "System Supplier", // Removed brand field
       contact: "supplier@system.com",
       avatar: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=100&h=100&fit=crop"
     },
@@ -154,7 +154,7 @@ export function AddProductToCompanyDialog({
   const [defaultVariantId, setDefaultVariantId] = useState<string | null>(null);
   const [showAddSystemProductDialog, setShowAddSystemProductDialog] = useState(false);
   const [newSystemProductData, setNewSystemProductData] = useState({
-    brand: "",
+    // Removed brand field
     name: "",
     description: "",
     imageUrl: "",
@@ -1344,7 +1344,7 @@ export function AddProductToCompanyDialog({
               onClick={() => {
                 setShowAddSystemProductDialog(false);
                 setNewSystemProductData({
-                  brand: "",
+                  // Removed brand field
                   name: "",
                   description: "",
                   imageUrl: "",
@@ -1366,7 +1366,7 @@ export function AddProductToCompanyDialog({
                 setIsCreatingSystemProduct(true);
                 try {
                   const productData = {
-                    brand: newSystemProductData.brand.trim() || undefined,
+                    // Removed brand field
                     name: newSystemProductData.name.trim(),
                     description: newSystemProductData.description || undefined,
                     imageUrl: newSystemProductData.imageUrl || undefined,
@@ -1388,7 +1388,7 @@ export function AddProductToCompanyDialog({
                   // Close dialog and reset form
                   setShowAddSystemProductDialog(false);
                   setNewSystemProductData({
-                    brand: "",
+                    // Removed brand field
                     name: "",
                     description: "",
                     imageUrl: "",
@@ -1412,17 +1412,6 @@ export function AddProductToCompanyDialog({
         }
       >
           <div className="space-y-4">
-            {/* Brand */}
-            <div className="space-y-2">
-              <Label>Brand</Label>
-              <Input
-                value={newSystemProductData.brand}
-                onChange={(e) => setNewSystemProductData(prev => ({ ...prev, brand: e.target.value }))}
-                placeholder="Enter brand name"
-                className="bg-[var(--input-background)] border-[var(--glass-border)] text-foreground"
-              />
-            </div>
-
             {/* Product Name */}
             <div className="space-y-2">
               <Label>Product Name *</Label>

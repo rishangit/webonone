@@ -567,12 +567,7 @@ export const CompanyProductDetailPage = ({ productId, onBack }: CompanyProductDe
                     <p className="text-foreground">{currentCompanyProduct.sku}</p>
                   </div>
                 )}
-                {currentCompanyProduct.brand && (
-                  <div>
-                    <Label className="text-muted-foreground">Brand</Label>
-                    <p className="text-foreground">{currentCompanyProduct.brand}</p>
-                  </div>
-                )}
+                {/* Removed brand field display */}
               </div>
 
               {isEditing && (

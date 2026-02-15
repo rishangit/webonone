@@ -1,53 +1,35 @@
 import { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
-import { Search, Plus, Edit, Trash2, MoreVertical, Package, Eye, Settings, AlertTriangle, CheckCircle, Filter, SortAsc, Star, Users, List, LayoutGrid, Grid, Tag } from "lucide-react";
-import { Card } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
-import { Badge } from "../../components/ui/badge";
-import { Textarea } from "../../components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "../../components/ui/dropdown-menu";
-import { DeleteConfirmationDialog } from "../../components/common/DeleteConfirmationDialog";
-import { Pagination } from "../../components/common/Pagination";
-import { SearchInput } from "../../components/common/SearchInput";
-import { EmptyState } from "../../components/common/EmptyState";
-import { RightPanel } from "../../components/common/RightPanel";
-import { cn } from "../../components/ui/utils";
-import { CreateSystemProductDialog } from "./CreateSystemProductDialog";
-import { CustomDialog } from "../../components/ui/custom-dialog";
-import { TagSelector } from "../../components/tags/TagSelector";
-import { useIsMobile } from "../../components/ui/use-mobile";
-import { ViewSwitcher } from "../../components/ui/view-switcher";
-import { ImageWithFallback } from "../../components/figma/ImageWithFallback";
-import { Carousel, CarouselContent, CarouselItem } from "../../components/ui/carousel";
+import { Plus, Package, AlertTriangle, CheckCircle, Filter, Users } from "lucide-react";
+import { Card } from "../../../components/ui/card";
+import { Button } from "../../../components/ui/button";
+import { Badge } from "../../../components/ui/badge";
+import { DeleteConfirmationDialog } from "../../../components/common/DeleteConfirmationDialog";
+import { Pagination } from "../../../components/common/Pagination";
+import { SearchInput } from "../../../components/common/SearchInput";
+import { EmptyState } from "../../../components/common/EmptyState";
+import { cn } from "../../../components/ui/utils";
+import { CreateSystemProductDialog } from "../CreateSystemProductDialog";
+import { ViewSwitcher } from "../../../components/ui/view-switcher";
+import { Carousel, CarouselContent, CarouselItem } from "../../../components/ui/carousel";
 import { toast } from "sonner";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import FileUpload from "../../components/ui/file-upload";
-import { formatAvatarUrl } from "../../utils";
-import { DateDisplay } from "../../components/common/DateDisplay";
+import { useAppDispatch, useAppSelector } from "../../../store/hooks";
+import { SystemProductCard } from "./SystemProductCard";
+import { SystemProductListItem } from "./SystemProductListItem";
+import { SystemProductFilters } from "./SystemProductFilters";
+import { SystemProductAddEditDialog } from "./SystemProductAddEditDialog";
 import {
   fetchSystemProductsRequest,
-  createSystemProductRequest,
   updateSystemProductRequest,
   deleteSystemProductRequest,
   clearError as clearSystemProductsError,
-} from "../../store/slices/systemProductsSlice";
+} from "../../../store/slices/systemProductsSlice";
 import {
   fetchCompanyProductsRequest,
   clearError as clearCompanyProductsError,
-} from "../../store/slices/companyProductsSlice";
-import { fetchTagsRequest } from "../../store/slices/tagsSlice";
-import { Product } from "../../services/products";
-import { CompanyProduct } from "../../services/companyProducts";
-
-interface Tag {
-  id: number;
-  name: string;
-  color: string;
-  icon?: string;
-}
+} from "../../../store/slices/companyProductsSlice";
+import { fetchTagsRequest } from "../../../store/slices/tagsSlice";
+import { Product, Tag } from "../../../services/products";
+import { CompanyProduct } from "../../../services/companyProducts";
 
 interface SystemProduct {
   id: string;
@@ -77,10 +59,15 @@ interface SystemProduct {
 // Helper function to map Product from API to SystemProduct for UI
 const mapProductToSystemProduct = (product: Product): SystemProduct => {
   // Ensure tags are properly handled - could be Tag objects or string array
-  let tags: (string | Tag)[] = [];
+  let tags: string[] | Tag[] = [];
   if (product.tags) {
     if (Array.isArray(product.tags)) {
-      tags = product.tags;
+      // Check if it's an array of strings or Tag objects
+      if (product.tags.length > 0 && typeof product.tags[0] === 'string') {
+        tags = product.tags as string[];
+      } else {
+        tags = product.tags as Tag[];
+      }
     }
   }
   
@@ -94,13 +81,13 @@ const mapProductToSystemProduct = (product: Product): SystemProduct => {
     usageCount: product.usageCount || 0,
     createdDate: product.createdDate,
     lastModified: product.lastModified,
-      tags: tags,
+    tags: tags,
   };
 };
 
 // Mock data removed - now using Redux
 
-import { UserRole, isRole } from "../../types/user";
+import { UserRole, isRole } from "../../../types/user";
 
 interface SystemProductsPageProps {
   currentUser?: {
@@ -114,7 +101,6 @@ interface SystemProductsPageProps {
 }
 
 export function SystemProductsPage({ currentUser, onViewProduct }: SystemProductsPageProps) {
-  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { systemProducts: productsFromRedux, loading: productsLoading, error: productsError } = useAppSelector((state) => state.systemProducts);
   const { companyProducts, loading: companyProductsLoading, error: companyProductsError } = useAppSelector((state) => state.companyProducts);
@@ -161,7 +147,7 @@ export function SystemProductsPage({ currentUser, onViewProduct }: SystemProduct
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<SystemProduct | null>(null);
   const [editFormData, setEditFormData] = useState({
-    brand: "",
+    // Removed brand field
     name: "",
     description: "",
     imageUrl: "",
@@ -260,21 +246,20 @@ export function SystemProductsPage({ currentUser, onViewProduct }: SystemProduct
         // Company-specific data
         companyProductId: cp.id,
         systemProductId: cp.systemProductId,
-        type: cp.type,
-        costPrice: cp.costPrice,
-        sellPrice: cp.sellPrice,
-        currentStock: cp.currentStock,
-        minStock: cp.minStock,
-        maxStock: cp.maxStock,
-        stockUnit: cp.stockUnit,
+        type: (cp as any).type,
+        costPrice: (cp as any).costPrice,
+        sellPrice: (cp as any).sellPrice,
+        currentStock: (cp as any).currentStock,
+        minStock: (cp as any).minStock,
+        maxStock: (cp as any).maxStock,
+        stockUnit: (cp as any).stockUnit,
         isAvailableForPurchase: cp.isAvailableForPurchase,
-        notes: cp.notes,
+        notes: (cp as any).notes,
       }));
     }
     return [];
   }, [productsFromRedux, companyProducts, isSuperAdmin, isCompanyOwner]);
   const loading = productsLoading || companyProductsLoading;
-  const isMobile = useIsMobile();
 
   // Get pagination metadata from Redux
   const { pagination } = useAppSelector((state) => state.systemProducts);
@@ -303,7 +288,7 @@ export function SystemProductsPage({ currentUser, onViewProduct }: SystemProduct
   const handleEditProduct = (product: SystemProduct) => {
     setSelectedProduct(product);
     
-    // Get the product from Redux to get the actual imageUrl, brand, sku, and isActive
+    // Get the product from Redux to get the actual imageUrl, sku, and isActive
     const productFromRedux = productsFromRedux.find(p => String(p.id) === product.id);
     
     // Convert tags array to tagIds array
@@ -320,7 +305,7 @@ export function SystemProductsPage({ currentUser, onViewProduct }: SystemProduct
       : [];
     
     setEditFormData({
-      brand: productFromRedux?.brand || "",
+      // Removed brand field
       name: product.name,
       description: product.description,
       imageUrl: productFromRedux?.imageUrl || product.imageUrl || "",
@@ -339,7 +324,7 @@ export function SystemProductsPage({ currentUser, onViewProduct }: SystemProduct
     }
 
     const updateData = {
-      brand: editFormData.brand.trim() || undefined,
+      // Removed brand field
       name: editFormData.name.trim(),
       description: editFormData.description || undefined,
       imageUrl: editFormData.imageUrl || undefined,
@@ -385,291 +370,17 @@ export function SystemProductsPage({ currentUser, onViewProduct }: SystemProduct
     if (!product) return;
     
     dispatch(updateSystemProductRequest({ 
-      id: parseInt(productId, 10), 
+      id: productId, 
       data: { isActive: !product.isActive } 
     }));
   };
 
-  const formatPrice = (price: number | null | undefined) => {
-    if (price === null || price === undefined || isNaN(price)) {
-      return "$0.00";
-    }
-    return `$${price.toFixed(2)}`;
-  };
-
-  const ProductCard = ({ product }: { product: SystemProduct }) => {
-    const handleCardClick = () => {
-      navigate(`/system/system-products/${product.id}`);
-    };
-
-    if (viewMode === "list") {
-      return (
-        <Card 
-          className="p-6 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)] cursor-pointer"
-          onClick={handleCardClick}
-        >
-          <div className="flex items-start gap-4">
-            <div className="flex-shrink-0">
-              <ImageWithFallback
-                src={product.imageUrl ? (product.imageUrl.startsWith('http') ? product.imageUrl : formatAvatarUrl(product.imageUrl)) : undefined}
-                alt={product.name}
-                className="w-20 h-16 object-cover rounded-lg"
-                fallbackSrc="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=80&h=64&fit=crop"
-              />
-            </div>
-            
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between mb-3">
-                <div className="min-w-0 flex-1 mr-2">
-                  <h3 className="font-medium text-foreground text-base sm:text-lg truncate">{product.name}</h3>
-                </div>
-                
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <Badge className={product.isActive ? "bg-green-500/20 text-green-600 dark:text-green-400 border-green-500/30" : "bg-gray-500/20 text-gray-600 dark:text-gray-400 border-gray-500/30"}>
-                    {product.isActive ? "Active" : "Inactive"}
-                  </Badge>
-                  <Badge className={product.isVerified ? "bg-purple-500/20 text-purple-600 dark:text-purple-400 border-purple-500/30" : "bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border-yellow-500/30"}>
-                    {product.isVerified ? (
-                      <>
-                        <CheckCircle className="w-3 h-3 mr-1" />
-                        Verified
-                      </>
-                    ) : (
-                      <>
-                        <AlertTriangle className="w-3 h-3 mr-1" />
-                        Unverified
-                      </>
-                    )}
-                  </Badge>
-                  
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="w-8 h-8 hover:bg-accent text-muted-foreground hover:text-foreground"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <MoreVertical className="w-4 h-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="bg-popover border-border" align="end">
-                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onViewProduct?.(product.id); }}>
-                        <Eye className="w-4 h-4 mr-2" />
-                        View Details
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEditProduct(product); }}>
-                        <Edit className="w-4 h-4 mr-2" />
-                        Edit Product
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); toggleProductStatus(product.id); }}>
-                        <Settings className="w-4 h-4 mr-2" />
-                        {product.isActive ? "Deactivate" : "Activate"}
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem 
-                        onClick={(e) => { e.stopPropagation(); handleDeleteProduct(product); }}
-                        className="text-red-600 dark:text-red-400"
-                        disabled={product.usageCount > 0}
-                      >
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Users className="w-4 h-4 flex-shrink-0" />
-                  <span className="truncate">{product.usageCount} companies</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <CheckCircle className="w-4 h-4 flex-shrink-0" />
-                  <span className="truncate"><DateDisplay date={product.lastModified} /></span>
-                </div>
-              </div>
-
-              <p className="text-sm text-foreground mb-3 line-clamp-2">{product.description}</p>
-
-              {/* Tags Section */}
-              <div className="flex flex-wrap gap-1">
-                {product.tags && product.tags.length > 0 ? (
-                  <>
-                    {product.tags.slice(0, 4).map((tag, index) => {
-                      // Handle both string tags (legacy) and Tag objects
-                      const tagObj = typeof tag === 'string' 
-                        ? { id: index, name: tag, color: '#3B82F6', icon: undefined }
-                        : tag;
-                      return (
-                        <Badge
-                          key={tagObj.id || index}
-                          variant="secondary"
-                          className="text-xs"
-                          style={{ 
-                            backgroundColor: `${tagObj.color}20`, 
-                            color: tagObj.color,
-                            borderColor: `${tagObj.color}40`
-                          }}
-                        >
-                          {tagObj.icon && <span className="mr-1">{tagObj.icon}</span>}
-                          {tagObj.name}
-                  </Badge>
-                      );
-                    })}
-                {product.tags.length > 4 && (
-                  <Badge variant="outline" className="text-xs">
-                    +{product.tags.length - 4} more
-                  </Badge>
-                    )}
-                  </>
-                ) : (
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Tag className="w-3 h-3" />
-                    <span>No tags</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </Card>
-      );
-    }
-
-    // Grid View
-    return (
-      <Card 
-        className="overflow-hidden backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-300 hover:shadow-lg hover:shadow-[var(--glass-shadow)] group cursor-pointer"
-        onClick={handleCardClick}
-      >
-        <div className="relative h-48 overflow-hidden">
-          <ImageWithFallback
-            src={product.imageUrl ? (product.imageUrl.startsWith('http') ? product.imageUrl : formatAvatarUrl(product.imageUrl)) : undefined}
-            alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            fallbackSrc="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=300&fit=crop"
-          />
-          <div className="absolute top-3 right-3 flex gap-1 flex-wrap">
-            <Badge className={product.isActive ? "bg-green-500/20 text-green-400 backdrop-blur-sm border border-green-500/30" : "bg-gray-500/20 text-gray-400 backdrop-blur-sm border border-gray-500/30"}>
-              {product.isActive ? "Active" : "Inactive"}
-            </Badge>
-            <Badge className={product.isVerified ? "bg-purple-500/20 text-purple-600 dark:text-purple-400 backdrop-blur-sm border border-purple-500/30" : "bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 backdrop-blur-sm border border-yellow-500/30"}>
-              {product.isVerified ? (
-                <>
-                  <CheckCircle className="w-3 h-3 mr-1" />
-                  Verified
-                </>
-              ) : (
-                <>
-                  <AlertTriangle className="w-3 h-3 mr-1" />
-                  Unverified
-                </>
-              )}
-            </Badge>
-          </div>
-        </div>
-        
-        <div className="p-6">
-          <div className="flex items-start justify-between mb-4">
-            <div className="min-w-0 flex-1">
-              <h3 className="text-lg font-semibold text-card-foreground mb-1 truncate">{product.name}</h3>
-            </div>
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="text-muted-foreground hover:text-card-foreground hover:bg-sidebar-accent flex-shrink-0"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <MoreVertical className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-popover border-border" align="end">
-                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onViewProduct?.(product.id); }}>
-                  <Eye className="w-4 h-4 mr-2" />
-                  View Details
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEditProduct(product); }}>
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit Product
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); toggleProductStatus(product.id); }}>
-                  <Settings className="w-4 h-4 mr-2" />
-                  {product.isActive ? "Deactivate" : "Activate"}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  onClick={(e) => { e.stopPropagation(); handleDeleteProduct(product); }}
-                  className="text-red-500 hover:bg-red-500/10"
-                  disabled={product.usageCount > 0}
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          <div className="space-y-3 mb-4">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Usage:</span>
-              <span className="text-card-foreground">{product.usageCount} companies</span>
-            </div>
-
-            <p className="text-sm text-muted-foreground line-clamp-2">{product.description}</p>
-          </div>
-
-          {/* Tags Section */}
-          <div className="mb-4">
-            {product.tags && product.tags.length > 0 ? (
-              <div className="flex flex-wrap gap-1">
-                {product.tags.slice(0, 3).map((tag, index) => {
-                  // Handle both string tags (legacy) and Tag objects
-                  const tagObj = typeof tag === 'string' 
-                    ? { id: index, name: tag, color: '#3B82F6', icon: undefined }
-                    : tag;
-                  return (
-                    <Badge
-                      key={tagObj.id || index}
-                      variant="secondary"
-                      className="text-xs"
-                      style={{ 
-                        backgroundColor: `${tagObj.color}20`, 
-                        color: tagObj.color,
-                        borderColor: `${tagObj.color}40`
-                      }}
-                    >
-                      {tagObj.icon && <span className="mr-1">{tagObj.icon}</span>}
-                      {tagObj.name}
-              </Badge>
-                  );
-                })}
-            {product.tags.length > 3 && (
-              <Badge variant="outline" className="text-xs">
-                +{product.tags.length - 3}
-              </Badge>
-                )}
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Tag className="w-3 h-3" />
-                <span>No tags assigned</span>
-              </div>
-            )}
-          </div>
-
-          <div className="pt-4">
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>Modified: <DateDisplay date={product.lastModified} /></span>
-              <span>ID: {product.id}</span>
-            </div>
-          </div>
-        </div>
-      </Card>
-    );
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    setDebouncedSearchTerm("");
+    setStatusFilter("all");
+    setVerifiedFilter("all");
+    setSelectedTagIds([]);
   };
 
   return (
@@ -894,7 +605,25 @@ export function SystemProductsPage({ currentUser, onViewProduct }: SystemProduct
         <>
           <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" : "space-y-4"}>
             {displayedProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              viewMode === "list" ? (
+                <SystemProductListItem
+                  key={product.id}
+                  product={product}
+                  onViewProduct={onViewProduct}
+                  onEdit={handleEditProduct}
+                  onDelete={handleDeleteProduct}
+                  onToggleStatus={toggleProductStatus}
+                />
+              ) : (
+                <SystemProductCard
+                  key={product.id}
+                  product={product}
+                  onViewProduct={onViewProduct}
+                  onEdit={handleEditProduct}
+                  onDelete={handleDeleteProduct}
+                  onToggleStatus={toggleProductStatus}
+                />
+              )
             ))}
           </div>
 
@@ -946,118 +675,16 @@ export function SystemProductsPage({ currentUser, onViewProduct }: SystemProduct
       />
 
       {/* Edit Product Dialog */}
-      <CustomDialog 
-        open={isEditDialogOpen} 
+      <SystemProductAddEditDialog
+        open={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
-        title="Edit System Product"
-        description="Update product information and settings"
-        icon={<Package className="w-5 h-5" />}
-        maxWidth="max-w-2xl"
-        footer={
-          <div className="flex items-center justify-end gap-2">
-            <Button 
-              variant="outline" 
-              onClick={() => setIsEditDialogOpen(false)}
-              size="default"
-              className="h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent"
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleUpdateProduct}
-              size="default"
-              variant="accent"
-              disabled={loading}
-            >
-              {loading ? "Updating..." : "Update Product"}
-            </Button>
-          </div>
-        }
-      >
-        <div className="space-y-6">
-          {/* Brand */}
-          <div className="space-y-2">
-            <Label className="text-foreground">Brand</Label>
-            <Input
-              value={editFormData.brand}
-              onChange={(e) => setEditFormData(prev => ({ ...prev, brand: e.target.value }))}
-              placeholder="Enter brand name"
-              className="bg-[var(--input-background)] border-[var(--glass-border)] text-foreground"
-            />
-          </div>
-
-          {/* Product Name */}
-          <div className="space-y-2">
-            <Label className="text-foreground">Product Name *</Label>
-            <Input
-              value={editFormData.name}
-              onChange={(e) => setEditFormData(prev => ({ ...prev, name: e.target.value }))}
-              placeholder="Product name"
-              className="bg-[var(--input-background)] border-[var(--glass-border)] text-foreground text-lg py-3"
-            />
-          </div>
-
-          {/* Description */}
-          <div className="space-y-2">
-            <Label className="text-foreground">Description</Label>
-            <Textarea
-              value={editFormData.description}
-              onChange={(e) => setEditFormData(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="High-quality nitrile examination gloves for medical procedures"
-              className="bg-[var(--input-background)] border-[var(--glass-border)] text-foreground min-h-[80px]"
-              rows={3}
-            />
-          </div>
-
-          {/* SKU */}
-          {/* Product Image */}
-          <div className="space-y-2">
-            <Label className="text-foreground">Product Image</Label>
-            <FileUpload
-              onFileUploaded={handleImageUploaded}
-              onFileDeleted={handleImageDeleted}
-              currentImagePath={editFormData.imageUrl}
-              currentImageUrl={editFormData.imageUrl ? formatAvatarUrl(editFormData.imageUrl) : undefined}
-              folderPath="products"
-              label="Upload Product Image"
-              maxSize={5}
-              className="w-full"
-            />
-          </div>
-
-          {/* Tags */}
-          <div className="space-y-2">
-            <Label className="text-foreground">Tags</Label>
-            <TagSelector
-              value={editFormData.tagIds}
-              onChange={(tagIds) => {
-                setEditFormData(prev => ({ ...prev, tagIds }));
-              }}
-              placeholder="Select tags for this product"
-            />
-            <p className="text-xs text-muted-foreground">
-              Select one or more tags that best describe this product. You can search for tags in the dropdown.
-            </p>
-          </div>
-
-          {/* Active Status */}
-          <div className="space-y-2">
-            <Label className="text-foreground">Status</Label>
-            <Select 
-              value={editFormData.isActive ? "active" : "inactive"} 
-              onValueChange={(value) => setEditFormData(prev => ({ ...prev, isActive: value === "active" }))}
-            >
-              <SelectTrigger className="bg-[var(--input-background)] border-[var(--glass-border)] text-foreground">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-popover border-border">
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </CustomDialog>
+        formData={editFormData}
+        onFormDataChange={setEditFormData}
+        onSubmit={handleUpdateProduct}
+        onImageUploaded={handleImageUploaded}
+        onImageDeleted={handleImageDeleted}
+        loading={loading}
+      />
 
       {/* Delete Confirmation Dialog */}
       <DeleteConfirmationDialog
@@ -1075,80 +702,19 @@ export function SystemProductsPage({ currentUser, onViewProduct }: SystemProduct
       />
 
       {/* Filter Right Panel */}
-      <RightPanel
+      <SystemProductFilters
         open={isFilterPanelOpen}
         onOpenChange={setIsFilterPanelOpen}
-        title="Filters"
-        contentClassName="bg-background"
-      >
-        <div className="space-y-4">
-          {/* Status Filter */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Status</label>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-popover border-border">
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Verified Filter */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Verified</label>
-            <Select value={verifiedFilter} onValueChange={setVerifiedFilter}>
-              <SelectTrigger className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-popover border-border">
-                <SelectItem value="all">All Verified</SelectItem>
-                <SelectItem value="verified">Verified</SelectItem>
-                <SelectItem value="unverified">Unverified</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Tags Filter */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Tags</label>
-            <TagSelector
-              value={selectedTagIds}
-              onChange={setSelectedTagIds}
-              placeholder="Select tags"
-            />
-          </div>
-
-          {/* Filter Results Count */}
-          {(debouncedSearchTerm || statusFilter !== "all" || verifiedFilter !== "all" || selectedTagIds.length > 0) && (
-            <div className="pt-4 border-t border-border space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Results</span>
-                <Badge variant="outline" className="bg-[var(--accent-bg)] text-[var(--accent-text)] border-[var(--accent-border)]">
-                  {displayedProducts.length} products
-                </Badge>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setSearchTerm("");
-                  setDebouncedSearchTerm("");
-                  setStatusFilter("all");
-                  setVerifiedFilter("all");
-                  setSelectedTagIds([]);
-                }}
-                className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground hover:bg-accent hover:text-foreground"
-              >
-                Clear All Filters
-              </Button>
-            </div>
-          )}
-        </div>
-      </RightPanel>
+        statusFilter={statusFilter}
+        verifiedFilter={verifiedFilter}
+        selectedTagIds={selectedTagIds}
+        onStatusFilterChange={setStatusFilter}
+        onVerifiedFilterChange={setVerifiedFilter}
+        onTagIdsChange={setSelectedTagIds}
+        onClearFilters={handleClearFilters}
+        hasActiveFilters={!!(debouncedSearchTerm || statusFilter !== "all" || verifiedFilter !== "all" || selectedTagIds.length > 0)}
+        resultsCount={displayedProducts.length}
+      />
     </div>
   );
 }

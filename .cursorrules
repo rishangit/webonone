@@ -26,14 +26,10 @@
         "Organize files logically (pages, components, hooks, store, utils) and maintain consistent naming conventions.",
         "Use proper indentation, spacing, and code comments where necessary to make the code user-friendly and easy to understand.",
         "Prefer explicit imports over wildcards, and keep imports organized (React, third-party, internal).",
-        "When generating Next.js pages, use `getServerSideProps`, `getStaticProps`, or `getStaticPaths` appropriately and structure them clearly.",
         "Separate UI, business logic, and API logic to make components focused and maintainable.",
         "Always use `.env` files for storing secrets, API URLs, and environment-specific configuration.",
         "Access environment variables using `process.env.NEXT_PUBLIC_...` in Next.js for frontend code and `process.env...` for backend/server code.",
         "Do not hardcode sensitive or environment-specific values in the codebase; always reference the `.env` variables.",
-        "Keep dummy data in JSON files inside a `/json` folder at the project root.",
-        "Always fetch data from the server first; if the server endpoint is unavailable, use the JSON files as fallback data.",
-        "Structure the JSON data similar to API responses so that Redux and components can consume it without code changes.",
         "Use try/catch or RxJS operators to handle server errors and switch to local JSON data automatically."
       ]
     }

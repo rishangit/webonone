@@ -240,7 +240,6 @@ const createTables = async () => {
     await pool.execute(`
       CREATE TABLE IF NOT EXISTS products (
         id VARCHAR(10) PRIMARY KEY,
-        brand VARCHAR(255),
         name VARCHAR(255) NOT NULL,
         description TEXT,
         imageUrl TEXT,
@@ -250,8 +249,7 @@ const createTables = async () => {
         createdDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         lastModified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         INDEX idx_active (isActive),
-        INDEX idx_verified (isVerified),
-        INDEX idx_brand (brand)
+        INDEX idx_verified (isVerified)
       )
     `);
 
@@ -326,6 +324,56 @@ const createTables = async () => {
         FOREIGN KEY (productId) REFERENCES products(id) ON DELETE CASCADE,
         FOREIGN KEY (tagId) REFERENCES tags(id) ON DELETE CASCADE
       )
+    `);
+
+    // Product Attributes table
+    await pool.execute(`
+      CREATE TABLE IF NOT EXISTS product_attributes (
+        id VARCHAR(10) PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        description TEXT,
+        valueDataType ENUM('text', 'number', 'boolean', 'date', 'json') DEFAULT 'text',
+        unit_of_measure VARCHAR(10),
+        isActive BOOLEAN DEFAULT TRUE,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_active (isActive),
+        INDEX idx_unit_of_measure (unit_of_measure),
+        FOREIGN KEY (unit_of_measure) REFERENCES units_of_measure(id) ON DELETE SET NULL
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+    `);
+
+    // Product Related Attributes junction table
+    await pool.execute(`
+      CREATE TABLE IF NOT EXISTS product_related_attributes (
+        id VARCHAR(10) PRIMARY KEY,
+        productId VARCHAR(10) NOT NULL,
+        attributeId VARCHAR(10) NOT NULL,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY unique_product_attribute (productId, attributeId),
+        INDEX idx_product (productId),
+        INDEX idx_attribute (attributeId),
+        FOREIGN KEY (productId) REFERENCES products(id) ON DELETE CASCADE,
+        FOREIGN KEY (attributeId) REFERENCES product_attributes(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+    `);
+
+    // Product Related Attributes Values table (stores attribute values for variants)
+    await pool.execute(`
+      CREATE TABLE IF NOT EXISTS product_related_attributes_values (
+        id VARCHAR(10) PRIMARY KEY,
+        variantId VARCHAR(10) NOT NULL,
+        productRelatedAttributeId VARCHAR(10) NOT NULL,
+        attributeValue TEXT,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY unique_variant_attribute (variantId, productRelatedAttributeId),
+        INDEX idx_variant (variantId),
+        INDEX idx_product_related_attribute (productRelatedAttributeId),
+        FOREIGN KEY (variantId) REFERENCES product_variants(id) ON DELETE CASCADE,
+        FOREIGN KEY (productRelatedAttributeId) REFERENCES product_related_attributes(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
     `);
 
     // Company Products table (only company-specific data, system product data comes from products table)

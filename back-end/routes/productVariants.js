@@ -65,10 +65,8 @@ router.post('/',
       productId: req.body.productId,
       name: req.body.name,
       sku: req.body.sku,
-      color: req.body.color || null,
-      size: req.body.size || null,
-      weight: req.body.weight || null,
-      material: req.body.material || null,
+      // Removed hardcoded fields: color, size, weight, material
+      // These are now stored in product_related_attributes_values
       isDefault: req.body.isDefault || false,
       isActive: req.body.isActive !== undefined ? Boolean(req.body.isActive) : true,
       isVerified: finalIsVerified
@@ -110,10 +108,8 @@ router.put('/:id',
     
     if (req.body.name !== undefined) updateData.name = req.body.name;
     if (req.body.sku !== undefined) updateData.sku = req.body.sku;
-    if (req.body.color !== undefined) updateData.color = req.body.color || null;
-    if (req.body.size !== undefined) updateData.size = req.body.size || null;
-    if (req.body.weight !== undefined) updateData.weight = req.body.weight || null;
-    if (req.body.material !== undefined) updateData.material = req.body.material || null;
+    // Removed hardcoded fields: color, size, weight, material
+    // These are now stored in product_related_attributes_values
     if (req.body.isDefault !== undefined) updateData.isDefault = Boolean(req.body.isDefault);
     if (req.body.isActive !== undefined) updateData.isActive = Boolean(req.body.isActive);
     if (req.body.isVerified !== undefined) updateData.isVerified = Boolean(req.body.isVerified);

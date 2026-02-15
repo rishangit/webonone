@@ -9,10 +9,7 @@ class CompanyProductVariant {
     // Variant details from system product variant (joined)
     this.name = data.name || data.systemVariantName;
     this.sku = data.sku || data.systemVariantSku;
-    this.color = data.color || data.systemVariantColor;
-    this.size = data.size || data.systemVariantSize;
-    this.weight = data.weight || data.systemVariantWeight;
-    this.material = data.material || data.systemVariantMaterial;
+    // Removed hardcoded fields: color, size, weight, material (now stored in attributes)
     // Company-specific fields
     this.type = data.type;
     this.isDefault = Boolean(data.isDefault);
@@ -31,10 +28,7 @@ class CompanyProductVariant {
       systemProductVariantId: this.systemProductVariantId,
       name: this.name,
       sku: this.sku,
-      color: this.color,
-      size: this.size,
-      weight: this.weight,
-      material: this.material,
+      // Removed hardcoded fields: color, size, weight, material (now stored in attributes)
       type: this.type,
       isDefault: this.isDefault,
       isActive: this.isActive,
@@ -221,10 +215,7 @@ class CompanyProductVariant {
           cpv.*,
           pv.name as systemVariantName,
           pv.sku as systemVariantSku,
-          pv.color as systemVariantColor,
-          pv.size as systemVariantSize,
-          pv.weight as systemVariantWeight,
-          pv.material as systemVariantMaterial,
+          -- Removed hardcoded fields: color, size, weight, material (now stored in attributes)
           cps.costPrice as activeStockCostPrice,
           cps.sellPrice as activeStockSellPrice,
           cps.quantity as activeStockQuantity
@@ -262,10 +253,7 @@ class CompanyProductVariant {
           cpv.*,
           pv.name as systemVariantName,
           pv.sku as systemVariantSku,
-          pv.color as systemVariantColor,
-          pv.size as systemVariantSize,
-          pv.weight as systemVariantWeight,
-          pv.material as systemVariantMaterial,
+          -- Removed hardcoded fields: color, size, weight, material (now stored in attributes)
           cps.costPrice as activeStockCostPrice,
           cps.sellPrice as activeStockSellPrice,
           cps.quantity as activeStockQuantity

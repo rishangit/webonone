@@ -11,7 +11,7 @@ export interface CompanyProduct {
   description?: string;
   sku?: string;
   imageUrl?: string;
-  brand?: string;
+  // Removed brand field
   // Company-specific data (type, price, stock are now in variants)
   isAvailableForPurchase: boolean;
   notes?: string;

@@ -14,53 +14,16 @@ export const variantSchema = yup.object({
     .optional()
     .transform((value) => value || undefined),
   
-  color: yup
-    .string()
+  variantDefiningAttributes: yup
+    .array()
+    .of(yup.string())
     .optional()
-    .max(100, 'Color must be less than 100 characters')
-    .transform((value) => value?.trim() || undefined),
+    .default([]),
   
-  size: yup
-    .string()
+  variantAttributeValues: yup
+    .object()
     .optional()
-    .test('size-format', 'Size must be a positive number', function(value) {
-      if (!value || value.trim() === '') {
-        return true; // Allow empty
-      }
-      const num = Number(value);
-      return !isNaN(num) && num > 0;
-    })
-    .transform((value) => value?.trim() || undefined),
-  
-  sizeUnit: yup
-    .string()
-    .oneOf(['ml', 'L'], 'Size unit must be ml or L')
-    .optional()
-    .transform((value) => value || undefined),
-  
-  weight: yup
-    .string()
-    .optional()
-    .test('weight-format', 'Weight must be a positive number', function(value) {
-      if (!value || value.trim() === '') {
-        return true; // Allow empty
-      }
-      const num = Number(value);
-      return !isNaN(num) && num > 0;
-    })
-    .transform((value) => value?.trim() || undefined),
-  
-  weightUnit: yup
-    .string()
-    .oneOf(['mg', 'g', 'kg'], 'Weight unit must be mg, g, or kg')
-    .optional()
-    .transform((value) => value || undefined),
-  
-  material: yup
-    .string()
-    .optional()
-    .max(255, 'Material must be less than 255 characters')
-    .transform((value) => value?.trim() || undefined),
+    .default({}),
   
   type: yup
     .string()
