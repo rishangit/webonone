@@ -6,12 +6,10 @@ import { Input } from "../ui/input";
 import { Badge } from "../ui/badge";
 import { Label } from "../ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { CustomDialog } from "../ui/custom-dialog";
-import { productVariantsService, ProductVariant, CreateProductVariantData } from "../../services/productVariants";
-import { VariantForm } from "./VariantForm";
+import { productVariantsService, ProductVariant } from "../../services/productVariants";
 import { VariantFormData } from "../../schemas/variantValidation";
 import { toast } from "sonner";
-import { generateVariantSKU } from "../../utils/skuGenerator";
+import { VariantDialog } from "./VariantDialog";
 
 interface SystemProductVariantSelectorProps {
   productId: string;
@@ -22,6 +20,8 @@ interface SystemProductVariantSelectorProps {
   placeholder?: string;
   productName?: string; // System product name for SKU generation
   productSKU?: string; // System product SKU for SKU generation
+  companyProductId?: string | null; // Company product ID for auto-creating company variant
+  onSystemVariantCreated?: (systemVariantId: string) => void; // Callback when system variant is created
 }
 
 export const SystemProductVariantSelector = ({
@@ -32,7 +32,9 @@ export const SystemProductVariantSelector = ({
   className = "",
   placeholder = "Select variant",
   productName,
-  productSKU
+  productSKU,
+  companyProductId,
+  onSystemVariantCreated
 }: SystemProductVariantSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -43,21 +45,6 @@ export const SystemProductVariantSelector = ({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [popoverWidth, setPopoverWidth] = useState<number | undefined>(undefined);
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [newVariantData, setNewVariantData] = useState<VariantFormData>({
-    name: '',
-    sku: '',
-    color: '',
-    size: '',
-    sizeUnit: 'ml',
-    weight: '',
-    weightUnit: 'g',
-    material: '',
-    type: 'service',
-    isDefault: false,
-    price: { cost: 0, sell: 0 },
-    stock: { current: 0, minimum: 10, maximum: 100, unit: 'pieces' }
-  });
-  const [isCreating, setIsCreating] = useState(false);
 
   // Fetch variants when component mounts or productId changes
   useEffect(() => {
@@ -124,96 +111,143 @@ export const SystemProductVariantSelector = ({
     onChange(null, null);
   };
 
-  const handleAddNewVariant = async () => {
-    if (!newVariantData.name || !newVariantData.sku) {
-      toast.error("Variant name and SKU are required");
-      return;
-    }
-
-    setIsCreating(true);
+  // Handle save variant from VariantDialog
+  const handleSaveVariant = async (variantData: VariantFormData, attributeValues?: Record<string, string>) => {
     try {
-      // Combine size and sizeUnit, weight and weightUnit
-      const size = newVariantData.size && newVariantData.sizeUnit 
-        ? `${newVariantData.size}${newVariantData.sizeUnit}` 
-        : newVariantData.size || undefined;
-      const weight = newVariantData.weight && newVariantData.weightUnit 
-        ? `${newVariantData.weight}${newVariantData.weightUnit}` 
-        : newVariantData.weight || undefined;
+      const { productVariantsService } = await import("../../services/productVariants");
+      const { productRelatedAttributesService } = await import("../../services/productRelatedAttributes");
+      const { productRelatedAttributeValuesService } = await import("../../services/productRelatedAttributeValues");
+      const { companyProductVariantsService } = await import("../../services/companyProductVariants");
 
-      const variantData: CreateProductVariantData = {
-        productId: productId,
-        name: newVariantData.name,
-        sku: newVariantData.sku,
-        color: newVariantData.color || undefined,
-        size: size,
-        weight: weight,
-        material: newVariantData.material || undefined,
-        isDefault: newVariantData.isDefault || false,
+      // Extract variant defining attributes and their values
+      const variantDefiningAttributeIds = (variantData as any).variantDefiningAttributes || [];
+      const variantAttributeValues = (variantData as any).variantAttributeValues || attributeValues || {};
+
+      // Step 1: Create system product variant
+      const systemVariantData = {
+        productId,
+        name: variantData.name,
+        sku: variantData.sku,
+        isDefault: variantData.isDefault || false,
         isActive: true,
         isVerified: false // Company owners create unverified variants
       };
 
-      const createdVariant = await productVariantsService.createVariant(variantData);
+      const createdSystemVariant = await productVariantsService.createVariant(systemVariantData);
       
+      // Step 2: Save variant-defining attributes and attribute values for system variant
+      if (createdSystemVariant.id) {
+        try {
+          const productAttributes = await productRelatedAttributesService.getAttributesByProductId(productId);
+          
+          // Update variant-defining status for all attributes
+          for (const attr of productAttributes) {
+            const shouldBeVariantDefining = variantDefiningAttributeIds.includes(attr.attributeId);
+            if (attr.isVariantDefining !== shouldBeVariantDefining) {
+              await productRelatedAttributesService.updateAttribute(attr.id, {
+                isVariantDefining: shouldBeVariantDefining
+              });
+            }
+          }
+
+          // Save attribute values if provided
+          if (variantAttributeValues && Object.keys(variantAttributeValues).length > 0) {
+            const valuesToSave = productAttributes
+              .map((attr) => ({
+                productRelatedAttributeId: attr.id,
+                attributeValue: variantAttributeValues[attr.id] || null,
+              }))
+              .filter((v) => v.attributeValue !== null && v.attributeValue !== "");
+
+            if (valuesToSave.length > 0) {
+              await productRelatedAttributeValuesService.bulkUpsertValues(createdSystemVariant.id, valuesToSave);
+            }
+          }
+        } catch (error: any) {
+          console.error("Error saving attribute values:", error);
+          toast.error("Variant created but failed to save attribute values");
+        }
+      }
+
+      // Step 3: If companyProductId is provided, automatically create company variant
+      if (companyProductId && createdSystemVariant.id) {
+        try {
+          const existingVariants = await companyProductVariantsService.getVariantsByCompanyProductId(companyProductId);
+          const willBeOnlyVariant = existingVariants.length === 0;
+
+          const companyVariantData: any = {
+            companyProductId,
+            systemProductVariantId: createdSystemVariant.id,
+            type: variantData.type || 'service',
+            isActive: true,
+            isDefault: willBeOnlyVariant ? true : (variantData.isDefault || false)
+          };
+
+          await companyProductVariantsService.createVariant(companyVariantData);
+        } catch (error: any) {
+          console.error("Error creating company variant:", error);
+          toast.error("System variant created but failed to create company variant");
+        }
+      }
+
       // Refresh variants list
       const fetchedVariants = await productVariantsService.getVariantsByProductId(productId);
       setVariants(fetchedVariants);
       
-      // Select the newly created variant
-      onChange(createdVariant.id, createdVariant);
+      // Find the newly created variant in the refreshed list
+      const newVariant = fetchedVariants.find(v => v.id === createdSystemVariant.id);
       
-      // Close dialog and reset form
+      // Select the newly created variant
+      if (newVariant) {
+        onChange(createdSystemVariant.id, newVariant);
+      } else {
+        onChange(createdSystemVariant.id, createdSystemVariant);
+      }
+      
+      // Close dialog
       setShowAddDialog(false);
-      setNewVariantData({
-        name: '',
-        sku: '',
-        color: '',
-        size: '',
-        sizeUnit: 'ml',
-        weight: '',
-        weightUnit: 'g',
-        material: '',
-        type: 'service',
-        isDefault: false,
-        price: { cost: 0, sell: 0 },
-        stock: { current: 0, minimum: 10, maximum: 100, unit: 'pieces' }
-      });
+      
+      // Call callback if provided
+      if (onSystemVariantCreated && createdSystemVariant.id) {
+        onSystemVariantCreated(createdSystemVariant.id);
+      }
       
       toast.success("Variant added successfully. It will be verified by system admin.");
     } catch (error: any) {
       console.error('Error creating variant:', error);
       toast.error(error?.message || "Failed to add variant");
-    } finally {
-      setIsCreating(false);
+      throw error;
     }
-  };
-
-  // Auto-generate SKU when variant details change
-  const handleVariantDataChange = (field: keyof VariantFormData, value: any) => {
-    const updated = { ...newVariantData, [field]: value };
-    
-    // Auto-generate SKU when variant details change
-    if (field === 'name' || field === 'color' || field === 'size' || field === 'sizeUnit') {
-      if (updated.name && updated.name.trim()) {
-        updated.sku = generateVariantSKU(
-          productName || 'Product',
-          productSKU,
-          {
-            name: updated.name,
-            color: updated.color,
-            size: updated.size,
-            sizeUnit: updated.sizeUnit
-          }
-        );
-      }
-    }
-    
-    setNewVariantData(updated);
   };
 
   return (
-    <div className={className}>
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
+    <>
+      {/* Add New Variant Dialog - Render outside Popover to avoid conflicts */}
+      {productId && (
+        <VariantDialog
+          open={showAddDialog}
+          onOpenChange={(open) => {
+            setShowAddDialog(open);
+            if (!open) {
+              // Reset form when dialog closes
+              setIsOpen(false);
+            }
+          }}
+          mode="add"
+          variant={null}
+          systemProductId={null} // Not selecting from existing system variants
+          productId={productId} // Pass productId to enable wizard mode
+          variantMode="system" // This is for creating system variants
+          companyProductId={companyProductId} // Pass companyProductId for auto-creating company variant
+          onSave={handleSaveVariant}
+          onCancel={() => {
+            setShowAddDialog(false);
+          }}
+        />
+      )}
+      
+      <div className={className}>
+        <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <Button
             ref={triggerRef}
@@ -327,12 +361,18 @@ export const SystemProductVariantSelector = ({
             {/* Add New Variant Button */}
             <div className="p-2 border-t border-border">
               <Button
+                type="button"
                 variant="outline"
                 className="w-full justify-start text-sm"
                 onClick={(e) => {
+                  e.preventDefault();
                   e.stopPropagation();
-                  setShowAddDialog(true);
+                  // Close popover and open dialog
                   setIsOpen(false);
+                  // Small delay to ensure popover closes first
+                  requestAnimationFrame(() => {
+                    setShowAddDialog(true);
+                  });
                 }}
               >
                 <Icon icon={Plus} size="sm" className="mr-2" />
@@ -342,65 +382,8 @@ export const SystemProductVariantSelector = ({
           </div>
         </PopoverContent>
       </Popover>
-
-      {/* Add New Variant Dialog */}
-      <CustomDialog
-        open={showAddDialog}
-        onOpenChange={setShowAddDialog}
-        title="Add New System Product Variant"
-        description="This variant will be saved as unverified and will need to be verified by a system admin."
-        maxWidth="max-w-lg"
-        className="max-h-[90vh] overflow-y-auto bg-[var(--glass-bg)] border-[var(--glass-border)]"
-      >
-        <div className="space-y-4 py-4">
-          <VariantForm
-            variant={newVariantData}
-            onChange={handleVariantDataChange}
-            onDefaultChange={(isDefault) => {
-              setNewVariantData(prev => ({ ...prev, isDefault }));
-            }}
-            showDefaultCheckbox={true}
-            skuLabel="SKU * (Auto-generated)"
-            mode="system"
-            hideSku={false}
-          />
-        </div>
-
-        <div className="flex gap-3">
-          <Button
-            variant="outline"
-            onClick={() => {
-              setShowAddDialog(false);
-              setNewVariantData({
-                name: '',
-                sku: '',
-                color: '',
-                size: '',
-                sizeUnit: 'ml',
-                weight: '',
-                weightUnit: 'g',
-                material: '',
-                type: 'service',
-                isDefault: false,
-                price: { cost: 0, sell: 0 },
-                stock: { current: 0, minimum: 10, maximum: 100, unit: 'pieces' }
-              });
-            }}
-            disabled={isCreating}
-            className="flex-1 border-[var(--glass-border)] hover:border-[var(--accent-border)] hover:bg-[var(--accent-bg)] text-foreground"
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleAddNewVariant}
-            disabled={isCreating || !newVariantData.name || !newVariantData.sku}
-            className="flex-1 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-lg shadow-[var(--accent-primary)]/25 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isCreating ? "Adding..." : "Add Variant"}
-          </Button>
-        </div>
-      </CustomDialog>
-    </div>
+      </div>
+    </>
   );
 };
 

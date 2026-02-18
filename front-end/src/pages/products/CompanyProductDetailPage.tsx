@@ -31,6 +31,9 @@ import { SystemProductVariantSelector } from "../../components/products/SystemPr
 import { ProductVariant as SystemProductVariant } from "../../services/productVariants";
 import { DeleteConfirmationDialog } from "../../components/common/DeleteConfirmationDialog";
 import { currenciesService, Currency } from "../../services/currencies";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "../../components/ui/tabs";
+import { systemProductAttributesService, SystemProductAttribute } from "../../services/systemProductAttributes";
+import { unitsOfMeasureService, UnitsOfMeasure } from "../../services/unitsOfMeasure";
 
 interface CompanyProductDetailPageProps {
   productId: string;
@@ -60,6 +63,9 @@ export const CompanyProductDetailPage = ({ productId, onBack }: CompanyProductDe
   const [variants, setVariants] = useState<CompanyProductVariant[]>([]);
   const [variantsLoading, setVariantsLoading] = useState(false);
   const [companyCurrency, setCompanyCurrency] = useState<Currency | null>(null);
+  const [systemAttributes, setSystemAttributes] = useState<SystemProductAttribute[]>([]);
+  const [unitsOfMeasure, setUnitsOfMeasure] = useState<UnitsOfMeasure[]>([]);
+  const [attributesLoading, setAttributesLoading] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -360,6 +366,30 @@ export const CompanyProductDetailPage = ({ productId, onBack }: CompanyProductDe
     setSelectedVariant(selectedVariant?.id === variant.id ? null : variant);
   };
 
+  // Fetch all system product attributes
+  useEffect(() => {
+    const fetchSystemAttributes = async () => {
+      setAttributesLoading(true);
+      try {
+        const [attributesResult, unitsResult] = await Promise.all([
+          systemProductAttributesService.getAttributes({
+            isActive: true,
+            limit: 1000,
+          }),
+          unitsOfMeasureService.getActiveUnits(),
+        ]);
+        setSystemAttributes(attributesResult.attributes);
+        setUnitsOfMeasure(unitsResult);
+      } catch (error: any) {
+        console.error("Error fetching system attributes:", error);
+        toast.error(error.message || "Failed to load system attributes");
+      } finally {
+        setAttributesLoading(false);
+      }
+    };
+    fetchSystemAttributes();
+  }, []);
+
   // Fetch company currency
   useEffect(() => {
     const fetchCompanyCurrency = async () => {
@@ -534,7 +564,14 @@ export const CompanyProductDetailPage = ({ productId, onBack }: CompanyProductDe
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="attributes">Product Attributes</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="mt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left Side - Product Image and Information */}
         <div className="space-y-6">
           {/* Product Image */}
@@ -860,6 +897,66 @@ export const CompanyProductDetailPage = ({ productId, onBack }: CompanyProductDe
           </Card>
         </div>
       </div>
+        </TabsContent>
+
+        <TabsContent value="attributes" className="mt-6">
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-foreground">System Product Attributes</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  All available system product attributes
+                </p>
+              </div>
+            </div>
+
+            {attributesLoading ? (
+              <div className="text-center py-8">
+                <div className="animate-pulse">Loading attributes...</div>
+              </div>
+            ) : systemAttributes.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {systemAttributes.map((attr) => {
+                  const unit = attr.unitOfMeasure 
+                    ? unitsOfMeasure.find(u => u.id === attr.unitOfMeasure)
+                    : null;
+
+                  return (
+                    <Card key={attr.id} className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-semibold text-foreground">{attr.name}</h4>
+                          </div>
+                          {attr.description && (
+                            <p className="text-sm text-muted-foreground mb-3">{attr.description}</p>
+                          )}
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">{attr.valueDataType}</Badge>
+                            {unit && (
+                              <Badge variant="outline" className="text-xs">
+                                {unit.symbol}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            ) : (
+              <Card className="p-12 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] text-center">
+                <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <h4 className="font-medium text-foreground mb-2">No Attributes Available</h4>
+                <p className="text-muted-foreground text-sm">
+                  No system product attributes are available.
+                </p>
+              </Card>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

@@ -155,6 +155,13 @@ export const VariantDialog = ({
   // Initialize form data when dialog opens or variant changes
   useEffect(() => {
     if (open) {
+      // Reset wizard step when opening in add mode
+      if (mode === 'add' && isWizardMode) {
+        setCurrentStep(1);
+        setAttributeValues({});
+        setVariantDefiningAttributes([]);
+      }
+      
       if (mode === 'edit' || mode === 'view') {
         if (variant) {
           reset({
@@ -180,7 +187,7 @@ export const VariantDialog = ({
         });
       }
     }
-  }, [open, mode, variant, reset]);
+  }, [open, mode, variant, reset, isWizardMode]);
 
   const handleAttributeValueChange = async (productRelatedAttributeId: string, value: string) => {
     setAttributeValues((prev) => {
@@ -190,7 +197,7 @@ export const VariantDialog = ({
       };
       
       // Auto-generate SKU when attribute values change (only in step 1 of wizard mode)
-      if (isWizardMode && currentStep === 1 && productId && setValue) {
+      if (isWizardMode && currentStep === 1 && productId) {
         // Debounce SKU generation to avoid too many calls
         setTimeout(() => generateSKUFromAttributes(newValues), 300);
       }
@@ -249,7 +256,7 @@ export const VariantDialog = ({
       setVariantDefiningAttributes((prev) => {
         const updated = [...prev, attributeId];
         // Regenerate SKU when variant-defining attributes change (only in step 1 of wizard)
-        if (isWizard && currentStep === 1 && setValue) {
+        if (isWizard && currentStep === 1) {
           setTimeout(() => generateSKUFromAttributes(attributeValues), 100);
         }
         return updated;
@@ -258,7 +265,7 @@ export const VariantDialog = ({
       setVariantDefiningAttributes((prev) => {
         const updated = prev.filter((id) => id !== attributeId);
         // Regenerate SKU after removing attribute (only in step 1 of wizard)
-        if (isWizard && currentStep === 1 && setValue) {
+        if (isWizard && currentStep === 1) {
           setTimeout(() => generateSKUFromAttributes(attributeValues), 100);
         }
         return updated;
@@ -267,7 +274,12 @@ export const VariantDialog = ({
   };
 
   const onSubmit = async (data: VariantFormData) => {
-    if (mode === 'view' || !onSave) return;
+    console.log('onSubmit called', { mode, hasOnSave: !!onSave, data });
+    
+    if (mode === 'view' || !onSave) {
+      console.log('onSubmit: Returning early - mode is view or onSave is missing', { mode, hasOnSave: !!onSave });
+      return;
+    }
     
     try {
       // Pass variant defining attributes and their values to onSave handler
@@ -278,11 +290,15 @@ export const VariantDialog = ({
         variantAttributeValues: attributeValues,
       };
       const attributeValuesToSave = productId && variantMode === 'system' ? attributeValues : undefined;
+      
+      console.log('Calling onSave with:', { variantData, attributeValuesToSave });
       await onSave(variantData, attributeValuesToSave);
+      console.log('onSave completed successfully');
       onOpenChange(false);
     } catch (error) {
       console.error('Error saving variant:', error);
       toast.error("Failed to save variant or attribute values");
+      // Don't re-throw - let the form handle the error
     }
   };
 
@@ -444,9 +460,63 @@ export const VariantDialog = ({
           </Button>
           {currentStep === totalSteps ? (
             <Button
-              type="submit"
-              form="variant-form"
+              type="button"
               disabled={isSubmitting || (mode === 'add' && !canProceedToNextStep())}
+              onClick={async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Debug: Log button click
+                const canProceed = canProceedToNextStep();
+                console.log('Add Variant button clicked', {
+                  isSubmitting,
+                  canProceed,
+                  isDisabled: isSubmitting || (mode === 'add' && !canProceed),
+                  mode,
+                  currentStep,
+                  totalSteps,
+                  name: watch('name'),
+                  sku: watch('sku'),
+                  variantDefiningAttributes,
+                  attributeValues,
+                  errors: Object.keys(errors).length > 0 ? errors : 'none',
+                  hasOnSave: !!onSave
+                });
+                
+                // If button is disabled, show error and return
+                if (isSubmitting || (mode === 'add' && !canProceed)) {
+                  console.log('Button is disabled, preventing submission');
+                  if (mode === 'add' && !canProceed) {
+                    toast.error("Please complete all required fields before submitting");
+                  }
+                  return;
+                }
+                
+                // Manually trigger form submission with validation
+                try {
+                  const formData = watch();
+                  console.log('Calling handleSubmit with form data:', formData);
+                  
+                  // Use handleSubmit to trigger validation, then call onSubmit if valid
+                  // handleSubmit returns a function that needs to be called
+                  const submitHandler = handleSubmit(
+                    async (data: VariantFormData) => {
+                      console.log('Form validation passed, calling onSubmit with:', data);
+                      await onSubmit(data);
+                    },
+                    (errors) => {
+                      console.log('Form validation failed:', errors);
+                      toast.error("Please fix the form errors before submitting");
+                    }
+                  );
+                  
+                  // Call the submit handler (this will trigger validation)
+                  submitHandler();
+                } catch (error) {
+                  console.error('Error in form submission:', error);
+                  toast.error("Please fix the form errors before submitting");
+                }
+              }}
               variant="accent"
               className="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-lg shadow-[var(--accent-primary)]/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
@@ -515,7 +585,8 @@ export const VariantDialog = ({
       onOpenChange={onOpenChange}
       title={isWizardMode ? getStepTitle() : dialogTitle}
       description={isWizardMode ? `Step ${currentStep} of ${totalSteps}` : dialogDescription}
-      className="max-w-3xl max-h-[90vh] overflow-y-auto bg-[var(--glass-bg)] border-[var(--glass-border)] backdrop-blur-xl"
+      maxWidth="max-w-5xl"
+      className="max-h-[85vh] bg-[var(--glass-bg)] border-[var(--glass-border)] backdrop-blur-xl"
       footer={footerContent}
       disableContentScroll={true}
     >
@@ -545,6 +616,21 @@ export const VariantDialog = ({
                   }}
                   className="mt-1"
                   placeholder="Select a variant from system product..."
+                  onSystemVariantCreated={(systemVariantId) => {
+                    // When a new system variant is created, select it
+                    // The SystemProductVariantSelector will handle refreshing the list
+                    setValue('systemProductVariantId', systemVariantId);
+                    // Fetch the variant name from the product variants service
+                    import("../../services/productVariants").then(({ productVariantsService }) => {
+                      productVariantsService.getVariant(systemVariantId).then((newVariant) => {
+                        if (newVariant) {
+                          setValue('name', newVariant.name);
+                        }
+                      }).catch(() => {
+                        // If fetch fails, just set the ID
+                      });
+                    });
+                  }}
                 />
                 {mode === 'add' && systemProductId && !watch('systemProductVariantId') && (
                   <p className="text-sm text-muted-foreground mt-1">
@@ -597,9 +683,8 @@ export const VariantDialog = ({
             {isWizardMode ? (
               <>
                 {currentStep === 1 && (
-                  <div className="space-y-6">
+                  <div className="space-y-4">
                     <div>
-                      <h3 className="text-lg font-semibold text-foreground mb-2">Select Attributes for Variant</h3>
                       <p className="text-sm text-muted-foreground">
                         Select one or more variant-defining attributes and set their values. These attributes will be used to generate the variant name and SKU.
                       </p>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { Search, Package, Plus, Check, ChevronLeft, ChevronRight, Loader2, Tag as TagIcon, Trash2, MoreVertical } from "lucide-react";
+import { Search, Package, Plus, Check, ChevronLeft, ChevronRight, Loader2, Tag as TagIcon } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -8,7 +8,7 @@ import { Card } from "../../components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { Textarea } from "../../components/ui/textarea";
 import { CustomDialog } from "../../components/ui/custom-dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../components/ui/dropdown-menu";
+// DropdownMenu imports removed - no longer needed without variant step
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { fetchSystemProductsRequest } from "../../store/slices/systemProductsSlice";
@@ -22,11 +22,7 @@ import { companiesService } from "../../services/companies";
 import { Tag } from "../../services/tags";
 import FileUpload from "../../components/ui/file-upload";
 import { TagSelector } from "../../components/tags/TagSelector";
-import { VariantForm } from "../../components/products/VariantForm";
-import { VariantFormData } from "../../schemas/variantValidation";
-import { SystemProductVariantSelector } from "../../components/products/SystemProductVariantSelector";
-import { ProductVariant as SystemProductVariant } from "../../services/productVariants";
-import { generateVariantSKU } from "../../utils/skuGenerator";
+// Variant-related imports removed - variants can be added later in product detail page
 
 interface ProductVariant {
   id?: string;
@@ -102,7 +98,7 @@ const mapProductToSystemProduct = (product: Product): SystemProduct => {
     id: String(product.id),
     name: product.name,
     description: product.description || "",
-    sku: product.sku || "",
+    sku: "",
     type: productType,
     image: imageUrl,
     tags: product.tags || [],
@@ -144,14 +140,9 @@ export function AddProductToCompanyDialog({
   const [currentStep, setCurrentStep] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<SystemProduct | null>(null);
-  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [isCustomProduct, setIsCustomProduct] = useState(false);
   const [companyTags, setCompanyTags] = useState<Tag[]>([]);
   const [loadingCompanyTags, setLoadingCompanyTags] = useState(false);
-  const [variants, setVariants] = useState<ProductVariant[]>([]);
-  const [hasVariants, setHasVariants] = useState(false);
-  const [selectedVariantForPricing, setSelectedVariantForPricing] = useState<ProductVariant | null>(null);
-  const [defaultVariantId, setDefaultVariantId] = useState<string | null>(null);
   const [showAddSystemProductDialog, setShowAddSystemProductDialog] = useState(false);
   const [newSystemProductData, setNewSystemProductData] = useState({
     // Removed brand field
@@ -162,7 +153,7 @@ export function AddProductToCompanyDialog({
   });
   const [isCreatingSystemProduct, setIsCreatingSystemProduct] = useState(false);
   
-  const totalSteps = 3;
+  const totalSteps = 2; // Removed variant step
 
   // Load system products and tags when dialog opens
   useEffect(() => {
@@ -226,8 +217,6 @@ export function AddProductToCompanyDialog({
       name: "",
       description: "",
       sku: "",
-      category: "",
-      categoryId: undefined,
       // type, price, stock are now in variants
       isAvailableForPurchase: false,
       usedInServices: [],
@@ -236,14 +225,9 @@ export function AddProductToCompanyDialog({
       notes: ""
     });
     setSelectedProduct(null);
-    setSelectedVariant(null);
     setIsCustomProduct(false);
     setCurrentStep(1);
     setSearchTerm("");
-    setVariants([]);
-    setHasVariants(false);
-    setSelectedVariantForPricing(null);
-    setDefaultVariantId(null);
   };
 
   // Reset form when dialog closes (but not during product creation)
@@ -254,20 +238,8 @@ export function AddProductToCompanyDialog({
   }, [open]);
 
   const handleProductSelect = (product: SystemProduct) => {
-    // Check if product has changed - if so, reset variants
-    const productChanged = selectedProduct?.id !== product.id;
-    
     setSelectedProduct(product);
-    setSelectedVariant(null);
     setIsCustomProduct(false);
-    
-    // Reset variants if product has changed
-    if (productChanged) {
-      setVariants([]);
-      setHasVariants(false);
-      setSelectedVariantForPricing(null);
-      setDefaultVariantId(null);
-    }
     
     // Convert tags to string array if they are Tag objects
     const tagStrings = product.tags.map(tag => 
@@ -292,7 +264,6 @@ export function AddProductToCompanyDialog({
   const handleCreateCustom = () => {
     setIsCustomProduct(true);
     setSelectedProduct(null);
-    setSelectedVariant(null);
   };
 
   const handleSubmit = () => {
@@ -308,42 +279,6 @@ export function AddProductToCompanyDialog({
       return;
     }
 
-    // Require at least one variant
-    if (!hasVariants || variants.length === 0) {
-      toast.error("Please add at least one variant");
-      return;
-    }
-
-    // Validate all variants
-    // Note: Price and stock are handled separately, so we only validate variant identification and type
-    const invalidVariants = variants.filter(v => {
-      // For system products, require systemProductVariantId
-      if (!isCustomProduct && !v.systemProductVariantId) {
-        return true; // Invalid - missing system variant selection
-      }
-      
-      // For custom products, require name and SKU
-      if (isCustomProduct && (!v.name || !v.sku)) {
-        return true; // Invalid - missing name or SKU
-      }
-      
-      // All variants need type
-      if (!v.type) {
-        return true; // Invalid - missing type
-      }
-      
-      return false; // Valid
-    });
-    
-    if (invalidVariants.length > 0) {
-      if (!isCustomProduct) {
-        toast.error("All variants must have a selected system variant and type");
-      } else {
-        toast.error("All variants must have a name, SKU, and type");
-      }
-      return;
-    }
-
     if (!currentUser?.companyId) {
       toast.error("Company ID is required");
       return;
@@ -351,7 +286,7 @@ export function AddProductToCompanyDialog({
 
     // Transform formData to API format (only company-specific data, no duplicate system product data)
     // Note: Tags are inherited from the system product, so we don't send tagIds
-    // type, price, stock are now in variants
+    // Variants can be added later in the product detail page
     const systemProductId = formData.systemProductId || selectedProduct?.id;
     if (!systemProductId && !isCustomProduct) {
       toast.error("System product ID is required");
@@ -364,48 +299,19 @@ export function AddProductToCompanyDialog({
       isAvailableForPurchase: formData.isAvailableForPurchase,
       notes: formData.notes || undefined
       // tagIds removed - tags are inherited from system product
+      // variants removed - variants can be added later in product detail page
     };
-
-    // Prepare variants data if they exist
-    // Note: Price and stock are handled separately, so we only include variant identification and type
-    let variantData: any[] = [];
-    if (hasVariants && variants.length > 0) {
-      // If there's only one variant, it should be the default
-      const shouldSetSingleAsDefault = variants.length === 1;
-      
-      variantData = variants.map((v, index) => {
-        // Determine if this variant should be default:
-        // 1. If it's the only variant, set as default
-        // 2. Otherwise, use the isDefault value from the variant
-        const isDefault = shouldSetSingleAsDefault ? true : (v.isDefault === true);
-        
-        return {
-          systemProductVariantId: v.systemProductVariantId, // Reference to system product variant
-          type: v.type || 'service',
-          isDefault: isDefault, // Set as default if single variant, otherwise use UI selection
-          isActive: v.isActive !== undefined ? v.isActive : true,
-          minStock: v.stock?.minimum !== undefined ? v.stock.minimum : 10,
-          maxStock: v.stock?.maximum !== undefined ? v.stock.maximum : 100
-          // Note: Price and stock fields (costPrice, sellPrice, currentStock, stockUnit) 
-          // are handled separately in the stock table, but minStock and maxStock are stored on the variant
-        };
-      });
-      
-      productData.variants = variantData;
-      console.log('💾 Including variants in product creation request:', variantData.length);
-      console.log('💾 Variants data:', JSON.stringify(variantData, null, 2));
-    }
     
     // Set creating flag BEFORE dispatching
     isCreatingRef.current = true;
     creationStartedRef.current = true;
     previousCompanyProductsCount.current = companyProducts.companyProducts.length;
     
-    console.log('📤 Dispatching product creation request with variants:', variantData.length);
+    console.log('📤 Dispatching product creation request (variants can be added later):');
     console.log('📦 Product data:', JSON.stringify(productData, null, 2));
     
-    // Dispatch Redux action to create company product (with variants)
-    // Backend will handle creating both company_products and company_product_variants in one transaction
+    // Dispatch Redux action to create company product (without variants)
+    // Variants can be added later in the product detail page
     dispatch(createCompanyProductRequest(productData));
   };
 
@@ -435,16 +341,10 @@ export function AddProductToCompanyDialog({
     }
   }, [open]);
   
-  // Store the created product ID for variant creation
+  // Store the created product ID
   const createdProductIdRef = useRef<string | null>(null);
-  const variantsCreatedRef = useRef<boolean>(false);
-  
-  // Get variant creation state from Redux
-  const { loading: variantsLoading, error: variantsError } = useAppSelector((state) => state.companyProductVariants);
 
-  // Store variants data to preserve it during product creation
-  const variantsDataRef = useRef<ProductVariant[]>([]);
-  const hasVariantsRef = useRef<boolean>(false);
+  // Variant-related refs removed - variants can be added later in product detail page
 
   // Handle successful product creation
   useEffect(() => {
@@ -456,9 +356,7 @@ export function AddProductToCompanyDialog({
       loading: companyProductsLoading,
       error: companyProductsError,
       isCreating: isCreatingRef.current,
-      open,
-      hasVariants: hasVariantsRef.current,
-      variantsCount: variantsDataRef.current.length
+      open
     });
     
     // Only process if dialog is open (to avoid triggering on page refresh)
@@ -467,9 +365,6 @@ export function AddProductToCompanyDialog({
       if (!isCreatingRef.current) {
         previousCompanyProductsCount.current = currentCount;
         createdProductIdRef.current = null;
-        variantsCreatedRef.current = false;
-        variantsDataRef.current = [];
-        hasVariantsRef.current = false;
       }
       return;
     }
@@ -487,8 +382,6 @@ export function AddProductToCompanyDialog({
       error: companyProductsError,
       isCreating: isCreatingRef.current,
       productWasCreated,
-      hasVariants: hasVariantsRef.current,
-      variantsCount: variantsDataRef.current.length,
       alreadyCreated: !!createdProductIdRef.current
     });
     
@@ -520,64 +413,20 @@ export function AddProductToCompanyDialog({
       return () => clearTimeout(timer);
     }
     
-    // DON'T update previousCompanyProductsCount here if we just created a product with variants
-    // We need to keep it at the old value until variants are created
-    // Only update if we're not in the middle of creating a product with variants
-    if (!productWasCreated && (!isCreatingRef.current || (!hasVariantsRef.current || variantsCreatedRef.current))) {
+    // Update previous count if product wasn't created
+    if (!productWasCreated && !isCreatingRef.current) {
       previousCompanyProductsCount.current = currentCount;
     }
     
-    // Reset creating flag when loading stops AND dialog is closed AND we're done
-    if (!companyProductsLoading && !open && (!hasVariantsRef.current || variantsCreatedRef.current)) {
+    // Reset creating flag when loading stops AND dialog is closed
+    if (!companyProductsLoading && !open) {
       isCreatingRef.current = false;
       createdProductIdRef.current = null;
-      variantsCreatedRef.current = false;
-      variantsDataRef.current = [];
-      hasVariantsRef.current = false;
       previousCompanyProductsCount.current = currentCount;
     }
   }, [companyProducts.companyProducts.length, companyProductsLoading, companyProductsError, onOpenChange, onProductAdded, open, dispatch]);
 
-  // Handle successful variant creation
-  useEffect(() => {
-    if (!open || !variantsCreatedRef.current) return;
-    
-    // Check if variants were created successfully
-    if (!variantsLoading && !variantsError && variantsCreatedRef.current && createdProductIdRef.current) {
-      // Variants created successfully, close dialog
-      const timer = setTimeout(() => {
-        resetForm();
-        onOpenChange(false);
-        if (onProductAdded) {
-          onProductAdded({} as any);
-        }
-        isCreatingRef.current = false;
-        createdProductIdRef.current = null;
-        variantsCreatedRef.current = false;
-      }, 500);
-      
-      return () => clearTimeout(timer);
-    }
-    
-    // Handle variant creation error
-    if (variantsError && variantsCreatedRef.current) {
-      console.error('Error creating variants:', variantsError);
-      toast.error(`Product created but failed to create variants: ${variantsError}`);
-      // Still close dialog but show error
-      const timer = setTimeout(() => {
-        resetForm();
-        onOpenChange(false);
-        if (onProductAdded) {
-          onProductAdded({} as any);
-        }
-        isCreatingRef.current = false;
-        createdProductIdRef.current = null;
-        variantsCreatedRef.current = false;
-      }, 2000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [variantsLoading, variantsError, open, onOpenChange, onProductAdded]);
+  // Variant creation handling removed - variants can be added later in product detail page
 
   const filteredProducts = systemProducts.filter(product => {
     const searchLower = searchTerm.toLowerCase();
@@ -648,8 +497,7 @@ export function AddProductToCompanyDialog({
   const getStepTitle = () => {
     switch (currentStep) {
       case 1: return "Product Selection";
-      case 2: return "Add Variants (Optional)";
-      case 3: return hasVariants ? "Review & Submit" : "Product Configuration";
+      case 2: return "Product Configuration";
       default: return "";
     }
   };
@@ -661,178 +509,16 @@ export function AddProductToCompanyDialog({
         return;
       }
       setCurrentStep(2);
-    } else if (currentStep === 2) {
-      // If no variants, skip to step 3
-      if (!hasVariants || variants.length === 0) {
-        setCurrentStep(3);
-      } else {
-        // If variants exist, set the first variant for pricing
-        setSelectedVariantForPricing(variants[0]);
-        setCurrentStep(3);
-      }
     }
   };
 
   const handlePrevious = () => {
-    if (currentStep === 3) {
-      if (hasVariants && variants.length > 0) {
-        setCurrentStep(2);
-      } else {
-        setCurrentStep(1);
-      }
-    } else if (currentStep === 2) {
+    if (currentStep === 2) {
       setCurrentStep(1);
     }
   };
 
-  // Auto-generate SKU based on variant details
-  const generateVariantSKUFromDetails = (variant: ProductVariant): string => {
-    return generateVariantSKU(
-      formData.name || selectedProduct?.name || 'Product',
-      formData.sku || selectedProduct?.sku,
-      {
-        name: variant.name,
-        color: variant.color,
-        size: variant.size,
-        sizeUnit: variant.sizeUnit
-      }
-    );
-  };
-
-  const handleAddVariant = () => {
-    const variantIndex = variants.length;
-    const newVariant: ProductVariant = {
-      id: `temp-${Date.now()}-${variantIndex}`,
-      systemProductVariantId: undefined, // Will be set when user selects from dropdown
-      name: "",
-      sku: "",
-      color: "",
-      size: "",
-      sizeUnit: 'ml',
-      weight: "",
-      weightUnit: 'g',
-      material: "",
-      type: "service", // Default type for variant
-      isActive: true,
-      isDefault: variants.length === 0, // First variant is default by default
-      price: { cost: 0, sell: 0 },
-      stock: { current: 0, minimum: 10, maximum: 100, unit: "pieces" }
-    };
-    const updatedVariants = [...variants, newVariant];
-    setVariants(updatedVariants);
-    setHasVariants(true);
-    if (variants.length === 0) {
-      setDefaultVariantId(newVariant.id!);
-    }
-  };
-
-  const handleSelectSystemVariant = (index: number, variantId: string | null, systemVariant: SystemProductVariant | null) => {
-    const updatedVariants = [...variants];
-    if (systemVariant) {
-      // Populate variant details from system variant
-      updatedVariants[index] = {
-        ...updatedVariants[index],
-        systemProductVariantId: variantId || undefined,
-        name: systemVariant.name,
-        sku: systemVariant.sku,
-        color: systemVariant.color || "",
-        size: systemVariant.size || "",
-        sizeUnit: systemVariant.size?.match(/^(\d+)(ml|L)$/i)?.[2]?.toLowerCase() === 'l' ? 'L' : 'ml',
-        weight: systemVariant.weight || "",
-        weightUnit: systemVariant.weight?.match(/^(\d+)(mg|g|kg)$/i)?.[2]?.toLowerCase() === 'kg' ? 'kg' : 
-                   systemVariant.weight?.match(/^(\d+)(mg|g|kg)$/i)?.[2]?.toLowerCase() === 'mg' ? 'mg' : 'g',
-        material: systemVariant.material || "",
-      };
-    } else {
-      // Clear variant details if selection is cleared
-      updatedVariants[index] = {
-        ...updatedVariants[index],
-        systemProductVariantId: undefined,
-        name: "",
-        sku: "",
-        color: "",
-        size: "",
-        weight: "",
-        material: "",
-      };
-    }
-    setVariants(updatedVariants);
-  };
-
-  const handleRemoveVariant = (index: number) => {
-    const variantToRemove = variants[index];
-    const newVariants = variants.filter((_, i) => i !== index);
-    setVariants(newVariants);
-    if (newVariants.length === 0) {
-      setHasVariants(false);
-      setDefaultVariantId(null);
-    } else {
-      // If removed variant was default, set first variant as default
-      if (defaultVariantId === variantToRemove.id) {
-        setDefaultVariantId(newVariants[0].id || null);
-        newVariants[0].isDefault = true;
-      }
-    }
-    if (selectedVariantForPricing && variants[index] === selectedVariantForPricing) {
-      setSelectedVariantForPricing(newVariants[0] || null);
-    }
-  };
-
-  const handleUpdateVariant = (index: number, field: keyof ProductVariant, value: any) => {
-    const updatedVariants = [...variants];
-    
-    // Update the field
-    updatedVariants[index] = { ...updatedVariants[index], [field]: value };
-    
-    // Auto-generate SKU when variant details change (name, color, size)
-    if (field === 'name' || field === 'color' || field === 'size' || field === 'sizeUnit') {
-      const variant = updatedVariants[index];
-      // Always auto-generate if we have at least a variant name
-      if (variant.name && variant.name.trim()) {
-        updatedVariants[index].sku = generateVariantSKUFromDetails(variant);
-      }
-    }
-    
-    // Handle default variant selection
-    if (field === 'isDefault' && value === true) {
-      // Unset other variants as default
-      updatedVariants.forEach((v, i) => {
-        if (i !== index) {
-          v.isDefault = false;
-        }
-      });
-      setDefaultVariantId(updatedVariants[index].id || null);
-    }
-    
-    setVariants(updatedVariants);
-    
-    // Update selectedVariantForPricing if it's the variant being updated
-    if (selectedVariantForPricing && variants[index] === selectedVariantForPricing) {
-      setSelectedVariantForPricing(updatedVariants[index]);
-    }
-  };
-  
-  const handleSetDefaultVariant = (variantId: string | null) => {
-    setDefaultVariantId(variantId);
-    const updatedVariants = variants.map(v => ({
-      ...v,
-      isDefault: v.id === variantId
-    }));
-    setVariants(updatedVariants);
-  };
-
-  // Sync selectedVariantForPricing with variants array when variants change
-  useEffect(() => {
-    if (hasVariants && variants.length > 0 && selectedVariantForPricing) {
-      const index = variants.findIndex(v => v === selectedVariantForPricing);
-      if (index >= 0) {
-        setSelectedVariantForPricing(variants[index]);
-      } else if (variants.length > 0) {
-        // If selected variant is no longer in the array, select the first one
-        setSelectedVariantForPricing(variants[0]);
-      }
-    }
-  }, [variants, hasVariants]);
+  // Variant-related functions removed - variants can be added later in product detail page
 
   // Render footer buttons based on current step
   const renderFooter = () => {
@@ -848,37 +534,16 @@ export function AddProductToCompanyDialog({
           </Button>
           <Button 
             onClick={handleNext}
-            disabled={!selectedProduct}
+            disabled={!selectedProduct && !isCustomProduct}
             variant="accent"
             className="flex-1"
           >
-            Next: {hasVariants ? "Add Variants" : "Skip to Configuration"}
+            Next: Configuration
             <ChevronRight className="w-4 h-4 ml-2" />
           </Button>
         </>
       );
     } else if (currentStep === 2) {
-      return (
-        <>
-          <Button
-            variant="outline"
-            onClick={handlePrevious}
-            className="flex-1"
-          >
-            <ChevronLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
-          <Button 
-            onClick={handleNext}
-            variant="accent"
-            className="flex-1"
-          >
-            Next: Configure {hasVariants && variants.length > 0 ? 'Variants' : 'Product'}
-            <ChevronRight className="w-4 h-4 ml-2" />
-          </Button>
-        </>
-      );
-    } else if (currentStep === 3) {
       return (
         <>
           <Button
@@ -1053,160 +718,8 @@ export function AddProductToCompanyDialog({
             </div>
           )}
 
-          {/* Step 2: Add Variants (Optional) */}
+          {/* Step 2: Product Configuration */}
           {currentStep === 2 && (
-            <div className="space-y-6 flex flex-col flex-1 min-h-0 overflow-hidden">
-              {/* Selected Product Display */}
-              {(selectedProduct || isCustomProduct) && (
-                <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] flex-shrink-0">
-                  <div className="flex items-start gap-4">
-                    <img 
-                      src={selectedProduct?.image || formData.image || "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=300&h=200&fit=crop"} 
-                      alt={formData.name}
-                      className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-foreground mb-1">{formData.name}</h3>
-                      <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{formData.description}</p>
-                    </div>
-                    {selectedProduct && (
-                      <div className="w-6 h-6 rounded-full bg-[var(--accent-primary)] flex items-center justify-center flex-shrink-0">
-                        <Check className="w-4 h-4 text-white" />
-                      </div>
-                    )}
-                  </div>
-                </Card>
-              )}
-
-              <div className="space-y-4 flex flex-col flex-1 min-h-0">
-                <div className="flex items-center justify-between flex-shrink-0">
-                  <div>
-                    <h3 className="text-lg font-semibold text-foreground">Product Variants</h3>
-                    <p className="text-sm text-muted-foreground">Add variants if this product has different sizes, colors, or options (optional)</p>
-                  </div>
-                  <Button
-                    onClick={handleAddVariant}
-                    variant="outline"
-                    size="sm"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Variant
-                  </Button>
-                </div>
-
-                {variants.length > 0 ? (
-                  <div className="space-y-3 overflow-y-auto custom-scrollbar pr-2 flex-1 min-h-0" style={{ maxHeight: 'calc(100vh - 500px)' }}>
-                    {variants.map((variant, index) => (
-                      <Card key={variant.id || index} className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]">
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <h4 className="font-medium text-foreground text-lg">{variant.name || `Variant ${index + 1}`}</h4>
-                              {variant.isDefault && (
-                                <Badge className="bg-green-500/20 text-green-600 dark:text-green-400 border-green-500/30 text-xs">
-                                  Default
-                                </Badge>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Badge className="bg-green-500/20 text-green-600 dark:text-green-400 border-green-500/30 text-xs">
-                                Active
-                              </Badge>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="w-8 h-8 p-0"
-                                  >
-                                    <MoreVertical className="w-4 h-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem onClick={() => handleRemoveVariant(index)} className="text-destructive">
-                                    <Trash2 className="w-4 h-4 mr-2" />
-                                    Delete
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </div>
-                          {variant.sku && (
-                            <p className="text-sm text-muted-foreground">SKU: {variant.sku}</p>
-                          )}
-                          
-                          {/* System Product Variant Selector - Only show if system product is selected */}
-                          {selectedProduct && !isCustomProduct && (
-                            <div className="mb-4">
-                              <Label>Select System Product Variant *</Label>
-                              <SystemProductVariantSelector
-                                productId={selectedProduct.id}
-                                value={variant.systemProductVariantId || null}
-                                onChange={(variantId, systemVariant) => {
-                                  handleSelectSystemVariant(index, variantId || "", systemVariant);
-                                }}
-                                className="mt-1"
-                                placeholder="Select a variant from system product..."
-                                productName={selectedProduct.name}
-                                productSKU={selectedProduct.sku}
-                              />
-                              {variant.systemProductVariantId && variant.name && (
-                                <div className="mt-2 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                                  <p className="text-sm text-blue-600 dark:text-blue-400">
-                                    <strong>Selected:</strong> {variant.name}
-                                    {variant.color && ` - ${variant.color}`}
-                                    {variant.size && ` (${variant.size})`}
-                                    {variant.sku && ` - SKU: ${variant.sku}`}
-                                  </p>
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-                          {/* Pricing & Stock Form - Only show after variant is selected (for system products) or always (for custom products) */}
-                          {((selectedProduct && !isCustomProduct && variant.systemProductVariantId) || isCustomProduct || !selectedProduct) && (
-                            <VariantForm
-                              variant={variant as VariantFormData}
-                              onChange={(field, value) => {
-                                // Handle nested objects (price, stock) specially
-                                if (field === 'price' || field === 'stock') {
-                                  handleUpdateVariant(index, field, value);
-                                } else if (field === 'type') {
-                                  handleUpdateVariant(index, 'type', value);
-                                } else {
-                                  // Don't allow editing variant details if it's from system product
-                                  if (selectedProduct && !isCustomProduct && variant.systemProductVariantId) {
-                                    if (field === 'name' || field === 'sku' || field === 'color' || field === 'size' || field === 'weight' || field === 'material') {
-                                      return; // Ignore changes to variant details from system product
-                                    }
-                                  }
-                                  handleUpdateVariant(index, field as keyof ProductVariant, value);
-                                }
-                              }}
-                              onDefaultChange={(isDefault) => handleSetDefaultVariant(isDefault ? variant.id || null : null)}
-                              showDefaultCheckbox={true}
-                              skuLabel="SKU * (Auto-generated)"
-                              mode="company" // Always company mode for pricing/stock
-                              hideVariantDetails={selectedProduct && !isCustomProduct && !!variant.systemProductVariantId} // Hide variant details when using system variant
-                            />
-                          )}
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
-                ) : (
-                  <Card className="p-8 text-center backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]">
-                    <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <h4 className="font-medium text-foreground mb-2">No Variants Added</h4>
-                    <p className="text-muted-foreground text-sm mb-4">Click "Add Variant" to create variants, or skip this step if not needed.</p>
-                  </Card>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Step 3: Pricing & Stock Configuration */}
-          {currentStep === 3 && (
             <div className="space-y-6">
               {/* Selected Product Display */}
               {(selectedProduct || isCustomProduct) && (
@@ -1230,101 +743,12 @@ export function AddProductToCompanyDialog({
                 </Card>
               )}
 
-              {/* Note: Product Type is in variants, but Pricing & Stock are handled separately */}
-              {hasVariants && variants.length > 0 ? (
-                <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                  <p className="text-sm text-blue-600 dark:text-blue-400">
-                    <strong>Note:</strong> Product type for variants is configured in Step 2. Pricing and stock information are managed separately in the Stock Details page. Review the variants summary below before submitting.
-                  </p>
-                </div>
-              ) : (
-                <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                  <p className="text-sm text-yellow-600 dark:text-yellow-400">
-                    <strong>Note:</strong> This product has no variants. Please add at least one variant in Step 2 with type information. Pricing and stock can be configured later in the Stock Details page.
-                  </p>
-                </div>
-              )}
-
-              {/* Variants Summary - Show all variants before submission */}
-              {hasVariants && variants.length > 0 && (
-                <div className="space-y-4">
-                  <div className="border-t border-[var(--glass-border)] pt-4">
-                    <h3 className="text-lg font-semibold text-foreground mb-4">Variants Summary</h3>
-                    <p className="text-sm text-muted-foreground mb-4">Review all variants before submitting:</p>
-                    <div className="space-y-3">
-                      {variants.map((variant, index) => (
-                        <Card key={variant.id || index} className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]">
-                          <div className="space-y-3">
-                            <div className="flex items-start justify-between">
-                              <div className="flex items-center gap-2">
-                                <h4 className="font-medium text-foreground">{variant.name || `Variant ${index + 1}`}</h4>
-                                {variant.isDefault && (
-                                  <Badge className="bg-green-500/20 text-green-600 dark:text-green-400 border-green-500/30 text-xs">
-                                    Default
-                                  </Badge>
-                                )}
-                              </div>
-                              <div className="text-sm text-muted-foreground">
-                                SKU: {variant.sku}
-                              </div>
-                            </div>
-                            
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                              <div>
-                                <span className="text-muted-foreground">Color:</span>
-                                <span className="ml-2 text-foreground">{variant.color || 'N/A'}</span>
-                              </div>
-                              <div>
-                                <span className="text-muted-foreground">Size:</span>
-                                <span className="ml-2 text-foreground">
-                                  {variant.size ? (
-                                    /(ml|L)$/i.test(variant.size)
-                                      ? variant.size 
-                                      : `${variant.size}${variant.sizeUnit || 'ml'}`
-                                  ) : 'N/A'}
-                                </span>
-                              </div>
-                              <div>
-                                <span className="text-muted-foreground">Weight:</span>
-                                <span className="ml-2 text-foreground">
-                                  {variant.weight ? (
-                                    /(mg|g|kg)$/i.test(variant.weight)
-                                      ? variant.weight
-                                      : `${variant.weight}${variant.weightUnit || 'g'}`
-                                  ) : 'N/A'}
-                                </span>
-                              </div>
-                              <div>
-                                <span className="text-muted-foreground">Material:</span>
-                                <span className="ml-2 text-foreground">{variant.material || 'N/A'}</span>
-                              </div>
-                              <div>
-                                <span className="text-muted-foreground">Type:</span>
-                                <span className="ml-2 text-foreground">
-                                  {variant.type === 'sell' ? 'For Sale' : variant.type === 'service' ? 'Service Use' : 'Both'}
-                                </span>
-                              </div>
-                              <div>
-                                <span className="text-muted-foreground">Min Stock:</span>
-                                <span className="ml-2 text-foreground">
-                                  {variant.stock?.minimum !== undefined ? variant.stock.minimum : 'N/A'}
-                                </span>
-                              </div>
-                              <div>
-                                <span className="text-muted-foreground">Max Stock:</span>
-                                <span className="ml-2 text-foreground">
-                                  {variant.stock?.maximum !== undefined ? variant.stock.maximum : 'N/A'}
-                                </span>
-                              </div>
-                            </div>
-
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
+              {/* Note: Variants can be added later in product detail page */}
+              <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                <p className="text-sm text-blue-600 dark:text-blue-400">
+                  <strong>Note:</strong> Variants can be added later in the product detail page. Pricing and stock information are managed separately in the Stock Details page.
+                </p>
+              </div>
             </div>
           )}
       </div>
@@ -1377,16 +801,10 @@ export function AddProductToCompanyDialog({
 
                   const createdProduct = await productsService.createProduct(productData);
                   
-                  // Refresh the product list
-                  dispatch(fetchSystemProductsRequest({ isActive: true }));
-                  
-                  // Select the newly created product
-                  const mappedProduct = mapProductToSystemProduct(createdProduct);
-                  setSelectedProduct(mappedProduct);
-                  setIsCustomProduct(false);
-                  
-                  // Close dialog and reset form
+                  // Close dialog first
                   setShowAddSystemProductDialog(false);
+                  
+                  // Reset form
                   setNewSystemProductData({
                     // Removed brand field
                     name: "",
@@ -1394,6 +812,16 @@ export function AddProductToCompanyDialog({
                     imageUrl: "",
                     tagIds: []
                   });
+                  
+                  // Refresh the product list
+                  dispatch(fetchSystemProductsRequest({ isActive: true }));
+                  
+                  // Select the newly created product after a short delay to ensure list is updated
+                  setTimeout(() => {
+                    const mappedProduct = mapProductToSystemProduct(createdProduct);
+                    setSelectedProduct(mappedProduct);
+                    setIsCustomProduct(false);
+                  }, 300);
                   
                   toast.success("Product added successfully. It will be verified by system admin.");
                 } catch (error: any) {
