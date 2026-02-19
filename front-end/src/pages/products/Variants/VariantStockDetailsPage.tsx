@@ -3,28 +3,28 @@ import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { ArrowLeft, Warehouse, TrendingUp, Package, AlertTriangle, CheckCircle, Clock, DollarSign, Plus, Calendar, Building2, Hash, User, X, MoreVertical, Edit, Trash2 } from "lucide-react";
-import { Card } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { Badge } from "../../components/ui/badge";
-import { Label } from "../../components/ui/label";
-import { Input } from "../../components/ui/input";
-import { CustomDialog } from "../../components/ui/custom-dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../../components/ui/dropdown-menu";
-import { DatePicker } from "../../components/common/DatePicker";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { fetchCompanyProductRequest } from "../../store/slices/companyProductsSlice";
-import { fetchUsersRequest } from "../../store/slices/usersSlice";
-import { companyProductVariantsService } from "../../services/companyProductVariants";
-import { CompanyProductVariant } from "../../services/companyProductVariants";
-import { companyProductStockService, CompanyProductStock, CreateCompanyProductStockData } from "../../services/companyProductStock";
+import { Card } from "../../../components/ui/card";
+import { Button } from "../../../components/ui/button";
+import { Badge } from "../../../components/ui/badge";
+import { Label } from "../../../components/ui/label";
+import { Input } from "../../../components/ui/input";
+import { CustomDialog } from "../../../components/ui/custom-dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../../../components/ui/dropdown-menu";
+import { DatePicker } from "../../../components/common/DatePicker";
+import { useAppDispatch, useAppSelector } from "../../../store/hooks";
+import { fetchCompanyProductRequest } from "../../../store/slices/companyProductsSlice";
+import { fetchUsersRequest } from "../../../store/slices/usersSlice";
+import { companyProductVariantsService } from "../../../services/companyProductVariants";
+import { CompanyProductVariant } from "../../../services/companyProductVariants";
+import { companyProductStockService, CompanyProductStock, CreateCompanyProductStockData } from "../../../services/companyProductStock";
 import { toast } from "sonner";
-import { formatCurrency } from "../../utils";
-import { UserSelectionDialog } from "../../components/common/UserSelectionDialog";
-import { currenciesService, Currency } from "../../services/currencies";
-import { DateDisplay } from "../../components/common/DateDisplay";
-import { Avatar, AvatarImage, AvatarFallback } from "../../components/ui/avatar";
-import { formatAvatarUrl } from "../../utils";
-import { ImageWithFallback } from "../../components/figma/ImageWithFallback";
+import { formatCurrency } from "../../../utils";
+import { UserSelectionDialog } from "../../../components/common/UserSelectionDialog";
+import { currenciesService, Currency } from "../../../services/currencies";
+import { DateDisplay } from "../../../components/common/DateDisplay";
+import { Avatar, AvatarImage, AvatarFallback } from "../../../components/ui/avatar";
+import { formatAvatarUrl } from "../../../utils";
+import { ImageWithFallback } from "../../../components/figma/ImageWithFallback";
 
 interface VariantStockDetailsPageProps {
   productId: string;
@@ -39,7 +39,7 @@ const addStockSchema = yup.object({
     .required("Quantity is required")
     .min(1, "Quantity must be at least 1")
     .integer("Quantity must be a whole number")
-    .transform((value, originalValue) => {
+    .transform((_value, originalValue) => {
       if (originalValue === "" || originalValue == null || originalValue === undefined) {
         return undefined;
       }
@@ -51,7 +51,7 @@ const addStockSchema = yup.object({
     .typeError("Cost price must be a number")
     .required("Cost price is required")
     .min(0, "Cost price must be 0 or greater")
-    .transform((value, originalValue) => {
+    .transform((_value, originalValue) => {
       if (originalValue === "" || originalValue == null || originalValue === undefined) {
         return undefined;
       }
@@ -125,8 +125,7 @@ export const VariantStockDetailsPage = ({ productId, variantId, onBack }: Varian
     handleSubmit,
     formState: { errors },
     reset,
-    control,
-    watch
+    control
   } = useForm<AddStockFormData>({
     resolver: yupResolver(addStockSchema) as any,
     defaultValues: {

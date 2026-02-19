@@ -12,8 +12,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { useIsMobile } from "../../components/ui/use-mobile";
 import { ViewSwitcher } from "../../components/ui/view-switcher";
-import { AddProductToCompanyDialog } from "./AddProductToCompanyDialog";
-import { CompanyProductCard } from "./CompanyProductCard";
+import { AddProductToCompanyDialog } from "./CompanyProducts/AddProductToCompanyDialog";
+import { CompanyProductCard } from "./CompanyProducts/CompanyProductCard";
 import { toast } from "sonner";
 import { database } from "../../services";
 import { isRole, UserRole } from "../../types/user";

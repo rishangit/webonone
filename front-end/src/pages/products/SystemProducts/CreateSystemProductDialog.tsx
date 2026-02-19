@@ -1,17 +1,17 @@
 import { useState, useEffect } from "react";
 import { Package } from "lucide-react";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
-import { Textarea } from "../../components/ui/textarea";
-import { CustomDialog } from "../../components/ui/custom-dialog";
+import { Button } from "../../../components/ui/button";
+import { Input } from "../../../components/ui/input";
+import { Label } from "../../../components/ui/label";
+import { Textarea } from "../../../components/ui/textarea";
+import { CustomDialog } from "../../../components/ui/custom-dialog";
 import { toast } from "sonner";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { fetchTagsRequest } from "../../store/slices/tagsSlice";
-import { createSystemProductRequest, clearError as clearSystemProductsError } from "../../store/slices/systemProductsSlice";
-import FileUpload from "../../components/ui/file-upload";
-import { formatAvatarUrl } from "../../utils";
-import { TagSelector } from "../../components/tags/TagSelector";
+import { useAppDispatch, useAppSelector } from "../../../store/hooks";
+import { fetchTagsRequest } from "../../../store/slices/tagsSlice";
+import { createSystemProductRequest, clearError as clearSystemProductsError } from "../../../store/slices/systemProductsSlice";
+import FileUpload from "../../../components/ui/file-upload";
+import { formatAvatarUrl } from "../../../utils";
+import { TagSelector } from "../../../components/tags/TagSelector";
 
 interface CreateSystemProductDialogProps {
   open: boolean;

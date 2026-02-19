@@ -7,19 +7,14 @@ import { fetchSystemProductRequest, clearError as clearSystemProductsError } fro
 import { Product } from "../../../services/products";
 import { toast } from "sonner";
 import { productVariantsService, ProductVariant as SystemProductVariant } from "../../../services/productVariants";
-import { VariantDialog } from "../../../components/products/VariantDialog";
 import { VariantFormData } from "../../../schemas/variantValidation";
 import { CompanyProductVariant } from "../../../services/companyProductVariants";
 import { UserRole, isRole } from "../../../types/user";
 import { database } from "../../../services";
 import { ProductDetailHeader } from "./ProductDetailHeader";
-import { ProductDetailImage } from "./ProductDetailImage";
-import { ProductDetailInfo } from "./ProductDetailInfo";
-import { ProductDetailTags } from "./ProductDetailTags";
-import { ProductDetailNotes } from "./ProductDetailNotes";
-import { ProductVariantList } from "./ProductVariantList";
-import { ProductVariantAddForm } from "./ProductVariantAddForm";
-import { ProductAttributesTab } from "./ProductAttributesTab";
+import { ProductOverviewTab } from "./overview/ProductOverviewTab";
+import { ProductVariantsTab } from "./productVariants/ProductVariantsTab";
+import { ProductAttributesTab } from "./attributes/ProductAttributesTab";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../../../components/ui/tabs";
 
 // Legacy ProductVariant interface for company products (kept for backward compatibility)
@@ -128,14 +123,10 @@ export function ProductDetailPage({ productId, onBack, productType = "system", c
   const [newVariant, setNewVariant] = useState<VariantFormData>({
     name: '',
     sku: '',
-    color: '',
-    size: '',
-    sizeUnit: 'ml',
-    weight: '',
-    weightUnit: 'g',
-    material: '',
     type: 'sell',
-    isDefault: false
+    isDefault: false,
+    variantDefiningAttributes: [],
+    variantAttributeValues: {}
   });
   
   // Variant dialog state
@@ -159,11 +150,16 @@ export function ProductDetailPage({ productId, onBack, productType = "system", c
           const variants = await productVariantsService.getVariantsByProductId(productId);
           setSystemVariants(variants);
           if (variants.length > 0) {
-            setSelectedVariant(variants[0]);
+            // Prefer default variant, otherwise select first variant
+            const defaultVariant = variants.find(v => v.isDefault);
+            setSelectedVariant(defaultVariant || variants[0]);
+          } else {
+            setSelectedVariant(null);
           }
         } catch (error) {
           console.error("Error fetching system product variants:", error);
           setSystemVariants([]);
+          setSelectedVariant(null);
         } finally {
           setVariantsLoading(false);
         }
@@ -212,10 +208,6 @@ export function ProductDetailPage({ productId, onBack, productType = "system", c
       id: variant.id,
       name: variant.name,
       sku: variant.sku,
-      color: variant.color || undefined,
-      size: variant.size || undefined,
-      weight: variant.weight || undefined,
-      material: variant.material || undefined,
       isDefault: variant.isDefault || false,
       isActive: variant.isActive !== undefined ? variant.isActive : true,
       systemProductVariantId: undefined // System variants don't have a parent system variant
@@ -245,7 +237,6 @@ export function ProductDetailPage({ productId, onBack, productType = "system", c
     try {
       // Extract variant defining attributes and their values
       const variantDefiningAttributeIds = (variantData as any).variantDefiningAttributes || [];
-      const variantAttributeValues = (variantData as any).variantAttributeValues || attributeValues || {};
 
       const updateData = {
         name: variantData.name,
@@ -291,6 +282,7 @@ export function ProductDetailPage({ productId, onBack, productType = "system", c
             // Prepare values for bulk upsert
             const valuesToSave = productAttributes
               .map((attr) => ({
+                variantId: savedVariantId!,
                 productRelatedAttributeId: attr.id,
                 attributeValue: attributeValues[attr.id] || null,
               }))
@@ -311,6 +303,16 @@ export function ProductDetailPage({ productId, onBack, productType = "system", c
       const variants = await productVariantsService.getVariantsByProductId(productId);
       setSystemVariants(variants);
       
+      // Update selected variant - prefer default, otherwise keep current or select first
+      if (variants.length > 0) {
+        const defaultVariant = variants.find(v => v.isDefault);
+        if (defaultVariant) {
+          setSelectedVariant(defaultVariant);
+        } else if (!selectedVariant || !variants.find(v => v.id === selectedVariant.id)) {
+          setSelectedVariant(variants[0]);
+        }
+      }
+      
       // Close dialog
       setVariantDialogOpen(false);
       setVariantDialogVariant(null);
@@ -329,6 +331,12 @@ export function ProductDetailPage({ productId, onBack, productType = "system", c
       // Refresh variants list
       const variants = await productVariantsService.getVariantsByProductId(productId);
       setSystemVariants(variants);
+      
+      // Select the new default variant
+      const updatedDefaultVariant = variants.find(v => v.isDefault);
+      if (updatedDefaultVariant) {
+        setSelectedVariant(updatedDefaultVariant);
+      }
     } catch (error: any) {
       toast.error(error.message || "Failed to set default variant");
     }
@@ -347,8 +355,14 @@ export function ProductDetailPage({ productId, onBack, productType = "system", c
       const variants = await productVariantsService.getVariantsByProductId(productId);
       setSystemVariants(variants);
       
+      // Update selected variant if the deleted one was selected
       if (selectedVariant?.id === variantId) {
-        setSelectedVariant(null);
+        if (variants.length > 0) {
+          const defaultVariant = variants.find(v => v.isDefault);
+          setSelectedVariant(defaultVariant || variants[0]);
+        } else {
+          setSelectedVariant(null);
+        }
       }
     } catch (error: any) {
       toast.error(error.message || "Failed to delete variant");
@@ -408,14 +422,10 @@ export function ProductDetailPage({ productId, onBack, productType = "system", c
         setNewVariant({
           name: '',
           sku: '',
-          color: '',
-          size: '',
-          sizeUnit: 'ml',
-          weight: '',
-          weightUnit: 'g',
-          material: '',
           type: 'sell',
-          isDefault: false
+          isDefault: false,
+          variantDefiningAttributes: [],
+          variantAttributeValues: {}
         });
         setIsAddingVariant(false);
       }
@@ -511,8 +521,6 @@ export function ProductDetailPage({ productId, onBack, productType = "system", c
     );
   }
 
-  const imageUrl = (product as any).imageUrl || (product as any).image;
-
   return (
     <div className="flex-1 space-y-6 p-4 lg:p-8 min-h-screen">
       <ProductDetailHeader
@@ -525,90 +533,50 @@ export function ProductDetailPage({ productId, onBack, productType = "system", c
       <Tabs defaultValue="overview" className="w-full">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="variants">Product Variants</TabsTrigger>
           <TabsTrigger value="attributes">Product Attributes</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="mt-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Left Side - Product Image and Information */}
-            <div className="space-y-6">
-              <ProductDetailImage
-                imageUrl={imageUrl}
-                productName={product.name}
-              />
+          <ProductOverviewTab 
+            product={product}
+            variants={productType === "system" ? systemVariants : []}
+            variantsLoading={variantsLoading}
+            selectedVariantId={selectedVariant?.id || null}
+            onVariantSelect={productType === "system" ? (variant) => setSelectedVariant(variant as SystemProductVariant | null) : undefined}
+          />
+        </TabsContent>
 
-              <ProductDetailInfo product={product} />
-
-              {product.tags && product.tags.length > 0 && (
-                <ProductDetailTags tags={product.tags} />
-              )}
-
-              {(product as any).notes && (
-                <ProductDetailNotes notes={(product as any).notes} />
-              )}
-            </div>
-
-            {/* Right Side - Product Variants */}
-            <div className="space-y-6">
-              <ProductVariantList
-                productType={productType}
-                systemVariants={systemVariants}
-                companyVariants={product.variants as LegacyProductVariant[]}
-                variantsLoading={variantsLoading}
-                selectedVariantId={selectedVariant?.id || null}
-                isSuperAdmin={isSuperAdmin}
-                onVariantSelect={(variant) => setSelectedVariant(variant as LegacyProductVariant | SystemProductVariant | null)}
-                onAddVariant={productType === "system" ? handleAddVariant : () => setIsAddingVariant(true)}
-                onEditVariant={productType === "system" ? (variant) => handleEditVariant(variant as SystemProductVariant) : undefined}
-                onDeleteVariant={productType === "system" ? handleDeleteSystemVariant : handleRemoveVariant}
-                onToggleVariantStatus={productType === "system" ? handleToggleVariantStatus : undefined}
-                onToggleVariantVerification={productType === "system" ? handleToggleVariantVerification : undefined}
-                onSetDefaultVariant={productType === "system" ? handleSetDefaultVariant : undefined}
-                onUpdateVariant={productType === "company" ? handleUpdateVariant : undefined}
-              />
-
-              {/* Variant Dialog for Add/Edit/View */}
-              {productType === "system" && (
-                <VariantDialog
-                  open={variantDialogOpen}
-                  onOpenChange={setVariantDialogOpen}
-                  mode={variantDialogMode}
-                  variant={variantDialogVariant}
-                  systemProductId={null} // System products don't have a parent system product
-                  productId={productId} // Pass productId to fetch attributes
-                  variantMode="system"
-                  onSave={handleSaveVariant}
-                  onCancel={() => {
-                    setVariantDialogVariant(null);
-                  }}
-                />
-              )}
-
-              {/* Add Variant Form - Only for company owners */}
-              {productType === "company" && isAddingVariant && (
-                <ProductVariantAddForm
-                  formData={newVariant}
-                  onFormDataChange={setNewVariant}
-                  onSubmit={handleAddCompanyVariant}
-                  onCancel={() => {
-                    setIsAddingVariant(false);
-                    setNewVariant({
-                      name: '',
-                      sku: '',
-                      color: '',
-                      size: '',
-                      sizeUnit: 'ml',
-                      weight: '',
-                      weightUnit: 'g',
-                      material: '',
-                      type: 'sell',
-                      isDefault: false
-                    });
-                  }}
-                />
-              )}
-            </div>
-          </div>
+        <TabsContent value="variants" className="mt-6">
+          <ProductVariantsTab
+            productType={productType}
+            productId={productId}
+            systemVariants={systemVariants}
+            companyVariants={product.variants as LegacyProductVariant[]}
+            variantsLoading={variantsLoading}
+            selectedVariantId={selectedVariant?.id || null}
+            isSuperAdmin={isSuperAdmin}
+            isAddingVariant={isAddingVariant}
+            newVariant={newVariant}
+            variantDialogOpen={variantDialogOpen}
+            variantDialogMode={variantDialogMode}
+            variantDialogVariant={variantDialogVariant}
+            onVariantSelect={(variant) => setSelectedVariant(variant as LegacyProductVariant | SystemProductVariant | null)}
+            onAddVariant={productType === "system" ? handleAddVariant : () => setIsAddingVariant(true)}
+            onEditVariant={productType === "system" ? (variant) => handleEditVariant(variant as SystemProductVariant) : undefined}
+            onDeleteVariant={productType === "system" ? handleDeleteSystemVariant : handleRemoveVariant}
+            onToggleVariantStatus={productType === "system" ? handleToggleVariantStatus : undefined}
+            onToggleVariantVerification={productType === "system" ? handleToggleVariantVerification : undefined}
+            onSetDefaultVariant={productType === "system" ? handleSetDefaultVariant : undefined}
+            onUpdateVariant={productType === "company" ? handleUpdateVariant : undefined}
+            onSaveVariant={handleSaveVariant}
+            onSetIsAddingVariant={setIsAddingVariant}
+            onSetNewVariant={setNewVariant}
+            onSetVariantDialogOpen={setVariantDialogOpen}
+            onSetVariantDialogMode={setVariantDialogMode}
+            onSetVariantDialogVariant={setVariantDialogVariant}
+            onAddCompanyVariant={productType === "company" ? handleAddCompanyVariant : undefined}
+          />
         </TabsContent>
 
         <TabsContent value="attributes" className="mt-6">

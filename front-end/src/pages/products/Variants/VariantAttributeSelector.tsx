@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
-import { Badge } from "../ui/badge";
-import { Card } from "../ui/card";
-import { Checkbox } from "../ui/checkbox";
-import { ProductRelatedAttribute } from "../../services/productRelatedAttributes";
-import { unitsOfMeasureService, UnitsOfMeasure } from "../../services/unitsOfMeasure";
+import { Label } from "../../../components/ui/label";
+import { Input } from "../../../components/ui/input";
+import { Badge } from "../../../components/ui/badge";
+import { Card } from "../../../components/ui/card";
+import { Checkbox } from "../../../components/ui/checkbox";
+import { ProductRelatedAttribute } from "../../../services/productRelatedAttributes";
+import { unitsOfMeasureService, UnitsOfMeasure } from "../../../services/unitsOfMeasure";
 
 interface VariantAttributeSelectorProps {
   productId: string;
@@ -35,7 +35,7 @@ export const VariantAttributeSelector = ({
       setLoading(true);
       try {
         const [attributes, units] = await Promise.all([
-          import("../../services/productRelatedAttributes").then(m => 
+          import("../../../services/productRelatedAttributes").then(m => 
             m.productRelatedAttributesService.getAttributesByProductId(productId)
           ),
           unitsOfMeasureService.getActiveUnits(),

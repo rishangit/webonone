@@ -1,10 +1,10 @@
 import { Controller, UseFormRegister, Control, FieldErrors, UseFormWatch, UseFormSetValue } from "react-hook-form";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Label } from "../../../components/ui/label";
+import { Input } from "../../../components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select";
 import { AlertCircle } from "lucide-react";
-import { VariantFormData } from "../../schemas/variantValidation";
-import { CompanyProductVariant } from "../../services/companyProductVariants";
+import { VariantFormData } from "../../../schemas/variantValidation";
+import { CompanyProductVariant } from "../../../services/companyProductVariants";
 
 interface VariantFormProps {
   // React Hook Form props (optional - for use with react-hook-form)

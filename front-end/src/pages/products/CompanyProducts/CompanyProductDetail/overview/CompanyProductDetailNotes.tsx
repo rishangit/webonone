@@ -1,10 +1,10 @@
-import { Card } from "../../../components/ui/card";
+import { Card } from "../../../../../components/ui/card";
 
-interface ProductDetailNotesProps {
+interface CompanyProductDetailNotesProps {
   notes: string;
 }
 
-export const ProductDetailNotes = ({ notes }: ProductDetailNotesProps) => {
+export const CompanyProductDetailNotes = ({ notes }: CompanyProductDetailNotesProps) => {
   if (!notes) {
     return null;
   }

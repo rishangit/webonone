@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
-import { Badge } from "../ui/badge";
-import { Card } from "../ui/card";
-import { ProductRelatedAttribute } from "../../services/productRelatedAttributes";
-import { ProductRelatedAttributeValue } from "../../services/productRelatedAttributeValues";
+import { Label } from "../../../components/ui/label";
+import { Input } from "../../../components/ui/input";
+import { Badge } from "../../../components/ui/badge";
+import { Card } from "../../../components/ui/card";
+import { ProductRelatedAttribute } from "../../../services/productRelatedAttributes";
+import { ProductRelatedAttributeValue } from "../../../services/productRelatedAttributeValues";
 
 interface VariantAttributeValuesProps {
   productId: string;
@@ -32,7 +32,7 @@ export const VariantAttributeValues = ({
       
       setLoading(true);
       try {
-        const { productRelatedAttributesService } = await import("../../services/productRelatedAttributes");
+        const { productRelatedAttributesService } = await import("../../../services/productRelatedAttributes");
         const attributes = await productRelatedAttributesService.getAttributesByProductId(productId);
         setProductAttributes(attributes);
       } catch (error) {

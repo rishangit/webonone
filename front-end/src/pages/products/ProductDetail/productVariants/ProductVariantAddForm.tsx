@@ -1,6 +1,6 @@
-import { Button } from "../../../components/ui/button";
-import { Label } from "../../../components/ui/label";
-import { VariantFormData } from "../../../schemas/variantValidation";
+import { Button } from "../../../../components/ui/button";
+import { Label } from "../../../../components/ui/label";
+import { VariantFormData } from "../../../../schemas/variantValidation";
 
 interface ProductVariantAddFormProps {
   formData: VariantFormData;

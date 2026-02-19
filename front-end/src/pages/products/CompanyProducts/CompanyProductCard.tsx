@@ -1,19 +1,19 @@
 import { useState, useEffect } from "react";
-import { Card } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { Badge } from "../../components/ui/badge";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../components/ui/dropdown-menu";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
-import { Label } from "../../components/ui/label";
+import { Card } from "../../../components/ui/card";
+import { Button } from "../../../components/ui/button";
+import { Badge } from "../../../components/ui/badge";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../../components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select";
+import { Label } from "../../../components/ui/label";
 import { Package, DollarSign, TrendingUp, MoreVertical, Trash2, Eye, AlertTriangle, CheckCircle, Image as ImageIcon } from "lucide-react";
-import { CompanyProduct } from "../../services/companyProducts";
-import { CompanyProductVariant } from "../../services/companyProductVariants";
-import { companyProductVariantsService } from "../../services/companyProductVariants";
-import { formatAvatarUrl } from "../../utils";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { currenciesService, Currency } from "../../services/currencies";
-import { fetchCompanyRequest } from "../../store/slices/companiesSlice";
-import { companiesService } from "../../services/companies";
+import { CompanyProduct } from "../../../services/companyProducts";
+import { CompanyProductVariant } from "../../../services/companyProductVariants";
+import { companyProductVariantsService } from "../../../services/companyProductVariants";
+import { formatAvatarUrl } from "../../../utils";
+import { useAppDispatch, useAppSelector } from "../../../store/hooks";
+import { currenciesService, Currency } from "../../../services/currencies";
+import { fetchCompanyRequest } from "../../../store/slices/companiesSlice";
+import { companiesService } from "../../../services/companies";
 
 interface CompanyProductCardProps {
   product: CompanyProduct;
@@ -33,7 +33,7 @@ export const CompanyProductCard = ({
 }: CompanyProductCardProps) => {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
-  const { companies, currentCompany } = useAppSelector((state) => state.companies);
+  const { companies } = useAppSelector((state) => state.companies);
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [variants, setVariants] = useState<CompanyProductVariant[]>([]);
@@ -232,27 +232,6 @@ export const CompanyProductCard = ({
 
   // Get the currently selected variant
   const selectedVariant = variants.find(v => v.id === selectedVariantId) || null;
-  
-  // Calculate aggregated price and margin from variants (using active stock)
-  const aggregatedCostPrice = variants.length > 0 
-    ? (() => {
-        const variantsWithCost = variants.filter(v => v.activeStock?.costPrice !== undefined && v.activeStock?.costPrice !== null);
-        if (variantsWithCost.length === 0) return 0;
-        const sum = variantsWithCost.reduce((sum, v) => sum + (Number(v.activeStock?.costPrice) || 0), 0);
-        return sum / variantsWithCost.length;
-      })()
-    : 0;
-  const aggregatedSellPrice = variants.length > 0
-    ? (() => {
-        const variantsWithSell = variants.filter(v => v.activeStock?.sellPrice !== undefined && v.activeStock?.sellPrice !== null);
-        if (variantsWithSell.length === 0) return undefined;
-        const sum = variantsWithSell.reduce((sum, v) => sum + (Number(v.activeStock?.sellPrice) || 0), 0);
-        return sum / variantsWithSell.length;
-      })()
-    : undefined;
-  
-  // Calculate aggregated stock from active stock entries
-  const aggregatedStock = variants.reduce((sum, v) => sum + (Number(v.activeStock?.quantity) || 0), 0);
   
   // Use selected variant's active stock data if available, otherwise show 0
   // Always prioritize active stock prices from the selected variant

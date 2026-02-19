@@ -30,7 +30,7 @@ import { CompaniesPage, CompanyProfilePage, CompanySettingsPage } from "./pages/
 
 // Products
 import { ProductsPage, SystemProductsPage, SystemProductAttributesPage, UnitsOfMeasurePage, ProductDetailPage, CompanyProductDetailPage } from "./pages/products";
-import { VariantStockDetailsPage } from "./pages/products/VariantStockDetailsPage";
+import { VariantStockDetailsPage } from "./pages/products/Variants/VariantStockDetailsPage";
 
 // Tags
 import { TagsPage } from "./pages/tags";

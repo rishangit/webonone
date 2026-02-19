@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { Search, X, Check, ChevronDown, CheckCircle2, XCircle, Plus } from "lucide-react";
-import { Button } from "../ui/button";
-import { Icon } from "../common/Icon";
-import { Input } from "../ui/input";
-import { Badge } from "../ui/badge";
-import { Label } from "../ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { productVariantsService, ProductVariant } from "../../services/productVariants";
-import { VariantFormData } from "../../schemas/variantValidation";
+import { Button } from "../../../components/ui/button";
+import { Icon } from "../../../components/common/Icon";
+import { Input } from "../../../components/ui/input";
+import { Badge } from "../../../components/ui/badge";
+import { Label } from "../../../components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "../../../components/ui/popover";
+import { productVariantsService, ProductVariant } from "../../../services/productVariants";
+import { VariantFormData } from "../../../schemas/variantValidation";
 import { toast } from "sonner";
 import { VariantDialog } from "./VariantDialog";
 
@@ -114,10 +114,10 @@ export const SystemProductVariantSelector = ({
   // Handle save variant from VariantDialog
   const handleSaveVariant = async (variantData: VariantFormData, attributeValues?: Record<string, string>) => {
     try {
-      const { productVariantsService } = await import("../../services/productVariants");
-      const { productRelatedAttributesService } = await import("../../services/productRelatedAttributes");
-      const { productRelatedAttributeValuesService } = await import("../../services/productRelatedAttributeValues");
-      const { companyProductVariantsService } = await import("../../services/companyProductVariants");
+      const { productVariantsService } = await import("../../../services/productVariants");
+      const { productRelatedAttributesService } = await import("../../../services/productRelatedAttributes");
+      const { productRelatedAttributeValuesService } = await import("../../../services/productRelatedAttributeValues");
+      const { companyProductVariantsService } = await import("../../../services/companyProductVariants");
 
       // Extract variant defining attributes and their values
       const variantDefiningAttributeIds = (variantData as any).variantDefiningAttributes || [];

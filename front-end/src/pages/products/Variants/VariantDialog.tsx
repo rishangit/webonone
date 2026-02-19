@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { CustomDialog } from "../ui/custom-dialog";
-import { Button } from "../ui/button";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
+import { CustomDialog } from "../../../components/ui/custom-dialog";
+import { Button } from "../../../components/ui/button";
+import { Label } from "../../../components/ui/label";
+import { Input } from "../../../components/ui/input";
 import { AlertCircle, Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { VariantForm } from "./VariantForm";
 import { SystemProductVariantSelector } from "./SystemProductVariantSelector";
 import { VariantAttributeValues } from "./VariantAttributeValues";
 import { VariantAttributeSelector } from "./VariantAttributeSelector";
-import { ProductVariant as SystemProductVariant } from "../../services/productVariants";
-import { CompanyProductVariant } from "../../services/companyProductVariants";
-import { variantSchema, VariantFormData } from "../../schemas/variantValidation";
-import { productRelatedAttributeValuesService } from "../../services/productRelatedAttributeValues";
+import { ProductVariant as SystemProductVariant } from "../../../services/productVariants";
+import { CompanyProductVariant } from "../../../services/companyProductVariants";
+import { variantSchema, VariantFormData } from "../../../schemas/variantValidation";
+import { productRelatedAttributeValuesService } from "../../../services/productRelatedAttributeValues";
 import { toast } from "sonner";
 
 interface VariantDialogProps {
@@ -76,18 +76,18 @@ export const VariantDialog = ({
     const loadAttributeValues = async () => {
       if (open && productId) {
         if (variant?.id && (mode === 'edit' || mode === 'view')) {
-          setLoadingAttributeValues(true);
-          try {
+        setLoadingAttributeValues(true);
+        try {
             // Load attribute values
-            const values = await productRelatedAttributeValuesService.getValuesByVariantId(variant.id);
-            const valuesMap: Record<string, string> = {};
-            values.forEach((val) => {
-              valuesMap[val.productRelatedAttributeId] = val.attributeValue || "";
-            });
-            setAttributeValues(valuesMap);
+          const values = await productRelatedAttributeValuesService.getValuesByVariantId(variant.id);
+          const valuesMap: Record<string, string> = {};
+          values.forEach((val) => {
+            valuesMap[val.productRelatedAttributeId] = val.attributeValue || "";
+          });
+          setAttributeValues(valuesMap);
 
             // Load variant-defining attributes
-            const { productRelatedAttributesService } = await import("../../services/productRelatedAttributes");
+            const { productRelatedAttributesService } = await import("../../../services/productRelatedAttributes");
             const attrs = await productRelatedAttributesService.getAttributesByProductId(productId);
             setProductAttributes(attrs);
             
@@ -113,15 +113,15 @@ export const VariantDialog = ({
             if (mode === 'edit') {
               setCurrentStep(1);
             }
-          } catch (error) {
-            console.error("Error loading attribute values:", error);
-          } finally {
-            setLoadingAttributeValues(false);
-          }
-        } else if (open && mode === 'add') {
+        } catch (error) {
+          console.error("Error loading attribute values:", error);
+        } finally {
+          setLoadingAttributeValues(false);
+        }
+      } else if (open && mode === 'add') {
           // Load variant-defining attributes for add mode (to show which are already marked)
           try {
-            const { productRelatedAttributesService } = await import("../../services/productRelatedAttributes");
+            const { productRelatedAttributesService } = await import("../../../services/productRelatedAttributes");
             const attrs = await productRelatedAttributesService.getAttributesByProductId(productId);
             setProductAttributes(attrs);
             const variantDefiningAttrIds = attrs
@@ -131,8 +131,8 @@ export const VariantDialog = ({
           } catch (error) {
             console.error("Error loading variant-defining attributes:", error);
           }
-          // Reset attribute values for add mode
-          setAttributeValues({});
+        // Reset attribute values for add mode
+        setAttributeValues({});
           // Reset wizard step
           setCurrentStep(1);
         }
@@ -192,8 +192,8 @@ export const VariantDialog = ({
   const handleAttributeValueChange = async (productRelatedAttributeId: string, value: string) => {
     setAttributeValues((prev) => {
       const newValues = {
-        ...prev,
-        [productRelatedAttributeId]: value,
+      ...prev,
+      [productRelatedAttributeId]: value,
       };
       
       // Auto-generate SKU when attribute values change (only in step 1 of wizard mode)
@@ -228,11 +228,11 @@ export const VariantDialog = ({
 
       // Generate SKU if we have attribute values
       if (attributeValuesForSKU.length > 0) {
-        const { generateVariantSKUFromAttributes } = await import("../../utils/skuGenerator");
+        const { generateVariantSKUFromAttributes } = await import("../../../utils/skuGenerator");
         // Try to get product name, fallback to variant name or 'Product'
         let productName = 'Product';
         try {
-          const { productsService } = await import("../../services/products");
+          const { productsService } = await import("../../../services/products");
           const product = await productsService.getProduct(productId);
           productName = product?.name || watch('name') || 'Product';
         } catch {
@@ -541,38 +541,38 @@ export const VariantDialog = ({
         </div>
       ) : (
         // Regular mode footer (for edit/view mode)
+    <>
+      {mode !== 'view' && (
         <>
-          {mode !== 'view' && (
-            <>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleCancel}
-                disabled={isSubmitting}
-                className="border-[var(--glass-border)] bg-[var(--input-background)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-border)] hover:text-[var(--accent-text)] text-foreground transition-all duration-200"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                form="variant-form"
-                disabled={isSubmitting}
-                variant="accent"
-                className="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-lg shadow-[var(--accent-primary)]/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-              >
-                {isSubmitting ? 'Saving...' : mode === 'add' ? 'Add Variant' : 'Save Changes'}
-              </Button>
-            </>
-          )}
-          {mode === 'view' && (
-            <Button
-              type="button"
-              onClick={handleCancel}
-              variant="accent"
-              className="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-lg shadow-[var(--accent-primary)]/25 transition-all duration-200"
-            >
-              Close
-            </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleCancel}
+            disabled={isSubmitting}
+            className="border-[var(--glass-border)] bg-[var(--input-background)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-border)] hover:text-[var(--accent-text)] text-foreground transition-all duration-200"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            form="variant-form"
+            disabled={isSubmitting}
+            variant="accent"
+            className="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-lg shadow-[var(--accent-primary)]/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+          >
+            {isSubmitting ? 'Saving...' : mode === 'add' ? 'Add Variant' : 'Save Changes'}
+          </Button>
+        </>
+      )}
+      {mode === 'view' && (
+        <Button
+          type="button"
+          onClick={handleCancel}
+          variant="accent"
+          className="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-lg shadow-[var(--accent-primary)]/25 transition-all duration-200"
+        >
+          Close
+        </Button>
           )}
         </>
       )}
@@ -585,7 +585,7 @@ export const VariantDialog = ({
       onOpenChange={onOpenChange}
       title={isWizardMode ? getStepTitle() : dialogTitle}
       description={isWizardMode ? `Step ${currentStep} of ${totalSteps}` : dialogDescription}
-      maxWidth="max-w-5xl"
+      maxWidth="max-w-4xl"
       className="max-h-[85vh] bg-[var(--glass-bg)] border-[var(--glass-border)] backdrop-blur-xl"
       footer={footerContent}
       disableContentScroll={true}
@@ -593,7 +593,7 @@ export const VariantDialog = ({
       <div className="space-y-6">
         {isWizardMode && <StepIndicator />}
         
-        <form onSubmit={handleSubmit(onSubmit)} id="variant-form" className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} id="variant-form" className="space-y-6">
             {/* System Product Variant Selector - Only show for add mode with system product */}
             {mode === 'add' && systemProductId && (
               <div className="space-y-2">
@@ -621,7 +621,7 @@ export const VariantDialog = ({
                     // The SystemProductVariantSelector will handle refreshing the list
                     setValue('systemProductVariantId', systemVariantId);
                     // Fetch the variant name from the product variants service
-                    import("../../services/productVariants").then(({ productVariantsService }) => {
+                    import("../../../services/productVariants").then(({ productVariantsService }) => {
                       productVariantsService.getVariant(systemVariantId).then((newVariant) => {
                         if (newVariant) {
                           setValue('name', newVariant.name);
@@ -633,8 +633,8 @@ export const VariantDialog = ({
                   }}
                 />
                 {mode === 'add' && systemProductId && !watch('systemProductVariantId') && (
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Please select a system product variant to add to this product. Variant details will be populated automatically from the selected system variant. If you need to add a new system variant, use the "Add New Variant" button in the dropdown.
+                  <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
+                    Select a system variant to add. Details will auto-populate. Use "Add New Variant" in the dropdown to create a new system variant.
                   </p>
                 )}
                 {mode === 'add' && systemProductId && watch('systemProductVariantId') && watch('name') && (
@@ -791,36 +791,36 @@ export const VariantDialog = ({
             ) : (
               <>
                 {/* Regular Mode: Show all fields at once (for edit/view) */}
-                <VariantForm
-                  register={register}
-                  control={control}
-                  errors={errors}
-                  watch={watch}
-                  setValue={setValue}
-                  showDefaultCheckbox={true}
-                  skuLabel="SKU * (Auto-generated)"
-                  mode={variantMode}
-                  hideVariantDetails={mode === 'add' && !!systemProductId}
-                  hideSku={variantMode === 'system' ? false : true}
-                  readOnly={isReadOnly}
-                  systemProductId={systemProductId}
-                  variant={variant || (mode === 'add' && watch('systemProductVariantId') ? { 
-                    systemProductVariantId: watch('systemProductVariantId') 
-                  } as CompanyProductVariant : null)}
-                />
+            <VariantForm
+              register={register}
+              control={control}
+              errors={errors}
+              watch={watch}
+              setValue={setValue}
+              showDefaultCheckbox={true}
+              skuLabel="SKU * (Auto-generated)"
+              mode={variantMode}
+              hideVariantDetails={mode === 'add' && !!systemProductId}
+              hideSku={variantMode === 'system' ? false : true}
+              readOnly={isReadOnly}
+              systemProductId={systemProductId}
+              variant={variant || (mode === 'add' && watch('systemProductVariantId') ? { 
+                systemProductVariantId: watch('systemProductVariantId') 
+              } as CompanyProductVariant : null)}
+            />
 
                 {/* Variant Defining Attributes - Only show for system products in edit mode */}
                 {productId && variantMode === 'system' && mode === 'edit' && (
-                  <div className="border-t border-[var(--glass-border)] pt-6">
-                    <VariantAttributeSelector
-                      productId={productId}
-                      selectedAttributes={attributeValues}
-                      variantDefiningAttributes={variantDefiningAttributes}
-                      onAttributeSelect={handleVariantDefiningAttributeSelect}
-                      onValueChange={handleAttributeValueChange}
-                      readOnly={isReadOnly}
-                    />
-                  </div>
+              <div className="border-t border-[var(--glass-border)] pt-6">
+                <VariantAttributeSelector
+                  productId={productId}
+                  selectedAttributes={attributeValues}
+                  variantDefiningAttributes={variantDefiningAttributes}
+                  onAttributeSelect={handleVariantDefiningAttributeSelect}
+                  onValueChange={handleAttributeValueChange}
+                  readOnly={isReadOnly}
+                />
+              </div>
                 )}
               </>
             )}

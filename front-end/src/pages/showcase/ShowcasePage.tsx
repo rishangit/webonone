@@ -60,7 +60,7 @@ import { ViewSwitcher } from "../../components/ui/view-switcher";
 import { AppointmentCard } from "../appointments/AppointmentCard";
 import { CompanyCard } from "../companies/CompanyCard";
 import { CompanyListItem } from "../companies/CompanyListItem";
-import { CompanyProductCard } from "../products/CompanyProductCard";
+import { CompanyProductCard } from "../products/CompanyProducts/CompanyProductCard";
 import { UserCard } from "../users/UserCard";
 import { AppointmentStatus } from "../../types/appointmentStatus";
 

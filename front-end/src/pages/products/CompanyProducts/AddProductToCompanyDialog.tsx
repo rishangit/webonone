@@ -1,27 +1,27 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { Search, Package, Plus, Check, ChevronLeft, ChevronRight, Loader2, Tag as TagIcon } from "lucide-react";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
-import { Badge } from "../../components/ui/badge";
-import { Card } from "../../components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
-import { Textarea } from "../../components/ui/textarea";
-import { CustomDialog } from "../../components/ui/custom-dialog";
+import { Button } from "../../../components/ui/button";
+import { Input } from "../../../components/ui/input";
+import { Label } from "../../../components/ui/label";
+import { Badge } from "../../../components/ui/badge";
+import { Card } from "../../../components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select";
+import { Textarea } from "../../../components/ui/textarea";
+import { CustomDialog } from "../../../components/ui/custom-dialog";
 // DropdownMenu imports removed - no longer needed without variant step
 import { toast } from "sonner";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { fetchSystemProductsRequest } from "../../store/slices/systemProductsSlice";
-import { createCompanyProductRequest, clearError as clearCompanyProductsError } from "../../store/slices/companyProductsSlice";
-import { createCompanyProductVariantsRequest, clearError as clearVariantsError } from "../../store/slices/companyProductVariantsSlice";
-import { fetchTagsRequest } from "../../store/slices/tagsSlice";
-import { Product } from "../../services/products";
-import { productsService } from "../../services/products";
-import { formatAvatarUrl } from "../../utils";
-import { companiesService } from "../../services/companies";
-import { Tag } from "../../services/tags";
-import FileUpload from "../../components/ui/file-upload";
-import { TagSelector } from "../../components/tags/TagSelector";
+import { useAppDispatch, useAppSelector } from "../../../store/hooks";
+import { fetchSystemProductsRequest } from "../../../store/slices/systemProductsSlice";
+import { createCompanyProductRequest, clearError as clearCompanyProductsError } from "../../../store/slices/companyProductsSlice";
+import { createCompanyProductVariantsRequest, clearError as clearVariantsError } from "../../../store/slices/companyProductVariantsSlice";
+import { fetchTagsRequest } from "../../../store/slices/tagsSlice";
+import { Product } from "../../../services/products";
+import { productsService } from "../../../services/products";
+import { formatAvatarUrl } from "../../../utils";
+import { companiesService } from "../../../services/companies";
+import { Tag } from "../../../services/tags";
+import FileUpload from "../../../components/ui/file-upload";
+import { TagSelector } from "../../../components/tags/TagSelector";
 // Variant-related imports removed - variants can be added later in product detail page
 
 interface ProductVariant {

@@ -1,16 +1,16 @@
-import { Card } from "../../../components/ui/card";
-import { ImageWithFallback } from "../../../components/figma/ImageWithFallback";
-import { formatAvatarUrl } from "../../../utils";
+import { Card } from "../../../../../components/ui/card";
+import { ImageWithFallback } from "../../../../../components/figma/ImageWithFallback";
+import { formatAvatarUrl } from "../../../../../utils";
 
-interface ProductDetailImageProps {
+interface CompanyProductDetailImageProps {
   imageUrl?: string;
   productName: string;
 }
 
-export const ProductDetailImage = ({
+export const CompanyProductDetailImage = ({
   imageUrl,
   productName,
-}: ProductDetailImageProps) => {
+}: CompanyProductDetailImageProps) => {
   const displayImageUrl = imageUrl 
     ? (imageUrl.startsWith('http') ? imageUrl : formatAvatarUrl(imageUrl))
     : undefined;

@@ -1,19 +1,19 @@
 import { useState, useEffect } from "react";
 import { Plus, Trash2, Package, Star, MoreVertical } from "lucide-react";
-import { Card } from "../../../components/ui/card";
-import { Button } from "../../../components/ui/button";
-import { Badge } from "../../../components/ui/badge";
-import { SearchInput } from "../../../components/common/SearchInput";
-import { Checkbox } from "../../../components/ui/checkbox";
-import { systemProductAttributesService, SystemProductAttribute } from "../../../services/systemProductAttributes";
-import { productRelatedAttributesService, ProductRelatedAttribute } from "../../../services/productRelatedAttributes";
-import { unitsOfMeasureService, UnitsOfMeasure } from "../../../services/unitsOfMeasure";
+import { Card } from "../../../../components/ui/card";
+import { Button } from "../../../../components/ui/button";
+import { Badge } from "../../../../components/ui/badge";
+import { SearchInput } from "../../../../components/common/SearchInput";
+import { Checkbox } from "../../../../components/ui/checkbox";
+import { systemProductAttributesService, SystemProductAttribute } from "../../../../services/systemProductAttributes";
+import { productRelatedAttributesService, ProductRelatedAttribute } from "../../../../services/productRelatedAttributes";
+import { unitsOfMeasureService, UnitsOfMeasure } from "../../../../services/unitsOfMeasure";
 import { toast } from "sonner";
-import { CustomDialog } from "../../../components/ui/custom-dialog";
-import { Label } from "../../../components/ui/label";
-import { ViewSwitcher } from "../../../components/ui/view-switcher";
-import { Pagination } from "../../../components/common/Pagination";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../../components/ui/dropdown-menu";
+import { CustomDialog } from "../../../../components/ui/custom-dialog";
+import { Label } from "../../../../components/ui/label";
+import { ViewSwitcher } from "../../../../components/ui/view-switcher";
+import { Pagination } from "../../../../components/common/Pagination";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../../../components/ui/dropdown-menu";
 
 interface ProductAttributesTabProps {
   productId: string;
@@ -37,8 +37,8 @@ export const ProductAttributesTab = ({ productId }: ProductAttributesTabProps) =
       try {
         const [attributesResult, unitsResult] = await Promise.all([
           systemProductAttributesService.getAttributes({
-            isActive: true,
-            limit: 1000,
+          isActive: true,
+          limit: 1000,
           }),
           unitsOfMeasureService.getActiveUnits(),
         ]);
@@ -327,27 +327,31 @@ export const ProductAttributesTab = ({ productId }: ProductAttributesTabProps) =
             Manage attributes for this product from the global system attributes
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <ViewSwitcher viewMode={viewMode} onViewModeChange={setViewMode} />
-          <Button
-            onClick={handleAddAttribute}
-            className="bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] text-[var(--accent-button-text)]"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Add Attribute
-          </Button>
-        </div>
+        <Button
+          onClick={handleAddAttribute}
+          className="bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] text-[var(--accent-button-text)]"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Add Attribute
+        </Button>
       </div>
 
-      {/* Search */}
+      {/* Search and Filters */}
       {productAttributes.length > 0 && (
-        <div className="max-w-md">
-          <SearchInput
-            placeholder="Search attributes..."
-            value={searchTerm}
-            onChange={setSearchTerm}
-          />
-        </div>
+        <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]">
+          <div className="space-y-4">
+            <SearchInput
+              placeholder="Search attributes..."
+              value={searchTerm}
+              onChange={setSearchTerm}
+            />
+
+            {/* View Switcher - Aligned to right */}
+            <div className="flex items-center justify-end gap-3 flex-wrap">
+              <ViewSwitcher viewMode={viewMode} onViewModeChange={setViewMode} />
+                  </div>
+                </div>
+              </Card>
       )}
 
       {loading ? (
@@ -359,7 +363,7 @@ export const ProductAttributesTab = ({ productId }: ProductAttributesTabProps) =
           {viewMode === "grid" ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {paginatedAttributes.map((productAttr) => renderAttributeCard(productAttr))}
-            </div>
+        </div>
           ) : (
             <div className="space-y-3">
               {paginatedAttributes.map((productAttr) => renderAttributeListItem(productAttr))}
@@ -435,34 +439,34 @@ export const ProductAttributesTab = ({ productId }: ProductAttributesTabProps) =
                       : null;
                     
                     return (
-                      <div
-                        key={attr.id}
-                        onClick={() => setSelectedAttributeId(attr.id)}
+                    <div
+                      key={attr.id}
+                      onClick={() => setSelectedAttributeId(attr.id)}
                         className={`p-2.5 rounded-md cursor-pointer transition-colors ${
-                          selectedAttributeId === attr.id
-                            ? "bg-[var(--accent-primary)]/20 border border-[var(--accent-primary)]"
-                            : "hover:bg-accent border border-transparent"
-                        }`}
-                      >
-                        <div className="flex items-start justify-between">
+                        selectedAttributeId === attr.id
+                          ? "bg-[var(--accent-primary)]/20 border border-[var(--accent-primary)]"
+                          : "hover:bg-accent border border-transparent"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between">
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-foreground text-sm">{attr.name}</p>
-                            {attr.description && (
+                          {attr.description && (
                               <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
                                 {attr.description}
                               </p>
-                            )}
+                          )}
                             <div className="flex items-center gap-2 mt-1.5">
-                              <Badge variant="outline" className="text-xs">{attr.valueDataType}</Badge>
+                            <Badge variant="outline" className="text-xs">{attr.valueDataType}</Badge>
                               {unit && (
-                                <Badge variant="outline" className="text-xs">
+                              <Badge variant="outline" className="text-xs">
                                   {unit.symbol}
-                                </Badge>
-                              )}
-                            </div>
+                              </Badge>
+                            )}
                           </div>
                         </div>
                       </div>
+                    </div>
                     );
                   })}
                 </div>

@@ -1,9 +1,9 @@
 import { Edit, Trash2, MoreVertical, Star, Settings, CheckCircle2, XCircle } from "lucide-react";
-import { Card } from "../../../components/ui/card";
-import { Button } from "../../../components/ui/button";
-import { Badge } from "../../../components/ui/badge";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../../components/ui/dropdown-menu";
-import { ProductVariant as SystemProductVariant } from "../../../services/productVariants";
+import { Card } from "../../../../components/ui/card";
+import { Button } from "../../../../components/ui/button";
+import { Badge } from "../../../../components/ui/badge";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../../../components/ui/dropdown-menu";
+import { ProductVariant as SystemProductVariant } from "../../../../services/productVariants";
 
 interface LegacyProductVariant {
   id: string;

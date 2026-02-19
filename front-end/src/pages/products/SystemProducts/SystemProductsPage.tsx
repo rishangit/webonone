@@ -8,7 +8,7 @@ import { Pagination } from "../../../components/common/Pagination";
 import { SearchInput } from "../../../components/common/SearchInput";
 import { EmptyState } from "../../../components/common/EmptyState";
 import { cn } from "../../../components/ui/utils";
-import { CreateSystemProductDialog } from "../CreateSystemProductDialog";
+import { CreateSystemProductDialog } from "./CreateSystemProductDialog";
 import { ViewSwitcher } from "../../../components/ui/view-switcher";
 import { Carousel, CarouselContent, CarouselItem } from "../../../components/ui/carousel";
 import { toast } from "sonner";
