@@ -31,6 +31,11 @@ This directory contains essential database management scripts for the appointmen
 - **Usage**: `node scripts/verifyDatabase.js`
 - **Description**: Checks if all required tables exist and verifies their structure
 
+### `migrateAddPasswordResetTokens.js`
+- **Purpose**: Add password_reset_tokens table to existing database
+- **Usage**: `node scripts/migrateAddPasswordResetTokens.js`
+- **Description**: Migration script to add the password reset tokens table for existing databases. Safe to run multiple times (checks if table exists first).
+
 ### `generateRandomUsers.js`
 - **Purpose**: Generate random test users
 - **Usage**: `node scripts/generateRandomUsers.js`
@@ -73,9 +78,23 @@ node scripts/start.js
 node scripts/verifyDatabase.js
 ```
 
+## Migration Scripts
+
+### Adding Password Reset Functionality
+If you have an existing database and need to add password reset functionality:
+```bash
+node scripts/migrateAddPasswordResetTokens.js
+```
+
+This script will:
+- Check if the `password_reset_tokens` table already exists
+- Create the table if it doesn't exist
+- Verify the table was created successfully
+- Safe to run multiple times (idempotent)
+
 ## Notes
 
-- All one-time migration scripts have been removed as the local and live databases are now in sync
 - The database schema is stable and production-ready
 - Always backup your database before running any scripts in production
+- Migration scripts are idempotent and safe to run multiple times
 - Utility scripts can be run as needed for maintenance and testing

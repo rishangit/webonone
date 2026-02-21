@@ -659,7 +659,7 @@ router.get('/verify',
   })
 );
 
-// Forgot password (placeholder)
+// Forgot password
 router.post('/forgot-password',
   validate(Joi.object({
     email: Joi.string().email().required()
@@ -668,27 +668,53 @@ router.post('/forgot-password',
     const { email } = req.body;
     
     const user = await User.findByEmail(email);
+    
+    // Security: Don't reveal if email exists or not
+    // Always return the same response to prevent email enumeration
     if (!user) {
-      // Don't reveal if email exists or not
       return res.json({
         success: true,
-        message: 'If the email exists, a password reset link has been sent'
+        message: 'If the email exists, a password reset link has been sent to your email address'
       });
     }
     
-    // In a real implementation, you would:
-    // 1. Generate a password reset token
-    // 2. Send an email with the reset link
-    // 3. Store the reset token with expiration
+    // Check if user is active
+    if (!user.isActive) {
+      // Still return success to prevent account enumeration
+      return res.json({
+        success: true,
+        message: 'If the email exists, a password reset link has been sent to your email address'
+      });
+    }
     
-    res.json({
-      success: true,
-      message: 'If the email exists, a password reset link has been sent'
-    });
+    try {
+      // Generate secure password reset token
+      const PasswordResetToken = require('../models/PasswordResetToken');
+      const resetToken = await PasswordResetToken.create(user.id, 1); // 1 hour expiry
+      
+      // Send password reset email
+      const { sendPasswordResetEmail } = require('../utils/emailService');
+      const userName = user.getFullName() || user.email;
+      await sendPasswordResetEmail(user.email, resetToken, userName);
+      
+      console.log(`Password reset token generated for user: ${user.email}`);
+      
+      res.json({
+        success: true,
+        message: 'If the email exists, a password reset link has been sent to your email address'
+      });
+    } catch (error) {
+      console.error('Error in forgot password:', error);
+      // Still return success to prevent information leakage
+      res.json({
+        success: true,
+        message: 'If the email exists, a password reset link has been sent to your email address'
+      });
+    }
   })
 );
 
-// Reset password (placeholder)
+// Reset password
 router.post('/reset-password',
   validate(Joi.object({
     token: Joi.string().required(),
@@ -698,15 +724,76 @@ router.post('/reset-password',
   asyncHandler(async (req, res) => {
     const { token, newPassword } = req.body;
     
-    // In a real implementation, you would:
-    // 1. Verify the reset token
-    // 2. Check if it's expired
-    // 3. Update the user's password
-    // 4. Invalidate the reset token
+    // Find and validate the reset token
+    const PasswordResetToken = require('../models/PasswordResetToken');
+    const resetToken = await PasswordResetToken.findByToken(token);
+    
+    if (!resetToken) {
+      throw validationError('Invalid or expired password reset token. Please request a new password reset link.');
+    }
+    
+    // Check if token is expired (additional check)
+    if (new Date(resetToken.expiresAt) < new Date()) {
+      throw validationError('Password reset token has expired. Please request a new password reset link.');
+    }
+    
+    // Check if token is already used
+    if (resetToken.isUsed) {
+      throw validationError('This password reset link has already been used. Please request a new password reset link.');
+    }
+    
+    // Get user
+    const user = await User.findById(resetToken.userId);
+    if (!user) {
+      throw validationError('User not found');
+    }
+    
+    // Check if user is active
+    if (!user.isActive) {
+      throw validationError('Account is deactivated. Please contact support.');
+    }
+    
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    
+    // Update user password
+    await user.update({ password: hashedPassword });
+    
+    // Mark token as used
+    await resetToken.markAsUsed();
+    
+    console.log(`Password reset successful for user: ${user.email}`);
     
     res.json({
       success: true,
-      message: 'Password reset successfully'
+      message: 'Password reset successfully. You can now login with your new password.'
+    });
+  })
+);
+
+// Verify reset token (for frontend to check if token is valid before showing reset form)
+router.get('/verify-reset-token',
+  validate(Joi.object({
+    token: Joi.string().required()
+  }), 'query'),
+  asyncHandler(async (req, res) => {
+    const { token } = req.query;
+    
+    const PasswordResetToken = require('../models/PasswordResetToken');
+    const resetToken = await PasswordResetToken.findByToken(token);
+    
+    if (!resetToken) {
+      return res.json({
+        success: false,
+        valid: false,
+        message: 'Invalid or expired password reset token'
+      });
+    }
+    
+    res.json({
+      success: true,
+      valid: true,
+      message: 'Token is valid'
     });
   })
 );

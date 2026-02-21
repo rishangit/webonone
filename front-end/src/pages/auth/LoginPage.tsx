@@ -269,8 +269,14 @@ export function LoginPage() {
                   />
                   <Label htmlFor="remember" className="text-sm text-muted-foreground">Remember me</Label>
                 </div>
-                <Button variant="link" className="text-sm text-[var(--accent-text)] hover:text-[var(--accent-primary-hover)] p-0 h-auto">
-                  Forgot password?
+                <Button 
+                  variant="link" 
+                  asChild
+                  className="text-sm text-[var(--accent-text)] hover:text-[var(--accent-primary-hover)] p-0 h-auto"
+                >
+                  <Link to="/system/forgot-password">
+                    Forgot password?
+                  </Link>
                 </Button>
               </div>
 

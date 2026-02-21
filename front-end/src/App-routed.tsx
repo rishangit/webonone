@@ -18,6 +18,8 @@ import {
 
 // Auth Pages
 import { LoginPage, SignUpPage } from "./pages/auth";
+import { ForgotPasswordPage } from "./pages/auth/ForgotPasswordPage";
+import { ResetPasswordPage } from "./pages/auth/ResetPasswordPage";
 
 // Dashboard
 import { Dashboard } from "./pages/dashboard";
@@ -680,6 +682,26 @@ function App() {
                 <Navigate to="/system/dashboard" replace />
               ) : (
                 <AuthLayout><SignUpPage /></AuthLayout>
+              )
+            } 
+          />
+          <Route 
+            path="/system/forgot-password" 
+            element={
+              isAuthenticated ? (
+                <Navigate to="/system/dashboard" replace />
+              ) : (
+                <AuthLayout><ForgotPasswordPage /></AuthLayout>
+              )
+            } 
+          />
+          <Route 
+            path="/system/reset-password" 
+            element={
+              isAuthenticated ? (
+                <Navigate to="/system/dashboard" replace />
+              ) : (
+                <AuthLayout><ResetPasswordPage /></AuthLayout>
               )
             } 
           />

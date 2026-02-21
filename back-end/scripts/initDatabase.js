@@ -326,6 +326,25 @@ const createTables = async () => {
       )
     `);
 
+    // Units of Measure table
+    await pool.execute(`
+      CREATE TABLE IF NOT EXISTS units_of_measure (
+        id VARCHAR(10) PRIMARY KEY,
+        unit_name VARCHAR(255) NOT NULL,
+        symbol VARCHAR(50) NOT NULL,
+        base_unit VARCHAR(10),
+        multiplier DECIMAL(20, 10) DEFAULT 1.0,
+        isActive BOOLEAN DEFAULT TRUE,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_unit_name (unit_name),
+        INDEX idx_symbol (symbol),
+        INDEX idx_active (isActive),
+        INDEX idx_base_unit (base_unit),
+        FOREIGN KEY (base_unit) REFERENCES units_of_measure(id) ON DELETE SET NULL
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+    `);
+
     // Product Attributes table
     await pool.execute(`
       CREATE TABLE IF NOT EXISTS product_attributes (
@@ -414,6 +433,23 @@ const createTables = async () => {
         INDEX idx_tag (tagId),
         FOREIGN KEY (companyProductId) REFERENCES company_products(id) ON DELETE CASCADE,
         FOREIGN KEY (tagId) REFERENCES tags(id) ON DELETE CASCADE
+      )
+    `);
+
+    // Password Reset Tokens table
+    await pool.execute(`
+      CREATE TABLE IF NOT EXISTS password_reset_tokens (
+        id VARCHAR(10) PRIMARY KEY,
+        userId VARCHAR(10) NOT NULL,
+        token VARCHAR(255) UNIQUE NOT NULL,
+        expiresAt TIMESTAMP NOT NULL,
+        isUsed BOOLEAN DEFAULT FALSE,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_user (userId),
+        INDEX idx_token (token),
+        INDEX idx_expires (expiresAt),
+        INDEX idx_used (isUsed),
+        FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
       )
     `);
 

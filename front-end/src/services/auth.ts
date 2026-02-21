@@ -274,6 +274,73 @@ class AuthService {
       throw error;
     }
   }
+
+  // Request password reset
+  static async forgotPassword(email: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const response = await fetch(apiEndpoints.auth.forgotPassword, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to send password reset email');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      throw error;
+    }
+  }
+
+  // Reset password with token
+  static async resetPassword(token: string, newPassword: string, confirmPassword: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const response = await fetch(apiEndpoints.auth.resetPassword, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token, newPassword, confirmPassword }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Password reset failed');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Reset password error:', error);
+      throw error;
+    }
+  }
+
+  // Verify reset token
+  static async verifyResetToken(token: string): Promise<{ success: boolean; valid: boolean; message?: string }> {
+    try {
+      const response = await fetch(`${apiEndpoints.auth.verifyResetToken}?token=${encodeURIComponent(token)}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      return data;
+    } catch (error) {
+      console.error('Verify reset token error:', error);
+      return { success: false, valid: false, message: 'Failed to verify token' };
+    }
+  }
 }
 
 // Export the auth service object with static methods
@@ -286,6 +353,9 @@ export const authService = {
   logout: AuthService.logout,
   refreshToken: AuthService.refreshToken,
   verifyToken: AuthService.verifyToken,
+  forgotPassword: AuthService.forgotPassword,
+  resetPassword: AuthService.resetPassword,
+  verifyResetToken: AuthService.verifyResetToken,
   impersonateUser: AuthService.impersonateUser,
   completeImpersonateWithRole: AuthService.completeImpersonateWithRole,
 };
