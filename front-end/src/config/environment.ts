@@ -95,7 +95,7 @@ export const config: EnvironmentConfig = {
   
   // Application Configuration
   appName: getEnvVar('VITE_APP_NAME', 'webonone'),
-  appVersion: getEnvVar('VITE_APP_VERSION', '1.0.0'),
+  appVersion: getEnvVar('VITE_APP_VERSION', '1.1.0'),
   appDescription: getEnvVar('VITE_APP_DESCRIPTION', 'Full-stack appointment booking application'),
   
   // Development Configuration
