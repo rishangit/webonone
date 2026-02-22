@@ -453,6 +453,23 @@ const createTables = async () => {
       )
     `);
 
+    // Email verification tokens table
+    await pool.execute(`
+      CREATE TABLE IF NOT EXISTS email_verification_tokens (
+        id VARCHAR(10) PRIMARY KEY,
+        userId VARCHAR(10) NOT NULL,
+        token VARCHAR(255) UNIQUE NOT NULL,
+        expiresAt TIMESTAMP NOT NULL,
+        isUsed BOOLEAN DEFAULT FALSE,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_user (userId),
+        INDEX idx_token (token),
+        INDEX idx_expires (expiresAt),
+        INDEX idx_used (isUsed),
+        FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `);
+
     // Company Appointments table - using only IDs, duplicate data fields are nullable
     await pool.execute(`
       CREATE TABLE IF NOT EXISTS company_appointments (

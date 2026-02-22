@@ -17,7 +17,7 @@ import {
 } from "./pages/layout";
 
 // Auth Pages
-import { LoginPage, SignUpPage } from "./pages/auth";
+import { LoginPage, SignUpPage, SignUpWizardPage, VerifyEmailPage } from "./pages/auth";
 import { ForgotPasswordPage } from "./pages/auth/ForgotPasswordPage";
 import { ResetPasswordPage } from "./pages/auth/ResetPasswordPage";
 
@@ -681,7 +681,17 @@ function App() {
               isAuthenticated ? (
                 <Navigate to="/system/dashboard" replace />
               ) : (
-                <AuthLayout><SignUpPage /></AuthLayout>
+                <SignUpWizardPage />
+              )
+            } 
+          />
+          <Route 
+            path="/system/verify-email" 
+            element={
+              isAuthenticated ? (
+                <Navigate to="/system/dashboard" replace />
+              ) : (
+                <VerifyEmailPage />
               )
             } 
           />

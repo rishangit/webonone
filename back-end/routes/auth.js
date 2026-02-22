@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Joi = require('joi');
+const { pool } = require('../config/database');
 const User = require('../models/User');
 const { UserRole, UserRoleNames, getDefaultUserData } = require('../types/user');
 const { authenticateToken, requireRole } = require('../middleware/auth');
@@ -16,13 +17,14 @@ router.post('/register',
     lastName: Joi.string().min(1).max(100).required(),
     email: Joi.string().email().required(),
     password: Joi.string().min(6).required(),
+    mobileNumber: Joi.string().optional(),
     role: Joi.alternatives().try(
       Joi.number().valid(...Object.values(UserRole)),
       Joi.string().valid('Super Admin', 'System Admin', 'Company Owner', 'Staff Member', 'User', '0', '1', '2', '3')
     ).optional()
   })),
   asyncHandler(async (req, res) => {
-    let { firstName, lastName, email, password, role } = req.body;
+    let { firstName, lastName, email, password, mobileNumber, role } = req.body;
     
     // Convert string role to number if needed, or default to USER
     if (role === undefined || role === null) {
@@ -112,6 +114,7 @@ router.post('/register',
       password: hashedPassword,
       firstName,
       lastName,
+      phone: mobileNumber || null, // Save mobileNumber as phone
       role: defaultData.role, // Will be ignored if role column doesn't exist
       // companyId removed - now stored in users_role table
       isActive: defaultData.isActive,
@@ -226,10 +229,10 @@ router.post('/login',
     let userRoles = [];
     let defaultRole = null;
     let useOldRoleSystem = false;
+    const { UserRole: UserRoleEnum } = require('../types/user');
     
     try {
       const UserRoleModel = require('../models/UserRole');
-      const { UserRole: UserRoleEnum } = require('../types/user');
       userRoles = await UserRoleModel.findByUserId(user.id, false);
       
       // Filter out USER roles (3) - USER is the default, no need to store it
@@ -1024,6 +1027,231 @@ router.post('/impersonate/:userId/complete',
           name: adminUser.getFullName()
         }
       }
+    });
+  })
+);
+
+// Check if user exists by email and mobile (for signup wizard)
+router.post('/check-user',
+  validate(Joi.object({
+    email: Joi.string().email().required(),
+    mobileNumber: Joi.string().optional()
+  })),
+  asyncHandler(async (req, res) => {
+    const { email, mobileNumber } = req.body;
+    
+    // Find user by email
+    const userByEmail = await User.findByEmail(email);
+    
+    // Find user by mobile number if provided
+    let userByMobile = null;
+    if (mobileNumber) {
+      try {
+        const query = 'SELECT * FROM users WHERE phone = ? LIMIT 1';
+        const [rows] = await pool.execute(query, [mobileNumber]);
+        if (rows.length > 0) {
+          userByMobile = new User(rows[0]);
+        }
+      } catch (error) {
+        console.error('Error finding user by mobile:', error);
+      }
+    }
+    
+    // If user exists by email, return their details
+    if (userByEmail) {
+      return res.json({
+        success: true,
+        exists: true,
+        user: {
+          id: userByEmail.id,
+          email: userByEmail.email,
+          firstName: userByEmail.firstName,
+          lastName: userByEmail.lastName,
+          phone: userByEmail.phone
+        }
+      });
+    }
+    
+    // If user exists by mobile but not email, return exists but no details
+    if (userByMobile) {
+      return res.json({
+        success: true,
+        exists: true,
+        user: {
+          id: userByMobile.id,
+          email: userByMobile.email,
+          firstName: userByMobile.firstName,
+          lastName: userByMobile.lastName,
+          phone: userByMobile.phone
+        }
+      });
+    }
+    
+    // User doesn't exist
+    return res.json({
+      success: true,
+      exists: false
+    });
+  })
+);
+
+// Send verification email
+router.post('/send-verification-email',
+  validate(Joi.object({
+    userId: Joi.string().required()
+  })),
+  asyncHandler(async (req, res) => {
+    const { userId } = req.body;
+    
+    const user = await User.findById(userId);
+    if (!user) {
+      throw validationError('User not found');
+    }
+    
+    if (user.isVerified) {
+      return res.json({
+        success: true,
+        message: 'Email is already verified'
+      });
+    }
+    
+    try {
+      // Generate verification token
+      const EmailVerificationToken = require('../models/EmailVerificationToken');
+      const verificationToken = await EmailVerificationToken.create(user.id, 24); // 24 hours expiry
+      
+      // Send verification email
+      const { sendVerificationEmail } = require('../utils/emailService');
+      const userName = user.getFullName() || user.email;
+      await sendVerificationEmail(user.email, verificationToken, userName);
+      
+      console.log(`Verification email sent to user: ${user.email}`);
+      
+      res.json({
+        success: true,
+        message: 'Verification email sent successfully'
+      });
+    } catch (error) {
+      console.error('Error sending verification email:', error);
+      throw new Error(`Failed to send verification email: ${error.message}`);
+    }
+  })
+);
+
+// Setup existing account (for users found during signup)
+router.post('/setup-existing-account',
+  validate(Joi.object({
+    userId: Joi.string().required(),
+    firstName: Joi.string().min(1).max(100).required(),
+    lastName: Joi.string().min(1).max(100).required(),
+    mobileNumber: Joi.string().optional()
+  })),
+  asyncHandler(async (req, res) => {
+    const { userId, firstName, lastName, mobileNumber } = req.body;
+    
+    const user = await User.findById(userId);
+    if (!user) {
+      throw validationError('User not found');
+    }
+    
+    // Update user name and mobile number
+    const updateData = {
+      firstName,
+      lastName
+    };
+    
+    if (mobileNumber) {
+      updateData.phone = mobileNumber;
+    }
+    
+    await user.update(updateData);
+    
+    try {
+      // Generate password reset token
+      const PasswordResetToken = require('../models/PasswordResetToken');
+      const resetToken = await PasswordResetToken.create(user.id, 24); // 24 hours expiry
+      
+      // Send password reset email
+      const { sendPasswordResetEmail } = require('../utils/emailService');
+      const userName = user.getFullName() || user.email;
+      await sendPasswordResetEmail(user.email, resetToken, userName);
+      
+      // Generate verification token and send verification email (if not already verified)
+      if (!user.isVerified) {
+        const EmailVerificationToken = require('../models/EmailVerificationToken');
+        const verificationToken = await EmailVerificationToken.create(user.id, 24); // 24 hours expiry
+        
+        const { sendVerificationEmail } = require('../utils/emailService');
+        await sendVerificationEmail(user.email, verificationToken, userName);
+      }
+      
+      console.log(`Setup emails sent to existing user: ${user.email}`);
+      
+      res.json({
+        success: true,
+        message: 'Account setup complete. Please check your email for password reset and verification links.'
+      });
+    } catch (error) {
+      console.error('Error sending setup emails:', error);
+      throw new Error(`Failed to send setup emails: ${error.message}`);
+    }
+  })
+);
+
+// Verify email token
+router.get('/verify-email',
+  validate(Joi.object({
+    token: Joi.string().required()
+  }), 'query'),
+  asyncHandler(async (req, res) => {
+    const { token } = req.query;
+    
+    // Find and validate the verification token
+    const EmailVerificationToken = require('../models/EmailVerificationToken');
+    const verificationToken = await EmailVerificationToken.findByToken(token);
+    
+    if (!verificationToken) {
+      throw validationError('Invalid or expired verification token. Please request a new verification email.');
+    }
+    
+    // Check if token is expired (additional check)
+    if (new Date(verificationToken.expiresAt) < new Date()) {
+      throw validationError('Verification token has expired. Please request a new verification email.');
+    }
+    
+    // Check if token is already used
+    if (verificationToken.isUsed) {
+      throw validationError('This verification link has already been used.');
+    }
+    
+    // Get user
+    const user = await User.findById(verificationToken.userId);
+    if (!user) {
+      throw validationError('User not found');
+    }
+    
+    // Check if user is already verified
+    if (user.isVerified) {
+      // Mark token as used anyway
+      await verificationToken.markAsUsed();
+      return res.json({
+        success: true,
+        message: 'Email is already verified',
+        alreadyVerified: true
+      });
+    }
+    
+    // Update user as verified
+    await user.update({ isVerified: true });
+    
+    // Mark token as used
+    await verificationToken.markAsUsed();
+    
+    console.log(`Email verified for user: ${user.email}`);
+    
+    res.json({
+      success: true,
+      message: 'Email verified successfully'
     });
   })
 );

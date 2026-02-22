@@ -49,15 +49,28 @@ export const signUpEpic: Epic<any, any, RootState> = (action$) =>
       
       return from(authService.register(signUpData)).pipe(
         timeout(10000), // 10 second timeout
-        map((response) => {
+        switchMap((response) => {
           // Store token and user data in localStorage
           localStorage.setItem('authToken', response.token);
           localStorage.setItem('user', JSON.stringify(response.user));
           
-          return signUpSuccess({
-            user: response.user,
-            token: response.token,
-          });
+          // Send verification email
+          return from(authService.sendVerificationEmail(response.user.id)).pipe(
+            map(() => {
+              return signUpSuccess({
+                user: response.user,
+                token: response.token,
+              });
+            }),
+            catchError((emailError) => {
+              // Even if email fails, still complete signup
+              console.error('Failed to send verification email:', emailError);
+              return of(signUpSuccess({
+                user: response.user,
+                token: response.token,
+              }));
+            })
+          );
         }),
         catchError((error) => {
           ongoingSignUpRequest = null; // Clear flag on error

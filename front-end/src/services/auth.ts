@@ -341,6 +341,101 @@ class AuthService {
       return { success: false, valid: false, message: 'Failed to verify token' };
     }
   }
+
+  // Check if user exists by email and mobile
+  static async checkUser(email: string, mobileNumber?: string): Promise<{ success: boolean; exists: boolean; user?: any }> {
+    try {
+      const response = await fetch(apiEndpoints.auth.checkUser, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, mobileNumber }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to check user');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Check user error:', error);
+      throw error;
+    }
+  }
+
+  // Send verification email
+  static async sendVerificationEmail(userId: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const response = await fetch(apiEndpoints.auth.sendVerificationEmail, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to send verification email');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Send verification email error:', error);
+      throw error;
+    }
+  }
+
+  // Verify email token
+  static async verifyEmail(token: string): Promise<{ success: boolean; message: string; alreadyVerified?: boolean }> {
+    try {
+      const response = await fetch(`${apiEndpoints.auth.verifyEmail}?token=${encodeURIComponent(token)}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Email verification failed');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Verify email error:', error);
+      throw error;
+    }
+  }
+
+  // Setup existing account (update name, send password reset and verification emails)
+  static async setupExistingAccount(userId: string, firstName: string, lastName: string, mobileNumber?: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const response = await fetch(apiEndpoints.auth.setupExistingAccount, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId, firstName, lastName, mobileNumber }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to setup existing account');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Setup existing account error:', error);
+      throw error;
+    }
+  }
 }
 
 // Export the auth service object with static methods
@@ -356,6 +451,10 @@ export const authService = {
   forgotPassword: AuthService.forgotPassword,
   resetPassword: AuthService.resetPassword,
   verifyResetToken: AuthService.verifyResetToken,
+  checkUser: AuthService.checkUser,
+  sendVerificationEmail: AuthService.sendVerificationEmail,
+  verifyEmail: AuthService.verifyEmail,
+  setupExistingAccount: AuthService.setupExistingAccount,
   impersonateUser: AuthService.impersonateUser,
   completeImpersonateWithRole: AuthService.completeImpersonateWithRole,
 };
