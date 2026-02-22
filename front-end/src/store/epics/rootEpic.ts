@@ -32,6 +32,13 @@ import {
   fetchUserAppointmentHistoryEpic
 } from './appointmentHistoryEpics';
 import { currenciesEpics } from './currenciesEpics';
+import {
+  fetchBacklogItemsEpic,
+  fetchBacklogItemEpic,
+  createBacklogItemEpic,
+  updateBacklogItemEpic,
+  deleteBacklogItemEpic
+} from './backlogEpics';
 
 export const rootEpic = combineEpics(
   signUpEpic,
@@ -60,5 +67,10 @@ export const rootEpic = combineEpics(
   fetchAppointmentHistoryEpic,
   fetchUserAppointmentHistoryEpic,
   ...companyWebThemesEpics,
-  ...currenciesEpics
+  ...currenciesEpics,
+  fetchBacklogItemsEpic,
+  fetchBacklogItemEpic,
+  createBacklogItemEpic,
+  updateBacklogItemEpic,
+  deleteBacklogItemEpic
 );

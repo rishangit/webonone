@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Calendar, Users, CheckCircle, Clock, UserPlus, BarChart3, Settings } from "lucide-react";
+import { Calendar, Users, CheckCircle, Clock, UserPlus, BarChart3, Settings, Bug } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
 import { AppointmentCard } from "../appointments/AppointmentCard";
@@ -19,7 +19,11 @@ import { Carousel, CarouselContent, CarouselItem } from "../../components/ui/car
 
 // Stats will be calculated from real data
 
-export function Dashboard() {
+interface DashboardProps {
+  onNavigate?: (page: string) => void;
+}
+
+export const Dashboard = ({ onNavigate }: DashboardProps = {}) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { appointments: reduxAppointments, loading, error } = useAppSelector((state) => state.appointments);
@@ -448,6 +452,23 @@ export function Dashboard() {
               >
                 <Settings className="w-4 h-4 mr-2" />
                 Settings
+              </Button>
+              <Button 
+                variant="accent" 
+                className="w-full justify-start"
+                onClick={() => {
+                  console.log('[Dashboard] Log Issue button clicked, onNavigate:', onNavigate);
+                  if (onNavigate) {
+                    console.log('[Dashboard] Calling onNavigate("backlog")');
+                    onNavigate('backlog');
+                  } else {
+                    console.log('[Dashboard] Using navigate("/system/backlog")');
+                    navigate('/system/backlog');
+                  }
+                }}
+              >
+                <Bug className="w-4 h-4 mr-2" />
+                Log Issue / Request Feature
               </Button>
             </div>
           </Card>

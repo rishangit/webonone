@@ -504,6 +504,48 @@ const createTables = async () => {
       )
     `);
 
+    // Backlog Items table (for issue/feature request tracking)
+    await pool.execute(`
+      CREATE TABLE IF NOT EXISTS backlog_items (
+        id VARCHAR(10) PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        description TEXT NOT NULL,
+        type ENUM('Issue', 'Feature') NOT NULL DEFAULT 'Issue',
+        status ENUM('New', 'Active', 'Done') NOT NULL DEFAULT 'New',
+        screenshot_path VARCHAR(500) NULL,
+        created_by VARCHAR(10) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_type (type),
+        INDEX idx_status (status),
+        INDEX idx_created_by (created_by),
+        INDEX idx_created_at (created_at)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+
+    // Attempt to add foreign key constraint separately to handle potential collation issues
+    try {
+      const [fkCheck] = await pool.execute(`
+        SELECT CONSTRAINT_NAME 
+        FROM information_schema.TABLE_CONSTRAINTS 
+        WHERE TABLE_SCHEMA = DATABASE() 
+        AND TABLE_NAME = 'backlog_items' 
+        AND CONSTRAINT_TYPE = 'FOREIGN KEY'
+        AND CONSTRAINT_NAME LIKE '%created_by%'
+      `);
+
+      if (fkCheck.length === 0) {
+        await pool.execute(`
+          ALTER TABLE backlog_items 
+          ADD CONSTRAINT fk_backlog_items_created_by 
+          FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+        `);
+      }
+    } catch (fkError) {
+      // Foreign key constraint may fail due to collation mismatch, but table will still work
+      console.warn('⚠️  Warning: Could not add foreign key constraint for backlog_items:', fkError.message);
+    }
+
     console.log('✅ Database tables created successfully');
   } catch (error) {
     console.error('❌ Error creating tables:', error.message);
@@ -518,7 +560,7 @@ const dropTables = async () => {
     const tables = [
       'product_tags', 'company_tags', 'tags',
       'products', 'sales', 'notifications', 'appointments', 'company_appointments', 'services', 
-      'spaces', 'companies', 'company_categories', 'product_categories', 'users'
+      'spaces', 'companies', 'company_categories', 'product_categories', 'backlog_items', 'users'
     ];
 
     for (const table of tables) {

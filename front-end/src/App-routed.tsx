@@ -37,6 +37,9 @@ import { VariantStockDetailsPage } from "./pages/products/Variants/VariantStockD
 // Tags
 import { TagsPage } from "./pages/tags";
 
+// Backlog
+import { BacklogPage } from "./pages/backlog";
+
 // Sales
 import { SalesPage } from "./pages/sales";
 import { SalesDetailPage } from "./pages/sales/SalesDetailPage";
@@ -199,6 +202,9 @@ function ProtectedRouteWrapper({ children }: { children: React.ReactNode }) {
         break;
       case 'tags':
         navigate('/system/tags');
+        break;
+      case 'backlog':
+        navigate('/system/backlog');
         break;
       default:
         // Handle company-settings with ID (e.g., "company-settings/4")
@@ -847,6 +853,19 @@ function App() {
               isAuthenticated ? (
                 <ProtectedRouteWrapper>
                   <TagsPage currentUser={user as any} />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/backlog" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <BacklogPage currentUser={user as any} />
                 </ProtectedRouteWrapper>
               ) : (
                 <Navigate to="/system/login" replace />

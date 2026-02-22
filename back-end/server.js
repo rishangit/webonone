@@ -271,6 +271,9 @@ app.use('/api', companyUsersRoutes);
 console.log('Registering uploads routes...');
 app.use('/api/uploads', uploadRoutes);
 console.log('Uploads routes registered successfully');
+console.log('Registering backlog routes...');
+app.use('/api/backlog', require('./routes/backlog'));
+console.log('Backlog routes registered successfully');
 
 // Root endpoint
 app.get('/', (req, res) => {

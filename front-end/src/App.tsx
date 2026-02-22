@@ -67,6 +67,9 @@ import { SearchPage } from "./pages/search";
 // Analytics
 import { AnalyticsPage } from "./pages/analytics";
 
+// Backlog pages
+import { BacklogPage } from "./pages/backlog/BacklogPage";
+
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -315,6 +318,14 @@ export default function App() {
           return <SalesPage />;
         case "analytics":
           return <AnalyticsPage currentUser={currentUser} />;
+        case "backlog":
+          console.log('[App] Rendering BacklogPage with currentUser:', currentUser);
+          try {
+            return <BacklogPage currentUser={currentUser} />;
+          } catch (error) {
+            console.error('[App] Error rendering BacklogPage:', error);
+            throw error;
+          }
         case "settings":
           return <SettingsPage onThemeChange={handleThemeChange} currentTheme={theme} onAccentColorChange={handleAccentColorChange} currentAccentColor={accentColor} />;
         case "company-settings":
@@ -332,7 +343,7 @@ export default function App() {
           return <ProfilePage />;
         case "dashboard":
         default:
-          return <Dashboard />;
+          return <Dashboard onNavigate={handlePageChange} />;
       }
     } catch (error) {
       console.error("Error rendering page:", error);

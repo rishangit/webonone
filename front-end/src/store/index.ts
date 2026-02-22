@@ -18,6 +18,7 @@ import appointmentsReducer from './slices/appointmentsSlice';
 import appointmentHistoryReducer from './slices/appointmentHistorySlice';
 import companyWebThemesReducer from './slices/companyWebThemesSlice';
 import currenciesReducer from './slices/currenciesSlice';
+import backlogReducer from './slices/backlogSlice';
 import { rootEpic } from './epics/rootEpic';
 
 // Create epic middleware
@@ -44,6 +45,7 @@ export const store = configureStore({
     appointmentHistory: appointmentHistoryReducer,
     companyWebThemes: companyWebThemesReducer,
     currencies: currenciesReducer,
+    backlog: backlogReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
