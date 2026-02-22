@@ -1116,9 +1116,9 @@ router.post('/send-verification-email',
     }
     
     try {
-      // Generate verification token
-      const EmailVerificationToken = require('../models/EmailVerificationToken');
-      const verificationToken = await EmailVerificationToken.create(user.id, 24); // 24 hours expiry
+      // Generate verification token using authentication_tokens table
+      const PasswordResetToken = require('../models/PasswordResetToken');
+      const verificationToken = await PasswordResetToken.create(user.id, 24); // 24 hours expiry
       
       // Send verification email
       const { sendVerificationEmail } = require('../utils/emailService');
@@ -1134,6 +1134,77 @@ router.post('/send-verification-email',
     } catch (error) {
       console.error('Error sending verification email:', error);
       throw new Error(`Failed to send verification email: ${error.message}`);
+    }
+  })
+);
+
+// Create new user without password (for wizard flow)
+router.post('/create-user-without-password',
+  validate(Joi.object({
+    firstName: Joi.string().min(1).max(100).required(),
+    lastName: Joi.string().min(1).max(100).required(),
+    email: Joi.string().email().required(),
+    mobileNumber: Joi.string().optional()
+  })),
+  asyncHandler(async (req, res) => {
+    const { firstName, lastName, email, mobileNumber } = req.body;
+    
+    // Check if email already exists
+    const existingUser = await User.findByEmail(email);
+    if (existingUser) {
+      throw validationError('Email already exists');
+    }
+    
+    // Get default user data
+    const defaultData = getDefaultUserData(UserRole.USER);
+    
+    // Create user without password (empty string to satisfy NOT NULL constraint)
+    const userData = {
+      email,
+      password: '', // Empty password - will be set during email verification
+      firstName,
+      lastName,
+      phone: mobileNumber || null,
+      role: defaultData.role,
+      isActive: defaultData.isActive,
+      isVerified: false, // Not verified yet
+      preferences: defaultData.preferences,
+    };
+    
+    const userId = await User.create(userData);
+    const user = await User.findById(userId);
+    
+    try {
+      // Generate verification token using authentication_tokens table
+      const PasswordResetToken = require('../models/PasswordResetToken');
+      const verificationToken = await PasswordResetToken.create(user.id, 24); // 24 hours expiry
+      
+      // Send verification email
+      const { sendVerificationEmail } = require('../utils/emailService');
+      const userName = user.getFullName() || user.email;
+      await sendVerificationEmail(user.email, verificationToken, userName);
+      
+      console.log(`Verification email sent to new user: ${user.email}`);
+      
+      res.json({
+        success: true,
+        message: 'User created successfully. Verification email sent.',
+        data: {
+          userId: user.id,
+          email: user.email
+        }
+      });
+    } catch (error) {
+      console.error('Error sending verification email:', error);
+      // Still return success even if email fails
+      res.json({
+        success: true,
+        message: 'User created successfully. Please request a new verification email if needed.',
+        data: {
+          userId: user.id,
+          email: user.email
+        }
+      });
     }
   })
 );
@@ -1177,9 +1248,10 @@ router.post('/setup-existing-account',
       await sendPasswordResetEmail(user.email, resetToken, userName);
       
       // Generate verification token and send verification email (if not already verified)
+      // Use authentication_tokens table for verification
       if (!user.isVerified) {
-        const EmailVerificationToken = require('../models/EmailVerificationToken');
-        const verificationToken = await EmailVerificationToken.create(user.id, 24); // 24 hours expiry
+        const PasswordResetToken = require('../models/PasswordResetToken');
+        const verificationToken = await PasswordResetToken.create(user.id, 24); // 24 hours expiry
         
         const { sendVerificationEmail } = require('../utils/emailService');
         await sendVerificationEmail(user.email, verificationToken, userName);
@@ -1206,9 +1278,9 @@ router.get('/verify-email',
   asyncHandler(async (req, res) => {
     const { token } = req.query;
     
-    // Find and validate the verification token
-    const EmailVerificationToken = require('../models/EmailVerificationToken');
-    const verificationToken = await EmailVerificationToken.findByToken(token);
+    // Find and validate the verification token using authentication_tokens table
+    const PasswordResetToken = require('../models/PasswordResetToken');
+    const verificationToken = await PasswordResetToken.findByToken(token);
     
     if (!verificationToken) {
       throw validationError('Invalid or expired verification token. Please request a new verification email.');
@@ -1230,6 +1302,9 @@ router.get('/verify-email',
       throw validationError('User not found');
     }
     
+    // Check if user needs to set password
+    const needsPassword = !user.password || user.password === '';
+    
     // Check if user is already verified
     if (user.isVerified) {
       // Mark token as used anyway
@@ -1237,7 +1312,8 @@ router.get('/verify-email',
       return res.json({
         success: true,
         message: 'Email is already verified',
-        alreadyVerified: true
+        alreadyVerified: true,
+        needsPassword: needsPassword
       });
     }
     
@@ -1247,11 +1323,92 @@ router.get('/verify-email',
     // Mark token as used
     await verificationToken.markAsUsed();
     
-    console.log(`Email verified for user: ${user.email}`);
+    console.log(`Email verified for user: ${user.email}, needsPassword: ${needsPassword}`);
     
     res.json({
       success: true,
-      message: 'Email verified successfully'
+      message: needsPassword ? 'Email verified. Please set your password.' : 'Email verified successfully',
+      needsPassword: needsPassword,
+      token: token // Return token so frontend can use it for password setup
+    });
+  })
+);
+
+// Set password during email verification (uses authentication_tokens table)
+router.post('/verify-email-set-password',
+  validate(Joi.object({
+    token: Joi.string().required(),
+    password: Joi.string().min(6).required(),
+    confirmPassword: Joi.string().valid(Joi.ref('password')).required()
+  })),
+  asyncHandler(async (req, res) => {
+    const { token, password } = req.body;
+    
+    // Find and validate the verification token using authentication_tokens table
+    const PasswordResetToken = require('../models/PasswordResetToken');
+    let verificationToken = await PasswordResetToken.findByToken(token);
+    
+    // Also check if token was recently used (within last hour) for password setup
+    if (!verificationToken) {
+      // Try to find recently used token
+      // Get table name dynamically
+      const tableName = await PasswordResetToken.getTableName();
+      try {
+        const [rows] = await pool.execute(
+          `SELECT * FROM ${tableName} 
+           WHERE token = ? AND expiresAt > DATE_SUB(NOW(), INTERVAL 1 HOUR)
+           ORDER BY createdAt DESC LIMIT 1`,
+          [token]
+        );
+        if (rows.length === 0) {
+          throw validationError('Invalid or expired verification token. Please request a new verification email.');
+        }
+        // Use the recently used token
+        verificationToken = new PasswordResetToken(rows[0]);
+      } catch (error) {
+        throw validationError('Invalid or expired verification token. Please request a new verification email.');
+      }
+    }
+    
+    // Get user
+    const user = await User.findById(verificationToken.userId);
+    if (!user) {
+      throw validationError('User not found');
+    }
+    
+    // Check if user already has a password
+    if (user.password && user.password !== '') {
+      throw validationError('Password has already been set for this account. Please login instead.');
+    }
+    
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 12);
+    
+    // Update user password and mark as verified
+    await user.update({ 
+      password: hashedPassword,
+      isVerified: true 
+    });
+    
+    // Mark token as used
+    await verificationToken.markAsUsed();
+    
+    console.log(`Password set for user: ${user.email}`);
+    
+    // Generate JWT token
+    const jwtToken = jwt.sign(
+      { userId: user.id, email: user.email, role: UserRole.USER },
+      process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production',
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    );
+    
+    res.json({
+      success: true,
+      message: 'Password set successfully. You can now login.',
+      data: {
+        user: user.toJSON(),
+        token: jwtToken
+      }
     });
   })
 );

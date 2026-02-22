@@ -56,20 +56,15 @@ export const ForgotPasswordPage = () => {
         {/* Forgot Password Card */}
         <Card className="p-8 backdrop-blur-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] shadow-2xl">
           <div className="space-y-6">
-            {/* Header */}
-            <div className="text-center space-y-2">
-              <h2 className="text-xl font-semibold text-foreground">
-                {emailSent ? "Check Your Email" : "Forgot Password"}
-              </h2>
-              <p className="text-muted-foreground text-sm">
-                {emailSent 
-                  ? "We've sent a password reset link to your email address"
-                  : "Enter your email address and we'll send you a link to reset your password"
-                }
-              </p>
-            </div>
-
             {!emailSent ? (
+              <>
+                {/* Header */}
+                <div className="text-center space-y-2">
+                  <h2 className="text-xl font-semibold text-foreground">Forgot Password</h2>
+                  <p className="text-muted-foreground text-sm">
+                    Enter your email address and we'll send you a link to reset your password
+                  </p>
+                </div>
               /* Forgot Password Form */
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Email Field */}
@@ -107,41 +102,82 @@ export const ForgotPasswordPage = () => {
                   )}
                 </Button>
               </form>
+              </>
             ) : (
               /* Email Sent Success Message */
-              <div className="space-y-4">
-                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-                  <div className="flex items-start gap-3">
-                    <Mail className="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5" />
-                    <div className="flex-1">
-                      <p className="text-sm text-green-800 dark:text-green-200 font-medium mb-1">
-                        Password reset email sent!
-                      </p>
-                      <p className="text-xs text-green-700 dark:text-green-300">
-                        We've sent a password reset link to <strong>{email}</strong>. 
-                        Please check your inbox and click the link to reset your password.
-                      </p>
+              <div className="space-y-6">
+                <div className="text-center space-y-4">
+                  <div className="flex justify-center">
+                    <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center">
+                      <Mail className="w-8 h-8 text-green-500" />
                     </div>
+                  </div>
+                  <div className="space-y-2">
+                    <h2 className="text-xl font-semibold text-foreground">Password Reset Email Sent!</h2>
+                    <p className="text-muted-foreground text-sm">
+                      We've sent a password reset link to your email address
+                    </p>
                   </div>
                 </div>
 
-                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                  <p className="text-xs text-blue-800 dark:text-blue-200">
-                    <strong>Note:</strong> The password reset link will expire in 1 hour. 
-                    If you don't see the email, please check your spam folder.
-                  </p>
+                <div className="bg-[var(--input-background)] border border-[var(--glass-border)] rounded-lg p-4 space-y-3">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Email Address</p>
+                    <p className="text-foreground font-medium">{email}</p>
+                  </div>
                 </div>
 
-                <Button 
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => {
-                    setEmailSent(false);
-                    setEmail("");
-                  }}
-                >
-                  Send Another Email
-                </Button>
+                <div className="space-y-3">
+                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                    <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
+                      <Mail className="w-4 h-4 text-blue-500" />
+                      What's Next?
+                    </h3>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li className="flex items-center gap-2">
+                        <span className="text-blue-500">1.</span>
+                        <span>Check your email inbox for a password reset link</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-blue-500">2.</span>
+                        <span><strong className="text-foreground">Password Reset Link:</strong> Click the link in the email to reset your password</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-blue-500">3.</span>
+                        <span>After resetting your password, you can log in to your account</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                    <p className="text-sm text-muted-foreground">
+                      <strong className="text-foreground">Note:</strong> If you don't see the email, please check your spam folder. 
+                      The link will expire in 1 hour.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => navigate('/system/login')}
+                    className="flex-1"
+                  >
+                    Go to Login
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="accent"
+                    onClick={() => {
+                      setEmailSent(false);
+                      setEmail("");
+                    }}
+                    className="flex-1 font-medium"
+                  >
+                    Send Another Email
+                  </Button>
+                </div>
               </div>
             )}
 

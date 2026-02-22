@@ -32,7 +32,10 @@ This directory contains essential database management scripts for the appointmen
 - **Description**: Checks if all required tables exist and verifies their structure
 
 ### `migrateAddPasswordResetTokens.js`
-- **Purpose**: Add password_reset_tokens table to existing database
+- **Purpose**: Rename password_reset_tokens table to authentication_tokens (for multiple auth token types)
+- **File**: `migrateRenamePasswordResetTokensToAuthenticationTokens.js`
+- **Usage**: `node scripts/migrateRenamePasswordResetTokensToAuthenticationTokens.js`
+- **Safety**: Safe for production - uses atomic RENAME TABLE operation, preserves all data and indexes
 - **Usage**: `node scripts/migrateAddPasswordResetTokens.js`
 - **Description**: Migration script to add the password reset tokens table for existing databases. Safe to run multiple times (checks if table exists first).
 
@@ -80,17 +83,20 @@ node scripts/verifyDatabase.js
 
 ## Migration Scripts
 
-### Adding Password Reset Functionality
-If you have an existing database and need to add password reset functionality:
+### Renaming Password Reset Tokens Table
+If you have an existing database with `password_reset_tokens` table and need to rename it to `authentication_tokens`:
 ```bash
-node scripts/migrateAddPasswordResetTokens.js
+node scripts/migrateRenamePasswordResetTokensToAuthenticationTokens.js
 ```
 
 This script will:
-- Check if the `password_reset_tokens` table already exists
-- Create the table if it doesn't exist
-- Verify the table was created successfully
+- Check if the `password_reset_tokens` table exists
+- Check if `authentication_tokens` table already exists
+- Rename the table using atomic RENAME TABLE operation (preserves all data, indexes, and foreign keys)
+- Verify the rename was successful
 - Safe to run multiple times (idempotent)
+
+**Note**: This migration is safe for production use. The RENAME TABLE operation in MySQL is atomic and preserves all data.
 
 ## Notes
 

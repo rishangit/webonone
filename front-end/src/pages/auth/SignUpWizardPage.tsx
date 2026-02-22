@@ -186,8 +186,25 @@ export const SignUpWizardPage = () => {
         setIsSettingUpAccount(false);
       }
     } else {
-      // New user - move to password step
-      setCurrentStep(5);
+      // New user - create user without password and send verification email
+      try {
+        setIsSettingUpAccount(true);
+        const emailValue = emailForm.getValues('email');
+        const mobileValue = mobileForm.getValues('mobileNumber');
+        await authService.createUserWithoutPassword(
+          emailValue,
+          data.firstName,
+          data.lastName,
+          mobileValue || undefined
+        );
+        
+        setSetupComplete(true);
+        setCurrentStep(6); // Move to summary step
+      } catch (error: any) {
+        toast.error(error.message || 'Failed to create account');
+      } finally {
+        setIsSettingUpAccount(false);
+      }
     }
   };
 
@@ -488,14 +505,9 @@ export const SignUpWizardPage = () => {
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                       Sending...
                     </div>
-                  ) : isExistingUser ? (
-                    <>
-                      <Mail className="w-4 h-4 mr-2" />
-                      Send Setup Links
-                    </>
                   ) : (
                     <>
-                      Continue
+                      Next
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </>
                   )}
@@ -596,9 +608,13 @@ export const SignUpWizardPage = () => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <h2 className="text-xl font-semibold text-foreground">Emails Sent Successfully!</h2>
+                  <h2 className="text-xl font-semibold text-foreground">
+                    {setupComplete && isExistingUser ? 'Emails Sent Successfully!' : 'Verification Email Sent!'}
+                  </h2>
                   <p className="text-muted-foreground text-sm">
-                    We've sent important links to your email address
+                    {setupComplete && isExistingUser 
+                      ? "We've sent important links to your email address"
+                      : "We've sent a verification link to your email address"}
                   </p>
                 </div>
               </div>
@@ -616,38 +632,38 @@ export const SignUpWizardPage = () => {
                     <Mail className="w-4 h-4 text-blue-500" />
                     What's Next?
                   </h3>
-                  {setupComplete ? (
+                  {setupComplete && isExistingUser ? (
                     <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-500 mt-1">1.</span>
+                      <li className="flex items-center gap-2">
+                        <span className="text-blue-500">1.</span>
                         <span>Check your email inbox for two important links</span>
                       </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-500 mt-1">2.</span>
-                        <span><strong className="text-foreground">Password Reset Link:</strong> Click to set or update your account password</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-500 mt-1">3.</span>
+                      <li className="flex items-center gap-2">
+                        <span className="text-blue-500">2.</span>
                         <span><strong className="text-foreground">Email Verification Link:</strong> Click to verify your email address</span>
                       </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-500 mt-1">4.</span>
+                      <li className="flex items-center gap-2">
+                        <span className="text-blue-500">3.</span>
                         <span>After completing both steps, you can log in to your account</span>
                       </li>
                     </ul>
                   ) : (
                     <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-500 mt-1">1.</span>
+                      <li className="flex items-center gap-2">
+                        <span className="text-blue-500">1.</span>
                         <span>Check your email inbox for a verification link</span>
                       </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-500 mt-1">2.</span>
+                      <li className="flex items-center gap-2">
+                        <span className="text-blue-500">2.</span>
                         <span><strong className="text-foreground">Email Verification Link:</strong> Click the link in the email to verify your email address</span>
                       </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-500 mt-1">3.</span>
-                        <span>After verifying your email, you can log in to your account</span>
+                      <li className="flex items-center gap-2">
+                        <span className="text-blue-500">3.</span>
+                        <span><strong className="text-foreground">Set Password:</strong> After clicking the verification link, you'll be asked to set your account password</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-blue-500">4.</span>
+                        <span>After setting your password, you can log in to your account</span>
                       </li>
                     </ul>
                   )}
@@ -655,8 +671,8 @@ export const SignUpWizardPage = () => {
 
                 <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
                   <p className="text-sm text-muted-foreground">
-                    <strong className="text-foreground">Note:</strong> If you don't see the emails, please check your spam folder. 
-                    The links will expire in 24 hours.
+                    <strong className="text-foreground">Note:</strong> If you don't see the {setupComplete && isExistingUser ? 'emails' : 'email'}, please check your spam folder. 
+                    The link will expire in 24 hours.
                   </p>
                 </div>
               </div>

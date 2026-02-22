@@ -413,6 +413,54 @@ class AuthService {
     }
   }
 
+  // Create user without password (for new user wizard flow)
+  static async createUserWithoutPassword(email: string, firstName: string, lastName: string, mobileNumber?: string): Promise<{ success: boolean; message: string; data: { userId: string; email: string } }> {
+    try {
+      const response = await fetch(apiEndpoints.auth.createUserWithoutPassword, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, firstName, lastName, mobileNumber }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to create user');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Create user without password error:', error);
+      throw error;
+    }
+  }
+
+  // Set password during email verification
+  static async verifyEmailSetPassword(token: string, password: string, confirmPassword: string): Promise<AuthResponse> {
+    try {
+      const response = await fetch(apiEndpoints.auth.verifyEmailSetPassword, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token, password, confirmPassword }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to set password');
+      }
+
+      return data.data;
+    } catch (error) {
+      console.error('Verify email set password error:', error);
+      throw error;
+    }
+  }
+
   // Setup existing account (update name, send password reset and verification emails)
   static async setupExistingAccount(userId: string, firstName: string, lastName: string, mobileNumber?: string): Promise<{ success: boolean; message: string }> {
     try {
@@ -454,6 +502,8 @@ export const authService = {
   checkUser: AuthService.checkUser,
   sendVerificationEmail: AuthService.sendVerificationEmail,
   verifyEmail: AuthService.verifyEmail,
+  verifyEmailSetPassword: AuthService.verifyEmailSetPassword,
+  createUserWithoutPassword: AuthService.createUserWithoutPassword,
   setupExistingAccount: AuthService.setupExistingAccount,
   impersonateUser: AuthService.impersonateUser,
   completeImpersonateWithRole: AuthService.completeImpersonateWithRole,

@@ -128,6 +128,8 @@ export const apiEndpoints = {
     checkUser: `${config.apiBaseUrl}/auth/check-user`,
     sendVerificationEmail: `${config.apiBaseUrl}/auth/send-verification-email`,
     verifyEmail: `${config.apiBaseUrl}/auth/verify-email`,
+    verifyEmailSetPassword: `${config.apiBaseUrl}/auth/verify-email-set-password`,
+    createUserWithoutPassword: `${config.apiBaseUrl}/auth/create-user-without-password`,
     setupExistingAccount: `${config.apiBaseUrl}/auth/setup-existing-account`,
     impersonate: (userId: string) => `${config.apiBaseUrl}/auth/impersonate/${userId}`,
     impersonateComplete: (userId: string) => `${config.apiBaseUrl}/auth/impersonate/${userId}/complete`,

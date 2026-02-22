@@ -437,38 +437,45 @@ const createTables = async () => {
     `);
 
     // Password Reset Tokens table
-    await pool.execute(`
-      CREATE TABLE IF NOT EXISTS password_reset_tokens (
-        id VARCHAR(10) PRIMARY KEY,
-        userId VARCHAR(10) NOT NULL,
-        token VARCHAR(255) UNIQUE NOT NULL,
-        expiresAt TIMESTAMP NOT NULL,
-        isUsed BOOLEAN DEFAULT FALSE,
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        INDEX idx_user (userId),
-        INDEX idx_token (token),
-        INDEX idx_expires (expiresAt),
-        INDEX idx_used (isUsed),
-        FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
-      )
+    // Authentication tokens table (used for password reset, email verification, and other auth tokens)
+    // Check if old table exists and rename it, otherwise create new table
+    const [oldTableExists] = await pool.execute(`
+      SELECT TABLE_NAME 
+      FROM INFORMATION_SCHEMA.TABLES 
+      WHERE TABLE_SCHEMA = DATABASE() 
+      AND TABLE_NAME = 'password_reset_tokens'
     `);
 
-    // Email verification tokens table
-    await pool.execute(`
-      CREATE TABLE IF NOT EXISTS email_verification_tokens (
-        id VARCHAR(10) PRIMARY KEY,
-        userId VARCHAR(10) NOT NULL,
-        token VARCHAR(255) UNIQUE NOT NULL,
-        expiresAt TIMESTAMP NOT NULL,
-        isUsed BOOLEAN DEFAULT FALSE,
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        INDEX idx_user (userId),
-        INDEX idx_token (token),
-        INDEX idx_expires (expiresAt),
-        INDEX idx_used (isUsed),
-        FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
-      )
+    const [newTableExists] = await pool.execute(`
+      SELECT TABLE_NAME 
+      FROM INFORMATION_SCHEMA.TABLES 
+      WHERE TABLE_SCHEMA = DATABASE() 
+      AND TABLE_NAME = 'authentication_tokens'
     `);
+
+    if (oldTableExists.length > 0 && newTableExists.length === 0) {
+      // Rename old table to new name
+      console.log('Renaming password_reset_tokens to authentication_tokens...');
+      await pool.execute(`RENAME TABLE password_reset_tokens TO authentication_tokens`);
+      console.log('Table renamed successfully');
+    } else if (newTableExists.length === 0) {
+      // Create new table
+      await pool.execute(`
+        CREATE TABLE IF NOT EXISTS authentication_tokens (
+          id VARCHAR(10) PRIMARY KEY,
+          userId VARCHAR(10) NOT NULL,
+          token VARCHAR(255) UNIQUE NOT NULL,
+          expiresAt TIMESTAMP NOT NULL,
+          isUsed BOOLEAN DEFAULT FALSE,
+          createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          INDEX idx_user (userId),
+          INDEX idx_token (token),
+          INDEX idx_expires (expiresAt),
+          INDEX idx_used (isUsed),
+          FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+        )
+      `);
+    }
 
     // Company Appointments table - using only IDs, duplicate data fields are nullable
     await pool.execute(`

@@ -76,6 +76,13 @@ import { ShowcasePage } from "./pages/showcase";
 import { useAppDispatch, useAppSelector } from "./store/hooks";
 import { loginSuccess, logout, refreshUserRequest } from "./store/slices/authSlice";
 
+// Redirect component that preserves query parameters
+const VerifyEmailRedirect = () => {
+  const location = useLocation();
+  const searchParams = location.search; // Preserves ?token=...
+  return <Navigate to={`/system/email-verify${searchParams}`} replace />;
+};
+
 // Wrapper component for website routes (no MainLayout)
 function WebsiteRouteWrapper({ children }: { children: React.ReactNode }) {
   const { user } = useAppSelector((state) => state.auth);
@@ -686,12 +693,22 @@ function App() {
             } 
           />
           <Route 
-            path="/system/verify-email" 
+            path="/system/email-verify" 
             element={
               isAuthenticated ? (
                 <Navigate to="/system/dashboard" replace />
               ) : (
                 <VerifyEmailPage />
+              )
+            } 
+          />
+          <Route 
+            path="/system/verify-email" 
+            element={
+              isAuthenticated ? (
+                <Navigate to="/system/dashboard" replace />
+              ) : (
+                <VerifyEmailRedirect />
               )
             } 
           />
