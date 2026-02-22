@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
 import { useIsMobile } from "../../components/ui/use-mobile";
@@ -26,6 +26,7 @@ export function MainLayout({
   onLogout
 }: MainLayoutProps) {
   const isMobile = useIsMobile();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const handlePageChange = (page: string) => {
     onPageChange(page);
@@ -34,10 +35,22 @@ export function MainLayout({
     }
   };
 
+  const handleMenuClick = () => {
+    if (isMobile) {
+      setSidebarOpen(!sidebarOpen);
+    } else {
+      // In desktop view, toggle collapsed state
+      setSidebarCollapsed(!sidebarCollapsed);
+    }
+  };
+
+  // Calculate sidebar width: 256px (w-64) when expanded, 80px when collapsed
+  const sidebarWidth = sidebarCollapsed ? 80 : 256;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:bg-gradient-to-br dark:from-gray-900 dark:via-black dark:to-gray-800">
       <Header 
-        onMenuClick={() => setSidebarOpen(!sidebarOpen)} 
+        onMenuClick={handleMenuClick} 
         onNavigate={handlePageChange}
         onLogout={onLogout}
         currentUser={currentUser}
@@ -50,11 +63,12 @@ export function MainLayout({
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
           currentUser={currentUser}
+          collapsed={!isMobile && sidebarCollapsed}
         />
         
         <div 
-          className="pb-8"
-          style={!isMobile ? { marginLeft: '256px', width: 'calc(100% - 256px)' } : { width: '100%' }}
+          className="pb-8 transition-all duration-300"
+          style={!isMobile ? { marginLeft: `${sidebarWidth}px`, width: `calc(100% - ${sidebarWidth}px)` } : { width: '100%' }}
         >
           {children}
         </div>

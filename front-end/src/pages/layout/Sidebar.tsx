@@ -5,6 +5,7 @@ import { User as UserType, UserRole } from "../../types/user";
 import { useState, useEffect } from "react";
 import { Icon } from "../../components/common/Icon";
 import { config } from "../../config/environment";
+import { Tooltip, TooltipTrigger, TooltipContent } from "../../components/ui/tooltip";
 
 const getNavigationItems = (role: UserRole) => {
   const baseItems = [
@@ -85,9 +86,10 @@ interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
   currentUser: UserType | null;
+  collapsed?: boolean;
 }
 
-export function Sidebar({ currentPage, onPageChange, isOpen, onClose, currentUser }: SidebarProps) {
+export function Sidebar({ currentPage, onPageChange, isOpen, onClose: _onClose, currentUser, collapsed = false }: SidebarProps) {
   const isMobile = useIsMobile();
   const navigationItems = getNavigationItems(currentUser?.role ?? UserRole.USER);
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
@@ -109,19 +111,22 @@ export function Sidebar({ currentPage, onPageChange, isOpen, onClose, currentUse
     }
   }, [currentPage, navigationItems, openSubmenu]);
 
+  const sidebarWidth = collapsed ? 'w-20' : 'w-64';
+  const isCollapsed = !isMobile && collapsed;
+
   return (
     <div className={`
       ${isMobile 
         ? `fixed top-16 left-0 bottom-0 z-40 w-64 transform transition-transform duration-300 ease-in-out ${
             isOpen ? 'translate-x-0' : '-translate-x-full'
           }` 
-        : 'fixed top-16 left-0 bottom-0 w-64 z-40'
+        : `fixed top-16 left-0 bottom-0 z-40 ${sidebarWidth} transition-all duration-300`
       } 
       backdrop-blur-xl bg-sidebar border-r border-sidebar-border flex flex-col overflow-hidden
     `}>
-      <div className={`pt-3 ${isMobile ? 'p-2' : 'p-6'} flex-1 overflow-y-auto custom-scrollbar`}>
+      <div className={`pt-3 ${isMobile ? 'p-2' : 'p-4'} flex-1 overflow-y-auto custom-scrollbar flex flex-col`}>
         {/* Navigation Menu */}
-        <nav className="space-y-2">
+        <nav className="space-y-2 flex-1">
           {navigationItems.map((item, index) => {
             const ItemIcon = item.icon;
             const itemAny = item as any;
@@ -131,6 +136,38 @@ export function Sidebar({ currentPage, onPageChange, isOpen, onClose, currentUse
             if (hasSubmenu) {
               const submenu = (item as any).submenu;
               const defaultSubmenuId = submenu && submenu.length > 0 ? submenu[0].id : null;
+              
+              // When collapsed, don't show submenu - just navigate to default item
+              if (isCollapsed) {
+                const buttonContent = (
+                  <Button
+                    variant="ghost"
+                    className={`w-full justify-center px-0 gap-3 h-11 transition-all duration-200 ${
+                      isActive 
+                        ? "bg-[var(--accent-bg)] text-[var(--accent-text)] border border-[var(--accent-border)] shadow-lg shadow-[var(--accent-primary)]/10" 
+                        : "text-sidebar-foreground hover:bg-[var(--accent-bg)] hover:text-[var(--accent-text)] hover:border hover:border-[var(--accent-border)] hover:shadow-md hover:shadow-[var(--accent-primary)]/20"
+                    }`}
+                    onClick={() => {
+                      if (defaultSubmenuId) {
+                        onPageChange(defaultSubmenuId);
+                      }
+                    }}
+                  >
+                    <Icon icon={ItemIcon} size="md" />
+                  </Button>
+                );
+
+                return (
+                  <Tooltip key={index}>
+                    <TooltipTrigger asChild>
+                      {buttonContent}
+                    </TooltipTrigger>
+                    <TooltipContent side="right">
+                      {item.label}
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              }
               
               return (
                 <div key={index} className="relative">
@@ -188,11 +225,11 @@ export function Sidebar({ currentPage, onPageChange, isOpen, onClose, currentUse
               );
             }
             
-            return (
+            const buttonContent = (
               <Button
                 key={index}
                 variant="ghost"
-                className={`w-full justify-start gap-3 h-11 transition-all duration-200 ${
+                className={`w-full ${isCollapsed ? 'justify-center px-0' : 'justify-start'} gap-3 h-11 transition-all duration-200 ${
                   isActive 
                     ? "bg-[var(--accent-bg)] text-[var(--accent-text)] border border-[var(--accent-border)] shadow-lg shadow-[var(--accent-primary)]/10" 
                     : "text-sidebar-foreground hover:bg-[var(--accent-bg)] hover:text-[var(--accent-text)] hover:border hover:border-[var(--accent-border)] hover:shadow-md hover:shadow-[var(--accent-primary)]/20"
@@ -200,35 +237,31 @@ export function Sidebar({ currentPage, onPageChange, isOpen, onClose, currentUse
                 onClick={() => onPageChange(item.id)}
               >
                 <Icon icon={ItemIcon} size="md" />
-                {item.label}
+                {!isCollapsed && item.label}
               </Button>
             );
+
+            if (isCollapsed) {
+              return (
+                <Tooltip key={index}>
+                  <TooltipTrigger asChild>
+                    {buttonContent}
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    {item.label}
+                  </TooltipContent>
+                </Tooltip>
+              );
+            }
+
+            return buttonContent;
           })}
         </nav>
 
-        {/* Quick Stats Card */}
-        <div className="mt-8 p-4 rounded-xl bg-sidebar-accent backdrop-blur-sm border border-sidebar-border">
-          <h3 className="font-medium text-sidebar-foreground mb-3">Today's Stats</h3>
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Total Appointments</span>
-              <span className="font-medium text-[var(--accent-text)]">12</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Completed</span>
-              <span className="font-medium text-green-400">8</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Pending</span>
-              <span className="font-medium text-[var(--accent-text)]">4</span>
-            </div>
-          </div>
-        </div>
-
-        {/* App Version */}
-        <div className={`mt-8 py-2`}>
-          <p className="text-xs text-muted-foreground text-center">
-            Version {config.appVersion}
+        {/* App Version - Always at bottom */}
+        <div className={`mt-auto py-2 ${isCollapsed ? 'px-2' : ''}`}>
+          <p className={`text-xs text-muted-foreground ${isCollapsed ? 'text-center' : 'text-center'}`}>
+            {isCollapsed ? `v${config.appVersion}` : `Version ${config.appVersion}`}
           </p>
         </div>
       </div>
