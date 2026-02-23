@@ -31,6 +31,28 @@ This directory contains essential database management scripts for the appointmen
 - **Usage**: `node scripts/verifyDatabase.js`
 - **Description**: Checks if all required tables exist and verifies their structure
 
+### `migrateToUnifiedEntityTags.js`
+- **Purpose**: Migrate tag data from separate tables to unified entity_tags table
+- **Usage**: `node scripts/migrateToUnifiedEntityTags.js`
+- **Safety**: Safe for production - idempotent, checks for existing records before inserting
+- **Description**: Migrates tag relationships from old tables (company_tags, product_tags, service_tags, space_tags, company_product_tags) to the new unified entity_tags table.
+- **What it does**:
+  - Creates entity_tags table if it doesn't exist
+  - Migrates data from all old tag tables
+  - Skips records that already exist (safe to run multiple times)
+  - Preserves old tables for backward compatibility (until you run migrateDropOldTagTables.js)
+
+### `migrateDropOldTagTables.js`
+- **Purpose**: Remove old tag tables after migration to unified entity_tags
+- **Usage**: `node scripts/migrateDropOldTagTables.js`
+- **Safety**: Requires confirmation - permanently deletes old tag tables
+- **Description**: Drops the old tag junction tables (company_tags, product_tags, service_tags, space_tags, company_product_tags) after migration is complete and verified.
+- **When to run**: Only after:
+  1. Migration to entity_tags has been completed successfully
+  2. All code has been updated to use entity_tags
+  3. You have verified that entity_tags contains all the data
+  4. You have a database backup
+
 ### `migrateAddPasswordResetTokens.js`
 - **Purpose**: Rename password_reset_tokens table to authentication_tokens (for multiple auth token types)
 - **File**: `migrateRenamePasswordResetTokensToAuthenticationTokens.js`
@@ -82,6 +104,21 @@ node scripts/verifyDatabase.js
 ```
 
 ## Migration Scripts
+
+### Migrating to Unified Entity Tags
+If you have an existing database with separate tag tables and need to migrate to the unified entity_tags structure:
+```bash
+node scripts/migrateToUnifiedEntityTags.js
+```
+
+This script will:
+- Create the entity_tags table if it doesn't exist
+- Migrate data from company_tags, product_tags, service_tags, space_tags, and company_product_tags
+- Skip records that already exist (idempotent - safe to run multiple times)
+- Preserve old tables for backward compatibility
+- Provide a detailed migration summary
+
+**Note**: This migration is safe for production use. Old tag tables are preserved during the transition period for backward compatibility.
 
 ### Renaming Password Reset Tokens Table
 If you have an existing database with `password_reset_tokens` table and need to rename it to `authentication_tokens`:

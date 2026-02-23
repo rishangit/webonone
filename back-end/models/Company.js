@@ -338,87 +338,34 @@ class Company {
   // Tag management methods
   static async getTags(companyId) {
     try {
-      const [rows] = await pool.execute(
-        `SELECT t.* FROM tags t
-         INNER JOIN company_tags ct ON t.id = ct.tagId
-         WHERE ct.companyId = ?
-         ORDER BY t.name`,
-        [companyId]
-      );
-      return rows;
+      const { getEntityTags } = require('../utils/entityTags');
+      const { EntityType } = require('../constants/entityType');
+      return await getEntityTags(EntityType.COMPANY, companyId);
     } catch (error) {
       throw new Error(`Error getting company tags: ${error.message}`);
     }
   }
 
   static async setTags(companyId, tagIds) {
-    const connection = await pool.getConnection();
-    const Tag = require('./Tag');
-    
     try {
-      console.log(`[setTags] Starting transaction for companyId: ${companyId}, tagIds:`, tagIds);
-      await connection.beginTransaction();
+      const { setEntityTags, updateTagUsageCounts } = require('../utils/entityTags');
+      const { EntityType } = require('../constants/entityType');
       
-      // Get old tags for usage count decrement (before deleting)
-      const [oldTags] = await connection.execute(
-        'SELECT tagId FROM company_tags WHERE companyId = ?',
-        [companyId]
-      );
-      console.log(`[setTags] Found ${oldTags.length} existing tags`);
+      console.log(`[Company.setTags] Starting for companyId: ${companyId}, tagIds:`, tagIds);
       
-      const oldTagIds = oldTags.map(t => t.tagId);
+      // Set tags in unified entity_tags table
+      const result = await setEntityTags(EntityType.COMPANY, companyId, tagIds);
       
-      // Remove existing tags
-      await connection.execute('DELETE FROM company_tags WHERE companyId = ?', [companyId]);
-      console.log(`[setTags] Deleted existing tags`);
+      // Update usage counts asynchronously (non-blocking)
+      updateTagUsageCounts(result.oldTagIds, result.newTagIds).catch(err => {
+        console.error(`[Company.setTags] Background tag usage count update failed:`, err.message);
+      });
       
-      // Add new tags
-      if (tagIds && tagIds.length > 0) {
-        const values = tagIds.map(tagId => [nanoid(10), companyId, tagId]);
-        const placeholders = values.map(() => '(?, ?, ?)').join(', ');
-        console.log(`[setTags] Inserting tags:`, values);
-        const [result] = await connection.execute(
-          `INSERT INTO company_tags (id, companyId, tagId) VALUES ${placeholders}`,
-          values.flat()
-        );
-        console.log(`[setTags] Inserted ${result.affectedRows} tag(s)`);
-      }
-      
-      // Commit transaction first - this releases locks
-      await connection.commit();
-      console.log(`[setTags] Transaction committed successfully`);
-      
-      // Update usage counts OUTSIDE the transaction to avoid lock conflicts
-      // This is safe because the critical data (company_tags) is already saved
-      try {
-        // Decrement usage count for removed tags
-        for (const oldTagId of oldTagIds) {
-          if (!tagIds || !tagIds.includes(oldTagId)) {
-            await Tag.decrementUsageCount(oldTagId);
-          }
-        }
-        
-        // Increment usage count for new tags
-        if (tagIds && tagIds.length > 0) {
-          for (const tagId of tagIds) {
-            if (!oldTagIds.includes(tagId)) {
-              await Tag.incrementUsageCount(tagId);
-            }
-          }
-        }
-        console.log(`[setTags] Usage counts updated successfully`);
-      } catch (usageError) {
-        // Non-critical error - log but don't fail
-        console.error(`[setTags] Error updating usage counts (non-critical):`, usageError.message);
-      }
-      
+      console.log(`[Company.setTags] Completed successfully`);
       return true;
     } catch (error) {
-      await connection.rollback();
-      console.error(`[setTags] Error occurred, rolling back:`, error);
+      console.error(`[Company.setTags] Error occurred:`, error);
       throw new Error(`Error setting company tags: ${error.message}`);
-    } finally {
-      connection.release();
     }
   }
 }

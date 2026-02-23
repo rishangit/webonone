@@ -246,87 +246,34 @@ class Product {
   // Tag management methods
   static async getTags(productId) {
     try {
-      const [rows] = await pool.execute(
-        `SELECT t.* FROM tags t
-         INNER JOIN product_tags pt ON t.id = pt.tagId
-         WHERE pt.productId = ?
-         ORDER BY t.name`,
-        [productId]
-      );
-      return rows;
+      const { getEntityTags } = require('../utils/entityTags');
+      const { EntityType } = require('../constants/entityType');
+      return await getEntityTags(EntityType.PRODUCT, productId);
     } catch (error) {
       throw new Error(`Error getting product tags: ${error.message}`);
     }
   }
 
   static async setTags(productId, tagIds) {
-    const connection = await pool.getConnection();
-    const Tag = require('./Tag');
-    
     try {
-      console.log(`[Product.setTags] Starting transaction for productId: ${productId}, tagIds:`, tagIds);
-      await connection.beginTransaction();
+      const { setEntityTags, updateTagUsageCounts } = require('../utils/entityTags');
+      const { EntityType } = require('../constants/entityType');
       
-      // Get old tags for usage count decrement (before deleting)
-      const [oldTags] = await connection.execute(
-          'SELECT tagId FROM product_tags WHERE productId = ?',
-          [productId]
-        );
-      console.log(`[Product.setTags] Found ${oldTags.length} existing tags`);
+      console.log(`[Product.setTags] Starting for productId: ${productId}, tagIds:`, tagIds);
       
-      const oldTagIds = oldTags.map(t => t.tagId);
-        
-        // Remove existing tags
-      await connection.execute('DELETE FROM product_tags WHERE productId = ?', [productId]);
-      console.log(`[Product.setTags] Deleted existing tags`);
-        
-        // Add new tags
-        if (tagIds && tagIds.length > 0) {
-          const values = tagIds.map(tagId => [nanoid(10), productId, tagId]);
-          const placeholders = values.map(() => '(?, ?, ?)').join(', ');
-        console.log(`[Product.setTags] Inserting tags:`, values);
-        const [result] = await connection.execute(
-            `INSERT INTO product_tags (id, productId, tagId) VALUES ${placeholders}`,
-            values.flat()
-          );
-        console.log(`[Product.setTags] Inserted ${result.affectedRows} tag(s)`);
-      }
+      // Set tags in unified entity_tags table
+      const result = await setEntityTags(EntityType.PRODUCT, productId, tagIds);
       
-      // Commit transaction first - this releases locks
-      await connection.commit();
-      console.log(`[Product.setTags] Transaction committed successfully`);
+      // Update usage counts asynchronously (non-blocking)
+      updateTagUsageCounts(result.oldTagIds, result.newTagIds).catch(err => {
+        console.error(`[Product.setTags] Background tag usage count update failed:`, err.message);
+      });
       
-      // Update usage counts OUTSIDE the transaction to avoid lock conflicts
-      // This is safe because the critical data (product_tags) is already saved
-      try {
-        // Decrement usage count for removed tags
-        for (const oldTagId of oldTagIds) {
-          if (!tagIds || !tagIds.includes(oldTagId)) {
-            await Tag.decrementUsageCount(oldTagId);
-          }
-        }
-          
-          // Increment usage count for new tags
-        if (tagIds && tagIds.length > 0) {
-          for (const tagId of tagIds) {
-            if (!oldTagIds.includes(tagId)) {
-            await Tag.incrementUsageCount(tagId);
-          }
-        }
-        }
-        console.log(`[Product.setTags] Usage counts updated successfully`);
-      } catch (usageError) {
-        // Non-critical error - log but don't fail
-        console.error(`[Product.setTags] Error updating usage counts (non-critical):`, usageError.message);
-      }
-      
+      console.log(`[Product.setTags] Completed successfully`);
       return true;
     } catch (error) {
-      await connection.rollback();
-      console.error(`[Product.setTags] Error occurred, rolling back:`, error);
+      console.error(`[Product.setTags] Error occurred:`, error);
       throw new Error(`Error setting product tags: ${error.message}`);
-    } finally {
-      connection.release();
     }
   }
 }

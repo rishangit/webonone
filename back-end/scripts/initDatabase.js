@@ -296,35 +296,31 @@ const createTables = async () => {
       )
     `);
 
-    // Company Tags junction table
+    // Unified Entity Tags table (replaces separate tag junction tables)
+    // This table can store tag relationships for all entity types
     await pool.execute(`
-      CREATE TABLE IF NOT EXISTS company_tags (
+      CREATE TABLE IF NOT EXISTS entity_tags (
         id VARCHAR(10) PRIMARY KEY,
-        companyId VARCHAR(10) NOT NULL,
+        entityType ENUM('appointment', 'staff', 'space', 'service', 'product', 'user', 'company', 'company_product') NOT NULL,
+        entityId VARCHAR(50) NOT NULL,
         tagId VARCHAR(10) NOT NULL,
         createdDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE KEY unique_company_tag (companyId, tagId),
-        INDEX idx_company (companyId),
+        UNIQUE KEY unique_entity_tag (entityType, entityId, tagId),
+        INDEX idx_entity_type (entityType),
+        INDEX idx_entity_id (entityId),
         INDEX idx_tag (tagId),
-        FOREIGN KEY (companyId) REFERENCES companies(id) ON DELETE CASCADE,
+        INDEX idx_entity_type_id (entityType, entityId),
         FOREIGN KEY (tagId) REFERENCES tags(id) ON DELETE CASCADE
-      )
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
     `);
 
-    // Product Tags junction table
-    await pool.execute(`
-      CREATE TABLE IF NOT EXISTS product_tags (
-        id VARCHAR(10) PRIMARY KEY,
-        productId VARCHAR(10) NOT NULL,
-        tagId VARCHAR(10) NOT NULL,
-        createdDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE KEY unique_product_tag (productId, tagId),
-        INDEX idx_product (productId),
-        INDEX idx_tag (tagId),
-        FOREIGN KEY (productId) REFERENCES products(id) ON DELETE CASCADE,
-        FOREIGN KEY (tagId) REFERENCES tags(id) ON DELETE CASCADE
-      )
-    `);
+    // Old tag tables removed - now using unified entity_tags table
+    // The following tables are no longer created:
+    // - company_tags (migrated to entity_tags)
+    // - product_tags (migrated to entity_tags)
+    // - service_tags (migrated to entity_tags)
+    // - space_tags (migrated to entity_tags)
+    // - company_product_tags (migrated to entity_tags)
 
     // Units of Measure table
     await pool.execute(`
@@ -421,20 +417,7 @@ const createTables = async () => {
       )
     `);
 
-    // Company Product Tags junction table
-    await pool.execute(`
-      CREATE TABLE IF NOT EXISTS company_product_tags (
-        id VARCHAR(10) PRIMARY KEY,
-        companyProductId VARCHAR(10) NOT NULL,
-        tagId VARCHAR(10) NOT NULL,
-        createdDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE KEY unique_company_product_tag (companyProductId, tagId),
-        INDEX idx_company_product (companyProductId),
-        INDEX idx_tag (tagId),
-        FOREIGN KEY (companyProductId) REFERENCES company_products(id) ON DELETE CASCADE,
-        FOREIGN KEY (tagId) REFERENCES tags(id) ON DELETE CASCADE
-      )
-    `);
+    // Company Product Tags table removed - now using unified entity_tags table
 
     // Authentication tokens table (used for password reset, email verification, and other auth tokens)
     await pool.execute(`
@@ -558,7 +541,7 @@ const dropTables = async () => {
     console.log('Dropping database tables...');
     
     const tables = [
-      'product_tags', 'company_tags', 'tags',
+      'entity_tags', 'tags', // entity_tags is the unified tagging table
       'products', 'sales', 'notifications', 'appointments', 'company_appointments', 'services', 
       'spaces', 'companies', 'company_categories', 'product_categories', 'backlog_items', 'users'
     ];

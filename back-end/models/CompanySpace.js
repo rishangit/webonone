@@ -322,80 +322,30 @@ class CompanySpace {
   // Tag management methods
   static async getTags(spaceId) {
     try {
-      const [rows] = await pool.execute(
-        `SELECT t.* FROM tags t
-         INNER JOIN space_tags st ON t.id = st.tagId
-         WHERE st.spaceId = ?
-         ORDER BY t.name`,
-        [spaceId]
-      );
-      return rows;
+      const { getEntityTags } = require('../utils/entityTags');
+      const { EntityType } = require('../constants/entityType');
+      return await getEntityTags(EntityType.SPACE, spaceId);
     } catch (error) {
       throw new Error(`Error getting space tags: ${error.message}`);
     }
   }
 
   static async setTags(spaceId, tagIds) {
-    const connection = await pool.getConnection();
-    const Tag = require('./Tag');
-    
     try {
-      await connection.beginTransaction();
+      const { setEntityTags, updateTagUsageCounts } = require('../utils/entityTags');
+      const { EntityType } = require('../constants/entityType');
       
-      // Get old tags for usage count decrement (before deleting)
-      const [oldTags] = await connection.execute(
-        'SELECT tagId FROM space_tags WHERE spaceId = ?',
-        [spaceId]
-      );
+      // Set tags in unified entity_tags table
+      const result = await setEntityTags(EntityType.SPACE, spaceId, tagIds);
       
-      const oldTagIds = oldTags.map(t => t.tagId);
-      
-      // Remove existing tags
-      await connection.execute('DELETE FROM space_tags WHERE spaceId = ?', [spaceId]);
-      
-      // Add new tags
-      if (tagIds && tagIds.length > 0) {
-        const values = tagIds.map(tagId => [nanoid(10), spaceId, tagId]);
-        const placeholders = values.map(() => '(?, ?, ?)').join(', ');
-        
-        await connection.execute(
-          `INSERT INTO space_tags (id, spaceId, tagId) VALUES ${placeholders}`,
-          values.flat()
-        );
-      }
-      
-      // Commit transaction first - this releases locks
-      await connection.commit();
-      
-      // Update usage counts OUTSIDE the transaction to avoid lock conflicts
-      // This is safe because the critical data (space_tags) is already saved
-      try {
-        // Decrement usage count for removed tags
-        for (const oldTagId of oldTagIds) {
-          if (!tagIds || !tagIds.includes(oldTagId)) {
-            await Tag.decrementUsageCount(oldTagId);
-          }
-        }
-        
-        // Increment usage count for new tags
-        if (tagIds && tagIds.length > 0) {
-          for (const tagId of tagIds) {
-            if (!oldTagIds.includes(tagId)) {
-              await Tag.incrementUsageCount(tagId);
-            }
-          }
-        }
-      } catch (usageError) {
-        // Non-critical error - log but don't fail
-        console.error(`Error updating tag usage counts (non-critical):`, usageError.message);
-      }
+      // Update usage counts asynchronously (non-blocking)
+      updateTagUsageCounts(result.oldTagIds, result.newTagIds).catch(err => {
+        console.error(`[CompanySpace.setTags] Background tag usage count update failed:`, err.message);
+      });
       
       return true;
     } catch (error) {
-      await connection.rollback();
       throw new Error(`Error setting space tags: ${error.message}`);
-    } finally {
-      connection.release();
     }
   }
 }

@@ -421,65 +421,33 @@ class CompanyService {
   // Tag management methods
   static async getTags(serviceId) {
     try {
-      const [rows] = await pool.execute(
-        `SELECT t.* FROM tags t
-         INNER JOIN service_tags st ON t.id = st.tagId
-         WHERE st.serviceId = ?
-         ORDER BY t.name`,
-        [serviceId]
-      );
-      return rows;
+      const { getEntityTags } = require('../utils/entityTags');
+      const { EntityType } = require('../constants/entityType');
+      return await getEntityTags(EntityType.SERVICE, serviceId);
     } catch (error) {
       throw new Error(`Error getting service tags: ${error.message}`);
     }
   }
 
   static async setTags(serviceId, tagIds, connection = null) {
-    const useExternalConnection = connection !== null;
-    const conn = connection || await pool.getConnection();
-    
     try {
-      if (!useExternalConnection) {
-        await conn.beginTransaction();
-      }
+      const { setEntityTags, updateTagUsageCounts } = require('../utils/entityTags');
+      const { EntityType } = require('../constants/entityType');
       
-      // Get old tags for usage count decrement (before deleting)
-      const [oldTags] = await conn.execute(
-        'SELECT tagId FROM service_tags WHERE serviceId = ?',
-        [serviceId]
-      );
+      // Set tags in unified entity_tags table (use provided connection if available)
+      const result = await setEntityTags(EntityType.SERVICE, serviceId, tagIds, connection);
       
-      const oldTagIds = oldTags.map(t => t.tagId);
-      
-      // Remove existing tags
-      await conn.execute('DELETE FROM service_tags WHERE serviceId = ?', [serviceId]);
-      
-      // Add new tags
-      if (tagIds && tagIds.length > 0) {
-        const values = tagIds.map(tagId => [nanoid(10), serviceId, tagId]);
-        const placeholders = values.map(() => '(?, ?, ?)').join(', ');
-        
-        await conn.execute(
-          `INSERT INTO service_tags (id, serviceId, tagId) VALUES ${placeholders}`,
-          values.flat()
-        );
-      }
-      
-      if (!useExternalConnection) {
-        await conn.commit();
+      // Update usage counts asynchronously (non-blocking) if not in transaction
+      if (!connection) {
+        updateTagUsageCounts(result.oldTagIds, result.newTagIds).catch(err => {
+          console.error(`[CompanyService.setTags] Background tag usage count update failed:`, err.message);
+        });
       }
       
       // Return old and new tag IDs for async usage count update (don't update here)
-      return { oldTagIds, newTagIds: tagIds || [] };
+      return { oldTagIds: result.oldTagIds, newTagIds: result.newTagIds };
     } catch (error) {
-      if (!useExternalConnection) {
-        await conn.rollback();
-      }
       throw new Error(`Error setting service tags: ${error.message}`);
-    } finally {
-      if (!useExternalConnection) {
-        conn.release();
-      }
     }
   }
 

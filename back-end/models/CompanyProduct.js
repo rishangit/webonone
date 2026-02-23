@@ -345,49 +345,30 @@ class CompanyProduct {
   // Tag management methods
   static async getTags(companyProductId) {
     try {
-      const [rows] = await pool.execute(
-        `SELECT t.* FROM tags t
-         INNER JOIN company_product_tags cpt ON t.id = cpt.tagId
-         WHERE cpt.companyProductId = ?
-         ORDER BY t.name`,
-        [companyProductId]
-      );
-      return rows;
+      const { getEntityTags } = require('../utils/entityTags');
+      const { EntityType } = require('../constants/entityType');
+      return await getEntityTags(EntityType.COMPANY_PRODUCT, companyProductId);
     } catch (error) {
       throw new Error(`Error getting company product tags: ${error.message}`);
     }
   }
 
   static async setTags(companyProductId, tagIds) {
-    const connection = await pool.getConnection();
-    
     try {
-      await connection.beginTransaction();
+      const { setEntityTags, updateTagUsageCounts } = require('../utils/entityTags');
+      const { EntityType } = require('../constants/entityType');
       
-      // Remove existing tags
-      await connection.execute(
-        'DELETE FROM company_product_tags WHERE companyProductId = ?',
-        [companyProductId]
-      );
+      // Set tags in unified entity_tags table
+      const result = await setEntityTags(EntityType.COMPANY_PRODUCT, companyProductId, tagIds);
       
-      // Add new tags
-      if (tagIds && tagIds.length > 0) {
-        const values = tagIds.map(tagId => [nanoid(10), companyProductId, tagId]);
-        const placeholders = values.map(() => '(?, ?, ?)').join(', ');
-        
-        await connection.execute(
-          `INSERT INTO company_product_tags (id, companyProductId, tagId) VALUES ${placeholders}`,
-          values.flat()
-        );
-      }
+      // Update usage counts asynchronously (non-blocking)
+      updateTagUsageCounts(result.oldTagIds, result.newTagIds).catch(err => {
+        console.error(`[CompanyProduct.setTags] Background tag usage count update failed:`, err.message);
+      });
       
-      await connection.commit();
       return true;
     } catch (error) {
-      await connection.rollback();
       throw new Error(`Error setting company product tags: ${error.message}`);
-    } finally {
-      connection.release();
     }
   }
 }
