@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useParams, useNavigate } from "react-router-dom";
-import { Building, Camera, Upload, X, Phone, MapPin, Edit, Save, Check, AlertCircle, Settings, Plus, Globe } from "lucide-react";
+import { Building, Camera, Upload, X, Phone, MapPin, Edit, Save, Check, AlertCircle, Settings, Plus, Globe, Calendar, Users, Wrench, Package, Square } from "lucide-react";
 import { GoogleMapComponent } from "../../components/GoogleMapComponent";
 import { Card } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
@@ -115,7 +115,8 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
       companySize: undefined,
       logo: undefined,
       contactPerson: undefined,
-      currencyId: undefined
+      currencyId: undefined,
+      selectedEntities: undefined
     },
     mode: 'onBlur',
     reValidateMode: 'onChange'
@@ -228,7 +229,8 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
         latitude: company?.latitude !== undefined && company?.latitude !== null ? company.latitude : undefined,
         longitude: company?.longitude !== undefined && company?.longitude !== null ? company.longitude : undefined,
         logo: company?.logo || undefined,
-        currencyId: (company as any)?.currencyId || undefined
+        currencyId: (company as any)?.currencyId || undefined,
+        selectedEntities: (company as any)?.selectedEntities || undefined
       });
     }
   }, [reduxCompany, currentCompany, reset]);
@@ -258,7 +260,8 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
         companySize: data.companySize && data.companySize.trim() !== "" ? data.companySize : null,
         logo: data.logo || null,
         contactPerson: data.contactPerson || null,
-        currencyId: data.currencyId || null
+        currencyId: data.currencyId || null,
+        selectedEntities: data.selectedEntities || null
       };
 
       dispatch(updateCompanyRequest({ id: companyId, data: updateData }));
@@ -885,6 +888,133 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
                   })()}
                 </p>
               </div>
+            </div>
+          </Card>
+
+          {/* Entity Selection */}
+          <Card className="p-6 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]">
+            <div className="flex items-center gap-2 mb-4">
+              <Settings className="w-5 h-5 text-[var(--accent-text)]" />
+              <h3 className="font-semibold text-foreground">Company Entities</h3>
+            </div>
+
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Select which entities your company needs.
+              </p>
+
+              {isEditing ? (
+                <Controller
+                  name="selectedEntities"
+                  control={control}
+                  render={({ field }) => {
+                    const selectedEntities = field.value || [];
+                    const entityOptions = [
+                      { value: 'appointment', label: 'Appointments', icon: Calendar },
+                      { value: 'staff', label: 'Staff', icon: Users },
+                      { value: 'service', label: 'Services', icon: Wrench },
+                      { value: 'product', label: 'Products', icon: Package },
+                      { value: 'space', label: 'Spaces', icon: Square }
+                    ];
+
+                    const toggleEntity = (entityValue: string) => {
+                      const current = selectedEntities as string[];
+                      const newSelection = current.includes(entityValue)
+                        ? current.filter(e => e !== entityValue)
+                        : [...current, entityValue];
+                      field.onChange(newSelection.length > 0 ? newSelection : null);
+                    };
+
+                    return (
+                      <div className="space-y-2">
+                        {entityOptions.map((option) => {
+                          const Icon = option.icon;
+                          const isSelected = selectedEntities.includes(option.value);
+                          return (
+                            <div
+                              key={option.value}
+                              onClick={() => toggleEntity(option.value)}
+                              className={`
+                                flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all
+                                ${isSelected
+                                  ? 'border-[var(--accent-primary)] bg-[var(--accent-bg)] text-[var(--accent-text)]'
+                                  : 'border-[var(--glass-border)] bg-[var(--input-background)] hover:border-[var(--accent-border)]'
+                                }
+                              `}
+                            >
+                              <div className={`
+                                flex items-center justify-center w-8 h-8 rounded-lg
+                                ${isSelected
+                                  ? 'bg-[var(--accent-primary)] text-white'
+                                  : 'bg-[var(--glass-bg)] text-muted-foreground'
+                                }
+                              `}>
+                                <Icon className="w-4 h-4" />
+                              </div>
+                              <div className="flex-1">
+                                <p className="font-medium text-sm text-foreground">{option.label}</p>
+                              </div>
+                              {isSelected && (
+                                <Check className="w-4 h-4 text-[var(--accent-primary)]" />
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  }}
+                />
+              ) : (
+                <div className="space-y-2">
+                  {(() => {
+                    const selectedEntities = (companyInfo.selectedEntities as string[]) || [];
+                    const entityOptions = [
+                      { value: 'appointment', label: 'Appointments', icon: Calendar },
+                      { value: 'staff', label: 'Staff', icon: Users },
+                      { value: 'service', label: 'Services', icon: Wrench },
+                      { value: 'product', label: 'Products', icon: Package },
+                      { value: 'space', label: 'Spaces', icon: Square }
+                    ];
+
+                    return entityOptions.map((option) => {
+                      const Icon = option.icon;
+                      const isSelected = selectedEntities.includes(option.value);
+                      return (
+                        <div
+                          key={option.value}
+                          className={`
+                            flex items-center gap-3 p-3 rounded-lg border-2
+                            ${isSelected
+                              ? 'border-[var(--accent-primary)] bg-[var(--accent-bg)] text-[var(--accent-text)]'
+                              : 'border-[var(--glass-border)] bg-[var(--input-background)] opacity-50'
+                            }
+                          `}
+                        >
+                          <div className={`
+                            flex items-center justify-center w-8 h-8 rounded-lg
+                            ${isSelected
+                              ? 'bg-[var(--accent-primary)] text-white'
+                              : 'bg-[var(--glass-bg)] text-muted-foreground'
+                            }
+                          `}>
+                            <Icon className="w-4 h-4" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-medium text-sm text-foreground">{option.label}</p>
+                          </div>
+                          {isSelected && (
+                            <Check className="w-4 h-4 text-[var(--accent-primary)]" />
+                          )}
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
+              )}
+
+              {!isEditing && (!companyInfo.selectedEntities || (companyInfo.selectedEntities as string[]).length === 0) && (
+                <p className="text-sm text-muted-foreground italic">No entities selected</p>
+              )}
             </div>
           </Card>
 

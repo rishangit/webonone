@@ -2,15 +2,16 @@ import { Calendar, Users, Clock, BarChart3, FileText, MessageSquare, Settings, C
 import { Button } from "../../components/ui/button";
 import { useIsMobile } from "../../components/ui/use-mobile";
 import { User as UserType, UserRole } from "../../types/user";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Icon } from "../../components/common/Icon";
 import { config } from "../../config/environment";
 import { Tooltip, TooltipTrigger, TooltipContent } from "../../components/ui/tooltip";
+import { useAppSelector } from "../../store/hooks";
 
-const getNavigationItems = (role: UserRole) => {
+const getNavigationItems = (role: UserRole, selectedEntities?: string[] | null) => {
   const baseItems = [
     { icon: Calendar, label: "Dashboard", id: "dashboard" },
-    { icon: Clock, label: "Appointments", id: "appointments" },
+    { icon: Clock, label: "Appointments", id: "appointments", entityType: "appointment" },
   ];
 
   if (role === UserRole.SYSTEM_ADMIN) {
@@ -39,12 +40,12 @@ const getNavigationItems = (role: UserRole) => {
   }
 
   if (role === UserRole.COMPANY_OWNER) {
-    return [
+    const allItems = [
       ...baseItems,
-      { icon: UserCheck, label: "Staff", id: "staff" },
-      { icon: MapPin, label: "Spaces", id: "spaces" },
-      { icon: CreditCard, label: "Services", id: "services" },
-      { icon: Package, label: "Products", id: "products" },
+      { icon: UserCheck, label: "Staff", id: "staff", entityType: "staff" },
+      { icon: MapPin, label: "Spaces", id: "spaces", entityType: "space" },
+      { icon: CreditCard, label: "Services", id: "services", entityType: "service" },
+      { icon: Package, label: "Products", id: "products", entityType: "product" },
       { icon: DollarSign, label: "Sales", id: "sales" },
       { icon: Users, label: "Users", id: "users" },
       { icon: BarChart3, label: "Analytics", id: "analytics" },
@@ -52,20 +53,46 @@ const getNavigationItems = (role: UserRole) => {
       { icon: MessageSquare, label: "Messages", id: "messages" },
       { icon: Settings, label: "Settings", id: "settings" },
     ];
+
+    // Filter items based on selectedEntities if provided
+    if (selectedEntities && Array.isArray(selectedEntities) && selectedEntities.length > 0) {
+      return allItems.filter(item => {
+        const itemAny = item as any;
+        // Always show items without entityType (dashboard, sales, users, analytics, etc.)
+        if (!itemAny.entityType) return true;
+        // Show items with entityType only if the entity is selected
+        return selectedEntities.includes(itemAny.entityType);
+      });
+    }
+
+    return allItems;
   }
 
   if (role === UserRole.STAFF_MEMBER) {
-    return [
+    const allItems = [
       ...baseItems,
       { icon: Users, label: "Customers", id: "users" },
-      { icon: CreditCard, label: "Services", id: "services" },
-      { icon: Package, label: "Products", id: "products" },
+      { icon: CreditCard, label: "Services", id: "services", entityType: "service" },
+      { icon: Package, label: "Products", id: "products", entityType: "product" },
       { icon: DollarSign, label: "Sales", id: "sales" },
       { icon: BarChart3, label: "Analytics", id: "analytics" },
       { icon: FileText, label: "Reports", id: "reports" },
       { icon: MessageSquare, label: "Messages", id: "messages" },
       { icon: Settings, label: "Settings", id: "settings" },
     ];
+
+    // Filter items based on selectedEntities if provided
+    if (selectedEntities && Array.isArray(selectedEntities) && selectedEntities.length > 0) {
+      return allItems.filter(item => {
+        const itemAny = item as any;
+        // Always show items without entityType
+        if (!itemAny.entityType) return true;
+        // Show items with entityType only if the entity is selected
+        return selectedEntities.includes(itemAny.entityType);
+      });
+    }
+
+    return allItems;
   }
 
   // For regular users
@@ -91,7 +118,19 @@ interface SidebarProps {
 
 export function Sidebar({ currentPage, onPageChange, isOpen, onClose: _onClose, currentUser, collapsed = false }: SidebarProps) {
   const isMobile = useIsMobile();
-  const navigationItems = getNavigationItems(currentUser?.role ?? UserRole.USER);
+  const { currentCompany, userCompany } = useAppSelector((state) => state.companies);
+  
+  // Get company for filtering - prioritize currentCompany, fallback to userCompany
+  const company = currentCompany || userCompany;
+  const selectedEntities = company?.selectedEntities;
+  
+  // Filter navigation items based on selected entities for company owners and staff
+  const navigationItems = useMemo(() => {
+    const role = currentUser?.role ?? UserRole.USER;
+    const items = getNavigationItems(role, selectedEntities);
+    return items;
+  }, [currentUser?.role, selectedEntities]);
+  
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
 
   // Auto-open submenu if current page is a submenu item

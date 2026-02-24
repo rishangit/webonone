@@ -48,6 +48,7 @@ interface CompanyFormData {
   tagIds: string[];
   employees: string;
   logo?: string;
+  selectedEntities?: string[] | null;
 }
 
 const employeeSizes = [
@@ -69,6 +70,9 @@ export function CompanyRegistrationWizard({ open, onOpenChange }: CompanyRegistr
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [cropDialogOpen, setCropDialogOpen] = useState(false);
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+  // Default selected entities - all entities selected by default
+  const defaultSelectedEntities = ['appointment', 'staff', 'service', 'product', 'space'];
+  
   const [formData, setFormData] = useState<CompanyFormData>({
     companyName: "",
     description: "",
@@ -85,7 +89,8 @@ export function CompanyRegistrationWizard({ open, onOpenChange }: CompanyRegistr
     longitude: undefined,
     tagIds: [],
     employees: "",
-    logo: ""
+    logo: "",
+    selectedEntities: defaultSelectedEntities
   });
 
   const totalSteps = 5;
@@ -232,7 +237,8 @@ export function CompanyRegistrationWizard({ open, onOpenChange }: CompanyRegistr
         longitude: undefined,
         tagIds: [],
         employees: "",
-        logo: ""
+        logo: "",
+        selectedEntities: defaultSelectedEntities
       });
       setIsSubmitting(false);
       previousCompaniesCount.current = companies.companies.length;

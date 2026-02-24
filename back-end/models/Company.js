@@ -19,6 +19,20 @@ class Company {
     this.companySize = data.companySize;
     this.logo = data.logo;
     this.currencyId = data.currencyId || null;
+    // Parse selectedEntities JSON if it's a string, otherwise use as-is or default to null
+    if (data.selectedEntities !== undefined && data.selectedEntities !== null) {
+      if (typeof data.selectedEntities === 'string') {
+        try {
+          this.selectedEntities = JSON.parse(data.selectedEntities);
+        } catch (e) {
+          this.selectedEntities = null;
+        }
+      } else {
+        this.selectedEntities = data.selectedEntities;
+      }
+    } else {
+      this.selectedEntities = null;
+    }
     this.isActive = data.isActive !== undefined ? data.isActive : true;
     this.ownerId = data.ownerId;
     this.createdAt = data.createdAt;
@@ -43,6 +57,7 @@ class Company {
       companySize: this.companySize,
       logo: this.logo,
       currencyId: this.currencyId,
+      selectedEntities: this.selectedEntities,
       isActive: this.isActive,
       ownerId: this.ownerId,
       createdAt: this.createdAt,
@@ -59,9 +74,14 @@ class Company {
       const id = nanoid(10); // Generate NanoID for new company
       const query = `
         INSERT INTO companies (
-          id, name, description, address, city, state, postalCode, country, latitude, longitude, phone, email, website, companySize, logo, currencyId, isActive, ownerId
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          id, name, description, address, city, state, postalCode, country, latitude, longitude, phone, email, website, companySize, logo, currencyId, selectedEntities, isActive, ownerId
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
+
+      // Handle selectedEntities - stringify if it's an array/object
+      const selectedEntitiesValue = data.selectedEntities !== undefined && data.selectedEntities !== null
+        ? (typeof data.selectedEntities === 'string' ? data.selectedEntities : JSON.stringify(data.selectedEntities))
+        : null;
 
       const values = [
         id,
@@ -80,6 +100,7 @@ class Company {
         (data.companySize && data.companySize.trim() !== '') ? data.companySize : null,
         data.logo || null,
         data.currencyId || null,
+        selectedEntitiesValue,
         data.isActive !== undefined ? data.isActive : true,
         data.ownerId || null
       ];
@@ -297,6 +318,14 @@ class Company {
       if (data.currencyId !== undefined) {
         fields.push('currencyId = ?');
         values.push(data.currencyId || null);
+      }
+      if (data.selectedEntities !== undefined) {
+        // Handle selectedEntities - stringify if it's an array/object
+        const selectedEntitiesValue = data.selectedEntities !== null
+          ? (typeof data.selectedEntities === 'string' ? data.selectedEntities : JSON.stringify(data.selectedEntities))
+          : null;
+        fields.push('selectedEntities = ?');
+        values.push(selectedEntitiesValue);
       }
       if (data.isActive !== undefined) {
         fields.push('isActive = ?');

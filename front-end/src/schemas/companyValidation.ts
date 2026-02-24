@@ -107,7 +107,14 @@ export const companyUpdateSchema = yup.object({
     .max(180, 'Longitude must be between -180 and 180')
     .optional()
     .nullable()
-    .transform((value) => value === '' ? undefined : value)
+    .transform((value) => value === '' ? undefined : value),
+  
+  selectedEntities: yup
+    .array()
+    .of(yup.string().oneOf(['appointment', 'staff', 'service', 'product', 'space'], 'Invalid entity type'))
+    .optional()
+    .nullable()
+    .transform((value) => value || undefined)
 });
 
 export type CompanyUpdateFormData = yup.InferType<typeof companyUpdateSchema>;

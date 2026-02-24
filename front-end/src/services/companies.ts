@@ -25,6 +25,7 @@ interface Company {
   companySize?: CompanySize;
   logo?: string;
   currencyId?: string;
+  selectedEntities?: string[] | null;
   isActive: boolean;
   ownerId?: string;
   createdAt?: string;
@@ -63,6 +64,7 @@ interface CreateCompanyData {
   contactPerson?: string;
   employees?: string; // Keep for backward compatibility
   companySize?: CompanySize;
+  selectedEntities?: string[] | null;
 }
 
 class CompaniesService {

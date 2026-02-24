@@ -32,7 +32,8 @@ const companySchema = {
     companySize: Joi.string().valid('1-5', '6-10', '11-20', '21-50', '51-200', '201-500', '500+').optional().allow('', null),
     isActive: Joi.boolean().optional(),
     ownerId: Joi.string().optional().allow('', null),
-    tagIds: Joi.array().items(Joi.string().length(10)).optional()
+    tagIds: Joi.array().items(Joi.string().length(10)).optional(),
+    selectedEntities: Joi.array().items(Joi.string().valid('appointment', 'staff', 'service', 'product', 'space')).optional().allow(null)
   }),
   update: Joi.object({
     companyName: Joi.string().min(1).max(255).required(),
@@ -62,7 +63,8 @@ const companySchema = {
     companySize: Joi.string().valid('1-5', '6-10', '11-20', '21-50', '51-200', '201-500', '500+').optional().allow('', null),
     currencyId: Joi.string().length(10).optional().allow('', null),
     isActive: Joi.boolean().optional(),
-    ownerId: Joi.string().optional().allow('', null)
+    ownerId: Joi.string().optional().allow('', null),
+    selectedEntities: Joi.array().items(Joi.string().valid('appointment', 'staff', 'service', 'product', 'space')).optional().allow(null)
   })
 };
 
@@ -202,6 +204,12 @@ router.post('/',
         });
       }
 
+      // Default to all entities if not provided
+      const defaultEntities = ['appointment', 'staff', 'service', 'product', 'space'];
+      const selectedEntities = req.body.selectedEntities && Array.isArray(req.body.selectedEntities) && req.body.selectedEntities.length > 0
+        ? req.body.selectedEntities
+        : defaultEntities;
+
       const companyData = {
         name: companyName,
         description: req.body.description || null,
@@ -211,6 +219,7 @@ router.post('/',
         website: req.body.website || null,
         companySize: req.body.companySize || req.body.employees || null, // Support both companySize and employees for backward compatibility
         logo: req.body.logo || null,
+        selectedEntities: selectedEntities,
         isActive: false, // New registrations start as inactive (pending approval)
         ownerId: userId
       };
@@ -455,7 +464,7 @@ router.put('/:id',
       
       // Check if it's a single-field update (like logo only)
       const updateKeys = Object.keys(updateData).filter(key => updateData[key] !== undefined && updateData[key] !== null);
-      const isPartialUpdate = updateKeys.length === 1 && (updateKeys[0] === 'logo' || updateKeys[0] === 'companySize' || updateKeys[0] === 'employees' || updateKeys[0] === 'currencyId' || updateKeys[0] === 'isActive');
+      const isPartialUpdate = updateKeys.length === 1 && (updateKeys[0] === 'logo' || updateKeys[0] === 'companySize' || updateKeys[0] === 'employees' || updateKeys[0] === 'currencyId' || updateKeys[0] === 'isActive' || updateKeys[0] === 'selectedEntities');
       
       if (!isPartialUpdate) {
         // For full updates, validate all required fields
