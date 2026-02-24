@@ -74,6 +74,7 @@ router.post('/',
       description: req.body.description,
       type: req.body.type || 'Issue',
       status: req.body.status || 'New',
+      priority: req.body.priority || 'Medium',
       screenshotPath: req.body.screenshotPath || null,
       createdBy: req.user.id
     };
@@ -146,6 +147,18 @@ router.put('/:id',
       updateData.type = req.body.type;
     }
     if (req.body.screenshotPath !== undefined) updateData.screenshotPath = req.body.screenshotPath;
+    if (req.body.priority !== undefined) {
+      if (!['Low', 'Medium', 'High', 'Urgent'].includes(req.body.priority)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Priority must be "Low", "Medium", "High", or "Urgent"'
+        });
+      }
+      updateData.priority = req.body.priority;
+    }
+    if (req.body.displayOrder !== undefined) {
+      updateData.displayOrder = parseInt(req.body.displayOrder, 10);
+    }
 
     // Only company owners can update status
     if (req.body.status !== undefined) {

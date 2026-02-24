@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Plus, Edit, Trash2, MoreVertical, Bug, Sparkles, AlertTriangle, CheckCircle, Filter } from "lucide-react";
+import { Plus, Edit, Trash2, MoreVertical, Bug, Sparkles, AlertTriangle, CheckCircle, Filter, Eye, GripVertical } from "lucide-react";
 import { Card } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
@@ -17,6 +17,7 @@ import {
 } from '../../store/slices/backlogSlice';
 import { BacklogItem } from '../../services/backlog';
 import { BacklogFormDialog } from './BacklogFormDialog';
+import { BacklogViewDialog } from './BacklogViewDialog';
 import { SearchInput } from "../../components/common/SearchInput";
 import { Pagination } from "../../components/common/Pagination";
 import { EmptyState } from "../../components/common/EmptyState";
@@ -24,6 +25,23 @@ import { RightPanel } from "../../components/common/RightPanel";
 import { cn } from "../../components/ui/utils";
 import { Carousel, CarouselContent, CarouselItem } from "../../components/ui/carousel";
 import { formatAvatarUrl } from "../../utils";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface BacklogPageProps {
   currentUser?: UserType | null;
@@ -50,6 +68,17 @@ export const BacklogPage = ({ currentUser }: BacklogPageProps) => {
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
   const [filterType, setFilterType] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [showViewDialog, setShowViewDialog] = useState(false);
+  const [itemToView, setItemToView] = useState<BacklogItem | null>(null);
+  const [localItems, setLocalItems] = useState<BacklogItem[]>([]);
+
+  // Drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   // Check if user is company owner (can update status)
   const isCompanyOwner = useMemo(() => {
@@ -98,8 +127,42 @@ export const BacklogPage = ({ currentUser }: BacklogPageProps) => {
     }
   }, [error, dispatch]);
 
-  // For server-side pagination, use items directly (no client-side filtering)
-  const displayedItems = items || [];
+  // Update local items when items from API change
+  useEffect(() => {
+    if (items && items.length > 0) {
+      // Sort items: priority items first (High/Urgent), then by displayOrder, then by createdAt
+      const sorted = [...items].sort((a, b) => {
+        // Priority items go to top
+        const aIsPriority = a.priority === 'High' || a.priority === 'Urgent';
+        const bIsPriority = b.priority === 'High' || b.priority === 'Urgent';
+        
+        if (aIsPriority && !bIsPriority) return -1;
+        if (!aIsPriority && bIsPriority) return 1;
+        
+        // Within priority group, sort by priority level
+        if (aIsPriority && bIsPriority) {
+          const priorityOrder = { 'Urgent': 1, 'High': 2, 'Medium': 3, 'Low': 4 };
+          const aPriority = priorityOrder[a.priority || 'Medium'] || 3;
+          const bPriority = priorityOrder[b.priority || 'Medium'] || 3;
+          if (aPriority !== bPriority) return aPriority - bPriority;
+        }
+        
+        // Then by displayOrder
+        const aOrder = a.displayOrder ?? 999999;
+        const bOrder = b.displayOrder ?? 999999;
+        if (aOrder !== bOrder) return aOrder - bOrder;
+        
+        // Finally by createdAt (newest first)
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+      setLocalItems(sorted);
+    } else {
+      setLocalItems([]);
+    }
+  }, [items]);
+
+  // For server-side pagination, use localItems (sorted)
+  const displayedItems = localItems;
 
   const handleAddItem = () => {
     setSelectedItem(null);
@@ -111,6 +174,11 @@ export const BacklogPage = ({ currentUser }: BacklogPageProps) => {
     setSelectedItem(item);
     setDialogMode("edit");
     setShowFormDialog(true);
+  };
+
+  const handleViewItem = (item: BacklogItem) => {
+    setItemToView(item);
+    setShowViewDialog(true);
   };
 
   const handleDeleteItem = (item: BacklogItem) => {
@@ -137,6 +205,81 @@ export const BacklogPage = ({ currentUser }: BacklogPageProps) => {
     }));
   };
 
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    const oldIndex = localItems.findIndex((item) => item.id === active.id);
+    const newIndex = localItems.findIndex((item) => item.id === over.id);
+
+    if (oldIndex === -1 || newIndex === -1) {
+      return;
+    }
+
+    // Update local state immediately for better UX
+    const newItems = arrayMove(localItems, oldIndex, newIndex);
+    setLocalItems(newItems);
+
+    // Update displayOrder for all affected items
+    try {
+      const updates = newItems.map((item, index) => ({
+        id: item.id,
+        displayOrder: index + 1,
+      }));
+
+      // Update each item's displayOrder
+      for (const update of updates) {
+        try {
+          await dispatch(updateBacklogItemRequest({
+            id: update.id,
+            data: { displayOrder: update.displayOrder }
+          }));
+        } catch (error) {
+          // If update fails, reload items to restore correct order
+          const offset = (currentPage - 1) * itemsPerPage;
+          const filters: any = {
+            limit: itemsPerPage,
+            offset: offset,
+            page: currentPage,
+          };
+          if (debouncedSearchTerm.trim()) {
+            filters.search = debouncedSearchTerm.trim();
+          }
+          if (filterType !== "all") {
+            filters.type = filterType;
+          }
+          if (filterStatus !== "all") {
+            filters.status = filterStatus;
+          }
+          dispatch(fetchBacklogItemsRequest(filters));
+          break; // Stop updating if one fails
+        }
+      }
+    } catch (error) {
+      toast.error('Failed to update item order');
+      // Reload items to restore correct order
+      const offset = (currentPage - 1) * itemsPerPage;
+      const filters: any = {
+        limit: itemsPerPage,
+        offset: offset,
+        page: currentPage,
+      };
+      if (debouncedSearchTerm.trim()) {
+        filters.search = debouncedSearchTerm.trim();
+      }
+      if (filterType !== "all") {
+        filters.type = filterType;
+      }
+      if (filterStatus !== "all") {
+        filters.status = filterStatus;
+      }
+      dispatch(fetchBacklogItemsRequest(filters));
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'New':
@@ -148,6 +291,45 @@ export const BacklogPage = ({ currentUser }: BacklogPageProps) => {
       default:
         return '';
     }
+  };
+
+  const getPriorityColor = (priority?: string) => {
+    switch (priority) {
+      case 'Urgent':
+        return 'bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/30';
+      case 'High':
+        return 'bg-orange-500/20 text-orange-600 dark:text-orange-400 border border-orange-500/30';
+      case 'Medium':
+        return 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border border-yellow-500/30';
+      case 'Low':
+        return 'bg-gray-500/20 text-gray-600 dark:text-gray-400 border border-gray-500/30';
+      default:
+        return 'bg-gray-500/20 text-gray-600 dark:text-gray-400 border border-gray-500/30';
+    }
+  };
+
+  // Sortable Item Component for list view
+  const SortableListItem = ({ item }: { item: BacklogItem }) => {
+    const {
+      attributes,
+      listeners,
+      setNodeRef,
+      transform,
+      transition,
+      isDragging,
+    } = useSortable({ id: item.id });
+
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+      opacity: isDragging ? 0.5 : 1,
+    };
+
+    return (
+      <div ref={setNodeRef} style={style}>
+        {renderItemListItem(item, attributes, listeners)}
+      </div>
+    );
   };
 
   const getTypeIcon = (type: string) => {
@@ -219,6 +401,11 @@ export const BacklogPage = ({ currentUser }: BacklogPageProps) => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-popover border-border">
+                <DropdownMenuItem onClick={() => handleViewItem(item)}>
+                  <Eye className="w-4 h-4 mr-2" />
+                  View
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => handleEditItem(item)}>
                   <Edit className="w-4 h-4 mr-2" />
                   Edit
@@ -255,6 +442,11 @@ export const BacklogPage = ({ currentUser }: BacklogPageProps) => {
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <div className="flex items-center gap-4">
               <span>Type: <strong>{item.type}</strong></span>
+              {item.priority && (
+                <Badge className={`${getPriorityColor(item.priority)} text-xs`} variant="outline">
+                  {item.priority}
+                </Badge>
+              )}
               <span>Created: {formatDate(item.createdAt)}</span>
             </div>
             {item.creator && item.creator.name && (
@@ -266,7 +458,7 @@ export const BacklogPage = ({ currentUser }: BacklogPageProps) => {
     );
   };
 
-  const renderItemListItem = (item: BacklogItem): JSX.Element => {
+  const renderItemListItem = (item: BacklogItem, dragAttributes?: any, dragListeners?: any): JSX.Element => {
     const TypeIcon = getTypeIcon(item.type);
     return (
       <Card 
@@ -276,6 +468,17 @@ export const BacklogPage = ({ currentUser }: BacklogPageProps) => {
         <div className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4 flex-1 min-w-0">
+              {/* Drag Handle */}
+              {dragListeners && dragAttributes && (
+                <button
+                  {...dragAttributes}
+                  {...dragListeners}
+                  className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground transition-colors p-1"
+                  aria-label="Drag to reorder"
+                >
+                  <GripVertical className="w-5 h-5" />
+                </button>
+              )}
               <div 
                 className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
                   item.type === 'Issue' 
@@ -286,11 +489,16 @@ export const BacklogPage = ({ currentUser }: BacklogPageProps) => {
                 <TypeIcon className="w-5 h-5" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
                   <h3 className="font-semibold text-foreground truncate">{item.title}</h3>
                   <Badge className={getStatusColor(item.status)}>
                     {item.status}
                   </Badge>
+                  {item.priority && (
+                    <Badge className={`${getPriorityColor(item.priority)} text-xs`} variant="outline">
+                      {item.priority}
+                    </Badge>
+                  )}
                   <Badge variant="outline" className="text-xs">
                     {item.type}
                   </Badge>
@@ -323,6 +531,11 @@ export const BacklogPage = ({ currentUser }: BacklogPageProps) => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-popover border-border">
+                <DropdownMenuItem onClick={() => handleViewItem(item)}>
+                  <Eye className="w-4 h-4 mr-2" />
+                  View
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => handleEditItem(item)}>
                   <Edit className="w-4 h-4 mr-2" />
                   Edit
@@ -569,14 +782,28 @@ export const BacklogPage = ({ currentUser }: BacklogPageProps) => {
         />
       ) : (
         <>
-          <div className={viewMode === "grid" 
-            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" 
-            : "space-y-4"
-          }>
-            {displayedItems.map(item => 
-              viewMode === "grid" ? renderItemCard(item) : renderItemListItem(item)
-            )}
-          </div>
+          {viewMode === "grid" ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {displayedItems.map(item => renderItemCard(item))}
+            </div>
+          ) : (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={displayedItems.map(item => item.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-4">
+                  {displayedItems.map(item => (
+                    <SortableListItem key={item.id} item={item} />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+          )}
 
           {/* Pagination */}
           {pagination && (
@@ -623,6 +850,13 @@ export const BacklogPage = ({ currentUser }: BacklogPageProps) => {
           }
           dispatch(fetchBacklogItemsRequest(filters));
         }}
+      />
+
+      {/* Backlog View Dialog */}
+      <BacklogViewDialog
+        open={showViewDialog}
+        onOpenChange={setShowViewDialog}
+        item={itemToView}
       />
 
       {/* Filter Right Panel */}

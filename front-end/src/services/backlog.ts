@@ -9,6 +9,8 @@ export interface BacklogItem {
   description: string;
   type: 'Issue' | 'Feature';
   status: 'New' | 'Active' | 'Done';
+  priority?: 'Low' | 'Medium' | 'High' | 'Urgent';
+  displayOrder?: number | null;
   screenshotPath?: string | null;
   createdBy: string;
   createdAt: string;
@@ -26,11 +28,13 @@ export interface CreateBacklogItemData {
   title: string;
   description: string;
   type: 'Issue' | 'Feature';
+  priority?: 'Low' | 'Medium' | 'High' | 'Urgent';
   screenshotPath?: string | null;
 }
 
 export interface UpdateBacklogItemData extends Partial<CreateBacklogItemData> {
   status?: 'New' | 'Active' | 'Done';
+  displayOrder?: number;
 }
 
 class BacklogService {

@@ -8,6 +8,8 @@ class BacklogItem {
     this.description = data.description;
     this.type = data.type || 'Issue';
     this.status = data.status || 'New';
+    this.priority = data.priority || data.priority || 'Medium';
+    this.displayOrder = data.display_order !== undefined ? data.display_order : (data.displayOrder !== undefined ? data.displayOrder : null);
     this.screenshotPath = data.screenshot_path || data.screenshotPath || null;
     this.createdBy = data.created_by || data.createdBy;
     this.createdAt = data.created_at || data.createdAt;
@@ -17,15 +19,23 @@ class BacklogItem {
   static async create(data) {
     try {
       const id = nanoid(10);
+      // Get the next displayOrder (highest + 1, or 1 if none exist)
+      const [maxOrderResult] = await pool.execute(
+        `SELECT COALESCE(MAX(display_order), 0) as max_order FROM backlog_items`
+      );
+      const nextDisplayOrder = (maxOrderResult[0]?.max_order || 0) + 1;
+
       await pool.execute(
-        `INSERT INTO backlog_items (id, title, description, type, status, screenshot_path, created_by) 
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO backlog_items (id, title, description, type, status, priority, display_order, screenshot_path, created_by) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           id,
           data.title,
           data.description,
           data.type || 'Issue',
           data.status || 'New',
+          data.priority || 'Medium',
+          nextDisplayOrder, // New items go to top
           data.screenshotPath || null,
           data.createdBy
         ]
@@ -129,13 +139,22 @@ class BacklogItem {
       const total = countRows[0]?.total || 0;
 
       // Get paginated items
+      // Order by: priority items first (High/Urgent), then by display_order, then by created_at DESC
       const dataQuery = `
         SELECT bi.*, 
-               u.firstName, u.lastName, u.email 
+               u.firstName, u.lastName, u.email,
+               CASE 
+                 WHEN bi.priority = 'Urgent' THEN 1
+                 WHEN bi.priority = 'High' THEN 2
+                 ELSE 3
+               END as priority_order
         FROM backlog_items bi
         LEFT JOIN users u ON bi.created_by COLLATE utf8mb4_unicode_ci = u.id COLLATE utf8mb4_unicode_ci
         ${whereClause}
-        ORDER BY bi.created_at DESC
+        ORDER BY 
+          priority_order ASC,
+          COALESCE(bi.display_order, 999999) ASC,
+          bi.created_at DESC
         LIMIT ${limitInt} OFFSET ${offsetInt}
       `;
       
@@ -195,6 +214,14 @@ class BacklogItem {
         updateFields.push('screenshot_path = ?');
         values.push(data.screenshotPath);
       }
+      if (data.priority !== undefined) {
+        updateFields.push('priority = ?');
+        values.push(data.priority);
+      }
+      if (data.displayOrder !== undefined) {
+        updateFields.push('display_order = ?');
+        values.push(data.displayOrder);
+      }
 
       if (updateFields.length === 0) {
         return await BacklogItem.findById(id);
@@ -228,6 +255,8 @@ class BacklogItem {
       description: this.description,
       type: this.type,
       status: this.status,
+      priority: this.priority || 'Medium',
+      displayOrder: this.displayOrder,
       screenshotPath: this.screenshotPath,
       createdBy: this.createdBy,
       createdAt: this.createdAt,
