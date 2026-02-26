@@ -15,6 +15,10 @@ const spaceSchema = {
     status: Joi.string().valid('Active', 'Inactive', 'Maintenance').optional(),
     description: Joi.string().optional().allow('', null),
     imageUrl: Joi.string().optional().allow('', null),
+    galleryImages: Joi.alternatives().try(
+      Joi.array().items(Joi.string()),
+      Joi.string().allow('', null)
+    ).optional(),
     tagIds: Joi.array().items(Joi.string().length(10)).optional(),
   }),
   update: Joi.object({
@@ -23,6 +27,10 @@ const spaceSchema = {
     status: Joi.string().valid('Active', 'Inactive', 'Maintenance').optional(),
     description: Joi.string().optional().allow('', null),
     imageUrl: Joi.string().optional().allow('', null),
+    galleryImages: Joi.alternatives().try(
+      Joi.array().items(Joi.string()),
+      Joi.string().allow('', null)
+    ).optional(),
     tagIds: Joi.array().items(Joi.string().length(10)).optional(),
   }).min(1)
 };

@@ -18,6 +18,7 @@ class CompanyService {
     this.providerAvatar = data.providerAvatar;
     this.staffId = data.staffId;
     this.imageUrl = data.imageUrl;
+    this.galleryImages = data.galleryImages;
     this.createdAt = data.createdAt;
     this.updatedAt = data.updatedAt;
   }
@@ -46,6 +47,7 @@ class CompanyService {
       },
       tags: [],
       image: this.imageUrl || '',
+      galleryImages: this.galleryImages ? (typeof this.galleryImages === 'string' ? JSON.parse(this.galleryImages) : this.galleryImages) : [],
       createdAt: this.createdAt,
       updatedAt: this.updatedAt
     };
@@ -61,9 +63,13 @@ class CompanyService {
       const query = `
         INSERT INTO company_services (
           id, companyId, name, description, duration, price, category, subcategory,
-          categoryId, subcategoryId, status, providerName, providerAvatar, staffId, imageUrl
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          categoryId, subcategoryId, status, providerName, providerAvatar, staffId, imageUrl, galleryImages
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
+
+      const galleryImagesValue = data.galleryImages 
+        ? (Array.isArray(data.galleryImages) ? JSON.stringify(data.galleryImages) : data.galleryImages)
+        : null;
 
       const values = [
         id,
@@ -80,7 +86,8 @@ class CompanyService {
         data.providerName || null,
         data.providerAvatar || null,
         data.staffId || null,
-        data.imageUrl || null
+        data.imageUrl || null,
+        galleryImagesValue
       ];
 
       await connection.execute(query, values);
@@ -370,6 +377,13 @@ class CompanyService {
       if (data.imageUrl !== undefined) {
         fields.push('imageUrl = ?');
         values.push(data.imageUrl);
+      }
+      if (data.galleryImages !== undefined) {
+        const galleryImagesValue = Array.isArray(data.galleryImages) 
+          ? JSON.stringify(data.galleryImages) 
+          : (data.galleryImages || null);
+        fields.push('galleryImages = ?');
+        values.push(galleryImagesValue);
       }
 
       // Update service fields if any

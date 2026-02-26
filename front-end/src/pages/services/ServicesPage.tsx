@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Plus, Clock, MoreVertical, Edit, Trash2, Eye, Copy, Archive, Stethoscope, Filter } from "lucide-react";
 import { Card } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
@@ -55,6 +56,7 @@ interface Service {
 // Removed mockServices - now using Redux state from API
 
 export function ServicesPage() {
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { services: reduxServices, loading, error, pagination } = useAppSelector((state) => state.services);
   const { user } = useAppSelector((state) => state.auth);
@@ -269,8 +271,7 @@ export function ServicesPage() {
   };
 
   const openViewDialog = (service: ServiceType) => {
-    setSelectedService(service);
-    setIsViewDialogOpen(true);
+    navigate(`/system/services/${service.id}`);
   };
 
   const openDeleteDialog = (service: ServiceType) => {
@@ -550,7 +551,16 @@ export function ServicesPage() {
   };
 
   const ServiceCard = ({ service }: { service: ServiceType }) => (
-    <Card className="overflow-hidden backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-300 hover:shadow-lg hover:shadow-[var(--glass-shadow)] group">
+    <Card 
+      className="overflow-hidden backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-300 hover:shadow-lg hover:shadow-[var(--glass-shadow)] group cursor-pointer"
+      onClick={(e) => {
+        // Don't navigate if clicking on dropdown or button
+        if ((e.target as HTMLElement).closest('button, [role="menuitem"]')) {
+          return;
+        }
+        openViewDialog(service);
+      }}
+    >
       <div className="relative h-48 overflow-hidden">
         <img 
           src={getImageUrl(service)} 
@@ -580,7 +590,12 @@ export function ServicesPage() {
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground hover:bg-accent flex-shrink-0">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-muted-foreground hover:text-foreground hover:bg-accent flex-shrink-0"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <MoreVertical className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -634,7 +649,16 @@ export function ServicesPage() {
   );
 
   const ServiceListItem = ({ service }: { service: ServiceType }) => (
-    <Card className="p-6 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-300 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+    <Card 
+      className="p-6 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-300 hover:shadow-lg hover:shadow-[var(--glass-shadow)] cursor-pointer"
+      onClick={(e) => {
+        // Don't navigate if clicking on dropdown or button
+        if ((e.target as HTMLElement).closest('button, [role="menuitem"]')) {
+          return;
+        }
+        openViewDialog(service);
+      }}
+    >
       <div className="flex items-start gap-6">
         {/* Service Image */}
         <div className="flex-shrink-0 relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 w-20 h-16 flex items-center justify-center">
@@ -665,7 +689,12 @@ export function ServicesPage() {
               </Badge>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground hover:bg-accent">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="text-muted-foreground hover:text-foreground hover:bg-accent"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <MoreVertical className="w-4 h-4" />
                   </Button>
                 </DropdownMenuTrigger>

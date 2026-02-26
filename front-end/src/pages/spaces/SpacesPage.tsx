@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Plus, MapPin, Users, Calendar, MoreVertical, Edit, Trash2, Eye, Filter } from "lucide-react";
 import { Card } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
@@ -32,6 +33,7 @@ import { RightPanel } from "../../components/common/RightPanel";
 import { cn } from "../../components/ui/utils";
 
 export const SpacesPage = () => {
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { spaces: reduxSpaces, loading, error, pagination } = useAppSelector((state) => state.spaces);
   const { user } = useAppSelector((state) => state.auth);
@@ -153,8 +155,7 @@ export const SpacesPage = () => {
   };
 
   const openViewDialog = (space: SpaceType) => {
-    setSelectedSpace(space);
-    setIsViewDialogOpen(true);
+    navigate(`/system/spaces/${space.id}`);
   };
 
   const openDeleteDialog = (space: SpaceType) => {
@@ -227,7 +228,16 @@ export const SpacesPage = () => {
   };
 
   const SpaceCard = ({ space }: { space: SpaceType & { appointments?: { today: number; thisWeek: number } } }) => (
-    <Card className="overflow-hidden backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-300 hover:shadow-lg hover:shadow-[var(--glass-shadow)] group">
+    <Card 
+      className="overflow-hidden backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-300 hover:shadow-lg hover:shadow-[var(--glass-shadow)] group cursor-pointer"
+      onClick={(e) => {
+        // Don't navigate if clicking on dropdown or button
+        if ((e.target as HTMLElement).closest('button, [role="menuitem"]')) {
+          return;
+        }
+        openViewDialog(space);
+      }}
+    >
       <div className="relative h-48 overflow-hidden">
         <img 
           src={getImageUrl(space)} 
@@ -248,7 +258,12 @@ export const SpacesPage = () => {
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground hover:bg-accent">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-muted-foreground hover:text-foreground hover:bg-accent"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <MoreVertical className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -288,7 +303,16 @@ export const SpacesPage = () => {
   );
 
   const SpaceListItem = ({ space }: { space: SpaceType & { appointments?: { today: number; thisWeek: number } } }) => (
-    <Card className="p-6 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-300 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+    <Card 
+      className="p-6 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-300 hover:shadow-lg hover:shadow-[var(--glass-shadow)] cursor-pointer"
+      onClick={(e) => {
+        // Don't navigate if clicking on dropdown or button
+        if ((e.target as HTMLElement).closest('button, [role="menuitem"]')) {
+          return;
+        }
+        openViewDialog(space);
+      }}
+    >
       <div className="flex items-center gap-6">
         <div className="flex-shrink-0">
           <img 
@@ -329,7 +353,12 @@ export const SpacesPage = () => {
             <div className="flex items-center gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground hover:bg-accent">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="text-muted-foreground hover:text-foreground hover:bg-accent"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <MoreVertical className="w-4 h-4" />
                   </Button>
                 </DropdownMenuTrigger>

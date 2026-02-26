@@ -10,6 +10,7 @@ class CompanySpace {
     this.status = data.status || 'Active';
     this.description = data.description;
     this.imageUrl = data.imageUrl;
+    this.galleryImages = data.galleryImages;
     this.createdAt = data.createdAt;
     this.updatedAt = data.updatedAt;
   }
@@ -27,6 +28,7 @@ class CompanySpace {
         today: 0,
         thisWeek: 0
       },
+      galleryImages: this.galleryImages ? (typeof this.galleryImages === 'string' ? JSON.parse(this.galleryImages) : this.galleryImages) : [],
       createdAt: this.createdAt,
       updatedAt: this.updatedAt
     };
@@ -41,9 +43,13 @@ class CompanySpace {
       const id = nanoid(10);
       const query = `
         INSERT INTO company_spaces (
-          id, companyId, name, capacity, status, description, imageUrl
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+          id, companyId, name, capacity, status, description, imageUrl, galleryImages
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `;
+
+      const galleryImagesValue = data.galleryImages 
+        ? (Array.isArray(data.galleryImages) ? JSON.stringify(data.galleryImages) : data.galleryImages)
+        : null;
 
       const values = [
         id,
@@ -52,7 +58,8 @@ class CompanySpace {
         data.capacity,
         data.status || 'Active',
         data.description || null,
-        data.imageUrl || null
+        data.imageUrl || null,
+        galleryImagesValue
       ];
 
       await connection.execute(query, values);
@@ -273,6 +280,13 @@ class CompanySpace {
       if (data.imageUrl !== undefined) {
         fields.push('imageUrl = ?');
         values.push(data.imageUrl);
+      }
+      if (data.galleryImages !== undefined) {
+        const galleryImagesValue = Array.isArray(data.galleryImages) 
+          ? JSON.stringify(data.galleryImages) 
+          : (data.galleryImages || null);
+        fields.push('galleryImages = ?');
+        values.push(galleryImagesValue);
       }
 
       // Update space fields if any

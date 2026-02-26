@@ -486,12 +486,27 @@ router.get('/me',
   asyncHandler(async (req, res) => {
     const { UserRole: UserRoleEnum } = require('../types/user');
     const Company = require('../models/Company');
+    const UserRoleModel = require('../models/UserRole');
     const userResponse = req.user.toJSON();
     
     // Ensure role is always set (default to USER if null/undefined)
     if (userResponse.role === null || userResponse.role === undefined) {
       userResponse.role = UserRoleEnum.USER;
       userResponse.roleLevel = UserRoleEnum.USER;
+    }
+    
+    // Get user roles from users_role table
+    try {
+      const roles = await UserRoleModel.findByUserId(req.user.id, false); // false = only active roles
+      userResponse.roles = roles.map(r => ({
+        id: r.id,
+        role: r.role,
+        companyId: r.companyId,
+        isDefault: r.isDefault
+      }));
+    } catch (error) {
+      console.warn('Error fetching user roles:', error.message);
+      userResponse.roles = [];
     }
     
     // Get companies owned by this user

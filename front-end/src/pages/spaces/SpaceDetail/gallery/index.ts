@@ -1,0 +1,1 @@
+export { SpaceGalleryTab } from './SpaceGalleryTab';

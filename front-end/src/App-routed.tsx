@@ -45,13 +45,13 @@ import { SalesPage } from "./pages/sales";
 import { SalesDetailPage } from "./pages/sales/SalesDetailPage";
 
 // Services
-import { ServicesPage } from "./pages/services";
+import { ServicesPage, ServiceDetailPage } from "./pages/services";
+
+// Spaces
+import { SpacesPage, SpaceDetailPage } from "./pages/spaces";
 
 // Settings
 import { SettingsPage } from "./pages/settings";
-
-// Spaces
-import { SpacesPage } from "./pages/spaces";
 
 // Staff
 import { StaffPage } from "./pages/staff";
@@ -517,6 +517,66 @@ function SalesDetailPageWrapper() {
   );
 }
 
+// ServiceDetailPage Wrapper Component
+function ServiceDetailPageWrapper() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+
+  if (!id) {
+    return (
+      <div className="flex-1 p-4 lg:p-8 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-foreground mb-2">Service Not Found</h3>
+          <p className="text-muted-foreground mb-4">Invalid service ID</p>
+          <button 
+            onClick={() => navigate('/system/services')}
+            className="px-4 py-2 bg-[var(--accent-primary)] text-[var(--accent-button-text)] rounded-lg hover:bg-[var(--accent-primary-hover)]"
+          >
+            Back to Services
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <ServiceDetailPage 
+      serviceId={id}
+      onBack={() => navigate('/system/services')}
+    />
+  );
+}
+
+// SpaceDetailPage Wrapper Component
+function SpaceDetailPageWrapper() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+
+  if (!id) {
+    return (
+      <div className="flex-1 p-4 lg:p-8 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-foreground mb-2">Space Not Found</h3>
+          <p className="text-muted-foreground mb-4">Invalid space ID</p>
+          <button 
+            onClick={() => navigate('/system/spaces')}
+            className="px-4 py-2 bg-[var(--accent-primary)] text-[var(--accent-button-text)] rounded-lg hover:bg-[var(--accent-primary-hover)]"
+          >
+            Back to Spaces
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <SpaceDetailPage 
+      spaceId={id}
+      onBack={() => navigate('/system/spaces')}
+    />
+  );
+}
+
 function App() {
   const dispatch = useAppDispatch();
   const { isAuthenticated, isLoading, user } = useAppSelector((state) => state.auth);
@@ -952,6 +1012,19 @@ function App() {
           />
           
           <Route 
+            path="/system/services/:id" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <ServiceDetailPageWrapper />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
             path="/system/settings" 
             element={
               isAuthenticated ? (
@@ -975,6 +1048,19 @@ function App() {
               isAuthenticated ? (
                 <ProtectedRouteWrapper>
                   <SpacesPage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/spaces/:id" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <SpaceDetailPageWrapper />
                 </ProtectedRouteWrapper>
               ) : (
                 <Navigate to="/system/login" replace />

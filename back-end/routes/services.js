@@ -23,6 +23,10 @@ const serviceSchema = {
     providerAvatar: Joi.string().optional().allow('', null),
     staffId: Joi.string().length(10).optional().allow('', null),
     imageUrl: Joi.string().optional().allow('', null),
+    galleryImages: Joi.alternatives().try(
+      Joi.array().items(Joi.string()),
+      Joi.string().allow('', null)
+    ).optional(),
     tagIds: Joi.array().items(Joi.string().length(10)).optional(),
   }),
   update: Joi.object({
@@ -39,6 +43,10 @@ const serviceSchema = {
     providerAvatar: Joi.string().optional().allow('', null),
     staffId: Joi.string().length(10).optional().allow('', null),
     imageUrl: Joi.string().optional().allow('', null),
+    galleryImages: Joi.alternatives().try(
+      Joi.array().items(Joi.string()),
+      Joi.string().allow('', null)
+    ).optional(),
     tagIds: Joi.array().items(Joi.string().length(10)).optional(),
   }).min(1)
 };
