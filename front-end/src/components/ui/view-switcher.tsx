@@ -9,7 +9,7 @@ interface ViewSwitcherProps {
 
 export function ViewSwitcher({ viewMode, onViewModeChange, className }: ViewSwitcherProps) {
   return (
-    <div className={`flex items-center backdrop-blur-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg p-1 h-9 ${className || ""}`}>
+    <div className={`flex items-center gap-1 backdrop-blur-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg p-1 h-9 ${className || ""}`}>
       <Button
         variant={viewMode === "grid" ? "accent" : "ghost"}
         onClick={() => onViewModeChange("grid")}

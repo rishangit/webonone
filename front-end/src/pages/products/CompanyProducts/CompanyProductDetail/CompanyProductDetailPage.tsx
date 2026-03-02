@@ -13,7 +13,7 @@ import { CompanyProductVariant } from "../../../../services/companyProductVarian
 import { companyProductVariantsService } from "../../../../services/companyProductVariants";
 import { toast } from "sonner";
 import { VariantFormData } from "../../../../schemas/variantValidation";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "../../../../components/ui/tabs";
+import { TabSwitcher } from "../../../../components/ui/tab-switcher";
 import { CompanyProductDetailHeader } from "./CompanyProductDetailHeader";
 import { CompanyProductOverviewTab } from "./overview/CompanyProductOverviewTab";
 import { CompanyProductAttributesTab } from "./attributes/CompanyProductAttributesTab";
@@ -35,6 +35,7 @@ export const CompanyProductDetailPage = ({ productId, onBack }: CompanyProductDe
   const [variantsLoading, setVariantsLoading] = useState(false);
 
   // Form state
+  const [activeTab, setActiveTab] = useState<string>("overview");
   const [formData, setFormData] = useState({
     isAvailableForPurchase: false,
     notes: ''
@@ -263,47 +264,57 @@ export const CompanyProductDetailPage = ({ productId, onBack }: CompanyProductDe
         onCancel={handleCancel}
       />
 
-      <Tabs defaultValue="overview" className="w-full">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="variants">Product Variants</TabsTrigger>
-          <TabsTrigger value="attributes">Product Attributes</TabsTrigger>
-        </TabsList>
+      <div className="w-full space-y-6">
+        <TabSwitcher
+          tabs={[
+            { value: "overview", label: "Overview" },
+            { value: "variants", label: "Product Variants" },
+            { value: "attributes", label: "Product Attributes" }
+          ]}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
 
-        <TabsContent value="overview" className="mt-6">
-          <CompanyProductOverviewTab
-            product={currentCompanyProduct}
-            variants={variants}
-            variantsLoading={variantsLoading}
-            selectedVariantId={selectedVariant?.id || null}
-            onVariantSelect={setSelectedVariant}
-            isEditing={isEditing}
-            formData={{
-              notes: formData.notes,
-              isAvailableForPurchase: formData.isAvailableForPurchase,
-            }}
-            onFormChange={handleChange}
-          />
-        </TabsContent>
+        {activeTab === "overview" && (
+          <div className="mt-6">
+            <CompanyProductOverviewTab
+              product={currentCompanyProduct}
+              variants={variants}
+              variantsLoading={variantsLoading}
+              selectedVariantId={selectedVariant?.id || null}
+              onVariantSelect={setSelectedVariant}
+              isEditing={isEditing}
+              formData={{
+                notes: formData.notes,
+                isAvailableForPurchase: formData.isAvailableForPurchase,
+              }}
+              onFormChange={handleChange}
+            />
+          </div>
+        )}
 
-        <TabsContent value="variants" className="mt-6">
-          <CompanyProductVariantsTab
-            product={currentCompanyProduct}
-            variants={variants}
-            variantsLoading={variantsLoading}
-            selectedVariantId={selectedVariant?.id || null}
-            onVariantSelect={setSelectedVariant}
-            onDeleteVariant={handleRemoveVariant}
-            onSetAsDefault={handleSetAsDefault}
-            onViewStockDetails={handleViewStockDetails}
-            onSaveVariant={handleSaveVariant}
-          />
-        </TabsContent>
+        {activeTab === "variants" && (
+          <div className="mt-6">
+            <CompanyProductVariantsTab
+              product={currentCompanyProduct}
+              variants={variants}
+              variantsLoading={variantsLoading}
+              selectedVariantId={selectedVariant?.id || null}
+              onVariantSelect={setSelectedVariant}
+              onDeleteVariant={handleRemoveVariant}
+              onSetAsDefault={handleSetAsDefault}
+              onViewStockDetails={handleViewStockDetails}
+              onSaveVariant={handleSaveVariant}
+            />
+          </div>
+        )}
 
-        <TabsContent value="attributes" className="mt-6">
-          <CompanyProductAttributesTab />
-        </TabsContent>
-      </Tabs>
+        {activeTab === "attributes" && (
+          <div className="mt-6">
+            <CompanyProductAttributesTab />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -566,9 +566,9 @@ export function SalesPage() {
   }
 
   return (
-    <div className="flex-1 p-4 lg:p-6 space-y-6">
+    <div className="flex-1 p-4 lg:p-6 flex flex-col min-h-0">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-foreground mb-1">Sales Overview</h1>
           <p className="text-muted-foreground">Track your revenue from appointments and product sales</p>
@@ -586,7 +586,7 @@ export function SalesPage() {
       </div>
 
       {/* Stats Cards - Desktop Only */}
-      <div className="hidden lg:block">
+      <div className="hidden lg:block mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
             <div className="flex items-center justify-between">
@@ -631,7 +631,7 @@ export function SalesPage() {
       </div>
 
       {/* Mobile & Tablet: Carousel - Horizontal scroll with same layout as desktop */}
-      <div className="block lg:hidden">
+      <div className="block lg:hidden mb-6">
         <Carousel
           opts={{
             align: "start",
@@ -693,7 +693,7 @@ export function SalesPage() {
       </div>
 
       {/* Filters and Search */}
-      <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]">
+      <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] mb-6">
         <div className="space-y-4">
           {/* Search Bar */}
           <SearchInput
@@ -750,12 +750,17 @@ export function SalesPage() {
         </div>
       </Card>
 
-      {/* Content Based on Active Tab */}
-      {activeTab === "sales" ? (
-        <div className="space-y-4">
-          {loading && filteredSales.length === 0 ? (
+      {/* Body Container - Fills rest of screen */}
+      <div className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
+        {/* Main Content */}
+        <div className="flex flex-col flex-1 min-h-0">
+          {/* Content Based on Active Tab */}
+          {activeTab === "sales" ? (
+            <div className="flex flex-col flex-1 min-h-0">
+              {loading && filteredSales.length === 0 ? (
             /* Skeleton for Sales List - Matching sales card structure */
-            <div className="space-y-4">
+            <div className="flex-1">
+              <div className="space-y-4">
               {[...Array(6)].map((_, index) => (
                 <Card key={index} className="p-6 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                   <div className="flex items-start gap-4">
@@ -803,6 +808,7 @@ export function SalesPage() {
                   </div>
                 </Card>
               ))}
+              </div>
             </div>
           ) : filteredSales.length === 0 ? (
             <EmptyState
@@ -825,8 +831,10 @@ export function SalesPage() {
               }
             />
           ) : (
-            filteredSales.map((sale) => (
-            <Card key={sale.id} className="p-6 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+            <div className="flex flex-col flex-1 min-h-0">
+              <div className="flex-1 space-y-4">
+                {filteredSales.map((sale) => (
+                  <Card key={sale.id} className="p-6 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
               <div className="flex items-start gap-4">
                 {/* Customer Avatar */}
                 <Avatar className="w-12 h-12 sm:w-16 sm:h-16 ring-2 ring-[var(--accent-border)] flex-shrink-0">
@@ -987,23 +995,26 @@ export function SalesPage() {
                 </div>
               </div>
             </Card>
-            ))
-          )}
-
-          {/* Pagination */}
-          {pagination && pagination.total > 0 && (
-            <Pagination
-              totalItems={pagination.total}
-              itemsPerPage={itemsPerPage}
-              currentPage={currentPage}
-              onPageChange={setCurrentPage}
-              showItemsPerPageSelector={true}
-              itemsPerPageOptions={[12, 24, 48, 96]}
-              onItemsPerPageChange={(newItemsPerPage) => {
-                setItemsPerPage(newItemsPerPage);
-                setCurrentPage(1);
-              }}
-            />
+                  ))}
+              </div>
+              {/* Pagination */}
+              {pagination && pagination.total > 0 && (
+                <div className="mt-auto pt-4">
+                  <Pagination
+                    totalItems={pagination.total}
+                    itemsPerPage={itemsPerPage}
+                    currentPage={currentPage}
+                    onPageChange={setCurrentPage}
+                    showItemsPerPageSelector={true}
+                    itemsPerPageOptions={[12, 24, 48, 96]}
+                    onItemsPerPageChange={(newItemsPerPage) => {
+                      setItemsPerPage(newItemsPerPage);
+                      setCurrentPage(1);
+                    }}
+                  />
+                </div>
+              )}
+            </div>
           )}
         </div>
       ) : (
@@ -1067,6 +1078,8 @@ export function SalesPage() {
           </div>
         </Card>
       )}
+          </div>
+        </div>
 
       {/* Delete Sale Confirmation Dialog */}
       <CustomDialog

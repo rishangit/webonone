@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Building, MapPin, Phone, Mail, Globe, Users, CheckCircle, XCircle, Clock, ArrowLeft } from "lucide-react";
+import { Building, MapPin, Phone, Mail, Globe, Users, CheckCircle, XCircle, Clock } from "lucide-react";
 import { Card } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
@@ -13,6 +13,7 @@ import { fetchCompanyRequest, clearError, approveCompanyRequest, rejectCompanyRe
 import { toast } from "sonner";
 import { formatAvatarUrl } from "../../utils";
 import { DateDisplay } from "../../components/common/DateDisplay";
+import { BackButton } from "../../components/common/BackButton";
 
 interface Company {
   id: string;
@@ -147,10 +148,7 @@ export function CompanyProfilePage({ companyId, onBack }: CompanyProfilePageProp
             <Building className="w-12 h-12 text-muted-foreground" />
             <h3 className="text-lg font-semibold text-foreground">Company not found</h3>
             <p className="text-muted-foreground mb-4">The company you're looking for doesn't exist or has been removed.</p>
-            <Button onClick={onBack} variant="outline">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Companies
-            </Button>
+            <BackButton onClick={onBack} label="Back to Companies" />
           </div>
         </Card>
       </div>
@@ -215,14 +213,7 @@ export function CompanyProfilePage({ companyId, onBack }: CompanyProfilePageProp
     <div className="flex-1 p-4 lg:p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button 
-          variant="outline" 
-          size="icon"
-          onClick={onBack}
-          className="bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent text-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="w-4 h-4" />
-        </Button>
+        <BackButton onClick={onBack} />
         <div className="flex-1">
           <h1 className="text-xl sm:text-2xl font-semibold text-foreground">Company Profile</h1>
           <p className="text-muted-foreground mt-1 text-sm sm:text-base">Review company registration details</p>

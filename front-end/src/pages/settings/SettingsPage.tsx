@@ -6,7 +6,7 @@ import { Switch } from "../../components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { Separator } from "../../components/ui/separator";
 import { Badge } from "../../components/ui/badge";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "../../components/ui/tabs";
+import { TabSwitcher } from "../../components/ui/tab-switcher";
 import { useIsMobile } from "../../components/ui/use-mobile";
 import { config } from "../../config/environment";
 import { CompanySettingsPage } from "../companies/CompanySettingsPage";
@@ -44,6 +44,7 @@ export function SettingsPage({ onThemeChange, currentTheme, onAccentColorChange,
   });
 
   const isMobile = useIsMobile();
+  const [activeTab, setActiveTab] = useState<string>("system");
 
   const themeOptions = [
     { value: "light", label: "Light Mode", icon: Sun, description: "Light theme for better visibility" },
@@ -126,14 +127,19 @@ export function SettingsPage({ onThemeChange, currentTheme, onAccentColorChange,
         </Badge>
       </div>
 
-      <Tabs defaultValue="system" className="w-full">
-        <TabsList>
-          <TabsTrigger value="system">System Setting</TabsTrigger>
-          <TabsTrigger value="company">Company Setting</TabsTrigger>
-        </TabsList>
+      <div className="w-full space-y-6">
+        <TabSwitcher
+          tabs={[
+            { value: "system", label: "System Setting" },
+            { value: "company", label: "Company Setting" }
+          ]}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
 
-        <TabsContent value="system" className="mt-6">
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        {activeTab === "system" && (
+          <div className="mt-6">
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Main Settings Column */}
         <div className="xl:col-span-2 space-y-6">
           {/* Appearance Section */}
@@ -514,14 +520,17 @@ export function SettingsPage({ onThemeChange, currentTheme, onAccentColorChange,
           </Card>
         </div>
       </div>
-        </TabsContent>
-
-        <TabsContent value="company" className="mt-6">
-          <div className="-m-4 lg:-m-8">
-            <CompanySettingsPage />
           </div>
-        </TabsContent>
-      </Tabs>
+        )}
+
+        {activeTab === "company" && (
+          <div className="mt-6">
+            <div className="-m-4 lg:-m-8">
+              <CompanySettingsPage />
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

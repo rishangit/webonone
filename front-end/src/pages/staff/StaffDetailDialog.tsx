@@ -9,7 +9,7 @@ import { Badge } from "../../components/ui/badge";
 import { Card } from "../../components/ui/card";
 import { Separator } from "../../components/ui/separator";
 import { Textarea } from "../../components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { TabSwitcher } from "../../components/ui/tab-switcher";
 import { User, Mail, Phone, MapPin, Calendar, Shield, Edit2, Save, X, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import { formatAvatarUrl } from "../../utils";
@@ -148,14 +148,19 @@ export function StaffDetailDialog({
         </div>
 
         {/* Tabbed Content */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="permissions">Permissions</TabsTrigger>
-            <TabsTrigger value="schedule">Schedule</TabsTrigger>
-          </TabsList>
+        <div className="w-full space-y-4">
+          <TabSwitcher
+            tabs={[
+              { value: "overview", label: "Overview" },
+              { value: "permissions", label: "Permissions" },
+              { value: "schedule", label: "Schedule" }
+            ]}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+          />
 
-          <TabsContent value="overview" className="space-y-4">
+          {activeTab === "overview" && (
+            <div className="space-y-4">
             {/* Contact Information */}
             <Card className="p-4 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
               <h4 className="font-medium text-foreground mb-3 flex items-center gap-2">
@@ -225,9 +230,11 @@ export function StaffDetailDialog({
                 </div>
               </Card>
             )}
-          </TabsContent>
+            </div>
+          )}
 
-          <TabsContent value="permissions" className="space-y-4">
+          {activeTab === "permissions" && (
+            <div className="space-y-4">
             <Card className="p-4 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
               <h4 className="font-medium text-foreground mb-3 flex items-center gap-2">
                 <Shield className="w-4 h-4 text-[var(--accent-text)]" />
@@ -259,9 +266,11 @@ export function StaffDetailDialog({
                 );
               })()}
             </Card>
-          </TabsContent>
+            </div>
+          )}
 
-          <TabsContent value="schedule" className="space-y-4">
+          {activeTab === "schedule" && (
+            <div className="space-y-4">
             <Card className="p-4 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
               <h4 className="font-medium text-foreground mb-3 flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-[var(--accent-text)]" />
@@ -304,8 +313,9 @@ export function StaffDetailDialog({
                 <p className="text-muted-foreground text-sm">No schedule configured</p>
               )}
             </Card>
-          </TabsContent>
-        </Tabs>
+            </div>
+          )}
+        </div>
 
         {/* Action Buttons */}
         <div className="flex items-center gap-3 pt-4 border-t border-[var(--glass-border)]">

@@ -22,6 +22,7 @@ import { formatCurrency } from "../../../utils";
 import { UserSelectionDialog } from "../../../components/common/UserSelectionDialog";
 import { currenciesService, Currency } from "../../../services/currencies";
 import { DateDisplay } from "../../../components/common/DateDisplay";
+import { BackButton } from "../../../components/common/BackButton";
 import { Avatar, AvatarImage, AvatarFallback } from "../../../components/ui/avatar";
 import { formatAvatarUrl } from "../../../utils";
 import { ImageWithFallback } from "../../../components/figma/ImageWithFallback";
@@ -424,14 +425,7 @@ export const VariantStockDetailsPage = ({ productId, variantId, onBack }: Varian
       {/* Header */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="icon"
-            onClick={onBack}
-            className="bg-[var(--glass-bg)] border-[var(--accent-border)]/30 hover:bg-[var(--accent-bg)] text-foreground hover:text-[var(--accent-text)]"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </Button>
+          <BackButton onClick={onBack} size="icon" label="" />
           <div className="flex-1">
             <h1 className="text-xl sm:text-2xl font-semibold text-foreground">Stock Details</h1>
             <p className="text-muted-foreground mt-1 text-sm sm:text-base">

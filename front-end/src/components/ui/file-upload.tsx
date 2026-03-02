@@ -3,6 +3,7 @@ import { Button } from './button';
 import { Card } from './card';
 import { Alert, AlertDescription } from './alert';
 import { Upload, X, Loader2 } from 'lucide-react';
+import { ProgressBar } from './progress-bar';
 import { fileUploadService, FileUploadData } from '../../services/fileUploadService';
 import { toast } from 'sonner';
 import { formatAvatarUrl } from '../../utils';
@@ -244,12 +245,11 @@ const FileUpload: React.FC<FileUploadProps> = ({
                   </span>
                 </div>
                 {/* Progress Bar */}
-                <div className="w-full bg-[var(--input-background)] rounded-full h-2 overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] transition-all duration-300 ease-out rounded-full"
-                    style={{ width: `${uploadProgress}%` }}
-                  />
-                </div>
+                <ProgressBar
+                  value={uploadProgress}
+                  variant="upload"
+                  wrapperClassName=""
+                />
                 <p className="text-xs text-muted-foreground">
                   Please wait while your image is being uploaded...
                 </p>

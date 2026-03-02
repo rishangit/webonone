@@ -1,6 +1,4 @@
 import { useState, useEffect, useMemo } from "react";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "../../../components/ui/button";
 import { useAppSelector, useAppDispatch } from "../../../store/hooks";
 import { updateProfileRequest, clearProfileError } from "../../../store/slices/profileSlice";
 import { fetchCompaniesRequest, approveCompanyRequest, rejectCompanyRequest, deleteCompanyRequest } from "../../../store/slices/companiesSlice";
@@ -8,10 +6,11 @@ import { toast } from "sonner";
 import { UserRole, isRole } from "../../../types/user";
 import { useNavigate } from "react-router-dom";
 import { DeleteConfirmationDialog } from "../../../components/common/DeleteConfirmationDialog";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "../../../components/ui/tabs";
+import { TabSwitcher } from "../../../components/ui/tab-switcher";
 import { ProfileTab } from "./ProfileTab";
 import { CompaniesTab } from "./CompaniesTab";
 import { Company } from "../../../services/companies";
+import { BackButton } from "../../../components/common/BackButton";
 
 interface ProfilePageProps {
   userId?: string;
@@ -28,6 +27,7 @@ export const ProfilePage = ({ userId, onBack }: ProfilePageProps) => {
   const [companyToDelete, setCompanyToDelete] = useState<{ id: string; name: string } | null>(null);
   const [loggingIn, setLoggingIn] = useState<string | null>(null);
   const [showCompanyRegistration, setShowCompanyRegistration] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>("profile");
   
   const isSystemAdmin = isRole(user?.role, UserRole.SYSTEM_ADMIN);
 
@@ -224,9 +224,7 @@ export const ProfilePage = ({ userId, onBack }: ProfilePageProps) => {
       {/* Header */}
       <div className="flex items-center gap-4">
         {onBack && (
-          <Button variant="ghost" size="icon" onClick={onBack}>
-            <ArrowLeft className="w-4 h-4" />
-          </Button>
+          <BackButton onClick={onBack} />
         )}
         <div className="flex-1">
           <h1 className="text-2xl font-semibold text-foreground">
@@ -239,28 +237,34 @@ export const ProfilePage = ({ userId, onBack }: ProfilePageProps) => {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="profile" className="w-full">
-        <TabsList>
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          {(isSystemAdmin || userCompanies.length > 0 || companiesLoading) && (
-            <TabsTrigger value="companies">Companies</TabsTrigger>
-          )}
-        </TabsList>
+      <div className="w-full space-y-6">
+        <TabSwitcher
+          tabs={[
+            { value: "profile", label: "Profile" },
+            ...((isSystemAdmin || userCompanies.length > 0 || companiesLoading) 
+              ? [{ value: "companies", label: "Companies" }] 
+              : [])
+          ]}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
 
         {/* Profile Tab */}
-        <TabsContent value="profile" className="mt-6">
-          <ProfileTab
-            user={user}
-            userId={userId}
-            isUpdating={isUpdating}
-            onAvatarUpload={handleAvatarUpload}
-            onAvatarDelete={handleAvatarDelete}
-          />
-        </TabsContent>
+        {activeTab === "profile" && (
+          <div className="mt-6">
+            <ProfileTab
+              user={user}
+              userId={userId}
+              isUpdating={isUpdating}
+              onAvatarUpload={handleAvatarUpload}
+              onAvatarDelete={handleAvatarDelete}
+            />
+          </div>
+        )}
 
         {/* Companies Tab */}
-        {(isSystemAdmin || userCompanies.length > 0 || companiesLoading) && (
-          <TabsContent value="companies" className="mt-6">
+        {activeTab === "companies" && (isSystemAdmin || userCompanies.length > 0 || companiesLoading) && (
+          <div className="mt-6">
             <CompaniesTab
               userId={userId}
               isSystemAdmin={isSystemAdmin}
@@ -277,9 +281,9 @@ export const ProfilePage = ({ userId, onBack }: ProfilePageProps) => {
               onLogin={!isSystemAdmin ? handleLoginToCompany : undefined}
               onRegisterCompany={() => setShowCompanyRegistration(true)}
             />
-          </TabsContent>
+          </div>
         )}
-      </Tabs>
+      </div>
 
       {/* Delete Confirmation Dialog */}
       <DeleteConfirmationDialog

@@ -1,7 +1,8 @@
-import { ArrowLeft, FileText, Edit, Trash2 } from "lucide-react";
+import { FileText, Edit, Trash2 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Badge } from "../../../components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../../components/ui/dropdown-menu";
+import { BackButton } from "../../../components/common/BackButton";
 import { Service } from "../../../services/services";
 
 interface ServiceDetailHeaderProps {
@@ -35,15 +36,7 @@ export const ServiceDetailHeader = ({
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full">
       <div className="flex items-center gap-4 min-w-0 flex-1">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onBack}
-          className="border-[var(--glass-border)] text-foreground hover:bg-[var(--accent-bg)] flex-shrink-0"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
-        </Button>
+        <BackButton onClick={onBack} />
         <div className="min-w-0 flex-1">
           <h1 className="text-2xl font-semibold text-foreground break-words">{service.name}</h1>
           <p className="text-sm text-muted-foreground truncate">Service ID: {service.id}</p>

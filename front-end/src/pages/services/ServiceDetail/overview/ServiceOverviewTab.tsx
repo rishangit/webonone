@@ -17,17 +17,21 @@ export const ServiceOverviewTab = ({
   formatDuration,
 }: ServiceOverviewTabProps) => {
   return (
-    <div className="space-y-6">
-      {/* Service Image */}
-      <ServiceDetailImage service={service} />
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Service Image - Left Column */}
+      <div className="w-full">
+        <ServiceDetailImage service={service} />
+      </div>
 
-      {/* Service Details */}
-      <ServiceDetailInfo
-        service={service}
-        companyCurrency={companyCurrency}
-        formatCurrency={formatCurrency}
-        formatDuration={formatDuration}
-      />
+      {/* Service Details - Right Column */}
+      <div className="w-full">
+        <ServiceDetailInfo
+          service={service}
+          companyCurrency={companyCurrency}
+          formatCurrency={formatCurrency}
+          formatDuration={formatDuration}
+        />
+      </div>
     </div>
   );
 };

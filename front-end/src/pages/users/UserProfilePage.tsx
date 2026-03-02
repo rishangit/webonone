@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, User, Mail, Phone, MapPin, Shield, Building, CheckCircle, Clock } from "lucide-react";
+import { User, Mail, Phone, MapPin, Shield, Building, CheckCircle, Clock } from "lucide-react";
 import { Card } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { formatAvatarUrl } from "../../utils";
 import { UserRoleNames, UserRole } from "../../types/user";
 import { DateDisplay } from "../../components/common/DateDisplay";
+import { BackButton } from "../../components/common/BackButton";
 
 interface UserProfilePageProps {
   userId: string;
@@ -73,10 +74,7 @@ export const UserProfilePage = ({ userId, onBack }: UserProfilePageProps) => {
             <User className="w-12 h-12 text-muted-foreground" />
             <h3 className="text-lg font-semibold text-foreground">User not found</h3>
             <p className="text-muted-foreground mb-4">The user you're looking for doesn't exist or has been removed.</p>
-            <Button onClick={onBack} variant="outline">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Users
-            </Button>
+            <BackButton onClick={onBack} label="Back to Users" />
           </div>
         </Card>
       </div>
@@ -94,14 +92,7 @@ export const UserProfilePage = ({ userId, onBack }: UserProfilePageProps) => {
     <div className="flex-1 p-4 lg:p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button 
-          variant="outline" 
-          size="icon"
-          onClick={onBack}
-          className="bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent text-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="w-4 h-4" />
-        </Button>
+        <BackButton onClick={onBack} />
         <div className="flex-1">
           <h1 className="text-xl sm:text-2xl font-semibold text-foreground">User Profile</h1>
           <p className="text-muted-foreground mt-1 text-sm sm:text-base">View and manage user information</p>

@@ -314,9 +314,9 @@ export function TagsPage({ currentUser }: TagsPageProps) {
   }, [pagination, tags]);
 
   return (
-    <div className="flex-1 space-y-6 p-4 lg:p-8 min-h-screen">
+    <div className="flex-1 p-4 lg:p-8 flex flex-col min-h-0">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <div className="flex items-center gap-2 mb-2">
             <h1 className="text-2xl font-semibold text-foreground">Tags Management</h1>
@@ -337,7 +337,7 @@ export function TagsPage({ currentUser }: TagsPageProps) {
       </div>
 
       {/* Stats Cards - Desktop Only */}
-      <div className="hidden lg:block">
+      <div className="hidden lg:block mb-6">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] p-4">
             <div className="flex items-center justify-between">
@@ -379,7 +379,7 @@ export function TagsPage({ currentUser }: TagsPageProps) {
       </div>
 
       {/* Mobile & Tablet: Carousel - Horizontal scroll with same layout as desktop */}
-      <div className="block lg:hidden">
+      <div className="block lg:hidden mb-6">
         <Carousel
           opts={{
             align: "start",
@@ -416,7 +416,7 @@ export function TagsPage({ currentUser }: TagsPageProps) {
       </div>
 
       {/* Search and Filters */}
-      <Card className="p-4 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
+      <Card className="p-4 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] mb-6">
         <div className="space-y-4">
           <SearchInput
             placeholder="Search tags by name or description..."
@@ -452,9 +452,13 @@ export function TagsPage({ currentUser }: TagsPageProps) {
         </div>
       </Card>
 
-      {/* Loading State - Skeleton for Tag Cards */}
-      {loading && displayedTags.length === 0 ? (
-        <>
+      {/* Body Container - Fills rest of screen */}
+      <div className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
+        {/* Main Content */}
+        <div className="flex flex-col flex-1 min-h-0">
+          {/* Loading State - Skeleton for Tag Cards */}
+          {loading && displayedTags.length === 0 ? (
+        <div className="flex-1">
           {/* Skeleton for List View */}
           {viewMode === "list" ? (
             /* Skeleton for List View - Matching renderTagListItem structure */
@@ -520,7 +524,7 @@ export function TagsPage({ currentUser }: TagsPageProps) {
               ))}
             </div>
           )}
-        </>
+        </div>
       ) : displayedTags.length === 0 ? (
         <EmptyState
           icon={TagIcon}
@@ -538,33 +542,39 @@ export function TagsPage({ currentUser }: TagsPageProps) {
           }}
         />
       ) : (
-        <>
-          <div className={viewMode === "grid" 
-            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" 
-            : "space-y-4"
-          }>
-            {displayedTags.map(tag => 
-              viewMode === "grid" ? renderTagCard(tag) : renderTagListItem(tag)
-            )}
+        <div className="flex flex-col flex-1 min-h-0">
+          <div className="flex-1">
+            <div className={viewMode === "grid" 
+              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" 
+              : "space-y-4"
+            }>
+              {displayedTags.map(tag => 
+                viewMode === "grid" ? renderTagCard(tag) : renderTagListItem(tag)
+              )}
+            </div>
           </div>
 
           {/* Pagination */}
           {pagination && (
-            <Pagination
-              totalItems={pagination.total}
-              itemsPerPage={itemsPerPage}
-              currentPage={currentPage}
-              onPageChange={setCurrentPage}
-              showItemsPerPageSelector={true}
-              itemsPerPageOptions={[12, 24, 48, 96]}
-              onItemsPerPageChange={(newItemsPerPage) => {
-                setItemsPerPage(newItemsPerPage);
-                setCurrentPage(1);
-              }}
-            />
+            <div className="mt-auto pt-4">
+              <Pagination
+                totalItems={pagination.total}
+                itemsPerPage={itemsPerPage}
+                currentPage={currentPage}
+                onPageChange={setCurrentPage}
+                showItemsPerPageSelector={true}
+                itemsPerPageOptions={[12, 24, 48, 96]}
+                onItemsPerPageChange={(newItemsPerPage) => {
+                  setItemsPerPage(newItemsPerPage);
+                  setCurrentPage(1);
+                }}
+              />
+            </div>
           )}
-        </>
+        </div>
       )}
+        </div>
+      </div>
 
       {/* Tag Form Dialog */}
       <TagFormDialog

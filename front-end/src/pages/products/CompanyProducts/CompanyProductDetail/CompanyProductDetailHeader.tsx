@@ -1,6 +1,7 @@
-import { ArrowLeft, Package, Edit, Save, X } from "lucide-react";
+import { Package, Edit, Save, X } from "lucide-react";
 import { Button } from "../../../../components/ui/button";
 import { Badge } from "../../../../components/ui/badge";
+import { BackButton } from "../../../../components/common/BackButton";
 import { CompanyProduct } from "../../../../services/companyProducts";
 
 interface CompanyProductDetailHeaderProps {
@@ -27,14 +28,7 @@ export const CompanyProductDetailHeader = ({
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div className="flex items-center gap-3">
-        <Button 
-          variant="outline" 
-          size="icon"
-          onClick={onBack}
-          className="bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent"
-        >
-          <ArrowLeft className="w-4 h-4" />
-        </Button>
+        <BackButton onClick={onBack} />
         <div>
           <h1 className="text-2xl font-semibold text-foreground">{product.name || 'Unknown Product'}</h1>
           <p className="text-muted-foreground">{product.sku ? `SKU: ${product.sku}` : 'Company Product'}</p>

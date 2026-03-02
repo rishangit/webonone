@@ -120,9 +120,27 @@ export function UserCard({
     navigate(`/system/users/${userData.id}/history`);
   };
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Don't navigate if clicking on dropdown menu or buttons
+    const target = e.target as HTMLElement;
+    if (target.closest('button') || target.closest('[role="menuitem"]') || target.closest('[data-radix-popper-content-wrapper]')) {
+      return;
+    }
+    
+    // Navigate to user profile
+    if (onViewProfile) {
+      onViewProfile(userData.id);
+    } else {
+      navigate(`/system/users/${userData.id}`);
+    }
+  };
+
   if (viewMode === "list") {
     return (
-      <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200">
+      <Card 
+        className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 cursor-pointer"
+        onClick={handleCardClick}
+      >
         <div className="flex items-start gap-4">
           <Avatar className="w-20 h-20">
             <AvatarImage 
@@ -237,7 +255,10 @@ export function UserCard({
 
   // Grid view (default)
   return (
-    <Card className="overflow-hidden backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-300 hover:shadow-lg hover:shadow-[var(--glass-shadow)] group">
+    <Card 
+      className="overflow-hidden backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-300 hover:shadow-lg hover:shadow-[var(--glass-shadow)] group cursor-pointer"
+      onClick={handleCardClick}
+    >
       <div className="p-6">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">

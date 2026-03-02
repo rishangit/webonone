@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Stethoscope } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Card } from "../../../components/ui/card";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "../../../components/ui/tabs";
+import { TabSwitcher } from "../../../components/ui/tab-switcher";
 import { servicesService, Service } from "../../../services/services";
 import { currenciesService } from "../../../services/currencies";
 import type { Currency } from "../../../services/currencies";
@@ -226,38 +226,48 @@ export const ServiceDetailPage = ({ serviceId, onBack }: ServiceDetailPageProps)
         onDelete={() => setShowDeleteDialog(true)}
       />
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="gallery">Gallery</TabsTrigger>
-          <TabsTrigger value="statistics">Statistics</TabsTrigger>
-        </TabsList>
+      <div className="w-full space-y-6">
+        <TabSwitcher
+          tabs={[
+            { value: "overview", label: "Overview" },
+            { value: "gallery", label: "Gallery" },
+            { value: "statistics", label: "Statistics" }
+          ]}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
 
-        <TabsContent value="overview" className="mt-6">
-          <ServiceOverviewTab
-            service={service}
-            companyCurrency={companyCurrency}
-            formatCurrency={formatCurrency}
-            formatDuration={formatDuration}
-          />
-        </TabsContent>
+        {activeTab === "overview" && (
+          <div className="mt-6">
+            <ServiceOverviewTab
+              service={service}
+              companyCurrency={companyCurrency}
+              formatCurrency={formatCurrency}
+              formatDuration={formatDuration}
+            />
+          </div>
+        )}
 
-        <TabsContent value="gallery" className="mt-6">
-          <ServiceGalleryTab
-            service={service}
-            companyId={companyId}
-            onServiceUpdate={(updatedService) => setService(updatedService)}
-          />
-        </TabsContent>
+        {activeTab === "gallery" && (
+          <div className="mt-6">
+            <ServiceGalleryTab
+              service={service}
+              companyId={companyId}
+              onServiceUpdate={(updatedService) => setService(updatedService)}
+            />
+          </div>
+        )}
 
-        <TabsContent value="statistics" className="mt-6">
-          <ServiceStatisticsTab
-            service={service}
-            companyCurrency={companyCurrency}
-            formatCurrency={formatCurrency}
-          />
-        </TabsContent>
-      </Tabs>
+        {activeTab === "statistics" && (
+          <div className="mt-6">
+            <ServiceStatisticsTab
+              service={service}
+              companyCurrency={companyCurrency}
+              formatCurrency={formatCurrency}
+            />
+          </div>
+        )}
+      </div>
 
       {/* Delete Confirmation Dialog */}
       <CustomDialog

@@ -976,9 +976,9 @@ export function ProductsPage({ currentUser, onNavigate, onViewProduct }: Product
   const showSkeleton = loading && filteredProducts.length === 0;
 
   return (
-    <div className="flex-1 space-y-6 p-4 lg:p-6">
+    <div className="flex-1 p-4 lg:p-6 flex flex-col min-h-0">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">{getPageTitle()}</h1>
           <p className="text-muted-foreground mt-1">{getPageDescription()}</p>
@@ -996,7 +996,7 @@ export function ProductsPage({ currentUser, onNavigate, onViewProduct }: Product
       </div>
 
       {/* Search and Filters */}
-      <Card className="p-4 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
+      <Card className="p-4 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] mb-6">
         <div className="space-y-4">
             <SearchInput
             placeholder={isCompanyOwner 
@@ -1035,9 +1035,13 @@ export function ProductsPage({ currentUser, onNavigate, onViewProduct }: Product
         </div>
       </Card>
 
-      {/* Products Grid/List */}
-      {showSkeleton ? (
-        <>
+      {/* Body Container - Fills rest of screen */}
+      <div className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
+        {/* Main Content */}
+        <div className="flex flex-col flex-1 min-h-0">
+          {/* Products Grid/List */}
+          {showSkeleton ? (
+        <div className="flex-1">
           {viewMode === "list" ? (
             /* Skeleton for List View - Matching CompanyProductCard structure */
             <div className="space-y-4">
@@ -1153,28 +1157,49 @@ export function ProductsPage({ currentUser, onNavigate, onViewProduct }: Product
               ))}
             </div>
           )}
-        </>
+        </div>
       ) : filteredProducts.length > 0 ? (
-        <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" : "space-y-4"}>
-          {isCompanyOwner ? (
-            // Use CompanyProductCard for company owners
-            filteredProducts.map((product) => (
-              <CompanyProductCard
-                key={product.id}
-                product={product as CompanyProduct}
-                viewMode={viewMode}
-                onDelete={handleDeleteCompanyProduct}
-                onView={handleViewCompanyProduct}
-                onViewVariant={handleViewVariant}
-                onEditVariant={handleEditVariant}
-                onDeleteVariant={handleDeleteVariant}
+        <div className="flex flex-col flex-1 min-h-0">
+          <div className="flex-1">
+            <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" : "space-y-4"}>
+              {isCompanyOwner ? (
+                // Use CompanyProductCard for company owners
+                filteredProducts.map((product) => (
+                  <CompanyProductCard
+                    key={product.id}
+                    product={product as CompanyProduct}
+                    viewMode={viewMode}
+                    onDelete={handleDeleteCompanyProduct}
+                    onView={handleViewCompanyProduct}
+                    onViewVariant={handleViewVariant}
+                    onEditVariant={handleEditVariant}
+                    onDeleteVariant={handleDeleteVariant}
+                  />
+                ))
+              ) : (
+                // Use regular ProductCard for other roles
+                filteredProducts.map((product) => (
+                  <ProductCard key={product.id} product={product as Product} />
+                ))
+              )}
+            </div>
+          </div>
+          {/* Pagination - Only for Company Owners */}
+          {isCompanyOwner && pagination && pagination.total > 0 && (
+            <div className="mt-auto pt-4">
+              <Pagination
+                totalItems={pagination.total}
+                itemsPerPage={itemsPerPage}
+                currentPage={currentPage}
+                onPageChange={setCurrentPage}
+                showItemsPerPageSelector={true}
+                itemsPerPageOptions={[12, 24, 48, 96]}
+                onItemsPerPageChange={(newItemsPerPage) => {
+                  setItemsPerPage(newItemsPerPage);
+                  setCurrentPage(1);
+                }}
               />
-            ))
-          ) : (
-            // Use regular ProductCard for other roles
-            filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product as Product} />
-            ))
+            </div>
           )}
         </div>
       ) : (
@@ -1198,22 +1223,8 @@ export function ProductsPage({ currentUser, onNavigate, onViewProduct }: Product
           }
         />
       )}
-
-      {/* Pagination - Only for Company Owners */}
-      {isCompanyOwner && pagination && pagination.total > 0 && (
-        <Pagination
-          totalItems={pagination.total}
-          itemsPerPage={itemsPerPage}
-          currentPage={currentPage}
-          onPageChange={setCurrentPage}
-          showItemsPerPageSelector={true}
-          itemsPerPageOptions={[12, 24, 48, 96]}
-          onItemsPerPageChange={(newItemsPerPage) => {
-            setItemsPerPage(newItemsPerPage);
-            setCurrentPage(1);
-          }}
-        />
-      )}
+        </div>
+      </div>
 
       {/* Add Product Dialog */}
       {canAddProducts() && (

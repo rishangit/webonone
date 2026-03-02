@@ -594,9 +594,9 @@ export const BacklogPage = ({ currentUser }: BacklogPageProps) => {
   }, [pagination, items]);
 
   return (
-    <div className="flex-1 space-y-6 p-4 lg:p-8 min-h-screen">
+    <div className="flex-1 p-4 lg:p-8 flex flex-col min-h-0">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <div className="flex items-center gap-2 mb-2">
             <h1 className="text-2xl font-semibold text-foreground">Issue / Feature Request Backlog</h1>
@@ -613,7 +613,7 @@ export const BacklogPage = ({ currentUser }: BacklogPageProps) => {
       </div>
 
       {/* Stats Cards - Desktop Only */}
-      <div className="hidden lg:block">
+      <div className="hidden lg:block mb-6">
         <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
           <Card className="backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] p-4">
             <div className="flex items-center justify-between">
@@ -673,7 +673,7 @@ export const BacklogPage = ({ currentUser }: BacklogPageProps) => {
       </div>
 
       {/* Mobile & Tablet: Carousel */}
-      <div className="block lg:hidden">
+      <div className="block lg:hidden mb-6">
         <Carousel
           opts={{
             align: "start",
@@ -712,7 +712,7 @@ export const BacklogPage = ({ currentUser }: BacklogPageProps) => {
       </div>
 
       {/* Search and Filters */}
-      <Card className="p-4 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
+      <Card className="p-4 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] mb-6">
         <div className="space-y-4">
           <SearchInput
             placeholder="Search by title..."
@@ -746,9 +746,14 @@ export const BacklogPage = ({ currentUser }: BacklogPageProps) => {
         </div>
       </Card>
 
-      {/* Loading State */}
-      {loading && displayedItems.length === 0 ? (
-        <div className="space-y-4">
+      {/* Body Container - Fills rest of screen */}
+      <div className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
+        {/* Main Content */}
+        <div className="flex flex-col flex-1 min-h-0">
+          {/* Loading State */}
+          {loading && displayedItems.length === 0 ? (
+        <div className="flex-1">
+          <div className="space-y-4">
           {[...Array(6)].map((_, index) => (
             <Card key={index} className="p-4 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between">
@@ -763,6 +768,7 @@ export const BacklogPage = ({ currentUser }: BacklogPageProps) => {
               </div>
             </Card>
           ))}
+          </div>
         </div>
       ) : displayedItems.length === 0 ? (
         <EmptyState
@@ -781,47 +787,53 @@ export const BacklogPage = ({ currentUser }: BacklogPageProps) => {
           }}
         />
       ) : (
-        <>
-          {viewMode === "grid" ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {displayedItems.map(item => renderItemCard(item))}
-            </div>
-          ) : (
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
-            >
-              <SortableContext
-                items={displayedItems.map(item => item.id)}
-                strategy={verticalListSortingStrategy}
+        <div className="flex flex-col flex-1 min-h-0">
+          <div className="flex-1">
+            {viewMode === "grid" ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {displayedItems.map(item => renderItemCard(item))}
+              </div>
+            ) : (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
               >
-                <div className="space-y-4">
-                  {displayedItems.map(item => (
-                    <SortableListItem key={item.id} item={item} />
-                  ))}
-                </div>
-              </SortableContext>
-            </DndContext>
-          )}
+                <SortableContext
+                  items={displayedItems.map(item => item.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="space-y-4">
+                    {displayedItems.map(item => (
+                      <SortableListItem key={item.id} item={item} />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
+            )}
+          </div>
 
           {/* Pagination */}
           {pagination && (
-            <Pagination
-              totalItems={pagination.total}
-              itemsPerPage={itemsPerPage}
-              currentPage={currentPage}
-              onPageChange={setCurrentPage}
-              showItemsPerPageSelector={true}
-              itemsPerPageOptions={[12, 24, 48, 96]}
-              onItemsPerPageChange={(newItemsPerPage) => {
-                setItemsPerPage(newItemsPerPage);
-                setCurrentPage(1);
-              }}
-            />
+            <div className="mt-auto pt-4">
+              <Pagination
+                totalItems={pagination.total}
+                itemsPerPage={itemsPerPage}
+                currentPage={currentPage}
+                onPageChange={setCurrentPage}
+                showItemsPerPageSelector={true}
+                itemsPerPageOptions={[12, 24, 48, 96]}
+                onItemsPerPageChange={(newItemsPerPage) => {
+                  setItemsPerPage(newItemsPerPage);
+                  setCurrentPage(1);
+                }}
+              />
+            </div>
           )}
-        </>
+        </div>
       )}
+        </div>
+      </div>
 
       {/* Backlog Form Dialog */}
       <BacklogFormDialog

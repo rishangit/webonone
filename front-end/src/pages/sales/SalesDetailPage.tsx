@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, Calendar, Clock, CreditCard, DollarSign, Package, User, Users, FileText, Trash2 } from "lucide-react";
+import { Calendar, Clock, CreditCard, DollarSign, Package, User, Users, FileText, Trash2 } from "lucide-react";
 import { Card } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../components/ui/dropdown-menu";
 import { CustomDialog } from "../../components/ui/custom-dialog";
 import { currenciesService, Currency } from "../../services/currencies";
+import { BackButton } from "../../components/common/BackButton";
 
 interface SalesDetailPageProps {
   saleId: string;
@@ -196,10 +197,7 @@ export const SalesDetailPage = ({ saleId, onBack }: SalesDetailPageProps) => {
           <Package className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
           <h3 className="text-lg font-semibold text-foreground mb-2">Sale Not Found</h3>
           <p className="text-muted-foreground mb-4">The sale you're looking for doesn't exist.</p>
-          <Button onClick={onBack} variant="outline">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Sales
-          </Button>
+          <BackButton onClick={onBack} label="Back to Sales" />
         </div>
       </div>
     );
@@ -232,15 +230,7 @@ export const SalesDetailPage = ({ saleId, onBack }: SalesDetailPageProps) => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onBack}
-            className="border-[var(--glass-border)] text-foreground hover:bg-[var(--accent-bg)]"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
+          <BackButton onClick={onBack} />
           <div>
             <h1 className="text-2xl font-semibold text-foreground">Sale Details</h1>
             <p className="text-sm text-muted-foreground">Sale ID: {sale.id}</p>

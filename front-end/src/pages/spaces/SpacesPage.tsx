@@ -389,9 +389,9 @@ export const SpacesPage = () => {
   );
 
   return (
-    <div className="flex-1 p-4 lg:p-6 space-y-6">
+    <div className="flex-1 p-4 lg:p-6 flex flex-col min-h-0">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-xl sm:text-2xl font-semibold text-foreground">Spaces Management</h1>
           <p className="text-muted-foreground mt-1 text-sm sm:text-base">Manage your company's rooms, sections, and facilities</p>
@@ -407,7 +407,7 @@ export const SpacesPage = () => {
       </div>
 
       {/* Stats Cards - Desktop Only */}
-      <div className="hidden lg:block">
+      <div className="hidden lg:block mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
             <div className="flex items-center justify-between">
@@ -442,7 +442,7 @@ export const SpacesPage = () => {
       </div>
 
       {/* Mobile & Tablet: Carousel - Horizontal scroll with same layout as desktop */}
-      <div className="block lg:hidden">
+      <div className="block lg:hidden mb-6">
         <Carousel
           opts={{
             align: "start",
@@ -492,7 +492,7 @@ export const SpacesPage = () => {
       </div>
 
       {/* Filters and Search */}
-      <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]">
+      <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] mb-6">
         <div className="space-y-4">
           <SearchInput
             placeholder="Search spaces by name or description..."
@@ -528,9 +528,13 @@ export const SpacesPage = () => {
         </div>
       </Card>
 
-      {/* Spaces Grid/List */}
-      {loading && displayedSpaces.length === 0 ? (
-        <>
+      {/* Body Container - Fills rest of screen */}
+      <div className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
+        {/* Main Content */}
+        <div className="flex flex-col flex-1 min-h-0">
+          {/* Spaces Grid/List */}
+          {loading && displayedSpaces.length === 0 ? (
+        <div className="flex-1">
           {viewMode === "list" ? (
             /* Skeleton for List View - Matching SpaceListItem structure */
             <div className="space-y-4">
@@ -596,37 +600,41 @@ export const SpacesPage = () => {
               ))}
             </div>
           )}
-        </>
+        </div>
       ) : displayedSpaces.length > 0 ? (
-        <>
-          {viewMode === "grid" ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {displayedSpaces.map((space) => (
-                <SpaceCard key={space.id} space={space} />
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {displayedSpaces.map((space) => (
-                <SpaceListItem key={space.id} space={space} />
-              ))}
-            </div>
-          )}
+        <div className="flex flex-col flex-1 min-h-0">
+          <div className="flex-1">
+            {viewMode === "grid" ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {displayedSpaces.map((space) => (
+                  <SpaceCard key={space.id} space={space} />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {displayedSpaces.map((space) => (
+                  <SpaceListItem key={space.id} space={space} />
+                ))}
+              </div>
+            )}
+          </div>
           {pagination && (
-            <Pagination
-              totalItems={pagination.total}
-              itemsPerPage={itemsPerPage}
-              currentPage={currentPage}
-              onPageChange={setCurrentPage}
-              showItemsPerPageSelector={true}
-              itemsPerPageOptions={[12, 24, 48, 96]}
-              onItemsPerPageChange={(newItemsPerPage) => {
-                setItemsPerPage(newItemsPerPage);
-                setCurrentPage(1);
-              }}
-            />
+            <div className="mt-auto pt-4">
+              <Pagination
+                totalItems={pagination.total}
+                itemsPerPage={itemsPerPage}
+                currentPage={currentPage}
+                onPageChange={setCurrentPage}
+                showItemsPerPageSelector={true}
+                itemsPerPageOptions={[12, 24, 48, 96]}
+                onItemsPerPageChange={(newItemsPerPage) => {
+                  setItemsPerPage(newItemsPerPage);
+                  setCurrentPage(1);
+                }}
+              />
+            </div>
           )}
-        </>
+        </div>
       ) : (
         <EmptyState
           icon={MapPin}
@@ -644,6 +652,8 @@ export const SpacesPage = () => {
           }}
         />
       )}
+        </div>
+      </div>
 
       {/* Add/Edit Space Dialog */}
       <CustomDialog

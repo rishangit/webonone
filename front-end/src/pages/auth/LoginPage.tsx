@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Eye, EyeOff, Lock, Mail, Shield, Zap } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, Shield, Zap, AlertCircle } from "lucide-react";
 import { Card } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { loginRequest, clearError, setLoading } from "../../store/slices/authSlice";
 import { RoleSelectionDialog } from "../../components/auth/RoleSelectionDialog";
+import { cn } from "../../components/ui/utils";
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -88,13 +89,12 @@ export function LoginPage() {
     }
   }, [isAuthenticated, navigate]);
 
-  // Handle errors
+  // Handle errors - show toast but keep error in state for form display
   useEffect(() => {
     if (error) {
       toast.error(error);
-      dispatch(clearError());
     }
-  }, [error, dispatch]);
+  }, [error]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -226,7 +226,10 @@ export function LoginPage() {
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10 bg-[var(--input-background)] border-[var(--glass-border)] text-foreground placeholder:text-muted-foreground focus:border-[var(--accent-border)] focus:ring-[var(--accent-primary)]/20"
+                    className={cn(
+                      "pl-10 bg-[var(--input-background)] border-[var(--glass-border)] text-foreground placeholder:text-muted-foreground focus:border-[var(--accent-border)] focus:ring-[var(--accent-primary)]/20",
+                      error && "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+                    )}
                     required
                   />
                 </div>
@@ -243,7 +246,10 @@ export function LoginPage() {
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 pr-10 bg-[var(--input-background)] border-[var(--glass-border)] text-foreground placeholder:text-muted-foreground focus:border-[var(--accent-border)] focus:ring-[var(--accent-primary)]/20"
+                    className={cn(
+                      "pl-10 pr-10 bg-[var(--input-background)] border-[var(--glass-border)] text-foreground placeholder:text-muted-foreground focus:border-[var(--accent-border)] focus:ring-[var(--accent-primary)]/20",
+                      error && "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+                    )}
                     required
                   />
                   <Button
@@ -256,6 +262,12 @@ export function LoginPage() {
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </Button>
                 </div>
+                {error && (
+                  <div className="flex items-center gap-2 text-red-600 dark:text-red-400 text-sm mt-1">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    <span>{error}</span>
+                  </div>
+                )}
               </div>
 
               {/* Remember Me & Forgot Password */}

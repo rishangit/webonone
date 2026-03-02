@@ -7,6 +7,7 @@ import { Card } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
+import { ProgressBar } from "../../components/ui/progress-bar";
 import { PhoneInput } from "../../components/common/PhoneInput";
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
@@ -265,12 +266,10 @@ export const SignUpWizardPage = () => {
 
         {/* Progress Bar */}
         <div className="mb-6">
-          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-            <div
-              className="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-primary-hover)] h-2 rounded-full transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            ></div>
-          </div>
+          <ProgressBar
+            value={progress}
+            wrapperClassName=""
+          />
         </div>
 
         {/* Signup Card */}

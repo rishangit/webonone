@@ -5,7 +5,7 @@ import { Card } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "../../components/ui/tabs";
+import { TabSwitcher } from "../../components/ui/tab-switcher";
 import { WebsiteLayout } from "../layout/WebsiteLayout";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import {
@@ -186,13 +186,18 @@ export const ThemeFormPage = () => {
               </div>
 
               {/* Tabs */}
-              <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "colors" | "text")} className="w-full">
-                <TabsList className="grid w-full grid-cols-2 bg-[var(--glass-bg)] border-[var(--glass-border)]">
-                  <TabsTrigger value="colors">Color Settings</TabsTrigger>
-                  <TabsTrigger value="text">Text Settings</TabsTrigger>
-                </TabsList>
+              <div className="w-full space-y-6">
+                <TabSwitcher
+                  tabs={[
+                    { value: "colors", label: "Color Settings" },
+                    { value: "text", label: "Text Settings" }
+                  ]}
+                  activeTab={activeTab}
+                  onTabChange={(value) => setActiveTab(value as "colors" | "text")}
+                />
 
-                <TabsContent value="colors" className="space-y-6 mt-6">
+                {activeTab === "colors" && (
+                  <div className="space-y-6 mt-6">
                   <div className="space-y-2">
                     <Label htmlFor="backgroundColor">Background Color</Label>
                     <div className="flex items-center gap-2">
@@ -280,9 +285,11 @@ export const ThemeFormPage = () => {
                       </p>
                     </div>
                   </div>
-                </TabsContent>
+                  </div>
+                )}
 
-                <TabsContent value="text" className="space-y-6 mt-6">
+                {activeTab === "text" && (
+                  <div className="space-y-6 mt-6">
                   <div className="space-y-2">
                     <Label htmlFor="googleFontUrl">Google Font URL</Label>
                     <Input
@@ -385,8 +392,9 @@ export const ThemeFormPage = () => {
                       </div>
                     </div>
                   )}
-                </TabsContent>
-              </Tabs>
+                  </div>
+                )}
+              </div>
 
               {/* Status Checkboxes */}
               {!isViewMode && (

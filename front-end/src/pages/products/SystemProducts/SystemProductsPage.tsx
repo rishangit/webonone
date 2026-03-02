@@ -384,9 +384,9 @@ export function SystemProductsPage({ currentUser, onViewProduct }: SystemProduct
   };
 
   return (
-    <div className="flex-1 p-4 lg:p-6 space-y-6">
+    <div className="flex-1 p-4 lg:p-6 flex flex-col min-h-0">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <div className="flex items-center gap-2 mb-2">
             <h1 className="text-xl sm:text-2xl font-semibold text-foreground">System Products</h1>
@@ -409,7 +409,7 @@ export function SystemProductsPage({ currentUser, onViewProduct }: SystemProduct
       </div>
 
       {/* Stats Cards - Desktop Only */}
-      <div className="hidden lg:block">
+      <div className="hidden lg:block mb-6">
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
           <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
             <div className="flex items-center gap-3">
@@ -450,7 +450,7 @@ export function SystemProductsPage({ currentUser, onViewProduct }: SystemProduct
       </div>
 
       {/* Mobile & Tablet: Carousel - Horizontal scroll with same layout as desktop */}
-      <div className="block lg:hidden">
+      <div className="block lg:hidden mb-6">
         <Carousel
           opts={{
             align: "start",
@@ -488,7 +488,7 @@ export function SystemProductsPage({ currentUser, onViewProduct }: SystemProduct
       </div>
 
       {/* Search and Filters */}
-      <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]">
+      <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] mb-6">
         <div className="space-y-4">
           {/* Search */}
           <SearchInput
@@ -525,10 +525,14 @@ export function SystemProductsPage({ currentUser, onViewProduct }: SystemProduct
         </div>
       </Card>
 
-      {/* Products Grid/List */}
-      {loading && displayedProducts.length === 0 ? (
-        <>
-          {viewMode === "list" ? (
+      {/* Body Container - Fills rest of screen */}
+      <div className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
+        {/* Main Content */}
+        <div className="flex flex-col flex-1 min-h-0">
+          {/* Products Grid/List */}
+          {loading && displayedProducts.length === 0 ? (
+            <div className="flex-1">
+              {viewMode === "list" ? (
             /* Skeleton for List View - Matching ProductCard structure */
             <div className="space-y-4">
               {[...Array(6)].map((_, index) => (
@@ -600,49 +604,53 @@ export function SystemProductsPage({ currentUser, onViewProduct }: SystemProduct
               ))}
             </div>
           )}
-        </>
+            </div>
       ) : displayedProducts.length > 0 ? (
-        <>
-          <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" : "space-y-4"}>
-            {displayedProducts.map((product) => (
-              viewMode === "list" ? (
-                <SystemProductListItem
-                  key={product.id}
-                  product={product}
-                  onViewProduct={onViewProduct}
-                  onEdit={handleEditProduct}
-                  onDelete={handleDeleteProduct}
-                  onToggleStatus={toggleProductStatus}
-                />
-              ) : (
-                <SystemProductCard
-                  key={product.id}
-                  product={product}
-                  onViewProduct={onViewProduct}
-                  onEdit={handleEditProduct}
-                  onDelete={handleDeleteProduct}
-                  onToggleStatus={toggleProductStatus}
-                />
-              )
-            ))}
+        <div className="flex flex-col flex-1 min-h-0">
+          <div className="flex-1">
+            <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" : "space-y-4"}>
+              {displayedProducts.map((product) => (
+                viewMode === "list" ? (
+                  <SystemProductListItem
+                    key={product.id}
+                    product={product}
+                    onViewProduct={onViewProduct}
+                    onEdit={handleEditProduct}
+                    onDelete={handleDeleteProduct}
+                    onToggleStatus={toggleProductStatus}
+                  />
+                ) : (
+                  <SystemProductCard
+                    key={product.id}
+                    product={product}
+                    onViewProduct={onViewProduct}
+                    onEdit={handleEditProduct}
+                    onDelete={handleDeleteProduct}
+                    onToggleStatus={toggleProductStatus}
+                  />
+                )
+              ))}
+            </div>
           </div>
 
           {/* Pagination */}
           {isSuperAdmin && pagination && (
-            <Pagination
-              totalItems={pagination.total}
-              itemsPerPage={itemsPerPage}
-              currentPage={currentPage}
-              onPageChange={setCurrentPage}
-              showItemsPerPageSelector={true}
-              itemsPerPageOptions={[12, 24, 48, 96]}
-              onItemsPerPageChange={(newItemsPerPage) => {
-                setItemsPerPage(newItemsPerPage);
-                setCurrentPage(1);
-              }}
-            />
+            <div className="mt-auto pt-4">
+              <Pagination
+                totalItems={pagination.total}
+                itemsPerPage={itemsPerPage}
+                currentPage={currentPage}
+                onPageChange={setCurrentPage}
+                showItemsPerPageSelector={true}
+                itemsPerPageOptions={[12, 24, 48, 96]}
+                onItemsPerPageChange={(newItemsPerPage) => {
+                  setItemsPerPage(newItemsPerPage);
+                  setCurrentPage(1);
+                }}
+              />
+            </div>
           )}
-        </>
+        </div>
       ) : (
         <EmptyState
           icon={Package}
@@ -666,6 +674,8 @@ export function SystemProductsPage({ currentUser, onViewProduct }: SystemProduct
           }
         />
       )}
+        </div>
+      </div>
 
       {/* Create Product Dialog */}
       <CreateSystemProductDialog

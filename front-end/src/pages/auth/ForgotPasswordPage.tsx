@@ -65,8 +65,7 @@ export const ForgotPasswordPage = () => {
                     Enter your email address and we'll send you a link to reset your password
                   </p>
                 </div>
-              /* Forgot Password Form */
-              <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Email Field */}
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-foreground">Email Address</Label>

@@ -4,14 +4,14 @@ import { Card } from "../../components/ui/card";
 import { AppointmentCard } from "./AppointmentCard";
 import { Input } from "../../components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { Badge } from "../../components/ui/badge";
 import { Calendar as CalendarComponent } from "../../components/ui/calendar";
-import { AppointmentWizard } from "./AppointmentWizard";
+import { AppointmentWizard } from "./AppointmentWizard/index";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { TimelineView } from "../../components/TimelineView";
 import { MultiSelect } from "../../components/ui/multi-select";
 import { ViewSwitcher } from "../../components/ui/view-switcher";
+import { TabSwitcher } from "../../components/ui/tab-switcher";
 import { WeekView } from "./WeekView";
 import { MonthView } from "./MonthView";
 import { useState, useMemo, useEffect } from "react";
@@ -60,6 +60,7 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
   const { spaces } = useAppSelector((state) => state.spaces);
   const { user } = useAppSelector((state) => state.auth);
   const { currencies: reduxCurrencies } = useAppSelector((state) => state.currencies);
+  const { companies, currentCompany, userCompany } = useAppSelector((state) => state.companies);
 
   // Check if user is company owner
   const isCompanyOwner = isRole(currentUser?.role, UserRole.COMPANY_OWNER) || isRole(user?.role, UserRole.COMPANY_OWNER);
@@ -82,6 +83,12 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
 
   // Get company ID from user
   const companyId = user?.companyId || currentUser?.companyId;
+  
+  // Get company's selected entities
+  const company = (userCompany && String(userCompany.id) === String(companyId)) 
+    ? userCompany 
+    : companies.find(c => String(c.id) === String(companyId)) || currentCompany;
+  const selectedEntities = (company as any)?.selectedEntities as string[] | null | undefined;
 
   // Fetch appointments with pagination and search for company owners
   useEffect(() => {
@@ -421,9 +428,9 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
   }, [transformedAppointments, isCompanyOwner, searchQuery, statusFilter, timeFilter, selectedStaff, selectedSpaces]);
 
   return (
-    <div className="flex-1 p-6 space-y-6">
+    <div className="flex-1 p-6 flex flex-col min-h-0">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-xl sm:text-2xl font-semibold text-foreground">Appointments</h1>
           <p className="text-muted-foreground mt-1 text-sm sm:text-base">
@@ -450,8 +457,10 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
         </div>
       </div>
 
+      {/* Body Container - Fills rest of screen */}
+      <div className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
       {/* Stats Cards - Desktop Only */}
-      <div className="hidden lg:block">
+        <div className="hidden lg:block mb-6">
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
           {appointmentStats.map((stat, index) => {
             const Icon = stat.icon;
@@ -470,7 +479,7 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
         </div>
       </div>
       {/* Mobile & Tablet: Carousel - Horizontal scroll with same layout as desktop */}
-      <div className="block lg:hidden">
+        <div className="block lg:hidden mb-6">
         <Carousel
           opts={{
             align: "start",
@@ -502,9 +511,9 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
       </div>
 
       {/* Main Content with Tabs */}
-      <Tabs defaultValue="appointments" value={activeTab} onValueChange={(value) => setActiveTab(value as "appointments" | "calendar")} className="space-y-6">
+        <div className="flex flex-col flex-1 min-h-0">
         {/* Filters and Search */}
-        <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]">
+        <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] mb-6">
           <div className="space-y-4">
             {/* Search Bar - Use SearchInput for company owners, regular Input for others */}
             {isCompanyOwner ? (
@@ -545,14 +554,14 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
               </Button>
 
               {/* Tabs - Appointments/Calendar View */}
-              <TabsList className="bg-[var(--glass-bg)] backdrop-blur-sm border border-[var(--glass-border)] rounded-lg w-auto p-1 h-9">
-                <TabsTrigger value="appointments" className="data-[state=active]:bg-[var(--accent-bg)] data-[state=active]:text-[var(--accent-text)] text-muted-foreground h-7">
-                  Appointments
-                </TabsTrigger>
-                <TabsTrigger value="calendar" className="data-[state=active]:bg-[var(--accent-bg)] data-[state=active]:text-[var(--accent-text)] text-muted-foreground h-7">
-                  Calendar View
-                </TabsTrigger>
-              </TabsList>
+              <TabSwitcher
+                tabs={[
+                  { value: "appointments", label: "Appointments" },
+                  { value: "calendar", label: "Calendar View" }
+                ]}
+                activeTab={activeTab}
+                onTabChange={(value) => setActiveTab(value as "appointments" | "calendar")}
+              />
 
               {/* View Mode Toggle - Show based on active tab */}
               {activeTab === "appointments" && (
@@ -593,10 +602,11 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
           </div>
         </Card>
 
-        <TabsContent value="appointments" className="space-y-4">
+        {activeTab === "appointments" && (
+          <div className="flex flex-col flex-1 min-h-0">
           {/* Loading State - Skeleton for Appointment Cards */}
           {loading && reduxAppointments.length === 0 ? (
-            <>
+            <div className="flex-1">
               {/* Skeleton for List View */}
               {viewMode === "list" ? (
                 /* Skeleton for List View - Matching AppointmentCard structure */
@@ -712,10 +722,11 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
                   ))}
                 </div>
               )}
-            </>
+            </div>
           ) : (
             /* Appointments List/Grid */
-            viewMode === "list" ? (
+            <div className="flex-1">
+            {viewMode === "list" ? (
             <div className="space-y-3 sm:space-y-4">
               {filteredAppointments.length > 0 ? (
                 filteredAppointments.map((appointment) => (
@@ -723,6 +734,7 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
                     key={appointment.id}
                     {...appointment}
                     viewMode="list"
+                    selectedEntities={selectedEntities}
                     onStatusUpdate={(status, completionData) => {
                       if (appointment._originalAppointment) {
                         dispatch(updateAppointmentStatusRequest({
@@ -761,6 +773,7 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
                     key={appointment.id}
                     {...appointment}
                     viewMode="card"
+                    selectedEntities={selectedEntities}
                     onStatusUpdate={(status, completionData) => {
                       if (appointment._originalAppointment) {
                         dispatch(updateAppointmentStatusRequest({
@@ -794,9 +807,12 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
               )}
             </div>
           )
+            }
+            </div>
           )}
 
           {/* Pagination - Use Pagination component for company owners */}
+          <div className="mt-auto pt-4">
           {isCompanyOwner && pagination ? (
             <Pagination
               totalItems={pagination.total}
@@ -818,9 +834,12 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
               </p>
             </div>
           )}
-        </TabsContent>
+          </div>
+          </div>
+        )}
 
-        <TabsContent value="calendar" className="space-y-4">
+        {activeTab === "calendar" && (
+          <div className="space-y-4">
           {calendarViewMode === "week" ? (
             /* Week View - Full Width, No Calendar */
             <WeekView
@@ -871,8 +890,10 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
               </div>
             </div>
           )}
-        </TabsContent>
-      </Tabs>
+          </div>
+        )}
+        </div>
+      </div>
 
 
       {/* Filter Right Panel */}

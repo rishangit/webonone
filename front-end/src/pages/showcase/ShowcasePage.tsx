@@ -30,7 +30,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "../../components/ui/pop
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "../../components/ui/sheet";
 import { RightPanel } from "../../components/common/RightPanel";
 import { EmptyState } from "../../components/common/EmptyState";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { TabSwitcher } from "../../components/ui/tab-switcher";
 import { Separator } from "../../components/ui/separator";
 import { Progress } from "../../components/ui/progress";
 import { Skeleton } from "../../components/ui/skeleton";
@@ -80,6 +80,7 @@ const ShowcasePage = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [alertDialogOpen, setAlertDialogOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>("controls");
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
   const [checkboxChecked, setCheckboxChecked] = useState(true);
   const [switchChecked, setSwitchChecked] = useState(true);
@@ -155,7 +156,7 @@ const ShowcasePage = ({
 
   return (
     <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto space-y-12">
+      <div className="space-y-12">
         {/* Header */}
         <div className="space-y-2">
           <h1 className="text-4xl font-bold text-foreground">Component Showcase</h1>
@@ -164,16 +165,21 @@ const ShowcasePage = ({
           </p>
         </div>
 
-        <Tabs defaultValue="controls" className="w-full">
-          <TabsList className="w-full">
-            <TabsTrigger value="controls">Controls</TabsTrigger>
-            <TabsTrigger value="cards">Cards & Lists</TabsTrigger>
-            <TabsTrigger value="popups">Popups & Dialogs</TabsTrigger>
-            <TabsTrigger value="components">Components</TabsTrigger>
-          </TabsList>
+        <div className="w-full space-y-6">
+          <TabSwitcher
+            tabs={[
+              { value: "controls", label: "Controls" },
+              { value: "cards", label: "Cards & Lists" },
+              { value: "popups", label: "Popups & Dialogs" },
+              { value: "components", label: "Components" }
+            ]}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+          />
 
           {/* Controls Tab */}
-          <TabsContent value="controls" className="space-y-8 mt-6">
+          {activeTab === "controls" && (
+            <div className="space-y-8 mt-6">
             {/* Theme & Accent Color Section */}
             {onThemeChange && onAccentColorChange && (
               <section className="space-y-4">
@@ -567,10 +573,12 @@ const ShowcasePage = ({
                 </CardContent>
               </Card>
             </section>
-          </TabsContent>
+            </div>
+          )}
 
           {/* Cards & Lists Tab */}
-          <TabsContent value="cards" className="space-y-8 mt-6">
+          {activeTab === "cards" && (
+            <div className="space-y-8 mt-6">
             <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-foreground">Cards & List Items</h2>
 
@@ -993,10 +1001,12 @@ const ShowcasePage = ({
                 </CardContent>
               </Card>
             </section>
-          </TabsContent>
+            </div>
+          )}
 
           {/* Popups & Dialogs Tab */}
-          <TabsContent value="popups" className="space-y-8 mt-6">
+          {activeTab === "popups" && (
+            <div className="space-y-8 mt-6">
             <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-foreground">Popups & Dialogs</h2>
 
@@ -1189,10 +1199,12 @@ const ShowcasePage = ({
                 </CardContent>
               </Card>
             </section>
-          </TabsContent>
+            </div>
+          )}
 
           {/* Individual Components Tab */}
-          <TabsContent value="components" className="space-y-8 mt-6">
+          {activeTab === "components" && (
+            <div className="space-y-8 mt-6">
             <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-foreground">Individual Components</h2>
               <p className="text-muted-foreground">
@@ -1319,8 +1331,9 @@ const ShowcasePage = ({
                 </Card>
               </div>
             </section>
-          </TabsContent>
-        </Tabs>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

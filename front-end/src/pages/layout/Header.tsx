@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { Menu, Search, Bell, User, Settings, X } from "lucide-react";
+import { Menu, Search, Bell, User, Settings } from "lucide-react";
 import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { Badge } from "../../components/ui/badge";
 import { User as UserType } from "../../types/user";
@@ -18,8 +17,6 @@ interface HeaderProps {
 
 export function Header({ onMenuClick, onNavigate, onLogout, currentUser }: HeaderProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showMobileSearch, setShowMobileSearch] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Mock function to get unread notification count - in real app this would come from a service
@@ -30,36 +27,9 @@ export function Header({ onMenuClick, onNavigate, onLogout, currentUser }: Heade
 
   const unreadCount = getUnreadNotificationCount();
 
-  const handleSearch = () => {
-    if (searchQuery.trim()) {
-      // Store search query in sessionStorage to be picked up by SearchPage
-      sessionStorage.setItem("searchQuery", searchQuery.trim());
-      onNavigate?.("search");
-      // Clear the input after navigation
-      setSearchQuery("");
-    }
+  const handleSearchClick = () => {
+    onNavigate?.("search");
   };
-
-  const handleSearchKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleSearch();
-    }
-  };
-
-  // Close mobile search on Escape key
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && showMobileSearch) {
-        setShowMobileSearch(false);
-        setSearchQuery("");
-      }
-    };
-
-    if (showMobileSearch) {
-      document.addEventListener("keydown", handleEscape);
-      return () => document.removeEventListener("keydown", handleEscape);
-    }
-  }, [showMobileSearch]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -97,37 +67,13 @@ export function Header({ onMenuClick, onNavigate, onLogout, currentUser }: Heade
           </div>
         </div>
 
-        {/* Center - Search (Desktop) */}
-        <div className="hidden md:flex flex-1 max-w-md mx-8">
-          <div className="relative w-full">
-            <Icon icon={Search} size="sm" className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground pointer-events-none" />
-            <Input
-              placeholder="Search anything... (Press Enter)"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={handleSearchKeyPress}
-              className="pl-10 pr-10 bg-input-background border-border text-card-foreground placeholder-muted-foreground focus:border-[var(--accent-border)] focus:ring-[var(--accent-primary)]/20 transition-all duration-200"
-            />
-            {searchQuery && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 hover:bg-accent/50"
-                onClick={() => setSearchQuery("")}
-              >
-                <Icon icon={X} size="xs" />
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {/* Right side - Search icon (mobile) + Notifications + Profile */}
+        {/* Right side - Search icon + Notifications + Profile */}
         <div className="flex items-center gap-2">
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden hover:bg-sidebar-accent text-card-foreground hover:text-card-foreground transition-all duration-200"
-            onClick={() => setShowMobileSearch(true)}
+            className="hover:bg-sidebar-accent text-card-foreground hover:text-card-foreground transition-all duration-200"
+            onClick={handleSearchClick}
           >
             <Icon icon={Search} size="md" />
           </Button>
@@ -237,86 +183,8 @@ export function Header({ onMenuClick, onNavigate, onLogout, currentUser }: Heade
               </div>
             )}
           </div>
-        </div>
-      </div>
-
-      {/* Mobile Search Overlay */}
-      {showMobileSearch && (
-        <div className="fixed inset-0 z-60 bg-background/95 backdrop-blur-xl md:hidden">
-          <div className="flex items-center gap-3 p-4 border-b border-[var(--accent-border)]">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => {
-                setShowMobileSearch(false);
-                setSearchQuery("");
-              }}
-              className="shrink-0"
-            >
-              <Icon icon={X} size="md" />
-            </Button>
-            <div className="relative flex-1">
-              <Icon icon={Search} size="sm" className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground pointer-events-none" />
-              <Input
-                autoFocus
-                placeholder="Search anything..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === "Enter") {
-                    handleSearch();
-                    setShowMobileSearch(false);
-                  }
-                }}
-                className="pl-10 pr-10 bg-input-background border-border text-card-foreground placeholder-muted-foreground focus:border-[var(--accent-border)] focus:ring-[var(--accent-primary)]/20"
-              />
-              {searchQuery && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 hover:bg-accent/50"
-                  onClick={() => setSearchQuery("")}
-                >
-                  <Icon icon={X} size="xs" />
-                </Button>
-              )}
-            </div>
-            <Button
-              onClick={() => {
-                handleSearch();
-                setShowMobileSearch(false);
-              }}
-              disabled={!searchQuery.trim()}
-              className="shrink-0 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)]"
-            >
-              Search
-            </Button>
-          </div>
-          
-          {/* Search Suggestions (Optional) */}
-          <div className="p-4 space-y-3">
-            <p className="text-sm text-muted-foreground">Quick searches:</p>
-            <div className="flex flex-wrap gap-2">
-              {['appointments', 'users', 'services', 'products', 'companies'].map((term) => (
-                <Button
-                  key={term}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setSearchQuery(term);
-                    sessionStorage.setItem("searchQuery", term);
-                    onNavigate?.("search");
-                    setShowMobileSearch(false);
-                  }}
-                  className="bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)]"
-                >
-                  {term}
-                </Button>
-              ))}
-            </div>
           </div>
         </div>
-      )}
     </header>
   );
 }

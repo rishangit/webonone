@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { MapPin } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Card } from "../../../components/ui/card";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "../../../components/ui/tabs";
+import { TabSwitcher } from "../../../components/ui/tab-switcher";
 import { spacesService, Space } from "../../../services/spaces";
 import { toast } from "sonner";
 import { isRole, UserRole } from "../../../types/user";
@@ -119,29 +119,39 @@ export const SpaceDetailPage = ({ spaceId, onBack }: SpaceDetailPageProps) => {
         onDelete={() => setShowDeleteDialog(true)}
       />
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="gallery">Gallery</TabsTrigger>
-          <TabsTrigger value="statistics">Statistics</TabsTrigger>
-        </TabsList>
+      <div className="w-full space-y-6">
+        <TabSwitcher
+          tabs={[
+            { value: "overview", label: "Overview" },
+            { value: "gallery", label: "Gallery" },
+            { value: "statistics", label: "Statistics" }
+          ]}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
 
-        <TabsContent value="overview" className="mt-6">
-          <SpaceOverviewTab space={space} />
-        </TabsContent>
+        {activeTab === "overview" && (
+          <div className="mt-6">
+            <SpaceOverviewTab space={space} />
+          </div>
+        )}
 
-        <TabsContent value="gallery" className="mt-6">
-          <SpaceGalleryTab
-            space={space}
-            companyId={companyId}
-            onSpaceUpdate={(updatedSpace) => setSpace(updatedSpace)}
-          />
-        </TabsContent>
+        {activeTab === "gallery" && (
+          <div className="mt-6">
+            <SpaceGalleryTab
+              space={space}
+              companyId={companyId}
+              onSpaceUpdate={(updatedSpace) => setSpace(updatedSpace)}
+            />
+          </div>
+        )}
 
-        <TabsContent value="statistics" className="mt-6">
-          <SpaceStatisticsTab space={space} />
-        </TabsContent>
-      </Tabs>
+        {activeTab === "statistics" && (
+          <div className="mt-6">
+            <SpaceStatisticsTab space={space} />
+          </div>
+        )}
+      </div>
 
       {/* Delete Confirmation Dialog */}
       <CustomDialog

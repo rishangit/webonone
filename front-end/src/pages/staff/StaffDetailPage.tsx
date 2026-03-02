@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, Save, Edit2, Mail, Phone, Calendar, User, Shield, Clock, MapPin, X } from "lucide-react";
+import { Save, Edit2, Mail, Phone, Calendar, User, Shield, Clock, MapPin, X } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -19,6 +19,7 @@ import {
 import { fetchUserRequest } from "../../store/slices/usersSlice";
 import { Staff } from "../../services/staff";
 import { DateDisplay } from "../../components/common/DateDisplay";
+import { BackButton } from "../../components/common/BackButton";
 
 // Generate time options in 15-minute intervals from 00:00 to 24:00
 const generateTimeOptions = () => {
@@ -269,14 +270,7 @@ export const StaffDetailPage = ({ staffId, onBack, currentUser }: StaffDetailPag
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onBack}
-              className="bg-[var(--glass-bg)] border-[var(--glass-border)]"
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </Button>
+            <BackButton onClick={onBack} />
             <h1 className="text-2xl font-semibold text-foreground">Staff Details</h1>
           </div>
           {!isEditing ? (

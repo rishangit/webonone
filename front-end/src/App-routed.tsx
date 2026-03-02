@@ -25,7 +25,7 @@ import { ResetPasswordPage } from "./pages/auth/ResetPasswordPage";
 import { Dashboard } from "./pages/dashboard";
 
 // Appointments
-import { AppointmentsPage, UserAppointmentHistoryPage } from "./pages/appointments";
+import { AppointmentsPage, UserAppointmentHistoryPage, AppointmentDetailPage } from "./pages/appointments";
 
 // Companies
 import { CompaniesPage, CompanyProfilePage, CompanySettingsPage } from "./pages/companies";
@@ -296,6 +296,40 @@ function UserProfilePageWrapper() {
   return (
     <UserProfilePage 
       userId={userId} 
+      onBack={handleBack} 
+    />
+  );
+}
+
+// AppointmentDetailPage Wrapper Component
+function AppointmentDetailPageWrapper() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+
+  const handleBack = () => {
+    navigate('/system/appointments');
+  };
+
+  if (!id) {
+    return (
+      <div className="flex-1 p-4 lg:p-8 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-foreground mb-2">Appointment Not Found</h3>
+          <p className="text-muted-foreground mb-4">Invalid appointment ID</p>
+          <button 
+            onClick={() => navigate('/system/appointments')}
+            className="px-4 py-2 bg-[var(--accent-primary)] text-[var(--accent-button-text)] rounded-lg hover:bg-[var(--accent-primary-hover)]"
+          >
+            Back to Appointments
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <AppointmentDetailPage 
+      appointmentId={id}
       onBack={handleBack} 
     />
   );
@@ -822,6 +856,19 @@ function App() {
               isAuthenticated ? (
                 <ProtectedRouteWrapper>
                   <AppointmentsPage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/appointments/:id" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <AppointmentDetailPageWrapper />
                 </ProtectedRouteWrapper>
               ) : (
                 <Navigate to="/system/login" replace />

@@ -203,10 +203,10 @@ export const SystemProductAttributesPage = ({ currentUser }: SystemProductAttrib
   const hasActiveFilters = debouncedSearchTerm || statusFilter !== "all" || valueDataTypeFilter !== "all";
 
   return (
-    <div className="flex-1 p-4 lg:p-8 min-h-screen">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="flex-1 p-4 lg:p-6 flex flex-col min-h-0">
+      <div className="flex flex-col flex-1 min-h-0">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
             <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
               <ListChecks className="w-8 h-8" />
@@ -236,7 +236,7 @@ export const SystemProductAttributesPage = ({ currentUser }: SystemProductAttrib
         </div>
 
         {/* Search and Filters */}
-        <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]">
+        <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] mb-6">
           <div className="space-y-4">
             {/* Search */}
             <SearchInput
@@ -275,15 +275,19 @@ export const SystemProductAttributesPage = ({ currentUser }: SystemProductAttrib
 
         {/* Error Display */}
         {error && (
-          <Card className="p-4 bg-red-500/10 border-red-500/20">
+          <Card className="p-4 bg-red-500/10 border-red-500/20 mb-6">
             <p className="text-red-500 text-sm">{error}</p>
           </Card>
         )}
 
-        {/* Attributes Grid/List */}
-        {loading && displayedAttributes.length === 0 ? (
-          <>
-            {viewMode === "list" ? (
+        {/* Body Container - Fills rest of screen */}
+        <div className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
+          {/* Main Content */}
+          <div className="flex flex-col flex-1 min-h-0">
+            {/* Attributes Grid/List */}
+            {loading && displayedAttributes.length === 0 ? (
+              <div className="flex-1">
+                {viewMode === "list" ? (
               /* Skeleton for List View */
               <div className="space-y-4">
                 {[...Array(6)].map((_, index) => (
@@ -334,41 +338,45 @@ export const SystemProductAttributesPage = ({ currentUser }: SystemProductAttrib
                 ))}
               </div>
             )}
-          </>
+              </div>
         ) : displayedAttributes.length > 0 ? (
-          <>
-            <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" : "space-y-4"}>
-              {displayedAttributes.map((attribute) => (
-                viewMode === "list" ? (
-                  <ProductAttributeListItem
-                    key={attribute.id}
-                    attribute={attribute}
-                    unitsOfMeasure={unitsOfMeasure}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                  />
-                ) : (
-                  <ProductAttributeCard
-                    key={attribute.id}
-                    attribute={attribute}
-                    unitsOfMeasure={unitsOfMeasure}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                  />
-                )
-              ))}
+          <div className="flex flex-col flex-1 min-h-0">
+            <div className="flex-1">
+              <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" : "space-y-4"}>
+                {displayedAttributes.map((attribute) => (
+                  viewMode === "list" ? (
+                    <ProductAttributeListItem
+                      key={attribute.id}
+                      attribute={attribute}
+                      unitsOfMeasure={unitsOfMeasure}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                    />
+                  ) : (
+                    <ProductAttributeCard
+                      key={attribute.id}
+                      attribute={attribute}
+                      unitsOfMeasure={unitsOfMeasure}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                    />
+                  )
+                ))}
+              </div>
             </div>
 
             {/* Pagination */}
             {pagination && pagination.totalPages > 1 && (
-              <Pagination
-                totalItems={pagination.total}
-                itemsPerPage={12}
-                currentPage={currentPage}
-                onPageChange={setCurrentPage}
-              />
+              <div className="mt-auto pt-4">
+                <Pagination
+                  totalItems={pagination.total}
+                  itemsPerPage={12}
+                  currentPage={currentPage}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
             )}
-          </>
+          </div>
         ) : (
           <EmptyState
             icon={ListChecks}
@@ -386,6 +394,8 @@ export const SystemProductAttributesPage = ({ currentUser }: SystemProductAttrib
             }}
           />
         )}
+          </div>
+        </div>
 
         {/* Create Dialog */}
         <ProductAttributeAddEditDialog

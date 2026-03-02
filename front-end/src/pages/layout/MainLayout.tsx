@@ -48,7 +48,7 @@ export function MainLayout({
   const sidebarWidth = sidebarCollapsed ? 80 : 256;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:bg-gradient-to-br dark:from-gray-900 dark:via-black dark:to-gray-800">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:bg-gradient-to-br dark:from-gray-900 dark:via-black dark:to-gray-800 overflow-hidden">
       <Header 
         onMenuClick={handleMenuClick} 
         onNavigate={handlePageChange}
@@ -56,7 +56,7 @@ export function MainLayout({
         currentUser={currentUser}
       />
       
-      <div className="pt-16">
+      <div className="flex-1 flex flex-col pt-16 min-h-0">
         <Sidebar 
           currentPage={currentPage} 
           onPageChange={handlePageChange}
@@ -67,7 +67,7 @@ export function MainLayout({
         />
         
         <div 
-          className="pb-8 transition-all duration-300"
+          className="flex-1 flex flex-col min-h-0 pb-8 transition-all duration-300 overflow-auto"
           style={!isMobile ? { marginLeft: `${sidebarWidth}px`, width: `calc(100% - ${sidebarWidth}px)` } : { width: '100%' }}
         >
           {children}

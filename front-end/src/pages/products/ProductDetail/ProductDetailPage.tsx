@@ -15,7 +15,7 @@ import { ProductDetailHeader } from "./ProductDetailHeader";
 import { ProductOverviewTab } from "./overview/ProductOverviewTab";
 import { ProductVariantsTab } from "./productVariants/ProductVariantsTab";
 import { ProductAttributesTab } from "./attributes/ProductAttributesTab";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "../../../components/ui/tabs";
+import { TabSwitcher } from "../../../components/ui/tab-switcher";
 
 // Legacy ProductVariant interface for company products (kept for backward compatibility)
 interface LegacyProductVariant {
@@ -133,6 +133,7 @@ export function ProductDetailPage({ productId, onBack, productType = "system", c
   const [variantDialogOpen, setVariantDialogOpen] = useState(false);
   const [variantDialogMode, setVariantDialogMode] = useState<'add' | 'edit'>('add');
   const [variantDialogVariant, setVariantDialogVariant] = useState<CompanyProductVariant | null>(null);
+  const [activeTab, setActiveTab] = useState<string>("overview");
 
   // Fetch system product when productId changes
   useEffect(() => {
@@ -530,61 +531,71 @@ export function ProductDetailPage({ productId, onBack, productType = "system", c
         onBack={onBack}
       />
 
-      <Tabs defaultValue="overview" className="w-full">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="variants">Product Variants</TabsTrigger>
-          <TabsTrigger value="attributes">Product Attributes</TabsTrigger>
-        </TabsList>
+      <div className="w-full space-y-6">
+        <TabSwitcher
+          tabs={[
+            { value: "overview", label: "Overview" },
+            { value: "variants", label: "Product Variants" },
+            { value: "attributes", label: "Product Attributes" }
+          ]}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
 
-        <TabsContent value="overview" className="mt-6">
-          <ProductOverviewTab 
-            product={product}
-            variants={productType === "system" ? systemVariants : []}
-            variantsLoading={variantsLoading}
-            selectedVariantId={selectedVariant?.id || null}
-            onVariantSelect={productType === "system" ? (variant) => setSelectedVariant(variant as SystemProductVariant | null) : undefined}
-          />
-        </TabsContent>
+        {activeTab === "overview" && (
+          <div className="mt-6">
+            <ProductOverviewTab 
+              product={product}
+              variants={productType === "system" ? systemVariants : []}
+              variantsLoading={variantsLoading}
+              selectedVariantId={selectedVariant?.id || null}
+              onVariantSelect={productType === "system" ? (variant) => setSelectedVariant(variant as SystemProductVariant | null) : undefined}
+            />
+          </div>
+        )}
 
-        <TabsContent value="variants" className="mt-6">
-          <ProductVariantsTab
-            productType={productType}
-            productId={productId}
-            systemVariants={systemVariants}
-            companyVariants={product.variants as LegacyProductVariant[]}
-            variantsLoading={variantsLoading}
-            selectedVariantId={selectedVariant?.id || null}
-            isSuperAdmin={isSuperAdmin}
-            isAddingVariant={isAddingVariant}
-            newVariant={newVariant}
-            variantDialogOpen={variantDialogOpen}
-            variantDialogMode={variantDialogMode}
-            variantDialogVariant={variantDialogVariant}
-            onVariantSelect={(variant) => setSelectedVariant(variant as LegacyProductVariant | SystemProductVariant | null)}
-            onAddVariant={productType === "system" ? handleAddVariant : () => setIsAddingVariant(true)}
-            onEditVariant={productType === "system" ? (variant) => handleEditVariant(variant as SystemProductVariant) : undefined}
-            onDeleteVariant={productType === "system" ? handleDeleteSystemVariant : handleRemoveVariant}
-            onToggleVariantStatus={productType === "system" ? handleToggleVariantStatus : undefined}
-            onToggleVariantVerification={productType === "system" ? handleToggleVariantVerification : undefined}
-            onSetDefaultVariant={productType === "system" ? handleSetDefaultVariant : undefined}
-            onUpdateVariant={productType === "company" ? handleUpdateVariant : undefined}
-            onSaveVariant={handleSaveVariant}
-            onSetIsAddingVariant={setIsAddingVariant}
-            onSetNewVariant={setNewVariant}
-            onSetVariantDialogOpen={setVariantDialogOpen}
-            onSetVariantDialogMode={setVariantDialogMode}
-            onSetVariantDialogVariant={setVariantDialogVariant}
-            onAddCompanyVariant={productType === "company" ? handleAddCompanyVariant : undefined}
-          />
-        </TabsContent>
+        {activeTab === "variants" && (
+          <div className="mt-6">
+            <ProductVariantsTab
+              productType={productType}
+              productId={productId}
+              systemVariants={systemVariants}
+              companyVariants={product.variants as LegacyProductVariant[]}
+              variantsLoading={variantsLoading}
+              selectedVariantId={selectedVariant?.id || null}
+              isSuperAdmin={isSuperAdmin}
+              isAddingVariant={isAddingVariant}
+              newVariant={newVariant}
+              variantDialogOpen={variantDialogOpen}
+              variantDialogMode={variantDialogMode}
+              variantDialogVariant={variantDialogVariant}
+              onVariantSelect={(variant) => setSelectedVariant(variant as LegacyProductVariant | SystemProductVariant | null)}
+              onAddVariant={productType === "system" ? handleAddVariant : () => setIsAddingVariant(true)}
+              onEditVariant={productType === "system" ? (variant) => handleEditVariant(variant as SystemProductVariant) : undefined}
+              onDeleteVariant={productType === "system" ? handleDeleteSystemVariant : handleRemoveVariant}
+              onToggleVariantStatus={productType === "system" ? handleToggleVariantStatus : undefined}
+              onToggleVariantVerification={productType === "system" ? handleToggleVariantVerification : undefined}
+              onSetDefaultVariant={productType === "system" ? handleSetDefaultVariant : undefined}
+              onUpdateVariant={productType === "company" ? handleUpdateVariant : undefined}
+              onSaveVariant={handleSaveVariant}
+              onSetIsAddingVariant={setIsAddingVariant}
+              onSetNewVariant={setNewVariant}
+              onSetVariantDialogOpen={setVariantDialogOpen}
+              onSetVariantDialogMode={setVariantDialogMode}
+              onSetVariantDialogVariant={setVariantDialogVariant}
+              onAddCompanyVariant={productType === "company" ? handleAddCompanyVariant : undefined}
+            />
+          </div>
+        )}
 
-        <TabsContent value="attributes" className="mt-6">
-          <ProductAttributesTab
-            productId={productId}
-          />
-        </TabsContent>
-      </Tabs>
+        {activeTab === "attributes" && (
+          <div className="mt-6">
+            <ProductAttributesTab
+              productId={productId}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

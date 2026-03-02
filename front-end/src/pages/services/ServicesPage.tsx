@@ -756,9 +756,9 @@ export function ServicesPage() {
   );
 
   return (
-    <div className="flex-1 p-4 lg:p-6 space-y-6">
+    <div className="flex-1 p-4 lg:p-6 flex flex-col min-h-0">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-xl sm:text-2xl font-semibold text-foreground">Services</h1>
           <p className="text-muted-foreground mt-1">Manage your service offerings and appointments</p>
@@ -770,7 +770,7 @@ export function ServicesPage() {
       </div>
 
       {/* Search and Filters */}
-      <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]">
+      <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] mb-6">
         <div className="space-y-4">
           <SearchInput
             placeholder="Search services by name, category, or description..."
@@ -806,9 +806,13 @@ export function ServicesPage() {
         </div>
       </Card>
 
-      {/* Services Grid/List */}
-      {loading && reduxServices.length === 0 ? (
-        <>
+      {/* Body Container - Fills rest of screen */}
+      <div className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
+        {/* Main Content */}
+        <div className="flex flex-col flex-1 min-h-0">
+          {/* Services Grid/List */}
+          {loading && reduxServices.length === 0 ? (
+        <div className="flex-1">
           {viewMode === "list" ? (
             /* Skeleton for List View - Matching ServiceListItem structure */
             <div className="space-y-4">
@@ -882,21 +886,41 @@ export function ServicesPage() {
               ))}
             </div>
           )}
-        </>
+        </div>
       ) : filteredServices.length > 0 ? (
-        viewMode === "grid" ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredServices.map((service) => (
-              <ServiceCard key={service.id} service={service} />
-            ))}
+        <div className="flex flex-col flex-1 min-h-0">
+          <div className="flex-1">
+            {viewMode === "grid" ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {filteredServices.map((service) => (
+                  <ServiceCard key={service.id} service={service} />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredServices.map((service) => (
+                  <ServiceListItem key={service.id} service={service} />
+                ))}
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="space-y-4">
-            {filteredServices.map((service) => (
-              <ServiceListItem key={service.id} service={service} />
-            ))}
-          </div>
-        )
+          {pagination && pagination.total > 0 && (
+            <div className="mt-auto pt-4">
+              <Pagination
+                totalItems={pagination.total}
+                itemsPerPage={itemsPerPage}
+                currentPage={currentPage}
+                onPageChange={setCurrentPage}
+                showItemsPerPageSelector={true}
+                itemsPerPageOptions={[12, 24, 48, 96]}
+                onItemsPerPageChange={(newItemsPerPage) => {
+                  setItemsPerPage(newItemsPerPage);
+                  setCurrentPage(1);
+                }}
+              />
+            </div>
+          )}
+        </div>
       ) : (
         <EmptyState
           icon={Stethoscope}
@@ -914,22 +938,8 @@ export function ServicesPage() {
           }}
         />
       )}
-
-      {/* Pagination */}
-      {pagination && pagination.total > 0 && (
-        <Pagination
-          totalItems={pagination.total}
-          itemsPerPage={itemsPerPage}
-          currentPage={currentPage}
-          onPageChange={setCurrentPage}
-          showItemsPerPageSelector={true}
-          itemsPerPageOptions={[12, 24, 48, 96]}
-          onItemsPerPageChange={(newItemsPerPage) => {
-            setItemsPerPage(newItemsPerPage);
-            setCurrentPage(1);
-          }}
-        />
-      )}
+        </div>
+      </div>
 
       {/* Add Service Dialog */}
       <CustomDialog

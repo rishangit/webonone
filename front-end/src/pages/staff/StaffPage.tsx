@@ -70,36 +70,8 @@ export function StaffPage({ currentUser }: StaffPageProps) {
   // Get company ID from user (like ProductsPage)
   const companyId = user?.companyId || currentUser?.companyId;
 
-  // Early returns (after state declarations, before useEffects)
-  // If staffId is in URL, show detail view
-  if (staffId) {
-    return (
-      <StaffDetailPage
-        staffId={staffId}
-        onBack={() => navigate('/system/staff')}
-        currentUser={currentUser}
-      />
-    );
-  }
-
-  // Redirect regular users
-  if (currentUser?.role === "User") {
-    return (
-      <div className="flex-1 p-4 lg:p-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="bg-[var(--glass-bg)] backdrop-blur-sm border border-[var(--glass-border)] rounded-xl p-8">
-            <Shield className="w-16 h-16 mx-auto mb-4 text-[var(--accent-text)]" />
-            <h2 className="text-2xl font-semibold text-foreground mb-4">Access Restricted</h2>
-            <p className="text-muted-foreground mb-6">
-              Staff management is only available to company owners and administrators.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   // Fetch staff with pagination and filters (like ProductsPage)
+  // IMPORTANT: All hooks must be called before any conditional returns
   useEffect(() => {
     if (companyId && currentUser?.role !== "User") {
       const offset = (currentPage - 1) * itemsPerPage;
@@ -160,6 +132,35 @@ export function StaffPage({ currentUser }: StaffPageProps) {
   const uniqueDepartments = useMemo(() => {
     return [...new Set(reduxStaff.map(s => s.department).filter(Boolean))];
   }, [reduxStaff]);
+
+  // Early returns AFTER all hooks have been called
+  // If staffId is in URL, show detail view
+  if (staffId) {
+    return (
+      <StaffDetailPage
+        staffId={staffId}
+        onBack={() => navigate('/system/staff')}
+        currentUser={currentUser}
+      />
+    );
+  }
+
+  // Redirect regular users
+  if (currentUser?.role === "User") {
+    return (
+      <div className="flex-1 p-4 lg:p-6">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="bg-[var(--glass-bg)] backdrop-blur-sm border border-[var(--glass-border)] rounded-xl p-8">
+            <Shield className="w-16 h-16 mx-auto mb-4 text-[var(--accent-text)]" />
+            <h2 className="text-2xl font-semibold text-foreground mb-4">Access Restricted</h2>
+            <p className="text-muted-foreground mb-6">
+              Staff management is only available to company owners and administrators.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleAddStaff = async (staffData: {
     userId: string;
@@ -278,9 +279,23 @@ export function StaffPage({ currentUser }: StaffPageProps) {
   };
 
   const StaffCard = ({ member }: { member: StaffMember }) => {
+    const handleCardClick = (e: React.MouseEvent) => {
+      // Don't navigate if clicking on dropdown menu or buttons
+      const target = e.target as HTMLElement;
+      if (target.closest('button') || target.closest('[role="menuitem"]') || target.closest('[data-radix-popper-content-wrapper]')) {
+        return;
+      }
+      
+      // Navigate to staff detail page
+      navigate(`/system/staff/${member.id}`);
+    };
+
     if (viewMode === "list") {
       return (
-        <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200">
+        <Card 
+          className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 cursor-pointer"
+          onClick={handleCardClick}
+        >
           <div className="flex items-center gap-4">
             <Avatar className="w-20 h-20">
               <AvatarImage 
@@ -366,7 +381,10 @@ export function StaffPage({ currentUser }: StaffPageProps) {
 
     // Grid view
     return (
-      <Card className="overflow-hidden backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-300 hover:shadow-lg hover:shadow-[var(--glass-shadow)] group">
+      <Card 
+        className="overflow-hidden backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-300 hover:shadow-lg hover:shadow-[var(--glass-shadow)] group cursor-pointer"
+        onClick={handleCardClick}
+      >
         <div className="p-6">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -449,9 +467,9 @@ export function StaffPage({ currentUser }: StaffPageProps) {
   const showSkeleton = loading && displayedStaff.length === 0;
 
   return (
-    <div className="flex-1 space-y-6 p-4 lg:p-6">
+    <div className="flex-1 p-4 lg:p-6 flex flex-col min-h-0">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">Staff Management</h1>
           <p className="text-muted-foreground mt-1">
@@ -471,7 +489,7 @@ export function StaffPage({ currentUser }: StaffPageProps) {
       </div>
 
       {/* Search and Filters */}
-      <Card className="p-4 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
+      <Card className="p-4 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] mb-6">
         <div className="space-y-4">
           <SearchInput
             placeholder="Search staff members..."
@@ -507,9 +525,13 @@ export function StaffPage({ currentUser }: StaffPageProps) {
         </div>
       </Card>
 
-      {/* Staff List */}
-      {showSkeleton ? (
-        <>
+      {/* Body Container - Fills rest of screen */}
+      <div className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
+        {/* Main Content */}
+        <div className="flex flex-col flex-1 min-h-0">
+          {/* Staff List */}
+          {showSkeleton ? (
+        <div className="flex-1">
           {viewMode === "list" ? (
             /* Skeleton for List View - Matching StaffCard structure */
             <div className="space-y-4">
@@ -593,29 +615,35 @@ export function StaffPage({ currentUser }: StaffPageProps) {
               ))}
             </div>
           )}
-        </>
+        </div>
       ) : displayedStaff.length > 0 ? (
-        <>
-          <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" : "space-y-4"}>
-            {displayedStaff.map((member) => (
-              <StaffCard key={member.id} member={member} />
-            ))}
+        
+        <div className="flex flex-col flex-1 min-h-0">
+          <div className="flex-1">
+            <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" : "space-y-4"}>
+              {displayedStaff.map((member) => (
+                <StaffCard key={member.id} member={member} />
+              ))}
+            </div>
           </div>
           {pagination && (
-            <Pagination
-              totalItems={pagination.total}
-              itemsPerPage={itemsPerPage}
-              currentPage={currentPage}
-              onPageChange={setCurrentPage}
-              showItemsPerPageSelector={true}
-              itemsPerPageOptions={[12, 24, 48, 96]}
-              onItemsPerPageChange={(newItemsPerPage) => {
-                setItemsPerPage(newItemsPerPage);
-                setCurrentPage(1);
-              }}
-            />
+            <div className="mt-auto pt-4">
+              <Pagination
+                totalItems={pagination.total}
+                itemsPerPage={itemsPerPage}
+                currentPage={currentPage}
+                onPageChange={setCurrentPage}
+                showItemsPerPageSelector={true}
+                itemsPerPageOptions={[12, 24, 48, 96]}
+                onItemsPerPageChange={(newItemsPerPage) => {
+                  setItemsPerPage(newItemsPerPage);
+                  setCurrentPage(1);
+                }}
+              />
+            </div>
           )}
-        </>
+        </div>
+        
       ) : (
         <EmptyState
           icon={UserPlus}
@@ -636,6 +664,8 @@ export function StaffPage({ currentUser }: StaffPageProps) {
           }}
         />
       )}
+        </div>
+      </div>
 
       {/* Dialogs */}
       <AddStaffDialog
