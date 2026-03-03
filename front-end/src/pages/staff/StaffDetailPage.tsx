@@ -255,10 +255,7 @@ export const StaffDetailPage = ({ staffId, onBack, currentUser }: StaffDetailPag
       <div className="flex-1 p-4 lg:p-6">
         <div className="text-center py-12">
           <p className="text-muted-foreground">Staff member not found</p>
-          <Button onClick={onBack} variant="outline" className="mt-4">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Staff
-          </Button>
+          <BackButton onClick={onBack} label="Back to Staff" className="mt-4" />
         </div>
       </div>
     );

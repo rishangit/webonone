@@ -140,10 +140,7 @@ export const AppointmentDetailPage = ({ appointmentId, onBack }: AppointmentDeta
           <Calendar className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
           <h3 className="text-lg font-semibold text-foreground mb-2">Appointment Not Found</h3>
           <p className="text-muted-foreground mb-4">The appointment you're looking for doesn't exist.</p>
-          <Button onClick={onBack} variant="outline">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Appointments
-          </Button>
+          <BackButton onClick={onBack} label="Back to Appointments" />
         </div>
       </div>
     );
