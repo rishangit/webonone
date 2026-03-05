@@ -280,7 +280,7 @@ app.get('/', (req, res) => {
   res.json({
     success: true,
     message: 'Appointment App API',
-    version: '1.5.0',
+    version: '1.6.0',
     endpoints: {
       auth: '/api/auth',
       users: '/api/users',
