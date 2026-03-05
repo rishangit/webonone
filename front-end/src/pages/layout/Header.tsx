@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Menu, Search, Bell, User, Settings } from "lucide-react";
+import { Menu, Bell, User, Settings } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { Badge } from "../../components/ui/badge";
@@ -26,10 +26,6 @@ export function Header({ onMenuClick, onNavigate, onLogout, currentUser }: Heade
   };
 
   const unreadCount = getUnreadNotificationCount();
-
-  const handleSearchClick = () => {
-    onNavigate?.("search");
-  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -67,17 +63,8 @@ export function Header({ onMenuClick, onNavigate, onLogout, currentUser }: Heade
           </div>
         </div>
 
-        {/* Right side - Search icon + Notifications + Profile */}
+        {/* Right side - Notifications + Profile */}
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="hover:bg-sidebar-accent text-card-foreground hover:text-card-foreground transition-all duration-200"
-            onClick={handleSearchClick}
-          >
-            <Icon icon={Search} size="md" />
-          </Button>
-          
           <Button
             variant="ghost"
             size="icon"

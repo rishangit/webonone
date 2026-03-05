@@ -9,6 +9,7 @@ import { spacesService } from "../../../../services/spaces";
 import { toast } from "sonner";
 import { useAppDispatch } from "../../../../store/hooks";
 import { fetchSpaceRequest } from "../../../../store/slices/spacesSlice";
+import { CardTitle } from "../../../../components/common/CardTitle";
 
 interface SpaceGalleryTabProps {
   space: Space;
@@ -102,10 +103,7 @@ export const SpaceGalleryTab = ({ space, companyId, onSpaceUpdate }: SpaceGaller
     <div className="space-y-6">
       {/* Upload New Image */}
       <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
-        <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-          <Upload className="w-5 h-5 text-[var(--accent-text)]" />
-          Upload Gallery Images
-        </h3>
+        <CardTitle title="Upload Gallery Images" icon={Upload}  />
         <FileUpload
           onFileUploaded={(filePath, fileUrl) => handleImageUpload(filePath)}
           onFileDeleted={() => {}}
@@ -125,10 +123,7 @@ export const SpaceGalleryTab = ({ space, companyId, onSpaceUpdate }: SpaceGaller
       {/* Gallery Grid */}
       {galleryImages.length > 0 ? (
         <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
-          <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-            <ImageIcon className="w-5 h-5 text-[var(--accent-text)]" />
-            Gallery Images ({galleryImages.length})
-          </h3>
+          <CardTitle title={`Gallery Images (${galleryImages.length})`} icon={ImageIcon}  />
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {galleryImages.map((imagePath, index) => (
               <div key={index} className="relative group">

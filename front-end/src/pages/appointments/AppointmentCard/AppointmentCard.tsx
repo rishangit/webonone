@@ -293,60 +293,143 @@ export const AppointmentCard = ({
       />
 
       <Card 
-        className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)] cursor-pointer"
+        className={viewMode === 'card' 
+          ? "overflow-hidden backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-300 hover:shadow-lg hover:shadow-[var(--glass-shadow)] group cursor-pointer"
+          : "p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)] cursor-pointer"
+        }
         onClick={handleCardClick}
       >
-        <AppointmentCardHeader
-          patientName={patientName}
-          patientImage={patientImage}
-          service={service}
-          type={type}
-          status={status}
-          hasServiceEntity={hasServiceEntity}
-          getStatusColor={getStatusColor}
-          getStatusDisplay={getStatusDisplay}
-          isStatus={isStatus}
-          handleConfirmAppointment={handleConfirmAppointment}
-          handleCompleteAppointment={handleCompleteAppointment}
-          handleCancelAppointment={handleCancelAppointment}
-          handleStartSession={handleStartSession}
-          handleReschedule={handleReschedule}
-          onViewBill={() => setShowBillPreview(true)}
-          onDelete={onDelete}
-          onCardClick={handleCardClick}
-        />
+        {viewMode === 'card' ? (
+          <>
+            {/* Top area: Full image with blurred patient image background (Grid View) */}
+            <div className="relative h-48 overflow-hidden">
+              {/* Blurred background image */}
+              <div 
+                className="absolute inset-0 bg-cover bg-center"
+                style={{
+                  backgroundImage: `url(${patientImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(patientName)}&background=random`})`,
+                  filter: 'blur(20px)',
+                  transform: 'scale(1.1)',
+                }}
+              />
+              {/* Overlay gradient */}
+              <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/40" />
+              
+              {/* Avatar in center */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-24 h-24 ring-4 ring-white/20 backdrop-blur-sm rounded-full overflow-hidden">
+                  {patientImage ? (
+                    <img 
+                      src={patientImage} 
+                      alt={patientName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-[var(--accent-bg)] text-[var(--accent-text)] flex items-center justify-center text-2xl font-semibold">
+                      {patientName.split(' ').map(n => n[0]).join('')}
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Status badge top left */}
+              <div className="absolute top-3 left-3">
+                <div className={`px-3 py-1.5 rounded-md text-xs font-semibold border ${getStatusColor(status)}`}>
+                  {getStatusDisplay(status)}
+                </div>
+              </div>
+              
+              {/* Actions menu top right */}
+              <div className="absolute top-3 right-3">
+                <AppointmentCardHeader
+                  patientName={patientName}
+                  patientImage={patientImage}
+                  service={service}
+                  type={type}
+                  status={status}
+                  hasServiceEntity={hasServiceEntity}
+                  getStatusColor={getStatusColor}
+                  getStatusDisplay={getStatusDisplay}
+                  isStatus={isStatus}
+                  handleConfirmAppointment={handleConfirmAppointment}
+                  handleCompleteAppointment={handleCompleteAppointment}
+                  handleCancelAppointment={handleCancelAppointment}
+                  handleStartSession={handleStartSession}
+                  handleReschedule={handleReschedule}
+                  onViewBill={() => setShowBillPreview(true)}
+                  onDelete={onDelete}
+                  onCardClick={handleCardClick}
+                  isCompact={true}
+                />
+              </div>
+            </div>
+            
+            {/* Bottom area: Appointment details (Grid View) */}
+            <div className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-semibold text-foreground mb-1">{patientName}</h3>
+                  {hasServiceEntity && (
+                    <p className="text-[var(--accent-text)] text-sm">{service || type}</p>
+                  )}
+                </div>
+              </div>
 
-        {/* Conditional Layout Based on View Mode */}
-        {viewMode === 'list' ? (
-          <AppointmentListView
-            date={date}
-            time={time}
-            duration={duration}
-            phone={phone}
-            location={location}
-            hasSpaceEntity={hasSpaceEntity}
-            hasStaffEntity={hasStaffEntity}
-            staff={staff}
-            preferredStaff={preferredStaff}
-            availableStaff={availableStaff}
-            currentStaffId={currentStaffId}
-            handleStaffAssignment={handleStaffAssignment}
-          />
+              <AppointmentCardView
+                date={date}
+                time={time}
+                duration={duration}
+                phone={phone}
+                location={location}
+                hasSpaceEntity={hasSpaceEntity}
+                hasStaffEntity={hasStaffEntity}
+                staff={staff}
+                preferredStaff={preferredStaff}
+                availableStaff={availableStaff}
+                currentStaffId={currentStaffId}
+                handleStaffAssignment={handleStaffAssignment}
+              />
+            </div>
+          </>
         ) : (
-          <AppointmentCardView
-            date={date}
-            time={time}
-            duration={duration}
-            phone={phone}
-            location={location}
-            hasSpaceEntity={hasSpaceEntity}
-            hasStaffEntity={hasStaffEntity}
-            staff={staff}
-            preferredStaff={preferredStaff}
-            availableStaff={availableStaff}
-            currentStaffId={currentStaffId}
-            handleStaffAssignment={handleStaffAssignment}
-          />
+          <>
+            {/* List View: Full header with avatar and details */}
+            <AppointmentCardHeader
+              patientName={patientName}
+              patientImage={patientImage}
+              service={service}
+              type={type}
+              status={status}
+              hasServiceEntity={hasServiceEntity}
+              getStatusColor={getStatusColor}
+              getStatusDisplay={getStatusDisplay}
+              isStatus={isStatus}
+              handleConfirmAppointment={handleConfirmAppointment}
+              handleCompleteAppointment={handleCompleteAppointment}
+              handleCancelAppointment={handleCancelAppointment}
+              handleStartSession={handleStartSession}
+              handleReschedule={handleReschedule}
+              onViewBill={() => setShowBillPreview(true)}
+              onDelete={onDelete}
+              onCardClick={handleCardClick}
+              isCompact={false}
+            />
+
+            <AppointmentListView
+              date={date}
+              time={time}
+              duration={duration}
+              phone={phone}
+              location={location}
+              hasSpaceEntity={hasSpaceEntity}
+              hasStaffEntity={hasStaffEntity}
+              staff={staff}
+              preferredStaff={preferredStaff}
+              availableStaff={availableStaff}
+              currentStaffId={currentStaffId}
+              handleStaffAssignment={handleStaffAssignment}
+            />
+          </>
         )}
       </Card>
     </>

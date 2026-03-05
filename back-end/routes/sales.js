@@ -25,7 +25,7 @@ const saleSchemas = {
         productId: Joi.string().optional(), // productId for products
         serviceId: Joi.string().optional(), // serviceId for services
         name: Joi.string().required(),
-        description: Joi.string().optional(),
+        description: Joi.string().allow('', null).optional(),
         quantity: Joi.number().positive().required(),
         unitPrice: Joi.number().positive().required(),
         discount: Joi.number().min(0).max(100).optional().default(0),

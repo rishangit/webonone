@@ -23,6 +23,7 @@ interface AppointmentCardHeaderProps {
   onViewBill?: () => void;
   onDelete?: () => void;
   onCardClick: (e: React.MouseEvent) => void;
+  isCompact?: boolean;
 }
 
 export const AppointmentCardHeader = ({
@@ -42,8 +43,120 @@ export const AppointmentCardHeader = ({
   handleReschedule,
   onViewBill,
   onDelete,
-  onCardClick
+  onCardClick,
+  isCompact = false
 }: AppointmentCardHeaderProps) => {
+  // Compact mode: only show dropdown menu button (for top-right corner)
+  if (isCompact) {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8 bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm border border-white/20" 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <MoreVertical className="w-4 h-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="bg-popover border-border" align="end" onClick={(e) => e.stopPropagation()}>
+          {isStatus(status, AppointmentStatus.PENDING) && (
+            <>
+              <DropdownMenuItem onClick={handleConfirmAppointment}>
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Confirm Appointment
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleReschedule}>
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Reschedule
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleCancelAppointment} className="text-red-600 dark:text-red-400">
+                <XCircle className="w-4 h-4 mr-2" />
+                Cancel Appointment
+              </DropdownMenuItem>
+            </>
+          )}
+          {isStatus(status, AppointmentStatus.CONFIRMED) && (
+            <>
+              <DropdownMenuItem onClick={handleStartSession}>
+                <Play className="w-4 h-4 mr-2" />
+                Start Session
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleReschedule}>
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Reschedule
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleCancelAppointment} className="text-red-600 dark:text-red-400">
+                <XCircle className="w-4 h-4 mr-2" />
+                Cancel Appointment
+              </DropdownMenuItem>
+            </>
+          )}
+          {isStatus(status, AppointmentStatus.IN_PROGRESS) && (
+            <>
+              <DropdownMenuItem onClick={handleCompleteAppointment} className="text-green-600 dark:text-green-400">
+                <Check className="w-4 h-4 mr-2" />
+                Complete Appointment
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <FileText className="w-4 h-4 mr-2" />
+                Add Notes
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Eye className="w-4 h-4 mr-2" />
+                View Details
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleCancelAppointment} className="text-red-600 dark:text-red-400">
+                <XCircle className="w-4 h-4 mr-2" />
+                Cancel Session
+              </DropdownMenuItem>
+            </>
+          )}
+          {isStatus(status, AppointmentStatus.COMPLETED) && (
+            <>
+              <DropdownMenuItem onClick={onViewBill}>
+                <Receipt className="w-4 h-4 mr-2" />
+                View Bill
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Eye className="w-4 h-4 mr-2" />
+                View Details
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <FileText className="w-4 h-4 mr-2" />
+                Generate Report
+              </DropdownMenuItem>
+            </>
+          )}
+          {isStatus(status, AppointmentStatus.CANCELLED) && (
+            <>
+              <DropdownMenuItem onClick={handleReschedule}>
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Reschedule
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Eye className="w-4 h-4 mr-2" />
+                View Reason
+              </DropdownMenuItem>
+            </>
+          )}
+          <DropdownMenuSeparator />
+          {onDelete && (
+            <DropdownMenuItem onClick={onDelete} className="text-red-600 dark:text-red-400">
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete Appointment
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }
+
+  // Full mode: show avatar, name, and dropdown (for list view)
   return (
     <div className="flex items-start gap-3 mb-3">
       <Avatar className="w-12 h-12 sm:w-16 sm:h-16 ring-2 ring-[var(--accent-border)] flex-shrink-0">

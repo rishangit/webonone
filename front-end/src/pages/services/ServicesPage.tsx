@@ -32,6 +32,9 @@ import {
 import { Service as ServiceType } from "../../services/services";
 import { formatAvatarUrl } from "../../utils";
 import { currenciesService, Currency } from "../../services/currencies";
+import { ServiceCard } from "./ServicesPage/components";
+import { formatDuration, formatPrice as formatPriceUtil, getImageUrl, getStatusColor } from "./ServicesPage/utils";
+import { ServiceTags } from "./ServicesPage/components/ServiceTags";
 
 
 interface Service {
@@ -75,6 +78,33 @@ export function ServicesPage() {
   
   // Get company ID from user
   const companyId = user?.companyId;
+  
+  // Listen for header search event and sessionStorage
+  useEffect(() => {
+    const handleHeaderSearch = (event: CustomEvent) => {
+      const { query, entity } = event.detail;
+      if (entity === "service") {
+        setSearchTerm(query);
+        setDebouncedSearchTerm(query);
+        setCurrentPage(1);
+        sessionStorage.removeItem(`searchQuery_service`);
+      }
+    };
+
+    // Check sessionStorage on mount
+    const storedQuery = sessionStorage.getItem("searchQuery_service");
+    if (storedQuery) {
+      setSearchTerm(storedQuery);
+      setDebouncedSearchTerm(storedQuery);
+      setCurrentPage(1);
+      sessionStorage.removeItem("searchQuery_service");
+    }
+
+    window.addEventListener("headerSearch", handleHeaderSearch as EventListener);
+    return () => {
+      window.removeEventListener("headerSearch", handleHeaderSearch as EventListener);
+    };
+  }, [setSearchTerm, setDebouncedSearchTerm, setCurrentPage]);
   
   // Fetch services with pagination and filters
   useEffect(() => {
@@ -445,210 +475,16 @@ export function ServicesPage() {
     }, 500);
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Active": return "bg-green-500/20 text-green-600 dark:text-green-400 border-green-500/30";
-      case "Inactive": return "bg-gray-500/20 text-gray-600 dark:text-gray-400 border-gray-500/30";
-      case "Draft": return "bg-orange-500/20 text-orange-600 dark:text-orange-400 border-orange-500/30";
-      default: return "bg-gray-500/20 text-gray-600 dark:text-gray-400 border-gray-500/30";
-    }
-  };
-
-  const formatDuration = (minutes: number) => {
-    if (minutes >= 60) {
-      const hours = Math.floor(minutes / 60);
-      const remainingMinutes = minutes % 60;
-      if (remainingMinutes === 0) {
-        return `${hours}h`;
-      }
-      return `${hours}h ${remainingMinutes}m`;
-    }
-    return `${minutes}m`;
-  };
-
-  const formatPrice = (price: number) => {
-    const numPrice = Number(price) || 0;
-    
-    // Always use company currency (or USD default if no currency is set)
-    if (companyCurrency) {
-      const decimals = companyCurrency.decimals || 2;
-      
-      if (isNaN(numPrice)) {
-        return `${companyCurrency.symbol} ${(0).toFixed(decimals)}`;
-      }
-      
-      // Round the price according to currency rounding
-      const roundedPrice = Math.round(numPrice / companyCurrency.rounding) * companyCurrency.rounding;
-      
-      // Format with currency symbol directly with space
-      const formattedNumber = new Intl.NumberFormat('en-US', {
-        minimumFractionDigits: decimals,
-        maximumFractionDigits: decimals
-      }).format(roundedPrice);
-      
-      return `${companyCurrency.symbol} ${formattedNumber}`;
-    }
-    
-    // Last resort fallback (should rarely happen)
-    if (isNaN(numPrice)) {
-      return '$ 0.00';
-    }
-    
-    const formatted = new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2
-    }).format(numPrice);
-    // Replace $ with $  to add space
-    return formatted.replace('$', '$ ');
-  };
-
-  const getImageUrl = (service: ServiceType) => {
-    if (service.image) {
-      // Check if it's a URL path that needs formatting
-      if (service.image.startsWith('companies/') || service.image.startsWith('/uploads/')) {
-        return formatAvatarUrl(service.image);
-      }
-      return service.image;
-    }
-    return "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=300&h=200&fit=crop";
-  };
+  const formatPrice = (price: number) => formatPriceUtil(price, companyCurrency);
 
   // Helper function to render tags with colors
   const renderTags = (tags: any[]) => {
     if (!tags || tags.length === 0) return null;
-    
-    return (
-      <div className="flex flex-wrap gap-1 mb-4">
-        {tags.slice(0, 3).map((tag, index) => {
-          // Handle both string tags (legacy) and Tag objects
-          const tagObj = typeof tag === 'string' 
-            ? { id: index.toString(), name: tag, color: '#3B82F6', icon: undefined }
-            : tag;
-          return (
-            <Badge
-              key={tagObj.id || index}
-              variant="secondary"
-              className="text-xs"
-              style={{ 
-                backgroundColor: `${tagObj.color}20`, 
-                color: tagObj.color,
-                borderColor: `${tagObj.color}40`
-              }}
-            >
-              {tagObj.icon && <span className="mr-1">{tagObj.icon}</span>}
-              {tagObj.name}
-            </Badge>
-          );
-        })}
-        {tags.length > 3 && (
-          <Badge variant="outline" className="text-xs">
-            +{tags.length - 3}
-          </Badge>
-        )}
-      </div>
-    );
+    return <ServiceTags tags={tags} />;
   };
 
-  const ServiceCard = ({ service }: { service: ServiceType }) => (
-    <Card 
-      className="overflow-hidden backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-300 hover:shadow-lg hover:shadow-[var(--glass-shadow)] group cursor-pointer"
-      onClick={(e) => {
-        // Don't navigate if clicking on dropdown or button
-        if ((e.target as HTMLElement).closest('button, [role="menuitem"]')) {
-          return;
-        }
-        openViewDialog(service);
-      }}
-    >
-      <div className="relative h-48 overflow-hidden">
-        <img 
-          src={getImageUrl(service)} 
-          alt={service.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-        />
-
-        <div className="absolute top-3 left-3">
-          <Badge className={`${getStatusColor(service.status)} backdrop-blur-sm border`}>
-            {service.status}
-          </Badge>
-        </div>
-        <div className="absolute bottom-3 right-3">
-          <Badge className="bg-black/70 text-white backdrop-blur-sm border border-white/20 px-3 py-1.5 font-semibold">
-            {formatPrice(service.price)}
-          </Badge>
-        </div>
-      </div>
-      
-      <div className="p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-semibold text-foreground mb-1">{service.name}</h3>
-            {service.category && (
-              <p className="text-[var(--accent-text)] text-sm">{service.category}</p>
-            )}
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="text-muted-foreground hover:text-foreground hover:bg-accent flex-shrink-0"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <MoreVertical className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-popover border-border" align="end">
-              <DropdownMenuItem onClick={() => openViewDialog(service)}>
-                <Eye className="w-4 h-4 mr-2" />
-                View Details
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => openEditDialog(service)}>
-                <Edit className="w-4 h-4 mr-2" />
-                Edit Service
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleDuplicate(service)}>
-                <Copy className="w-4 h-4 mr-2" />
-                Duplicate
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => handleArchive(service)}>
-                <Archive className="w-4 h-4 mr-2" />
-                {service.status === "Inactive" ? "Restore" : "Archive"}
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => openDeleteDialog(service)}
-                className="text-red-500 hover:bg-red-500/10"
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        {service.description && (
-          <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{service.description}</p>
-        )}
-
-        <div className="flex items-center gap-4 mb-4 text-sm">
-          <div className="flex items-center gap-1.5">
-            <Clock className="w-4 h-4 text-[var(--accent-text)]" />
-            <span className="text-foreground font-medium">{formatDuration(service.duration)}</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-muted-foreground">Price:</span>
-            <span className="text-[var(--accent-text)] font-semibold">{formatPrice(service.price)}</span>
-          </div>
-        </div>
-
-        {renderTags(service.tags || [])}
-      </div>
-    </Card>
-  );
-
-  const ServiceListItem = ({ service }: { service: ServiceType }) => (
+  // Old ServiceCard and ServiceListItem definitions removed - now using imported ServiceCard component
+  const OldServiceListItem = ({ service }: { service: ServiceType }) => (
     <Card 
       className="p-6 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-300 hover:shadow-lg hover:shadow-[var(--glass-shadow)] cursor-pointer"
       onClick={(e) => {
@@ -893,13 +729,39 @@ export function ServicesPage() {
             {viewMode === "grid" ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {filteredServices.map((service) => (
-                  <ServiceCard key={service.id} service={service} />
+                  <ServiceCard
+                    key={service.id}
+                    service={service}
+                    onView={openViewDialog}
+                    onEdit={openEditDialog}
+                    onDelete={openDeleteDialog}
+                    onDuplicate={handleDuplicate}
+                    onArchive={handleArchive}
+                    formatPrice={formatPrice}
+                    formatDuration={formatDuration}
+                    getImageUrl={getImageUrl}
+                    getStatusColor={getStatusColor}
+                    viewMode="grid"
+                  />
                 ))}
               </div>
             ) : (
               <div className="space-y-4">
                 {filteredServices.map((service) => (
-                  <ServiceListItem key={service.id} service={service} />
+                  <ServiceCard
+                    key={service.id}
+                    service={service}
+                    onView={openViewDialog}
+                    onEdit={openEditDialog}
+                    onDelete={openDeleteDialog}
+                    onDuplicate={handleDuplicate}
+                    onArchive={handleArchive}
+                    formatPrice={formatPrice}
+                    formatDuration={formatDuration}
+                    getImageUrl={getImageUrl}
+                    getStatusColor={getStatusColor}
+                    viewMode="list"
+                  />
                 ))}
               </div>
             )}
@@ -1201,7 +1063,7 @@ export function ServicesPage() {
               </SelectTrigger>
               <SelectContent className="bg-popover border-border">
                 <SelectItem value="all">All Categories</SelectItem>
-                {[...new Set(services.map(s => s.category))].map(category => (
+                {[...new Set(services.map(s => s.category).filter((cat): cat is string => Boolean(cat)))].map(category => (
                   <SelectItem key={category} value={category}>{category}</SelectItem>
                 ))}
               </SelectContent>

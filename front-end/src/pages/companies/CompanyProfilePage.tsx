@@ -13,6 +13,7 @@ import { fetchCompanyRequest, clearError, approveCompanyRequest, rejectCompanyRe
 import { toast } from "sonner";
 import { formatAvatarUrl } from "../../utils";
 import { DateDisplay } from "../../components/common/DateDisplay";
+import { CardTitle } from "../../components/common/CardTitle";
 import { BackButton } from "../../components/common/BackButton";
 
 interface Company {
@@ -246,10 +247,7 @@ export function CompanyProfilePage({ companyId, onBack }: CompanyProfilePageProp
         <div className="lg:col-span-2 space-y-6">
           {/* Company Profile */}
           <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] shadow-lg">
-            <div className="flex items-center gap-2 mb-6">
-              <Building className="w-5 h-5 text-[var(--accent-text)]" />
-              <h3 className="font-semibold text-foreground">Company Profile</h3>
-            </div>
+            <CardTitle title="Company Profile" icon={Building} className="mb-6" />
 
             <div className="space-y-6">
               {/* Logo Upload */}
@@ -297,10 +295,7 @@ export function CompanyProfilePage({ companyId, onBack }: CompanyProfilePageProp
 
           {/* Contact Information */}
           <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] shadow-lg">
-            <div className="flex items-center gap-2 mb-6">
-              <Phone className="w-5 h-5 text-[var(--accent-text)]" />
-              <h3 className="font-semibold text-foreground">Contact Information</h3>
-            </div>
+            <CardTitle title="Contact Information" icon={Phone} className="mb-6" />
 
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -348,10 +343,7 @@ export function CompanyProfilePage({ companyId, onBack }: CompanyProfilePageProp
 
           {/* Location Information */}
           <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] shadow-lg">
-            <div className="flex items-center gap-2 mb-6">
-              <MapPin className="w-5 h-5 text-[var(--accent-text)]" />
-              <h3 className="font-semibold text-foreground">Location Information</h3>
-            </div>
+            <CardTitle title="Location Information" icon={MapPin} className="mb-6" />
 
             <div className="space-y-6">
               {/* Map Integration - Moved to top */}
@@ -475,10 +467,7 @@ export function CompanyProfilePage({ companyId, onBack }: CompanyProfilePageProp
 
           {/* Account Information */}
           <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] shadow-lg">
-            <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-              <Building className="w-5 h-5 text-[var(--accent-text)]" />
-              Account Information
-            </h3>
+            <CardTitle title="Account Information" icon={Building} />
             <div className="space-y-3">
               <div>
                 <p className="text-sm text-muted-foreground">Registration Date</p>

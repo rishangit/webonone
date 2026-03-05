@@ -19,6 +19,7 @@ import { fetchCompanyRequest, updateCompanyRequest, clearError } from "../../sto
 import FileUpload from "../../components/ui/file-upload";
 import { formatAvatarUrl } from "../../utils";
 import { DateDisplay } from "../../components/common/DateDisplay";
+import { CardTitle } from "../../components/common/CardTitle";
 import { UserRoleNames, UserRole } from "../../types/user";
 import { companyUpdateSchema, CompanyUpdateFormData } from "../../schemas/companyValidation";
 import { PhoneInput } from "../../components/common/PhoneInput";
@@ -394,10 +395,7 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
         <div className="lg:col-span-2 space-y-6">
           {/* Company Profile */}
           <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] shadow-lg">
-            <div className="flex items-center gap-2 mb-6">
-              <Building className="w-5 h-5 text-[var(--accent-text)]" />
-              <h3 className="font-semibold text-foreground">Company Profile</h3>
-            </div>
+            <CardTitle title="Company Profile" icon={Building}  className="mb-6" />
 
             <form id="company-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {/* Logo Upload */}
@@ -529,10 +527,7 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
 
           {/* Contact Information */}
           <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] shadow-lg">
-            <div className="flex items-center gap-2 mb-6">
-              <Phone className="w-5 h-5 text-[var(--accent-text)]" />
-              <h3 className="font-semibold text-foreground">Contact Information</h3>
-            </div>
+            <CardTitle title="Contact Information" icon={Phone}  className="mb-6" />
 
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -622,10 +617,7 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
 
           {/* Location Information */}
           <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] shadow-lg">
-            <div className="flex items-center gap-2 mb-6">
-              <MapPin className="w-5 h-5 text-[var(--accent-text)]" />
-              <h3 className="font-semibold text-foreground">Location Information</h3>
-            </div>
+            <CardTitle title="Location Information" icon={MapPin}  className="mb-6" />
 
             <div className="space-y-6">
               {/* Map Integration */}
@@ -834,10 +826,7 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
 
           {/* Account Info */}
           <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] shadow-lg">
-            <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-              <Building className="w-5 h-5 text-[var(--accent-text)]" />
-              Account Information
-            </h3>
+            <CardTitle title="Account Information" icon={Building}  />
             <div className="space-y-3">
               <div>
                 <p className="text-sm text-muted-foreground">Account Type</p>
@@ -893,10 +882,7 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
 
           {/* Entity Selection */}
           <Card className="p-6 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]">
-            <div className="flex items-center gap-2 mb-4">
-              <Settings className="w-5 h-5 text-[var(--accent-text)]" />
-              <h3 className="font-semibold text-foreground">Company Entities</h3>
-            </div>
+            <CardTitle title="Company Entities" icon={Settings}  />
 
             <div className="space-y-3">
               <p className="text-sm text-muted-foreground">
@@ -1020,10 +1006,7 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
 
           {/* More Settings */}
           <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] shadow-lg">
-            <div className="flex items-center gap-2 mb-4">
-              <Settings className="w-5 h-5 text-[var(--accent-text)]" />
-              <h3 className="font-semibold text-foreground">More Settings</h3>
-            </div>
+            <CardTitle title="More Settings" icon={Settings}  />
 
             <div className="space-y-3">
               <div>

@@ -14,7 +14,6 @@ import { Carousel, CarouselContent, CarouselItem } from "../../../components/ui/
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { SystemProductCard } from "./SystemProductCard";
-import { SystemProductListItem } from "./SystemProductListItem";
 import { SystemProductFilters } from "./SystemProductFilters";
 import { SystemProductAddEditDialog } from "./SystemProductAddEditDialog";
 import {
@@ -139,6 +138,33 @@ export function SystemProductsPage({ currentUser, onViewProduct }: SystemProduct
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Listen for header search event and sessionStorage
+  useEffect(() => {
+    const handleHeaderSearch = (event: CustomEvent) => {
+      const { query, entity } = event.detail;
+      if (entity === "product") {
+        setSearchTerm(query);
+        setDebouncedSearchTerm(query);
+        setCurrentPage(1);
+        sessionStorage.removeItem(`searchQuery_product`);
+      }
+    };
+
+    // Check sessionStorage on mount
+    const storedQuery = sessionStorage.getItem("searchQuery_product");
+    if (storedQuery) {
+      setSearchTerm(storedQuery);
+      setDebouncedSearchTerm(storedQuery);
+      setCurrentPage(1);
+      sessionStorage.removeItem("searchQuery_product");
+    }
+
+    window.addEventListener("headerSearch", handleHeaderSearch as EventListener);
+    return () => {
+      window.removeEventListener("headerSearch", handleHeaderSearch as EventListener);
+    };
+  }, []);
   const [itemsPerPage, setItemsPerPage] = useState(12);
   const [selectedProduct, setSelectedProduct] = useState<SystemProduct | null>(null);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
@@ -610,25 +636,15 @@ export function SystemProductsPage({ currentUser, onViewProduct }: SystemProduct
           <div className="flex-1">
             <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" : "space-y-4"}>
               {displayedProducts.map((product) => (
-                viewMode === "list" ? (
-                  <SystemProductListItem
-                    key={product.id}
-                    product={product}
-                    onViewProduct={onViewProduct}
-                    onEdit={handleEditProduct}
-                    onDelete={handleDeleteProduct}
-                    onToggleStatus={toggleProductStatus}
-                  />
-                ) : (
-                  <SystemProductCard
-                    key={product.id}
-                    product={product}
-                    onViewProduct={onViewProduct}
-                    onEdit={handleEditProduct}
-                    onDelete={handleDeleteProduct}
-                    onToggleStatus={toggleProductStatus}
-                  />
-                )
+                <SystemProductCard
+                  key={product.id}
+                  product={product}
+                  onViewProduct={onViewProduct}
+                  onEdit={handleEditProduct}
+                  onDelete={handleDeleteProduct}
+                  onToggleStatus={toggleProductStatus}
+                  viewMode={viewMode}
+                />
               ))}
             </div>
           </div>

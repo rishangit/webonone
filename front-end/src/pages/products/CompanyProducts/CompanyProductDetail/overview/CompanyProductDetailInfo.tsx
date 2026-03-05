@@ -1,8 +1,9 @@
+import { Package } from "lucide-react";
 import { Card } from "../../../../../components/ui/card";
 import { Label } from "../../../../../components/ui/label";
 import { Textarea } from "../../../../../components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../../components/ui/select";
-import { Badge } from "../../../../../components/ui/badge";
+import { CardTitle } from "../../../../../components/common/CardTitle";
 import { CompanyProduct } from "../../../../../services/companyProducts";
 import { CompanyProductVariant } from "../../../../../services/companyProductVariants";
 
@@ -34,7 +35,7 @@ export const CompanyProductDetailInfo = ({
 }: CompanyProductDetailInfoProps) => {
   return (
     <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
-      <h3 className="font-semibold text-foreground mb-4">Product Information</h3>
+      <CardTitle title="Product Information" icon={Package} />
       <div className="space-y-4">
         <div>
           <Label className="text-muted-foreground">Description</Label>

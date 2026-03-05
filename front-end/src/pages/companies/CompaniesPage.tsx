@@ -8,8 +8,7 @@ import { ViewSwitcher } from "../../components/ui/view-switcher";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { fetchCompaniesRequest, clearError } from "../../store/slices/companiesSlice";
 import { toast } from "sonner";
-import { CompanyCard } from "./CompanyCard";
-import { CompanyListItem } from "./CompanyListItem";
+import { CompanyCard, CompanyListView } from "./CompanyCard";
 import { SearchInput } from "../../components/common/SearchInput";
 import { Pagination } from "../../components/common/Pagination";
 import { EmptyState } from "../../components/common/EmptyState";
@@ -447,11 +446,12 @@ export function CompaniesPage({ onViewCompany }: CompaniesPageProps) {
             {viewMode === "list" ? (
               <div className="space-y-4">
                 {displayedCompanies.map((company) => (
-                  <CompanyListItem
-                    key={company.id}
-                    company={company}
-                    onViewCompany={onViewCompany}
-                  />
+                  <Card key={company.id} className="p-6 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+                    <CompanyListView
+                      company={company}
+                      onViewCompany={onViewCompany}
+                    />
+                  </Card>
                 ))}
               </div>
             ) : (

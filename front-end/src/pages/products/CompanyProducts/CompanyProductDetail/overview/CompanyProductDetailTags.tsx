@@ -1,6 +1,7 @@
 import { Tag } from "lucide-react";
 import { Card } from "../../../../../components/ui/card";
 import { Badge } from "../../../../../components/ui/badge";
+import { CardTitle } from "../../../../../components/common/CardTitle";
 
 interface CompanyProductDetailTagsProps {
   tags: string[] | Array<{ id: string | number; name: string; color?: string }>;
@@ -13,7 +14,7 @@ export const CompanyProductDetailTags = ({ tags }: CompanyProductDetailTagsProps
 
   return (
     <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
-      <h3 className="font-semibold text-foreground mb-4">Tags</h3>
+      <CardTitle title="Tags" icon={Tag} />
       <p className="text-xs text-muted-foreground mb-2">
         Tags are inherited from the system product.
       </p>

@@ -1,6 +1,7 @@
 import { Building } from "lucide-react";
 import { Card } from "../../../components/ui/card";
 import { Label } from "../../../components/ui/label";
+import { CardTitle } from "../../../components/common/CardTitle";
 import { User as UserType, UserRoleNames } from "../../../types/user";
 
 interface ProfessionalInformationCardProps {
@@ -10,10 +11,7 @@ interface ProfessionalInformationCardProps {
 export const ProfessionalInformationCard = ({ user }: ProfessionalInformationCardProps) => {
   return (
     <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] shadow-lg">
-      <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-        <Building className="w-5 h-5 text-[var(--accent-text)]" />
-        Professional Information
-      </h3>
+      <CardTitle title="Professional Information" icon={Building} />
       <div className="space-y-4">
         <div className="space-y-2">
           <Label className="text-muted-foreground">Role</Label>

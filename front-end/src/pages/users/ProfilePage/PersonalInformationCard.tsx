@@ -9,6 +9,7 @@ import { Label } from "../../../components/ui/label";
 import { PhoneInput } from "../../../components/common/PhoneInput";
 import { DatePicker } from "../../../components/common/DatePicker";
 import { DateDisplay } from "../../../components/common/DateDisplay";
+import { CardTitle } from "../../../components/common/CardTitle";
 import { User as UserType } from "../../../types/user";
 import { profileUpdateSchema, ProfileUpdateFormData } from "../../../schemas/profileValidation";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
@@ -96,10 +97,7 @@ export const PersonalInformationCard = ({ user, userId }: PersonalInformationCar
   return (
     <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] shadow-lg">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-foreground flex items-center gap-2">
-          <User className="w-5 h-5 text-[var(--accent-text)]" />
-          Personal Information
-        </h3>
+        <CardTitle title="Personal Information" icon={User} className="mb-0" />
         {!userId && !isEditing && (
           <Button 
             onClick={() => setIsEditing(true)} 

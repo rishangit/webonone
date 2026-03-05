@@ -22,7 +22,6 @@ import { DeleteConfirmationDialog } from "../../../components/common/DeleteConfi
 import { Pagination } from "../../../components/common/Pagination";
 import { UnitOfMeasureAddEditDialog } from "./UnitOfMeasureAddEditDialog";
 import { UnitOfMeasureCard } from "./UnitOfMeasureCard";
-import { UnitOfMeasureListItem } from "./UnitOfMeasureListItem";
 import { UnitOfMeasureFilters } from "./UnitOfMeasureFilters";
 
 interface UnitsOfMeasurePageProps {
@@ -324,24 +323,14 @@ export const UnitsOfMeasurePage = ({ currentUser }: UnitsOfMeasurePageProps) => 
             <div className="flex-1">
               <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" : "space-y-4"}>
                 {displayedUnits.map((unit) => (
-                  viewMode === "list" ? (
-                    <UnitOfMeasureListItem
-                      key={unit.id}
-                      unit={unit}
-                      unitsOfMeasure={unitsOfMeasure}
-                      onEdit={handleEdit}
-                      onDelete={handleDelete}
-                      getBaseUnitName={getBaseUnitName}
-                    />
-                  ) : (
-                    <UnitOfMeasureCard
-                      key={unit.id}
-                      unit={unit}
-                      onEdit={handleEdit}
-                      onDelete={handleDelete}
-                      getBaseUnitName={getBaseUnitName}
-                    />
-                  )
+                  <UnitOfMeasureCard
+                    key={unit.id}
+                    unit={unit}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    getBaseUnitName={getBaseUnitName}
+                    viewMode={viewMode}
+                  />
                 ))}
               </div>
             </div>

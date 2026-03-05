@@ -6,6 +6,7 @@ import { Input } from "../../components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { Badge } from "../../components/ui/badge";
 import { SearchResultCard } from "./SearchResultCard";
+import { SearchResultRenderer } from "./SearchResultRenderer";
 import { toast } from "sonner";
 
 // Mock search data - in a real app this would come from an API
@@ -266,6 +267,7 @@ interface SearchPageProps {
 export function SearchPage({ currentUser, onNavigate }: SearchPageProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchType, setSearchType] = useState("all");
+  const [selectedEntities, setSelectedEntities] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("relevance");
   const [loading, setLoading] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([
@@ -275,9 +277,12 @@ export function SearchPage({ currentUser, onNavigate }: SearchPageProps) {
     "appointment tomorrow"
   ]);
 
-  // Load initial search query from sessionStorage (from header search)
+  // Load initial search query and selected entities from sessionStorage (from header search)
   useEffect(() => {
     const initialQuery = sessionStorage.getItem("searchQuery");
+    const initialSearchType = sessionStorage.getItem("searchType");
+    const initialEntities = sessionStorage.getItem("searchEntities");
+    
     if (initialQuery) {
       setSearchQuery(initialQuery);
       // Add to recent searches if not already there
@@ -290,6 +295,21 @@ export function SearchPage({ currentUser, onNavigate }: SearchPageProps) {
       // Clear the session storage after loading
       sessionStorage.removeItem("searchQuery");
     }
+    
+    if (initialSearchType) {
+      setSearchType(initialSearchType);
+      sessionStorage.removeItem("searchType");
+    }
+    
+    if (initialEntities) {
+      try {
+        const entities = JSON.parse(initialEntities);
+        setSelectedEntities(entities);
+        sessionStorage.removeItem("searchEntities");
+      } catch (e) {
+        console.error("Error parsing search entities:", e);
+      }
+    }
   }, []);
 
   // Filter and search results
@@ -301,7 +321,16 @@ export function SearchPage({ currentUser, onNavigate }: SearchPageProps) {
       const query = searchQuery.toLowerCase();
       
       const matchesQuery = searchableText.includes(query);
-      const matchesType = searchType === "all" || item.type === searchType;
+      
+      // Filter by selected entities if any are selected
+      let matchesType = false;
+      if (selectedEntities.length > 0) {
+        matchesType = selectedEntities.includes(item.type);
+      } else if (searchType === "all") {
+        matchesType = true;
+      } else {
+        matchesType = item.type === searchType;
+      }
       
       return matchesQuery && matchesType;
     });
@@ -324,7 +353,7 @@ export function SearchPage({ currentUser, onNavigate }: SearchPageProps) {
     }
 
     return filtered;
-  }, [searchQuery, searchType, sortBy]);
+  }, [searchQuery, searchType, selectedEntities, sortBy]);
 
   const handleSearch = async (query: string) => {
     if (!query.trim()) return;
@@ -560,7 +589,7 @@ export function SearchPage({ currentUser, onNavigate }: SearchPageProps) {
           {searchResults.length > 0 ? (
             <div className="space-y-4">
               {searchResults.map((result) => (
-                <SearchResultCard
+                <SearchResultRenderer
                   key={result.id}
                   result={result}
                   searchQuery={searchQuery}

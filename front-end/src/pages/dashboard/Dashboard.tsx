@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Calendar, Users, CheckCircle, Clock, UserPlus, BarChart3, Settings, Bug } from "lucide-react";
+import { Calendar, CheckCircle, Clock, UserPlus, BarChart3, Settings, Bug, Play, XCircle } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
 import { AppointmentCard } from "../appointments/AppointmentCard";
@@ -15,7 +15,7 @@ import { AppointmentStatus, normalizeAppointmentStatus, getAppointmentStatusLabe
 import { Appointment } from "../../services/appointments";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { Carousel, CarouselContent, CarouselItem } from "../../components/ui/carousel";
+import { CardTitle } from "../../components/common/CardTitle";
 
 // Stats will be calculated from real data
 
@@ -32,11 +32,19 @@ export const Dashboard = ({ onNavigate }: DashboardProps = {}) => {
   const { staff } = useAppSelector((state) => state.staff);
   const { spaces } = useAppSelector((state) => state.spaces);
   const { user } = useAppSelector((state) => state.auth);
+  const { companies, currentCompany, userCompany } = useAppSelector((state) => state.companies);
 
   const [selectedPeriod, setSelectedPeriod] = useState("today");
 
   // Get company ID from user
   const companyId = user?.companyId;
+
+  // Get company's selected entities
+  const company = (userCompany && String(userCompany.id) === String(companyId)) 
+    ? userCompany 
+    : companies.find(c => String(c.id) === String(companyId)) || currentCompany;
+  const selectedEntities = (company as any)?.selectedEntities as string[] | null | undefined;
+  const isAppointmentEntityEnabled = !selectedEntities || selectedEntities.includes('appointment');
 
   // Get today's date in YYYY-MM-DD format (timezone-independent)
   // Use UTC to avoid timezone issues - DATE columns in MySQL are timezone-independent
@@ -239,54 +247,35 @@ export const Dashboard = ({ onNavigate }: DashboardProps = {}) => {
       });
   }, [reduxAppointments, users, services, staff, spaces, todayDate]);
 
-  // Calculate stats from real data
-  const statsData = useMemo(() => {
-    // Get unique clients (users who have appointments with this company)
-    const uniqueClientIds = new Set(reduxAppointments.map(apt => apt.clientId));
-    const clientsCount = uniqueClientIds.size;
-
-    // Get appointment stats
-    const totalAppointments = reduxAppointments.length;
-    const completedAppointments = reduxAppointments.filter(apt => {
-      const status = normalizeAppointmentStatus(apt.status);
-      return status === AppointmentStatus.COMPLETED;
+  // Calculate appointment summary statistics
+  const appointmentSummaryStats = useMemo(() => {
+    const total = reduxAppointments.length;
+    const pending = reduxAppointments.filter(a => {
+      const status = normalizeAppointmentStatus(a.status);
+      return status === AppointmentStatus.PENDING || a.status === 0;
+    }).length;
+    const confirmed = reduxAppointments.filter(a => {
+      const status = normalizeAppointmentStatus(a.status);
+      return status === AppointmentStatus.CONFIRMED || a.status === 1;
+    }).length;
+    const inProgress = reduxAppointments.filter(a => {
+      const status = normalizeAppointmentStatus(a.status);
+      return status === AppointmentStatus.IN_PROGRESS || a.status === 2;
+    }).length;
+    const cancelled = reduxAppointments.filter(a => {
+      const status = normalizeAppointmentStatus(a.status);
+      return status === AppointmentStatus.CANCELLED || status === AppointmentStatus.NO_SHOW || a.status === 4 || a.status === 5;
     }).length;
 
-    return [
-      {
-        title: "Total Appointments",
-        value: totalAppointments.toLocaleString(),
-        change: "",
-        trend: "up" as const,
-        icon: Calendar,
-        color: "text-blue-600"
-      },
-      {
-        title: "Clients", 
-        value: clientsCount.toLocaleString(),
-        change: "",
-        trend: "up" as const,
-        icon: Users,
-        color: "text-green-600"
-      },
-      {
-        title: "Completed",
-        value: completedAppointments.toLocaleString(),
-        change: "",
-        trend: "up" as const,
-        icon: CheckCircle,
-        color: "text-green-600"
-      },
-      {
-        title: "Today's Appointments",
-        value: todaysAppointments.length.toLocaleString(),
-        change: "",
-        trend: "up" as const,
-        icon: Clock,
-        color: "text-orange-600"
-      }
-    ];
-  }, [reduxAppointments, todaysAppointments]);
+    return {
+      total,
+      pending,
+      confirmed,
+      inProgress,
+      cancelled
+    };
+  }, [reduxAppointments]);
+
 
   return (
     <div className="flex-1 p-4 lg:p-6 space-y-6">
@@ -311,80 +300,12 @@ export const Dashboard = ({ onNavigate }: DashboardProps = {}) => {
         </div>
       </div>
 
-      {/* Stats Grid - Desktop Only */}
-      <div className="hidden lg:block">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {statsData.map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <Card key={index} className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">{stat.title}</p>
-                    <p className="text-xl font-semibold text-foreground">{stat.value}</p>
-                    {stat.change && (
-                      <p className={`text-xs flex items-center gap-1 mt-1 ${
-                        stat.trend === 'up' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-                      }`}>
-                        <span>{stat.trend === 'up' ? '↗' : '↘'}</span>
-                        {stat.change} from last period
-                      </p>
-                    )}
-                  </div>
-                  <Icon className={`w-8 h-8 ${stat.color} dark:text-${stat.color.split('-')[1]}-400`} />
-                </div>
-              </Card>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Mobile & Tablet: Carousel - Horizontal scroll with same layout as desktop */}
-      <div className="block lg:hidden">
-        <Carousel
-          opts={{
-            align: "start",
-            slidesToScroll: 1,
-            containScroll: "trimSnaps",
-          }}
-          className="w-full"
-        >
-          <CarouselContent className="ml-0">
-            {statsData.map((stat, index) => {
-              const Icon = stat.icon;
-              const isLast = index === statsData.length - 1;
-              return (
-                <CarouselItem key={index} className={`pl-0 ${isLast ? 'pr-4' : 'pr-2'} flex-shrink-0`} style={{ minWidth: '40vw', width: 'auto' }}>
-                  <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">{stat.title}</p>
-                        <p className="text-xl font-semibold text-foreground">{stat.value}</p>
-                        {stat.change && (
-                          <p className={`text-xs flex items-center gap-1 mt-1 ${
-                            stat.trend === 'up' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-                          }`}>
-                            <span>{stat.trend === 'up' ? '↗' : '↘'}</span>
-                            {stat.change} from last period
-                          </p>
-                        )}
-                      </div>
-                      <Icon className={`w-8 h-8 ${stat.color} dark:text-${stat.color.split('-')[1]}-400`} />
-                    </div>
-                  </Card>
-                </CarouselItem>
-              );
-            })}
-          </CarouselContent>
-        </Carousel>
-      </div>
-
       {/* Today's Appointments */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <Card className="p-6 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-foreground">Today's Appointments</h2>
+              <CardTitle title="Today's Appointments" icon={Calendar} className="mb-0" />
               <Button 
                 variant="outline" 
                 size="sm" 
@@ -417,6 +338,59 @@ export const Dashboard = ({ onNavigate }: DashboardProps = {}) => {
 
         {/* Quick Actions & Recent Activity */}
         <div className="space-y-6">
+          {/* Appointment Summary Card - Only show if appointment entity is enabled */}
+          {isAppointmentEntityEnabled && (
+            <Card className="p-6 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]">
+              <CardTitle title="Appointment Summary" icon={Calendar} className="mb-4" />
+              <div className="space-y-3">
+                {/* Total */}
+                <div className="flex items-center justify-between p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                  <div className="flex items-center gap-3">
+                    <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    <p className="text-sm text-muted-foreground">Total</p>
+                  </div>
+                  <p className="text-xl font-semibold text-foreground">{appointmentSummaryStats.total}</p>
+                </div>
+                
+                {/* Pending */}
+                <div className="flex items-center justify-between p-3 rounded-lg bg-orange-500/10 border border-orange-500/20">
+                  <div className="flex items-center gap-3">
+                    <Clock className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                    <p className="text-sm text-muted-foreground">Pending</p>
+                  </div>
+                  <p className="text-xl font-semibold text-foreground">{appointmentSummaryStats.pending}</p>
+                </div>
+                
+                {/* Confirmed */}
+                <div className="flex items-center justify-between p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
+                    <p className="text-sm text-muted-foreground">Confirmed</p>
+                  </div>
+                  <p className="text-xl font-semibold text-foreground">{appointmentSummaryStats.confirmed}</p>
+                </div>
+                
+                {/* In Progress */}
+                <div className="flex items-center justify-between p-3 rounded-lg bg-purple-500/10 border border-purple-500/20">
+                  <div className="flex items-center gap-3">
+                    <Play className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                    <p className="text-sm text-muted-foreground">In Progress</p>
+                  </div>
+                  <p className="text-xl font-semibold text-foreground">{appointmentSummaryStats.inProgress}</p>
+                </div>
+                
+                {/* Cancelled */}
+                <div className="flex items-center justify-between p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                  <div className="flex items-center gap-3">
+                    <XCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
+                    <p className="text-sm text-muted-foreground">Cancelled</p>
+                  </div>
+                  <p className="text-xl font-semibold text-foreground">{appointmentSummaryStats.cancelled}</p>
+                </div>
+              </div>
+            </Card>
+          )}
+
           {/* Quick Actions */}
           <Card className="p-6 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]">
             <h3 className="font-semibold text-foreground mb-4">Quick Actions</h3>

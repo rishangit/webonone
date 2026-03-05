@@ -1,0 +1,1 @@
+export { useStaffDetailPage } from "./useStaffDetailPage";

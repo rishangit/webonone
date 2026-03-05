@@ -1,4 +1,6 @@
+import { FileText } from "lucide-react";
 import { Card } from "../../../../../components/ui/card";
+import { CardTitle } from "../../../../../components/common/CardTitle";
 
 interface CompanyProductDetailNotesProps {
   notes: string;
@@ -11,7 +13,7 @@ export const CompanyProductDetailNotes = ({ notes }: CompanyProductDetailNotesPr
 
   return (
     <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
-      <h3 className="font-semibold text-foreground mb-4">Notes</h3>
+      <CardTitle title="Notes" icon={FileText} />
       <p className="text-muted-foreground">{notes}</p>
     </Card>
   );

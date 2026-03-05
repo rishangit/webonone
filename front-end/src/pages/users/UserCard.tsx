@@ -253,36 +253,58 @@ export function UserCard({
     );
   }
 
-  // Grid view (default)
+  // Grid view (default) - Matching ServiceCard layout
+  const avatarUrl = formatAvatarUrl(userData.avatar, userData.firstName, userData.lastName);
+  
   return (
     <Card 
-      className="overflow-hidden backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-300 hover:shadow-lg hover:shadow-[var(--glass-shadow)] group cursor-pointer"
+      className="overflow-hidden backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-300 hover:shadow-lg hover:shadow-[var(--glass-shadow)] group cursor-pointer"
       onClick={handleCardClick}
     >
-      <div className="p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <Avatar className="w-20 h-20">
-              <AvatarImage 
-                src={formatAvatarUrl(userData.avatar, userData.firstName, userData.lastName)} 
-                alt={userData.name}
-              />
-              <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)]">
-                {userData.name.split(' ').map((n: string) => n[0]).join('')}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <h3 className="font-semibold text-foreground">{userData.name}</h3>
-              <div className="mt-0.5">
-                <Badge className={getStatusColor(userData.status)}>
-                  {userData.status}
-                </Badge>
-              </div>
-            </div>
-          </div>
+      {/* Top area: Full image with blurred avatar background */}
+      <div className="relative h-48 overflow-hidden">
+        {/* Blurred background image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: `url(${avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.name)}&background=random`})`,
+            filter: 'blur(20px)',
+            transform: 'scale(1.1)',
+          }}
+        />
+        {/* Overlay gradient */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/40" />
+        
+        {/* Avatar in center */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Avatar className="w-24 h-24 ring-4 ring-white/20 backdrop-blur-sm">
+            <AvatarImage 
+              src={avatarUrl} 
+              alt={userData.name}
+            />
+            <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)] text-2xl font-semibold">
+              {userData.name.split(' ').map((n: string) => n[0]).join('')}
+            </AvatarFallback>
+          </Avatar>
+        </div>
+        
+        {/* Status badge top left */}
+        <div className="absolute top-3 left-3">
+          <Badge className={getStatusColor(userData.status)}>
+            {userData.status}
+          </Badge>
+        </div>
+        
+        {/* Actions menu top right */}
+        <div className="absolute top-3 right-3">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm border border-white/20"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -323,6 +345,20 @@ export function UserCard({
               )}
             </DropdownMenuContent>
           </DropdownMenu>
+        </div>
+      </div>
+      
+      {/* Bottom area: User details */}
+      <div className="p-6">
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-lg font-semibold text-foreground mb-1">{userData.name}</h3>
+            {roleNamesToShow.length > 0 && (
+              <p className="text-[var(--accent-text)] text-sm">
+                {roleNamesToShow[0]}
+              </p>
+            )}
+          </div>
         </div>
 
         <div className="space-y-3 mb-4">

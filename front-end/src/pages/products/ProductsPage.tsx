@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { useIsMobile } from "../../components/ui/use-mobile";
 import { ViewSwitcher } from "../../components/ui/view-switcher";
 import { AddProductToCompanyDialog } from "./CompanyProducts/AddProductToCompanyDialog";
-import { CompanyProductCard } from "./CompanyProducts/CompanyProductCard";
+import { CompanyProductCard } from "./CompanyProducts";
 import { toast } from "sonner";
 import { database } from "../../services";
 import { isRole, UserRole } from "../../types/user";
@@ -118,6 +118,33 @@ export function ProductsPage({ currentUser, onNavigate, onViewProduct }: Product
 
   // Get companyId from user (like ServicesPage)
   const companyId = user?.companyId || currentUser?.companyId;
+
+  // Listen for header search event and sessionStorage
+  useEffect(() => {
+    const handleHeaderSearch = (event: CustomEvent) => {
+      const { query, entity } = event.detail;
+      if (entity === "product") {
+        setSearchTerm(query);
+        setDebouncedSearchTerm(query);
+        setCurrentPage(1);
+        sessionStorage.removeItem(`searchQuery_product`);
+      }
+    };
+
+    // Check sessionStorage on mount
+    const storedQuery = sessionStorage.getItem("searchQuery_product");
+    if (storedQuery) {
+      setSearchTerm(storedQuery);
+      setDebouncedSearchTerm(storedQuery);
+      setCurrentPage(1);
+      sessionStorage.removeItem("searchQuery_product");
+    }
+
+    window.addEventListener("headerSearch", handleHeaderSearch as EventListener);
+    return () => {
+      window.removeEventListener("headerSearch", handleHeaderSearch as EventListener);
+    };
+  }, [setSearchTerm, setDebouncedSearchTerm, setCurrentPage]);
 
   // Redirect Super Admins to System Products page (early return)
   if (currentUser?.role === "Super Admin") {

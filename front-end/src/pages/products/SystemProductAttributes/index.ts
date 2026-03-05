@@ -1,5 +1,5 @@
 export { SystemProductAttributesPage } from "./SystemProductAttributesPage";
 export { ProductAttributeAddEditDialog } from "./ProductAttributeAddEditDialog";
-export { ProductAttributeCard } from "./ProductAttributeCard";
-export { ProductAttributeListItem } from "./ProductAttributeListItem";
+export { ProductAttributeCard, ProductAttributeCardView, ProductAttributeListView } from "./ProductAttributeCard";
+export type { ProductAttributeCardProps, ProductAttributeViewProps } from "./ProductAttributeCard";
 export { ProductAttributeFilters } from "./ProductAttributeFilters";

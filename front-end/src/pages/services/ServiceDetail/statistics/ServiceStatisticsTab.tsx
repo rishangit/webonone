@@ -4,6 +4,7 @@ import { Separator } from "../../../../components/ui/separator";
 import { Service } from "../../../../services/services";
 import { Currency } from "../../../../services/currencies";
 import { DateDisplay } from "../../../../components/common/DateDisplay";
+import { CardTitle } from "../../../../components/common/CardTitle";
 import { Badge } from "../../../../components/ui/badge";
 
 interface ServiceStatisticsTabProps {
@@ -36,10 +37,7 @@ export const ServiceStatisticsTab = ({
       <div className="lg:col-span-2 space-y-6">
         {/* Booking Statistics */}
         <Card className="p-6 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]">
-          <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-[var(--accent-text)]" />
-            Booking Statistics
-          </h3>
+          <CardTitle title="Booking Statistics" icon={Calendar}  />
           <div className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex items-center justify-between p-4 rounded-lg bg-[var(--accent-bg)]/10 border border-[var(--accent-border)]/20">
@@ -87,10 +85,7 @@ export const ServiceStatisticsTab = ({
 
         {/* Performance Metrics */}
         <Card className="p-6 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]">
-          <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-[var(--accent-text)]" />
-            Performance Metrics
-          </h3>
+          <CardTitle title="Performance Metrics" icon={TrendingUp}  />
           <div className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="p-4 rounded-lg bg-[var(--accent-bg)]/10 border border-[var(--accent-border)]/20">

@@ -272,22 +272,6 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
     });
   }, [reduxAppointments, users, services, staff, spaces]);
 
-  // Calculate stats from real data
-  const appointmentStats = useMemo(() => {
-    const total = reduxAppointments.length;
-    const pending = reduxAppointments.filter(a => a.status === AppointmentStatus.PENDING || a.status === 0).length;
-    const confirmed = reduxAppointments.filter(a => a.status === AppointmentStatus.CONFIRMED || a.status === 1).length;
-    const inProgress = reduxAppointments.filter(a => a.status === AppointmentStatus.IN_PROGRESS || a.status === 2).length;
-    const cancelled = reduxAppointments.filter(a => a.status === AppointmentStatus.CANCELLED || a.status === AppointmentStatus.NO_SHOW || a.status === 4 || a.status === 5).length;
-
-    return [
-      { label: "Total", count: total, icon: Calendar, color: "text-blue-600" },
-      { label: "Pending", count: pending, icon: Clock, color: "text-orange-600" },
-      { label: "Confirmed", count: confirmed, icon: CheckCircle, color: "text-green-600" },
-      { label: "In Progress", count: inProgress, icon: Play, color: "text-purple-600" },
-      { label: "Cancelled", count: cancelled, icon: XCircle, color: "text-red-600" }
-    ];
-  }, [reduxAppointments]);
 
   // Create staff options from Redux data
   const staffOptions = useMemo(() => {
@@ -459,57 +443,6 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
 
       {/* Body Container - Fills rest of screen */}
       <div className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
-      {/* Stats Cards - Desktop Only */}
-        <div className="hidden lg:block mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          {appointmentStats.map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <Card key={index} className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
-                    <p className="text-xl font-semibold text-foreground">{stat.count}</p>
-                  </div>
-                  <Icon className={`w-8 h-8 ${stat.color} dark:text-${stat.color.split('-')[1]}-400`} />
-                </div>
-              </Card>
-            );
-          })}
-        </div>
-      </div>
-      {/* Mobile & Tablet: Carousel - Horizontal scroll with same layout as desktop */}
-        <div className="block lg:hidden mb-6">
-        <Carousel
-          opts={{
-            align: "start",
-            slidesToScroll: 1,
-            containScroll: "trimSnaps",
-          }}
-          className="w-full"
-        >
-          <CarouselContent className="ml-0">
-            {appointmentStats.map((stat, index) => {
-              const Icon = stat.icon;
-              const isLast = index === appointmentStats.length - 1;
-              return (
-                <CarouselItem key={index} className={`pl-0 ${isLast ? 'pr-4' : 'pr-2'} flex-shrink-0`} style={{ minWidth: '40vw', width: 'auto' }}>
-                  <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
-                        <p className="text-xl font-semibold text-foreground">{stat.count}</p>
-                      </div>
-                      <Icon className={`w-8 h-8 ${stat.color} dark:text-${stat.color.split('-')[1]}-400`} />
-                    </div>
-                  </Card>
-                </CarouselItem>
-              );
-            })}
-          </CarouselContent>
-        </Carousel>
-      </div>
-
       {/* Main Content with Tabs */}
         <div className="flex flex-col flex-1 min-h-0">
         {/* Filters and Search */}

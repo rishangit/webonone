@@ -58,9 +58,8 @@ import {
 import type { Theme, AccentColor } from "../../types";
 import { ViewSwitcher } from "../../components/ui/view-switcher";
 import { AppointmentCard } from "../appointments/AppointmentCard";
-import { CompanyCard } from "../companies/CompanyCard";
-import { CompanyListItem } from "../companies/CompanyListItem";
-import { CompanyProductCard } from "../products/CompanyProducts/CompanyProductCard";
+import { CompanyCard, CompanyListView } from "../companies/CompanyCard";
+import { CompanyProductCard } from "../products/CompanyProducts";
 import { UserCard } from "../users/UserCard";
 import { AppointmentStatus } from "../../types/appointmentStatus";
 
@@ -972,10 +971,12 @@ const ShowcasePage = ({
                         />
                       </div>
                     ) : (
-                      <CompanyListItem
-                        company={sampleCompany}
-                        onViewCompany={() => {}}
-                      />
+                      <Card className="p-6 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+                        <CompanyListView
+                          company={sampleCompany}
+                          onViewCompany={() => {}}
+                        />
+                      </Card>
                     )}
                   </div>
                 </CardContent>

@@ -508,7 +508,7 @@ export const POSSalesPage = ({ onBack, currentUser }: POSSalesPageProps) => {
           type: item.type,
           productId: item.productId, // Include productId (optional, backend gets from variant)
           name: item.name,
-          description: item.description,
+          description: item.description && item.description.trim() ? item.description : undefined, // Only include if not empty
           quantity: item.quantity,
           unitPrice: item.unitPrice,
           discount: item.discount,

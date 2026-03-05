@@ -1,9 +1,6 @@
 import type { Theme, AccentColor } from '../types';
 import { config } from '../config/environment';
 
-// Export data seeder
-export { seedDatabase } from './seedData';
-
 // Theme management utilities
 export const applyTheme = (theme: Theme, accentColor: AccentColor) => {
   const root = document.documentElement;

@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
+import { ListChecks } from "lucide-react";
 import { Card } from "../../../../../components/ui/card";
 import { Label } from "../../../../../components/ui/label";
 import { Separator } from "../../../../../components/ui/separator";
+import { CardTitle } from "../../../../../components/common/CardTitle";
 import { ProductRelatedAttribute } from "../../../../../services/productRelatedAttributes";
 import { productRelatedAttributesService } from "../../../../../services/productRelatedAttributes";
 import { productRelatedAttributeValuesService } from "../../../../../services/productRelatedAttributeValues";
@@ -105,7 +107,7 @@ export const CompanyProductAttributesDisplay = ({
   if (loading) {
     return (
       <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
-        <h3 className="font-semibold text-foreground mb-4">Product Attributes</h3>
+        <CardTitle title="Product Attributes" icon={ListChecks} />
         <div className="text-sm text-muted-foreground">Loading attributes...</div>
       </Card>
     );
@@ -114,7 +116,7 @@ export const CompanyProductAttributesDisplay = ({
   if (productAttributes.length === 0) {
     return (
       <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
-        <h3 className="font-semibold text-foreground mb-4">Product Attributes</h3>
+        <CardTitle title="Product Attributes" icon={ListChecks} />
         <div className="text-sm text-muted-foreground">
           No attributes assigned to this product. Attributes are inherited from the system product.
         </div>
@@ -153,7 +155,7 @@ export const CompanyProductAttributesDisplay = ({
 
   return (
     <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
-      <h3 className="font-semibold text-foreground mb-4">Product Attributes</h3>
+      <CardTitle title="Product Attributes" icon={ListChecks} />
       {!selectedVariant ? (
         <div className="text-sm text-muted-foreground">
           Select a variant to view attribute values.

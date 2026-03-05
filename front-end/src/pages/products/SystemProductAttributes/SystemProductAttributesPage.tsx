@@ -23,7 +23,6 @@ import { DeleteConfirmationDialog } from "../../../components/common/DeleteConfi
 import { Pagination } from "../../../components/common/Pagination";
 import { ProductAttributeAddEditDialog } from "./ProductAttributeAddEditDialog";
 import { ProductAttributeCard } from "./ProductAttributeCard";
-import { ProductAttributeListItem } from "./ProductAttributeListItem";
 import { ProductAttributeFilters } from "./ProductAttributeFilters";
 
 interface SystemProductAttributesPageProps {
@@ -344,23 +343,14 @@ export const SystemProductAttributesPage = ({ currentUser }: SystemProductAttrib
             <div className="flex-1">
               <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" : "space-y-4"}>
                 {displayedAttributes.map((attribute) => (
-                  viewMode === "list" ? (
-                    <ProductAttributeListItem
-                      key={attribute.id}
-                      attribute={attribute}
-                      unitsOfMeasure={unitsOfMeasure}
-                      onEdit={handleEdit}
-                      onDelete={handleDelete}
-                    />
-                  ) : (
-                    <ProductAttributeCard
-                      key={attribute.id}
-                      attribute={attribute}
-                      unitsOfMeasure={unitsOfMeasure}
-                      onEdit={handleEdit}
-                      onDelete={handleDelete}
-                    />
-                  )
+                  <ProductAttributeCard
+                    key={attribute.id}
+                    attribute={attribute}
+                    unitsOfMeasure={unitsOfMeasure}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    viewMode={viewMode}
+                  />
                 ))}
               </div>
             </div>

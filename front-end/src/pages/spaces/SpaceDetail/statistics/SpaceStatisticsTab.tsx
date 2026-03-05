@@ -3,6 +3,7 @@ import { Card } from "../../../../components/ui/card";
 import { Separator } from "../../../../components/ui/separator";
 import { Space } from "../../../../services/spaces";
 import { DateDisplay } from "../../../../components/common/DateDisplay";
+import { CardTitle } from "../../../../components/common/CardTitle";
 import { Badge } from "../../../../components/ui/badge";
 
 interface SpaceStatisticsTabProps {
@@ -30,10 +31,7 @@ export const SpaceStatisticsTab = ({ space }: SpaceStatisticsTabProps) => {
         {/* Appointment Statistics */}
         {space.appointments && (
           <Card className="p-6 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]">
-            <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-[var(--accent-text)]" />
-              Appointment Statistics
-            </h3>
+            <CardTitle title="Appointment Statistics" icon={Calendar}  />
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex items-center justify-between p-4 rounded-lg bg-[var(--accent-bg)]/10 border border-[var(--accent-border)]/20">
@@ -67,10 +65,7 @@ export const SpaceStatisticsTab = ({ space }: SpaceStatisticsTabProps) => {
 
         {/* Space Metrics */}
         <Card className="p-6 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]">
-          <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-[var(--accent-text)]" />
-            Space Metrics
-          </h3>
+          <CardTitle title="Space Metrics" icon={TrendingUp}  />
           <div className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="p-4 rounded-lg bg-[var(--accent-bg)]/10 border border-[var(--accent-border)]/20">

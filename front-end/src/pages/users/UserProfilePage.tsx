@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { formatAvatarUrl } from "../../utils";
 import { UserRoleNames, UserRole } from "../../types/user";
 import { DateDisplay } from "../../components/common/DateDisplay";
+import { CardTitle } from "../../components/common/CardTitle";
 import { BackButton } from "../../components/common/BackButton";
 
 interface UserProfilePageProps {
@@ -169,10 +170,7 @@ export const UserProfilePage = ({ userId, onBack }: UserProfilePageProps) => {
 
           {/* Personal Information */}
           <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] shadow-lg">
-            <div className="flex items-center gap-2 mb-6">
-              <User className="w-5 h-5 text-[var(--accent-text)]" />
-              <h3 className="font-semibold text-foreground">Personal Information</h3>
-            </div>
+            <CardTitle title="Personal Information" icon={User} className="mb-6" />
 
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -215,10 +213,7 @@ export const UserProfilePage = ({ userId, onBack }: UserProfilePageProps) => {
 
           {/* Professional Information */}
           <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] shadow-lg">
-            <div className="flex items-center gap-2 mb-6">
-              <Building className="w-5 h-5 text-[var(--accent-text)]" />
-              <h3 className="font-semibold text-foreground">Professional Information</h3>
-            </div>
+            <CardTitle title="Professional Information" icon={Building} className="mb-6" />
 
             <div className="space-y-6">
               <div className="space-y-2">
@@ -272,10 +267,7 @@ export const UserProfilePage = ({ userId, onBack }: UserProfilePageProps) => {
 
           {/* Account Information */}
           <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] shadow-lg">
-            <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-              <User className="w-5 h-5 text-[var(--accent-text)]" />
-              Account Information
-            </h3>
+            <CardTitle title="Account Information" icon={User} />
             <div className="space-y-3">
               <div>
                 <p className="text-sm text-muted-foreground">Registration Date</p>

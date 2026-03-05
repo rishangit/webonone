@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calendar, Clock, User, MapPin, Phone, Mail, Stethoscope, Building, Edit, Trash2 } from "lucide-react";
+import { Calendar, Clock, User, MapPin, Phone, Mail, Stethoscope, Edit, Trash2 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
@@ -14,11 +14,12 @@ import { fetchStaffMemberRequest } from "../../store/slices/staffSlice";
 import { fetchSpaceRequest } from "../../store/slices/spacesSlice";
 import { Appointment } from "../../services/appointments";
 import { AppointmentStatus, normalizeAppointmentStatus, getAppointmentStatusLabel } from "../../types/appointmentStatus";
-import { formatAvatarUrl, formatDate } from "../../utils";
+import { formatAvatarUrl } from "../../utils";
 import { DateDisplay } from "../../components/common/DateDisplay";
 import { DeleteConfirmationDialog } from "../../components/common/DeleteConfirmationDialog";
 import { AppointmentBillingDialog } from "./AppointmentBillingDialog";
 import { BackButton } from "../../components/common/BackButton";
+import { CardTitle } from "../../components/common/CardTitle";
 
 interface AppointmentDetailPageProps {
   appointmentId: string;
@@ -33,7 +34,6 @@ export const AppointmentDetailPage = ({ appointmentId, onBack }: AppointmentDeta
   const { currentService } = useAppSelector((state) => state.services);
   const { currentStaff } = useAppSelector((state) => state.staff);
   const { currentSpace } = useAppSelector((state) => state.spaces);
-  const { companies, currentCompany } = useAppSelector((state) => state.companies);
 
   const [appointment, setAppointment] = useState<Appointment | null>(null);
   const [localLoading, setLocalLoading] = useState(true);
@@ -156,24 +156,26 @@ export const AppointmentDetailPage = ({ appointmentId, onBack }: AppointmentDeta
   return (
     <div className="flex-1 p-4 lg:p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-4">
           <BackButton onClick={onBack} />
           <div>
-            <h1 className="text-2xl font-semibold text-foreground">Appointment Details</h1>
-            <p className="text-muted-foreground mt-1">
+            <h1 className="text-2xl lg:text-3xl font-semibold text-foreground">Appointment Details</h1>
+            <p className="text-muted-foreground mt-1 flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-[var(--accent-text)]" />
               <DateDisplay date={appointment.date} className="text-sm" />
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Badge className={getStatusColor(appointment.status)}>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Badge className={`${getStatusColor(appointment.status)} border font-medium`}>
             {getStatusDisplay(appointment.status)}
           </Badge>
           <Button
             variant="outline"
             size="sm"
             onClick={() => navigate(`/system/appointments/${appointment.id}/edit`)}
+            className="border-[var(--accent-border)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)] hover:text-[var(--accent-text)] transition-colors"
           >
             <Edit className="w-4 h-4 mr-2" />
             Edit
@@ -182,7 +184,7 @@ export const AppointmentDetailPage = ({ appointmentId, onBack }: AppointmentDeta
             variant="outline"
             size="sm"
             onClick={() => setShowDeleteDialog(true)}
-            className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
+            className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 border-red-500/30 hover:bg-red-500/10 hover:border-red-500/50 transition-colors"
           >
             <Trash2 className="w-4 h-4 mr-2" />
             Delete
@@ -194,63 +196,57 @@ export const AppointmentDetailPage = ({ appointmentId, onBack }: AppointmentDeta
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
           {/* Client Information */}
-          <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
-            <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-              <User className="w-5 h-5" />
-              Client Information
-            </h2>
+          <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+            <CardTitle title="Client Information" icon={User} />
             <div className="flex items-start gap-4">
-              <Avatar className="w-16 h-16">
+              <Avatar className="w-16 h-16 ring-2 ring-[var(--accent-border)] ring-offset-2 ring-offset-background">
                 <AvatarImage src={formatAvatarUrl(clientAvatar, clientUser?.firstName, clientUser?.lastName)} />
-                <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)]">
+                <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)] font-semibold">
                   {clientName.split(' ').map(n => n[0]).join('')}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex-1 space-y-2">
+              <div className="flex-1 space-y-3">
                 <div>
-                  <p className="font-semibold text-foreground">{clientName}</p>
+                  <p className="font-semibold text-foreground text-lg">{clientName}</p>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Mail className="w-4 h-4" />
-                  <span>{clientEmail}</span>
+                <div className="flex items-center gap-2 text-sm">
+                  <Mail className="w-4 h-4 text-[var(--accent-text)] flex-shrink-0" />
+                  <span className="text-muted-foreground">{clientEmail}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Phone className="w-4 h-4" />
-                  <span>{clientPhone}</span>
+                <div className="flex items-center gap-2 text-sm">
+                  <Phone className="w-4 h-4 text-[var(--accent-text)] flex-shrink-0" />
+                  <span className="text-muted-foreground">{clientPhone}</span>
                 </div>
               </div>
             </div>
           </Card>
 
           {/* Appointment Details */}
-          <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
-            <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-              <Calendar className="w-5 h-5" />
-              Appointment Details
-            </h2>
+          <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+            <CardTitle title="Appointment Details" icon={Calendar} />
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-sm">
-                <Calendar className="w-4 h-4 text-muted-foreground" />
+                <Calendar className="w-4 h-4 text-[var(--accent-text)] flex-shrink-0" />
                 <span className="text-muted-foreground">Date:</span>
                 <span className="text-foreground font-medium">
                   <DateDisplay date={appointment.date} />
                 </span>
               </div>
               <div className="flex items-center gap-2 text-sm">
-                <Clock className="w-4 h-4 text-muted-foreground" />
+                <Clock className="w-4 h-4 text-[var(--accent-text)] flex-shrink-0" />
                 <span className="text-muted-foreground">Time:</span>
                 <span className="text-foreground font-medium">{appointment.time}</span>
               </div>
               {appointment.duration && (
                 <div className="flex items-center gap-2 text-sm">
-                  <Clock className="w-4 h-4 text-muted-foreground" />
+                  <Clock className="w-4 h-4 text-[var(--accent-text)] flex-shrink-0" />
                   <span className="text-muted-foreground">Duration:</span>
                   <span className="text-foreground font-medium">{appointment.duration} minutes</span>
                 </div>
               )}
               {appointment.type && (
                 <div className="flex items-center gap-2 text-sm">
-                  <Stethoscope className="w-4 h-4 text-muted-foreground" />
+                  <Stethoscope className="w-4 h-4 text-[var(--accent-text)] flex-shrink-0" />
                   <span className="text-muted-foreground">Type:</span>
                   <span className="text-foreground font-medium">{appointment.type}</span>
                 </div>
@@ -258,13 +254,15 @@ export const AppointmentDetailPage = ({ appointmentId, onBack }: AppointmentDeta
               {appointment.priority && (
                 <div className="flex items-center gap-2 text-sm">
                   <span className="text-muted-foreground">Priority:</span>
-                  <Badge variant="outline">{appointment.priority}</Badge>
+                  <Badge variant="outline" className="bg-[var(--accent-bg)] text-[var(--accent-text)] border-[var(--accent-border)]">
+                    {appointment.priority}
+                  </Badge>
                 </div>
               )}
               {appointment.price && (
                 <div className="flex items-center gap-2 text-sm">
                   <span className="text-muted-foreground">Price:</span>
-                  <span className="text-foreground font-medium">
+                  <span className="text-foreground font-semibold text-[var(--accent-text)]">
                     {new Intl.NumberFormat('en-US', {
                       style: 'currency',
                       currency: 'USD'
@@ -275,7 +273,9 @@ export const AppointmentDetailPage = ({ appointmentId, onBack }: AppointmentDeta
               {appointment.paymentStatus && (
                 <div className="flex items-center gap-2 text-sm">
                   <span className="text-muted-foreground">Payment Status:</span>
-                  <Badge variant="outline">{appointment.paymentStatus}</Badge>
+                  <Badge variant="outline" className="bg-[var(--accent-bg)] text-[var(--accent-text)] border-[var(--accent-border)]">
+                    {appointment.paymentStatus}
+                  </Badge>
                 </div>
               )}
             </div>
@@ -283,15 +283,12 @@ export const AppointmentDetailPage = ({ appointmentId, onBack }: AppointmentDeta
 
           {/* Service Information */}
           {appointment.serviceId && currentService && (
-            <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
-              <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                <Stethoscope className="w-5 h-5" />
-                Service
-              </h2>
+            <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+              <CardTitle title="Service" icon={Stethoscope} />
               <div>
-                <p className="font-semibold text-foreground">{currentService.name}</p>
+                <p className="font-semibold text-foreground text-lg">{currentService.name}</p>
                 {currentService.description && (
-                  <p className="text-sm text-muted-foreground mt-1">{currentService.description}</p>
+                  <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{currentService.description}</p>
                 )}
               </div>
             </Card>
@@ -299,15 +296,12 @@ export const AppointmentDetailPage = ({ appointmentId, onBack }: AppointmentDeta
 
           {/* Staff Information */}
           {appointment.staffId && currentStaff && (
-            <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
-              <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                <User className="w-5 h-5" />
-                Assigned Staff
-              </h2>
+            <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+              <CardTitle title="Assigned Staff" icon={User} />
               <div className="flex items-center gap-3">
-                <Avatar className="w-12 h-12">
+                <Avatar className="w-12 h-12 ring-2 ring-[var(--accent-border)] ring-offset-2 ring-offset-background">
                   <AvatarImage src={formatAvatarUrl(currentStaff.avatar, currentStaff.firstName, currentStaff.lastName)} />
-                  <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)]">
+                  <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)] font-semibold">
                     {`${currentStaff.firstName?.[0] || ''}${currentStaff.lastName?.[0] || ''}`}
                   </AvatarFallback>
                 </Avatar>
@@ -316,7 +310,7 @@ export const AppointmentDetailPage = ({ appointmentId, onBack }: AppointmentDeta
                     {currentStaff.firstName || ''} {currentStaff.lastName || ''}
                   </p>
                   {currentStaff.role && (
-                    <p className="text-sm text-muted-foreground">{currentStaff.role}</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">{currentStaff.role}</p>
                   )}
                 </div>
               </div>
@@ -325,15 +319,12 @@ export const AppointmentDetailPage = ({ appointmentId, onBack }: AppointmentDeta
 
           {/* Space Information */}
           {appointment.spaceId && currentSpace && (
-            <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
-              <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                <MapPin className="w-5 h-5" />
-                Location
-              </h2>
+            <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+              <CardTitle title="Location" icon={MapPin} />
               <div>
-                <p className="font-semibold text-foreground">{currentSpace.name}</p>
-                {currentSpace.address && (
-                  <p className="text-sm text-muted-foreground mt-1">{currentSpace.address}</p>
+                <p className="font-semibold text-foreground text-lg">{currentSpace.name}</p>
+                {currentSpace.description && (
+                  <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{currentSpace.description}</p>
                 )}
               </div>
             </Card>
@@ -341,9 +332,11 @@ export const AppointmentDetailPage = ({ appointmentId, onBack }: AppointmentDeta
 
           {/* Notes */}
           {appointment.notes && (
-            <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
-              <h2 className="text-lg font-semibold text-foreground mb-4">Notes</h2>
-              <p className="text-sm text-muted-foreground whitespace-pre-wrap">{appointment.notes}</p>
+            <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+              <CardTitle title="Notes" />
+              <div className="p-4 rounded-lg bg-[var(--accent-bg)]/30 border border-[var(--accent-border)]/30">
+                <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{appointment.notes}</p>
+              </div>
             </Card>
           )}
         </div>
@@ -351,13 +344,13 @@ export const AppointmentDetailPage = ({ appointmentId, onBack }: AppointmentDeta
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Quick Actions */}
-          <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
-            <h2 className="text-lg font-semibold text-foreground mb-4">Quick Actions</h2>
+          <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+            <CardTitle title="Quick Actions" />
             <div className="space-y-2">
               {normalizeAppointmentStatus(appointment.status) === AppointmentStatus.COMPLETED && (
                 <Button
                   variant="outline"
-                  className="w-full"
+                  className="w-full border-[var(--accent-border)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)] hover:text-[var(--accent-text)] transition-colors"
                   onClick={() => setShowBillingDialog(true)}
                 >
                   View Billing
@@ -365,7 +358,7 @@ export const AppointmentDetailPage = ({ appointmentId, onBack }: AppointmentDeta
               )}
               <Button
                 variant="outline"
-                className="w-full"
+                className="w-full border-[var(--accent-border)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)] hover:text-[var(--accent-text)] transition-colors"
                 onClick={() => navigate(`/system/users/${appointment.clientId}`)}
               >
                 View Client Profile
@@ -374,29 +367,29 @@ export const AppointmentDetailPage = ({ appointmentId, onBack }: AppointmentDeta
           </Card>
 
           {/* Additional Information */}
-          <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
-            <h2 className="text-lg font-semibold text-foreground mb-4">Additional Information</h2>
-            <div className="space-y-2 text-sm">
+          <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
+            <CardTitle title="Additional Information" />
+            <div className="space-y-4 text-sm">
               {appointment.createdAt && (
-                <div>
-                  <span className="text-muted-foreground">Created:</span>
-                  <p className="text-foreground">
+                <div className="pb-3 border-b border-[var(--glass-border)]">
+                  <span className="text-muted-foreground block mb-1">Created:</span>
+                  <p className="text-foreground font-medium">
                     <DateDisplay date={appointment.createdAt} />
                   </p>
                 </div>
               )}
               {appointment.updatedAt && (
-                <div>
-                  <span className="text-muted-foreground">Last Updated:</span>
-                  <p className="text-foreground">
+                <div className="pb-3 border-b border-[var(--glass-border)]">
+                  <span className="text-muted-foreground block mb-1">Last Updated:</span>
+                  <p className="text-foreground font-medium">
                     <DateDisplay date={appointment.updatedAt} />
                   </p>
                 </div>
               )}
               {appointment.reminderSent !== undefined && (
                 <div>
-                  <span className="text-muted-foreground">Reminder Sent:</span>
-                  <Badge variant="outline" className="ml-2">
+                  <span className="text-muted-foreground block mb-1">Reminder Sent:</span>
+                  <Badge variant="outline" className={`${appointment.reminderSent ? 'bg-[var(--accent-bg)] text-[var(--accent-text)] border-[var(--accent-border)]' : ''}`}>
                     {appointment.reminderSent ? 'Yes' : 'No'}
                   </Badge>
                 </div>
@@ -413,7 +406,7 @@ export const AppointmentDetailPage = ({ appointmentId, onBack }: AppointmentDeta
         title="Delete Appointment"
         description={`Are you sure you want to delete this appointment? This action cannot be undone.`}
         onConfirm={handleDelete}
-        isDeleting={deleting}
+        isLoading={deleting}
       />
 
       {/* Billing Dialog */}
@@ -435,7 +428,6 @@ export const AppointmentDetailPage = ({ appointmentId, onBack }: AppointmentDeta
             time: appointment.time,
             duration: appointment.duration || 60,
             status: appointment.status as any,
-            notes: appointment.notes || "",
             location: currentSpace?.name || 'Location'
           }}
           onComplete={() => {
