@@ -33,6 +33,7 @@ export const CompanyProductListView = ({
     availabilityStatus,
     displayValues,
     formatPrice,
+    isRegularUser,
     setSelectedVariantId,
     setImageLoading,
     setImageError
@@ -80,11 +81,13 @@ export const CompanyProductListView = ({
                   {variants.length} {variants.length === 1 ? 'variant' : 'variants'}
                 </Badge>
               )}
-              <ProductActions
-                product={product}
-                onView={onView}
-                onDelete={onDelete}
-              />
+              {!isRegularUser && (
+                <ProductActions
+                  product={product}
+                  onView={onView}
+                  onDelete={onDelete}
+                />
+              )}
             </div>
           </div>
 
@@ -100,21 +103,23 @@ export const CompanyProductListView = ({
                     <div className="text-xs">{displayValues.displayStockUnit}</div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <DollarSign className="w-4 h-4 flex-shrink-0" />
-                  <div>
-                    <div className="font-medium text-foreground">{formatPrice(displayValues.displayCostPrice)}</div>
-                    <div className="text-xs">{selectedVariant ? 'Cost' : 'Avg Cost'}</div>
+                {!isRegularUser && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <DollarSign className="w-4 h-4 flex-shrink-0" />
+                    <div>
+                      <div className="font-medium text-foreground">{formatPrice(displayValues.displayCostPrice)}</div>
+                      <div className="text-xs">{selectedVariant ? 'Cost' : 'Avg Cost'}</div>
+                    </div>
                   </div>
-                </div>
+                )}
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <TrendingUp className="w-4 h-4 flex-shrink-0" />
                   <div>
                     <div className="font-medium text-foreground">{formatPrice(displayValues.displaySellPrice)}</div>
-                    <div className="text-xs">{selectedVariant ? 'Sell' : 'Avg Sell'}</div>
+                    <div className="text-xs">{isRegularUser ? (selectedVariant ? 'Price' : 'Avg Price') : (selectedVariant ? 'Sell' : 'Avg Sell')}</div>
                   </div>
                 </div>
-                {displayValues.displayMargin && (
+                {!isRegularUser && displayValues.displayMargin && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <TrendingUp className="w-4 h-4 flex-shrink-0" />
                     <div>
@@ -141,9 +146,11 @@ export const CompanyProductListView = ({
             </div>
           )}
 
-          <div className="flex items-center justify-between">
-            <ProductAvailability availabilityStatus={availabilityStatus} />
-          </div>
+          {!isRegularUser && (
+            <div className="flex items-center justify-between">
+              <ProductAvailability availabilityStatus={availabilityStatus} />
+            </div>
+          )}
         </div>
       </div>
     </Card>

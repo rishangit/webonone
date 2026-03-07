@@ -6,6 +6,8 @@ import { ServiceStatus } from "./ServiceStatus";
 import { ServiceActions } from "./ServiceActions";
 import { ServiceTags } from "./ServiceTags";
 import { ServiceInfo } from "./ServiceInfo";
+import { useAppSelector } from "../../../../store/hooks";
+import { isRole, UserRole } from "../../../../types/user";
 
 export const ServiceCardView = ({
   service,
@@ -19,6 +21,10 @@ export const ServiceCardView = ({
   getImageUrl,
   getStatusColor,
 }: ServiceViewProps) => {
+  const { user } = useAppSelector((state) => state.auth);
+  // Check if user is a regular user (not company owner or admin)
+  const isRegularUser = user && !isRole(user.role, UserRole.COMPANY_OWNER) && !isRole(user.role, UserRole.SYSTEM_ADMIN);
+
   return (
     <Card 
       className="overflow-hidden backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-300 hover:shadow-lg hover:shadow-[var(--glass-shadow)] group cursor-pointer"
@@ -47,16 +53,18 @@ export const ServiceCardView = ({
             {formatPrice(service.price)}
           </Badge>
         </div>
-        <div className="absolute top-3 right-3">
-          <ServiceActions
-            service={service}
-            onView={onView}
-            onEdit={onEdit}
-            onDelete={onDelete}
-            onDuplicate={onDuplicate}
-            onArchive={onArchive}
-          />
-        </div>
+        {!isRegularUser && (
+          <div className="absolute top-3 right-3">
+            <ServiceActions
+              service={service}
+              onView={onView}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onDuplicate={onDuplicate}
+              onArchive={onArchive}
+            />
+          </div>
+        )}
       </div>
       
       <div className="p-6">

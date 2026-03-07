@@ -32,6 +32,7 @@ export const CompanyProductCardView = ({
     availabilityStatus,
     displayValues,
     formatPrice,
+    isRegularUser,
     setSelectedVariantId,
     setImageLoading,
     setImageError
@@ -56,14 +57,16 @@ export const CompanyProductCardView = ({
             setImageLoading(false);
           }}
         />
-        {/* 3-dot menu top right */}
-        <div className="absolute top-3 right-3">
-          <ProductActions
-            product={product}
-            onView={onView}
-            onDelete={onDelete}
-          />
-        </div>
+        {/* 3-dot menu top right - hidden for regular users */}
+        {!isRegularUser && (
+          <div className="absolute top-3 right-3">
+            <ProductActions
+              product={product}
+              onView={onView}
+              onDelete={onDelete}
+            />
+          </div>
+        )}
         {/* Stock status badge bottom left */}
         <div className="absolute bottom-3 left-3">
           <Badge className={`${selectedStockStatus.color} backdrop-blur-sm border`}>
@@ -115,6 +118,7 @@ export const CompanyProductCardView = ({
               selectedVariant={selectedVariant}
               formatPrice={formatPrice}
               variant="grid"
+              hideCostAndMargin={isRegularUser}
             />
           </>
         )}
@@ -125,9 +129,11 @@ export const CompanyProductCardView = ({
           </div>
         )}
 
-        <div className="flex items-center justify-between pt-3 border-t border-[var(--glass-border)]">
-          <ProductAvailability availabilityStatus={availabilityStatus} />
-        </div>
+        {!isRegularUser && (
+          <div className="flex items-center justify-between pt-3 border-t border-[var(--glass-border)]">
+            <ProductAvailability availabilityStatus={availabilityStatus} />
+          </div>
+        )}
       </div>
     </Card>
   );

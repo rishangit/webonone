@@ -8,6 +8,7 @@ interface ProductPricingProps {
   selectedVariant: any;
   formatPrice: (price: number) => string;
   variant?: "grid" | "list";
+  hideCostAndMargin?: boolean; // Hide cost price and margin for users
 }
 
 export const ProductPricing = ({
@@ -16,9 +17,25 @@ export const ProductPricing = ({
   displayMargin,
   selectedVariant,
   formatPrice,
-  variant = "grid"
+  variant = "grid",
+  hideCostAndMargin = false
 }: ProductPricingProps) => {
   if (variant === "list") {
+    if (hideCostAndMargin) {
+      // Only show sell price for users
+      return (
+        <div className="grid grid-cols-1 gap-3 mb-4">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <TrendingUp className="w-4 h-4 flex-shrink-0" />
+            <div>
+              <div className="font-medium text-foreground">{formatPrice(displaySellPrice)}</div>
+              <div className="text-xs">{selectedVariant ? 'Price' : 'Avg Price'}</div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
     return (
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-4">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -49,6 +66,18 @@ export const ProductPricing = ({
   }
 
   // Grid view - pricing details in card body only
+  if (hideCostAndMargin) {
+    // Only show sell price for users
+    return (
+      <div className="pt-2 border-t border-[var(--glass-border)]">
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-muted-foreground">{selectedVariant ? 'Price:' : 'Avg Price:'}</span>
+          <span className="text-green-600 dark:text-green-400 font-medium">{formatPrice(displaySellPrice)}</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-2 gap-3 pt-2 border-t border-[var(--glass-border)]">
       <div className="flex items-center justify-between text-sm">

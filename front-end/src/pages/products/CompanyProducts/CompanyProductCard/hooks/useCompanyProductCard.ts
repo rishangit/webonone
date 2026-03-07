@@ -6,6 +6,7 @@ import { currenciesService, Currency } from "../../../../../services/currencies"
 import { companyProductVariantsService } from "../../../../../services/companyProductVariants";
 import { CompanyProduct } from "../../../../../services/companyProducts";
 import { CompanyProductVariant } from "../../../../../services/companyProductVariants";
+import { isRole, UserRole } from "../../../../../types/user";
 import {
   getImageUrl,
   formatPrice as formatPriceUtil,
@@ -135,6 +136,9 @@ export const useCompanyProductCard = (product: CompanyProduct) => {
   const displayValues = calculateDisplayValues(selectedVariant);
   
   const formatPrice = (price: number) => formatPriceUtil(price, companyCurrency);
+  
+  // Check if user is a regular user (not company owner or admin)
+  const isRegularUser = user && !isRole(user.role, UserRole.COMPANY_OWNER) && !isRole(user.role, UserRole.SYSTEM_ADMIN);
 
   return {
     imageUrl,
@@ -149,6 +153,7 @@ export const useCompanyProductCard = (product: CompanyProduct) => {
     availabilityStatus,
     displayValues,
     formatPrice,
+    isRegularUser,
     setSelectedVariantId,
     setImageLoading,
     setImageError

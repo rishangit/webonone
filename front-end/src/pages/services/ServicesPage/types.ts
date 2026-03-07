@@ -46,6 +46,7 @@ export interface ServiceActionsProps {
   onDelete: (service: ServiceType) => void;
   onDuplicate: (service: ServiceType) => void;
   onArchive: (service: ServiceType) => void;
+  hideActions?: boolean; // Hide actions menu for regular users
 }
 
 export interface ServiceTagsProps {

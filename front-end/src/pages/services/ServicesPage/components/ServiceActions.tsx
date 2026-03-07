@@ -10,7 +10,13 @@ export const ServiceActions = ({
   onDelete,
   onDuplicate,
   onArchive,
+  hideActions = false,
 }: ServiceActionsProps) => {
+  // Don't render actions menu for regular users
+  if (hideActions) {
+    return null;
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

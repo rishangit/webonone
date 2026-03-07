@@ -7,9 +7,15 @@ interface ProductActionsProps {
   product: CompanyProduct;
   onView?: (product: CompanyProduct) => void;
   onDelete?: (product: CompanyProduct) => void;
+  hideActions?: boolean; // Hide actions menu for regular users
 }
 
-export const ProductActions = ({ product, onView, onDelete }: ProductActionsProps) => {
+export const ProductActions = ({ product, onView, onDelete, hideActions = false }: ProductActionsProps) => {
+  // Don't render actions menu for regular users
+  if (hideActions) {
+    return null;
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
