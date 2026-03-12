@@ -17,6 +17,7 @@ import staffReducer from './slices/staffSlice';
 import appointmentsReducer from './slices/appointmentsSlice';
 import appointmentHistoryReducer from './slices/appointmentHistorySlice';
 import companyWebThemesReducer from './slices/companyWebThemesSlice';
+import companyWebPagesReducer from './slices/companyWebPagesSlice';
 import currenciesReducer from './slices/currenciesSlice';
 import backlogReducer from './slices/backlogSlice';
 import { rootEpic } from './epics/rootEpic';
@@ -44,6 +45,7 @@ export const store = configureStore({
     appointments: appointmentsReducer,
     appointmentHistory: appointmentHistoryReducer,
     companyWebThemes: companyWebThemesReducer,
+    companyWebPages: companyWebPagesReducer,
     currencies: currenciesReducer,
     backlog: backlogReducer,
   },

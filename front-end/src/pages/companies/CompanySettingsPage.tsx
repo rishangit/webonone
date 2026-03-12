@@ -812,10 +812,7 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
                 variant="outline" 
                 className="w-full justify-start bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent text-foreground hover:text-foreground"
                 onClick={() => {
-                  const companyId = id || user?.companyId;
-                  if (companyId) {
-                    navigate(`/web/${companyId}/dashboard`);
-                  }
+                  navigate(`/system/web/webpages`);
                 }}
               >
                 <Globe className="w-4 h-4 mr-2" />

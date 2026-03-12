@@ -6,7 +6,6 @@ import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { TabSwitcher } from "../../components/ui/tab-switcher";
-import { WebsiteLayout } from "../layout/WebsiteLayout";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import {
   fetchThemeRequest,
@@ -18,12 +17,16 @@ import { CreateThemeData } from "../../services/companyWebThemes";
 import { toast } from "sonner";
 
 export const ThemeFormPage = () => {
-  const { companyId, themeId } = useParams<{ companyId: string; themeId: string }>();
+  const { themeId } = useParams<{ themeId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useAppDispatch();
   const { currentTheme, loading, error } = useAppSelector((state) => state.companyWebThemes);
-  const { user } = useAppSelector((state) => state.auth);
+  const { userCompany, currentCompany } = useAppSelector((state) => state.companies);
+  
+  // Get company for website configuration
+  const company = currentCompany || userCompany;
+  const companyId = company?.id;
   
   const isNew = !themeId;
   const isViewMode = themeId && new URLSearchParams(location.search).get('view') === 'true';
@@ -52,6 +55,13 @@ export const ThemeFormPage = () => {
       dispatch(fetchThemeRequest(themeId));
     }
   }, [dispatch, themeId]);
+
+  // Update companyId when company changes
+  useEffect(() => {
+    if (companyId) {
+      setFormData(prev => ({ ...prev, companyId }));
+    }
+  }, [companyId]);
 
   // Populate form when theme is loaded
   useEffect(() => {
@@ -94,13 +104,13 @@ export const ThemeFormPage = () => {
         dispatch(createThemeRequest(formData));
         toast.success("Theme created successfully!");
         setTimeout(() => {
-          navigate(`/web/${companyId}/theme`);
+          navigate(`/system/web/themes`);
         }, 500);
       } else {
         dispatch(updateThemeRequest({ id: themeId!, data: formData }));
         toast.success("Theme updated successfully!");
         setTimeout(() => {
-          navigate(`/web/${companyId}/theme`);
+          navigate(`/system/web/themes`);
         }, 500);
       }
     } catch (err) {
@@ -110,29 +120,13 @@ export const ThemeFormPage = () => {
     }
   };
 
-  const handleLogout = () => {
-    navigate("/system/login");
-  };
-
-  const handleNavigate = (page: string) => {
-    navigate(`/system/${page}`);
-  };
-
   const handleBack = () => {
-    navigate(`/web/${companyId}/theme`);
+    navigate(`/system/web/themes`);
   };
 
   const pageTitle = isNew ? "Create New Theme" : isViewMode ? "View Theme" : "Edit Theme";
 
   return (
-    <WebsiteLayout
-      activeSection="theme"
-      onSectionChange={(section) => navigate(`/web/${companyId}/${section}`)}
-      currentUser={user}
-      onLogout={handleLogout}
-      onNavigate={handleNavigate}
-      companyId={companyId || ""}
-    >
       <div className="p-6 max-w-4xl mx-auto">
         <div className="space-y-6">
           {/* Header */}
@@ -423,6 +417,5 @@ export const ThemeFormPage = () => {
           </Card>
         </div>
       </div>
-    </WebsiteLayout>
   );
 };

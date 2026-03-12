@@ -28,6 +28,7 @@ const tagRoutes = require('./routes/tags');
 const salesRoutes = require('./routes/sales');
 const currencyRoutes = require('./routes/currencies');
 const companyWebThemeRoutes = require('./routes/companyWebThemes');
+const companyWebPageRoutes = require('./routes/companyWebPages');
 const companyUsersRoutes = require('./routes/companyUsers');
 console.log('Loading uploads routes...');
 const uploadRoutes = require('./routes/uploads');
@@ -265,6 +266,7 @@ app.use('/api/tags', tagRoutes);
 app.use('/api/sales', salesRoutes);
 app.use('/api/currencies', currencyRoutes);
 app.use('/api/company-web-themes', companyWebThemeRoutes);
+app.use('/api/company-web-pages', companyWebPageRoutes);
 app.use('/api/spaces', require('./routes/spaces'));
 app.use('/api/staff', require('./routes/staff'));
 app.use('/api', companyUsersRoutes);
@@ -280,7 +282,7 @@ app.get('/', (req, res) => {
   res.json({
     success: true,
     message: 'Appointment App API',
-    version: '1.6.0',
+    version: '1.7.0',
     endpoints: {
       auth: '/api/auth',
       users: '/api/users',

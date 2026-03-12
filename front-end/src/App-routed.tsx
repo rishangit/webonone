@@ -70,7 +70,7 @@ import { SearchPage } from "./pages/search";
 import { AnalyticsPage } from "./pages/analytics";
 
 // Website
-import { WebsiteSetupPage, ThemeFormPage } from "./pages/website";
+import { WebsitePage, ThemeFormPage, ThemePage, WebpageFormPage, WebpageEditor, PublicWebPage } from "./pages/website";
 
 // Showcase
 import { ShowcasePage } from "./pages/showcase";
@@ -85,18 +85,6 @@ const VerifyEmailRedirect = () => {
   const searchParams = location.search; // Preserves ?token=...
   return <Navigate to={`/system/email-verify${searchParams}`} replace />;
 };
-
-// Wrapper component for website routes (no MainLayout)
-function WebsiteRouteWrapper({ children }: { children: React.ReactNode }) {
-  const { user } = useAppSelector((state) => state.auth);
-  const isAuthenticated = !!user;
-
-  if (!isAuthenticated) {
-    return <Navigate to="/system/login" replace />;
-  }
-
-  return <>{children}</>;
-}
 
 // Wrapper component for protected routes with logout functionality
 function ProtectedRouteWrapper({ children }: { children: React.ReactNode }) {
@@ -129,6 +117,10 @@ function ProtectedRouteWrapper({ children }: { children: React.ReactNode }) {
     if (path.includes('/analytics')) return 'analytics';
     if (path.includes('/settings')) return 'settings';
     if (path.includes('/showcase')) return 'showcase';
+    if (path.includes('/web/webpages')) return 'web-webpages';
+    if (path.includes('/web/themes')) return 'web-themes';
+    if (path.includes('/web/presets')) return 'web-presets';
+    if (path.includes('/web')) return 'web-webpages';
     return 'dashboard';
   };
 
@@ -205,6 +197,15 @@ function ProtectedRouteWrapper({ children }: { children: React.ReactNode }) {
         break;
       case 'backlog':
         navigate('/system/backlog');
+        break;
+      case 'web-webpages':
+        navigate('/system/web/webpages');
+        break;
+      case 'web-themes':
+        navigate('/system/web/themes');
+        break;
+      case 'web-presets':
+        navigate('/system/web/presets');
         break;
       default:
         // Handle company-settings with ID (e.g., "company-settings/4")
@@ -1258,6 +1259,115 @@ function App() {
           />
 
           <Route 
+            path="/system/web/themes/new" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <ThemeFormPage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          <Route 
+            path="/system/web/themes/:themeId" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <ThemeFormPage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          <Route 
+            path="/system/web/webpages/new" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <WebpageFormPage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          <Route 
+            path="/system/web/webpages/:pageId/edit" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <WebpageEditor />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          <Route 
+            path="/system/web/webpages/:pageId" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <WebpageFormPage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          <Route 
+            path="/system/web/webpages" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <WebsitePage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          <Route 
+            path="/system/web/themes" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <WebsitePage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          <Route 
+            path="/system/web/presets" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <WebsitePage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          <Route 
+            path="/system/web" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <WebsitePage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+
+          <Route 
             path="/showcase" 
             element={
               isAuthenticated ? (
@@ -1275,36 +1385,20 @@ function App() {
             }
           />
 
+          {/* Public Webpage Route - No authentication required */}
           <Route 
-            path="/web/:companyId/theme/new" 
-            element={
-              <WebsiteRouteWrapper>
-                <ThemeFormPage />
-              </WebsiteRouteWrapper>
-            }
+            path="/web/:companyId/*" 
+            element={<PublicWebPage />}
           />
+          {/* Full-width editor route - opens in new tab without sidebar */}
           <Route 
-            path="/web/:companyId/theme/:themeId" 
+            path="/editor/:pageId" 
             element={
-              <WebsiteRouteWrapper>
-                <ThemeFormPage />
-              </WebsiteRouteWrapper>
-            }
-          />
-          <Route 
-            path="/web/:companyId/:section" 
-            element={
-              <WebsiteRouteWrapper>
-                <WebsiteSetupPage />
-              </WebsiteRouteWrapper>
-            }
-          />
-          <Route 
-            path="/web/:companyId" 
-            element={
-              <WebsiteRouteWrapper>
-                <WebsiteSetupPage />
-              </WebsiteRouteWrapper>
+              isAuthenticated ? (
+                <WebpageEditor fullWidth={true} />
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
             }
           />
 

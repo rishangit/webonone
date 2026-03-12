@@ -15,10 +15,14 @@ import {
 import { CompanyWebTheme } from "../../services/companyWebThemes";
 
 export const ThemePage = () => {
-  const { companyId } = useParams<{ companyId: string }>();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { themes, loading, error } = useAppSelector((state) => state.companyWebThemes);
+  const { userCompany, currentCompany } = useAppSelector((state) => state.companies);
+  
+  // Get company for website configuration
+  const company = currentCompany || userCompany;
+  const companyId = company?.id;
   
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedTheme, setSelectedTheme] = useState<CompanyWebTheme | null>(null);
@@ -37,15 +41,15 @@ export const ThemePage = () => {
   }, [error, dispatch]);
 
   const handleAdd = () => {
-    navigate(`/web/${companyId}/theme/new`);
+    navigate(`/system/web/themes/new`);
   };
 
   const handleEdit = (theme: CompanyWebTheme) => {
-    navigate(`/web/${companyId}/theme/${theme.id}`);
+    navigate(`/system/web/themes/${theme.id}`);
   };
 
   const handleView = (theme: CompanyWebTheme) => {
-    navigate(`/web/${companyId}/theme/${theme.id}?view=true`);
+    navigate(`/system/web/themes/${theme.id}?view=true`);
   };
 
   const handleDelete = (theme: CompanyWebTheme) => {

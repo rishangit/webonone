@@ -1,4 +1,4 @@
-import { Calendar, Users, Clock, BarChart3, FileText, MessageSquare, Settings, CreditCard, Building, UserCheck, MapPin, Package, PackageCheck, DollarSign, ChevronRight, Tag } from "lucide-react";
+import { Calendar, Users, Clock, BarChart3, FileText, MessageSquare, Settings, CreditCard, Building, UserCheck, MapPin, Package, PackageCheck, DollarSign, ChevronRight, Tag, Globe } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { useIsMobile } from "../../components/ui/use-mobile";
 import { User as UserType, UserRole } from "../../types/user";
@@ -30,6 +30,17 @@ const getNavigationItems = (role: UserRole, selectedEntities?: string[] | null) 
           { label: "Units of Measure", id: "units-of-measure" }
         ]
       },
+      { 
+        icon: Globe, 
+        label: "Website", 
+        id: "web",
+        hasSubmenu: true,
+        submenu: [
+          { label: "Webpages", id: "web-webpages" },
+          { label: "Themes", id: "web-themes" },
+          { label: "Presets", id: "web-presets" }
+        ]
+      },
       { icon: Tag, label: "Tags", id: "tags" },
       { icon: BarChart3, label: "Analytics", id: "analytics" },
       { icon: FileText, label: "Reports", id: "reports" },
@@ -47,6 +58,17 @@ const getNavigationItems = (role: UserRole, selectedEntities?: string[] | null) 
       { icon: CreditCard, label: "Services", id: "services", entityType: "service" },
       { icon: Package, label: "Products", id: "products", entityType: "product" },
       { icon: DollarSign, label: "Sales", id: "sales" },
+      { 
+        icon: Globe, 
+        label: "Website", 
+        id: "web",
+        hasSubmenu: true,
+        submenu: [
+          { label: "Webpages", id: "web-webpages" },
+          { label: "Themes", id: "web-themes" },
+          { label: "Presets", id: "web-presets" }
+        ]
+      },
       { icon: Users, label: "Users", id: "users" },
       { icon: BarChart3, label: "Analytics", id: "analytics" },
       { icon: FileText, label: "Reports", id: "reports" },
@@ -75,6 +97,17 @@ const getNavigationItems = (role: UserRole, selectedEntities?: string[] | null) 
       { icon: CreditCard, label: "Services", id: "services", entityType: "service" },
       { icon: Package, label: "Products", id: "products", entityType: "product" },
       { icon: DollarSign, label: "Sales", id: "sales" },
+      { 
+        icon: Globe, 
+        label: "Website", 
+        id: "web",
+        hasSubmenu: true,
+        submenu: [
+          { label: "Webpages", id: "web-webpages" },
+          { label: "Themes", id: "web-themes" },
+          { label: "Presets", id: "web-presets" }
+        ]
+      },
       { icon: BarChart3, label: "Analytics", id: "analytics" },
       { icon: FileText, label: "Reports", id: "reports" },
       { icon: MessageSquare, label: "Messages", id: "messages" },

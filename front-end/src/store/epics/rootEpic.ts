@@ -27,6 +27,7 @@ import { servicesEpics } from './servicesEpics';
 import { staffEpics } from './staffEpics';
 import { appointmentsEpics } from './appointmentsEpics';
 import { companyWebThemesEpics } from './companyWebThemesEpics';
+import { companyWebPagesEpics } from './companyWebPagesEpics';
 import {
   fetchAppointmentHistoryEpic,
   fetchUserAppointmentHistoryEpic
@@ -67,6 +68,7 @@ export const rootEpic = combineEpics(
   fetchAppointmentHistoryEpic,
   fetchUserAppointmentHistoryEpic,
   ...companyWebThemesEpics,
+  ...companyWebPagesEpics,
   ...currenciesEpics,
   fetchBacklogItemsEpic,
   fetchBacklogItemEpic,

@@ -135,6 +135,12 @@ This script will:
 
 **Note**: This migration is safe for production use. The RENAME TABLE operation in MySQL is atomic and preserves all data.
 
+## Versioned scripts
+
+Scripts for a specific app version live in version folders (e.g. `1.7.0/`). Run them when upgrading to that version or when setting up a fresh database.
+
+- **1.7.0**: Company web pages table and content column. See `1.7.0/README.md`.
+
 ## Notes
 
 - The database schema is stable and production-ready
