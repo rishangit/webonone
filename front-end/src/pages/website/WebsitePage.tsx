@@ -1,10 +1,11 @@
 import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Card } from "../../components/ui/card";
-import { Palette, Layout } from "lucide-react";
+import { Palette, Layout, FolderOpen } from "lucide-react";
 import { useAppSelector } from "../../store/hooks";
-import { ThemePage } from "./ThemePage";
+import { ThemePage } from "./ThemePage/index";
 import { WebpagesPage } from "./WebpagesPage/index";
+import { MediaPage } from "./MediaPage";
 
 export const WebsitePage = () => {
   const navigate = useNavigate();
@@ -28,6 +29,7 @@ export const WebsitePage = () => {
     if (path.includes('/webpages')) return 'webpages';
     if (path.includes('/themes')) return 'themes';
     if (path.includes('/presets')) return 'presets';
+    if (path.includes('/media')) return 'media';
     return 'webpages'; // default
   };
 
@@ -38,24 +40,45 @@ export const WebsitePage = () => {
       case "webpages":
         return <WebpagesPage />;
       case "themes":
-        return (
-          <div className="space-y-6">
-            {companyId ? (
-              <ThemePage />
-            ) : (
-              <div className="space-y-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-foreground mb-2">Themes</h2>
-                  <p className="text-muted-foreground">Manage your website themes</p>
-                </div>
-                <Card className="p-6 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]">
-                  <div className="text-center py-8">
-                    <Palette className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-foreground mb-4">Please select a company to manage themes.</p>
-                  </div>
-                </Card>
+        return companyId ? (
+          <ThemePage />
+        ) : (
+          <div className="flex-1 p-4 lg:p-6 flex flex-col min-h-0">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <div>
+                <h1 className="text-xl sm:text-2xl font-semibold text-foreground">
+                  Theme Management
+                </h1>
+                <p className="text-muted-foreground mt-1">
+                  Create and manage multiple themes for your website
+                </p>
               </div>
-            )}
+            </div>
+            <Card className="p-6 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]">
+              <div className="text-center py-8">
+                <Palette className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-foreground mb-4">Please select a company to manage themes.</p>
+              </div>
+            </Card>
+          </div>
+        );
+      case "media":
+        return companyId ? (
+          <MediaPage />
+        ) : (
+          <div className="flex-1 p-4 lg:p-6 flex flex-col min-h-0">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <div>
+                <h1 className="text-xl sm:text-2xl font-semibold text-foreground">Media</h1>
+                <p className="text-muted-foreground mt-1">Manage media files and folders</p>
+              </div>
+            </div>
+            <Card className="p-6 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]">
+              <div className="text-center py-8">
+                <FolderOpen className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-foreground mb-4">Please select a company to manage media.</p>
+              </div>
+            </Card>
           </div>
         );
       case "presets":

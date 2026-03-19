@@ -5,7 +5,7 @@ import { WebsiteLayout } from "../layout/WebsiteLayout";
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
 import { logout } from "../../store/slices/authSlice";
 import { toast } from "sonner";
-import { ThemePage } from "./ThemePage";
+import { ThemePage } from "./ThemePage/index";
 
 export const WebsiteSetupPage = () => {
   const { companyId, section } = useParams<{ companyId: string; section: string }>();

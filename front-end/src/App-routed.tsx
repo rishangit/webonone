@@ -120,6 +120,7 @@ function ProtectedRouteWrapper({ children }: { children: React.ReactNode }) {
     if (path.includes('/web/webpages')) return 'web-webpages';
     if (path.includes('/web/themes')) return 'web-themes';
     if (path.includes('/web/presets')) return 'web-presets';
+    if (path.includes('/web/media')) return 'web-media';
     if (path.includes('/web')) return 'web-webpages';
     return 'dashboard';
   };
@@ -206,6 +207,9 @@ function ProtectedRouteWrapper({ children }: { children: React.ReactNode }) {
         break;
       case 'web-presets':
         navigate('/system/web/presets');
+        break;
+      case 'web-media':
+        navigate('/system/web/media');
         break;
       default:
         // Handle company-settings with ID (e.g., "company-settings/4")
@@ -1344,6 +1348,18 @@ function App() {
           />
           <Route 
             path="/system/web/presets" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <WebsitePage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          <Route 
+            path="/system/web/media" 
             element={
               isAuthenticated ? (
                 <ProtectedRouteWrapper>

@@ -6,36 +6,71 @@ const { asyncHandler, notFoundError, validationError } = require('../middleware/
 const Joi = require('joi');
 
 // Theme validation schema
+const textStyleSchema = Joi.object({
+  styleName: Joi.string().min(1).max(255).required(),
+  googleFontUrl: Joi.string().uri().optional().allow('', null),
+  fontFamily: Joi.string().max(255).optional().allow('', null),
+  fontSize: Joi.string().max(50).optional().allow('', null),
+});
+
+const fontSettingsSchema = textStyleSchema;
+
+const textSettingsSchema = Joi.object({
+  styleName: Joi.string().min(1).max(255).required(),
+  googleFontUrl: Joi.string().uri().optional().allow('', null),
+  fontFamily: Joi.string().max(255).optional().allow('', null),
+  fontSize: Joi.string().max(50).optional().allow('', null),
+  fontColor: Joi.string().max(50).optional().allow('', null),
+});
+
+const colorSchema = Joi.object({
+  name: Joi.string().min(1).max(255).required(),
+  color: Joi.string().max(50).required(),
+});
+
+const buttonSchema = Joi.object({
+  buttonName: Joi.string().min(1).max(255).required(),
+  backgroundColor: Joi.string().max(50).required(),
+  fontColor: Joi.string().max(50).required(),
+  textStyleName: Joi.string().min(1).max(255).required(),
+  borderColor: Joi.string().max(50).required(),
+  borderRadius: Joi.string().max(50).required(),
+});
+
 const themeSchema = {
   create: Joi.object({
     companyId: Joi.string().length(10).required(),
     name: Joi.string().min(1).max(255).required(),
-    backgroundColor: Joi.string().max(50).optional().allow('', null),
-    bodyTextColor: Joi.string().max(50).optional().allow('', null),
-    headingColor: Joi.string().max(50).optional().allow('', null),
-    h1Font: Joi.string().max(255).optional().allow('', null),
-    h2Font: Joi.string().max(255).optional().allow('', null),
-    h3Font: Joi.string().max(255).optional().allow('', null),
-    h4Font: Joi.string().max(255).optional().allow('', null),
-    h5Font: Joi.string().max(255).optional().allow('', null),
-    googleFontUrl: Joi.string().uri().optional().allow('', null),
+    themeData: Joi.object({
+      themeName: Joi.string().min(1).max(255).required(),
+      basicSetting: Joi.object({
+        backgroundColor: Joi.string().max(50).required(),
+        fontColor: Joi.string().max(50).required(),
+      }).required(),
+      fontSettings: Joi.array().items(fontSettingsSchema).default([]),
+      textSettings: Joi.array().items(textSettingsSchema).default([]),
+      colors: Joi.array().items(colorSchema).default([]),
+      buttons: Joi.array().items(buttonSchema).default([]),
+    }).required(),
     isActive: Joi.boolean().optional(),
     isDefault: Joi.boolean().optional(),
   }),
   update: Joi.object({
     name: Joi.string().min(1).max(255).optional(),
-    backgroundColor: Joi.string().max(50).optional().allow('', null),
-    bodyTextColor: Joi.string().max(50).optional().allow('', null),
-    headingColor: Joi.string().max(50).optional().allow('', null),
-    h1Font: Joi.string().max(255).optional().allow('', null),
-    h2Font: Joi.string().max(255).optional().allow('', null),
-    h3Font: Joi.string().max(255).optional().allow('', null),
-    h4Font: Joi.string().max(255).optional().allow('', null),
-    h5Font: Joi.string().max(255).optional().allow('', null),
-    googleFontUrl: Joi.string().uri().optional().allow('', null),
+    themeData: Joi.object({
+      themeName: Joi.string().min(1).max(255).required(),
+      basicSetting: Joi.object({
+        backgroundColor: Joi.string().max(50).required(),
+        fontColor: Joi.string().max(50).required(),
+      }).required(),
+      fontSettings: Joi.array().items(fontSettingsSchema).default([]),
+      textSettings: Joi.array().items(textSettingsSchema).default([]),
+      colors: Joi.array().items(colorSchema).default([]),
+      buttons: Joi.array().items(buttonSchema).default([]),
+    }).optional(),
     isActive: Joi.boolean().optional(),
     isDefault: Joi.boolean().optional(),
-  }).min(1)
+  }).min(1),
 };
 
 // Get all themes for a company

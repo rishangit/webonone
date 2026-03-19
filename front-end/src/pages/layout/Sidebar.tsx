@@ -38,7 +38,8 @@ const getNavigationItems = (role: UserRole, selectedEntities?: string[] | null) 
         submenu: [
           { label: "Webpages", id: "web-webpages" },
           { label: "Themes", id: "web-themes" },
-          { label: "Presets", id: "web-presets" }
+          { label: "Presets", id: "web-presets" },
+          { label: "Media", id: "web-media" }
         ]
       },
       { icon: Tag, label: "Tags", id: "tags" },
@@ -66,7 +67,8 @@ const getNavigationItems = (role: UserRole, selectedEntities?: string[] | null) 
         submenu: [
           { label: "Webpages", id: "web-webpages" },
           { label: "Themes", id: "web-themes" },
-          { label: "Presets", id: "web-presets" }
+          { label: "Presets", id: "web-presets" },
+          { label: "Media", id: "web-media" }
         ]
       },
       { icon: Users, label: "Users", id: "users" },
@@ -105,7 +107,8 @@ const getNavigationItems = (role: UserRole, selectedEntities?: string[] | null) 
         submenu: [
           { label: "Webpages", id: "web-webpages" },
           { label: "Themes", id: "web-themes" },
-          { label: "Presets", id: "web-presets" }
+          { label: "Presets", id: "web-presets" },
+          { label: "Media", id: "web-media" }
         ]
       },
       { icon: BarChart3, label: "Analytics", id: "analytics" },

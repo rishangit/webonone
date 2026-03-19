@@ -20,6 +20,7 @@ interface FileUploadProps {
   maxSize?: number; // in MB
   className?: string;
   disabled?: boolean;
+  cropAspectPresets?: { label: string; value: number }[]; // if provided, show ratio selector in crop dialog
 }
 
 const FileUpload: React.FC<FileUploadProps> = ({
@@ -32,7 +33,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
   accept = 'image/*',
   maxSize = 5, // 5MB default
   className = '',
-  disabled = false
+  disabled = false,
+  cropAspectPresets
 }) => {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -292,6 +294,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
           onOpenChange={setCropDialogOpen}
           imageSrc={imageToCrop}
           onCropComplete={handleCropComplete}
+          aspect={1}
+          aspectPresets={cropAspectPresets}
         />
       )}
     </div>

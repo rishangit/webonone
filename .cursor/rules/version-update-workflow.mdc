@@ -1,0 +1,46 @@
+---
+description: Standard workflow for branch version updates and DB script versioning
+alwaysApply: true
+---
+
+# Version Update Workflow
+
+When asked to "update version" or prepare a release on the current branch, follow this checklist:
+
+1. Confirm current branch with `git branch --show-current`.
+2. Inspect branch change scope before bumping version:
+   - review commits and diff from base branch (usually `main`/`master`)
+   - classify impact as patch, minor, or major
+   - if unclear, ask user to confirm bump level before applying
+3. Update application version consistently in:
+   - `package.json`
+   - `front-end/package.json`
+   - `back-end/package.json`
+4. Use semantic versioning based on current branch changes:
+   - patch: bugfix/internal updates (`x.y.Z`)
+   - minor: new backward-compatible features (`x.Y.z`)
+   - major: breaking changes (`X.y.z`)
+5. Do not create git tags unless explicitly requested.
+
+## Backend Script Version Foldering
+
+If a new backend migration/setup script is introduced for this version:
+
+1. Create a version folder under `back-end/scripts/<version>/`.
+2. Move related new scripts into that version folder.
+3. Keep existing script names descriptive (do not shorten names).
+4. Ensure script paths referenced by docs or npm scripts are updated.
+
+Example:
+
+- `back-end/scripts/migrateCreateCompanyWebThemesTable.js`
+- becomes `back-end/scripts/1.7.1/migrateCreateCompanyWebThemesTable.js`
+
+## Init Database Verification
+
+After adding or moving DB-related scripts:
+
+1. Check `back-end/scripts/initDatabase.js` includes/executes new DB changes.
+2. If not, wire the new migration logic into init flow.
+3. Keep init sequence idempotent (safe to run more than once).
+4. Validate by running only relevant script commands and checking for failures.

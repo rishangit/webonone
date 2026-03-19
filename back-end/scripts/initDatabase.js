@@ -569,6 +569,23 @@ const createTables = async () => {
       console.warn('⚠️  Warning: Could not add foreign key constraint for company_web_pages:', fkError.message);
     }
 
+    // Company Web Themes table - stores theme config as JSON
+    await pool.execute(`
+      CREATE TABLE IF NOT EXISTS company_web_themes (
+        id VARCHAR(10) PRIMARY KEY,
+        companyId VARCHAR(10) NOT NULL,
+        name VARCHAR(255) NOT NULL,
+        themeData JSON NOT NULL,
+        isActive BOOLEAN DEFAULT FALSE,
+        isDefault BOOLEAN DEFAULT FALSE,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_company (companyId),
+        INDEX idx_active (isActive),
+        INDEX idx_default (isDefault)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+
     console.log('✅ Database tables created successfully');
   } catch (error) {
     console.error('❌ Error creating tables:', error.message);

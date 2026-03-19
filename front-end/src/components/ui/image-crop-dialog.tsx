@@ -10,6 +10,8 @@ interface ImageCropDialogProps {
   onOpenChange: (open: boolean) => void;
   imageSrc: string;
   onCropComplete: (croppedImageBlob: Blob) => void;
+  aspect?: number; // default: 1 (1:1)
+  aspectPresets?: { label: string; value: number }[]; // if provided, show selector
 }
 
 const createImage = (url: string): Promise<HTMLImageElement> =>
@@ -84,12 +86,15 @@ export const ImageCropDialog: React.FC<ImageCropDialogProps> = ({
   open,
   onOpenChange,
   imageSrc,
-  onCropComplete
+  onCropComplete,
+  aspect = 1,
+  aspectPresets
 }) => {
   const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [selectedAspect, setSelectedAspect] = useState(aspect);
 
   const onCropChange = useCallback((crop: Point) => {
     setCrop(crop);
@@ -125,15 +130,24 @@ export const ImageCropDialog: React.FC<ImageCropDialogProps> = ({
     setCrop({ x: 0, y: 0 });
     setZoom(1);
     setCroppedAreaPixels(null);
+    setSelectedAspect(aspect);
     onOpenChange(false);
   };
+
+  const presetList = Array.isArray(aspectPresets) ? aspectPresets : undefined;
+  const activePresetLabel =
+    presetList?.find((p) => p.value === selectedAspect)?.label || null;
 
   return (
     <CustomDialog
       open={open}
       onOpenChange={onOpenChange}
       title="Crop Image"
-      description="Adjust the image to your desired crop area (1:1 ratio)"
+      description={
+        presetList?.length
+          ? "Adjust the image and choose a crop ratio."
+          : "Adjust the image to your desired crop area (1:1 ratio)"
+      }
       icon={<Crop className="w-5 h-5" />}
       maxWidth="max-w-2xl"
       footer={
@@ -158,12 +172,37 @@ export const ImageCropDialog: React.FC<ImageCropDialogProps> = ({
       }
     >
       <div className="space-y-4">
+        {presetList?.length ? (
+          <div className="space-y-2">
+            <label className="text-sm text-foreground font-medium">
+              Ratio{activePresetLabel ? `: ${activePresetLabel}` : ""}
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {presetList.map((p) => (
+                <Button
+                  key={p.label}
+                  type="button"
+                  variant={p.value === selectedAspect ? "accent" : "outline"}
+                  className={
+                    p.value === selectedAspect
+                      ? ""
+                      : "border-[var(--glass-border)] bg-[var(--glass-bg)]"
+                  }
+                  onClick={() => setSelectedAspect(p.value)}
+                  disabled={isProcessing}
+                >
+                  {p.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+        ) : null}
         <div className="relative w-full" style={{ height: '400px' }}>
           <Cropper
             image={imageSrc}
             crop={crop}
             zoom={zoom}
-            aspect={1} // 1:1 ratio
+            aspect={selectedAspect}
             onCropChange={onCropChange}
             onZoomChange={onZoomChange}
             onCropComplete={onCropCompleteCallback}
@@ -195,7 +234,8 @@ export const ImageCropDialog: React.FC<ImageCropDialogProps> = ({
           />
         </div>
         <p className="text-xs text-muted-foreground text-center">
-          Drag to reposition • Use zoom slider to adjust • Crop area is 1:1 ratio
+          Drag to reposition • Use zoom slider to adjust
+          {presetList?.length ? "" : " • Crop area is 1:1 ratio"}
         </p>
       </div>
     </CustomDialog>

@@ -2,18 +2,58 @@ import { config } from '../config/environment';
 
 const API_BASE_URL = config.apiBaseUrl;
 
+export interface ThemeBasicSetting {
+  backgroundColor: string;
+  fontColor: string;
+}
+
+export interface ThemeTextSetting {
+  styleName: string;
+  googleFontUrl: string;
+  fontFamily: string;
+  fontSize: string;
+  fontColor?: string;
+}
+
+export interface ThemeColorSetting {
+  name: string;
+  color: string;
+}
+
+export interface ThemeFontSetting {
+  styleName: string;
+  googleFontUrl: string;
+  fontFamily: string;
+  fontSize: string;
+}
+
+export interface ThemeButtonSetting {
+  buttonName: string;
+  backgroundColor: string;
+  fontColor: string;
+  textStyleName: string;
+  borderColor: string;
+  borderRadius: string;
+}
+
+export interface ThemeData {
+  themeName: string;
+  basicSetting: ThemeBasicSetting;
+  fontSettings?: ThemeFontSetting[];
+  textSettings: ThemeTextSetting[];
+  colors?: ThemeColorSetting[];
+  buttons?: ThemeButtonSetting[];
+}
+
 export interface CompanyWebTheme {
   id: string;
   companyId: string;
   name: string;
+  themeData: ThemeData;
+  // Convenience fields derived from themeData for previews
   backgroundColor?: string;
   bodyTextColor?: string;
   headingColor?: string;
-  h1Font?: string;
-  h2Font?: string;
-  h3Font?: string;
-  h4Font?: string;
-  h5Font?: string;
   googleFontUrl?: string;
   isActive: boolean;
   isDefault: boolean;
@@ -24,15 +64,7 @@ export interface CompanyWebTheme {
 export interface CreateThemeData {
   companyId: string;
   name: string;
-  backgroundColor?: string;
-  bodyTextColor?: string;
-  headingColor?: string;
-  h1Font?: string;
-  h2Font?: string;
-  h3Font?: string;
-  h4Font?: string;
-  h5Font?: string;
-  googleFontUrl?: string;
+  themeData: ThemeData;
   isActive?: boolean;
   isDefault?: boolean;
 }
