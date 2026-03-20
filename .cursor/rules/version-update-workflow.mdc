@@ -26,15 +26,12 @@ When asked to "update version" or prepare a release on the current branch, follo
 
 If a new backend migration/setup script is introduced for this version:
 
-1. Create a version folder under `back-end/scripts/<version>/`.
-2. Move related new scripts into that version folder.
+1. Use the latest release version folder under `back-end/scripts/<version>/` (the same version you are releasing now).
+2. Move related new scripts into that latest version folder (do not keep new scripts in older version folders).
 3. Keep existing script names descriptive (do not shorten names).
 4. Ensure script paths referenced by docs or npm scripts are updated.
 
-Example:
 
-- `back-end/scripts/migrateCreateCompanyWebThemesTable.js`
-- becomes `back-end/scripts/1.7.1/migrateCreateCompanyWebThemesTable.js`
 
 ## Init Database Verification
 
