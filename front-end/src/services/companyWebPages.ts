@@ -11,12 +11,30 @@ export interface CompanyWebPage {
   content?: {
     blocks?: Array<{
       id: string;
-      x: number;
-      y: number;
-      width: number;
-      height: number;
+      x?: number;
+      y?: number;
+      width?: number;
+      height?: number;
+      gridRowStart?: number;
+      gridColumnStart?: number;
+      rowSpan?: number;
+      colSpan?: number;
       content: string;
       type?: string;
+      settings?: {
+        backgroundColor?: string;
+      };
+      addons?: Array<{
+        id: string;
+        type: string;
+        data: {
+          imagePath?: string;
+          view?: 'best-fit' | 'full-width';
+          companyId?: string;
+          contentElementId?: string;
+          [key: string]: unknown;
+        };
+      }>;
     }>;
     html?: string;
     css?: string;
@@ -38,12 +56,30 @@ export interface UpdateWebPageData extends Partial<CreateWebPageData> {
   content?: {
     blocks?: Array<{
       id: string;
-      x: number;
-      y: number;
-      width: number;
-      height: number;
+      x?: number;
+      y?: number;
+      width?: number;
+      height?: number;
+      gridRowStart?: number;
+      gridColumnStart?: number;
+      rowSpan?: number;
+      colSpan?: number;
       content: string;
       type?: string;
+      settings?: {
+        backgroundColor?: string;
+      };
+      addons?: Array<{
+        id: string;
+        type: string;
+        data: {
+          imagePath?: string;
+          view?: 'best-fit' | 'full-width';
+          companyId?: string;
+          contentElementId?: string;
+          [key: string]: unknown;
+        };
+      }>;
     }>;
     html?: string;
     css?: string;
@@ -177,4 +213,3 @@ class CompanyWebPagesService {
 }
 
 export const companyWebPagesService = new CompanyWebPagesService();
-export type { CreateWebPageData, UpdateWebPageData };

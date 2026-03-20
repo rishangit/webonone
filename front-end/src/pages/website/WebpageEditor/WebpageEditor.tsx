@@ -140,7 +140,7 @@ export const WebpageEditor = (props: WebpageEditorProps = {}) => {
     const defaultRowSpan = 2;
     const newBlock: ContentBlock = {
       id: nanoid(10),
-      content: 'New Content Block',
+      content: '',
       type: 'text',
       gridRowStart: 1 + contentBlocks.length * defaultRowSpan,
       gridColumnStart: 1,
@@ -151,28 +151,84 @@ export const WebpageEditor = (props: WebpageEditorProps = {}) => {
     setEditorState((prev) => ({ ...prev, isDirty: true }));
   };
 
-  const handleUpdateBlock = (updatedBlock: ContentBlock) => {
+  const persistBlocksToDatabase = (blocksToPersist: ContentBlock[]) => {
+    if (!pageId || !currentWebPage) {
+      toast.error("Webpage not found");
+      return;
+    }
+
+    setEditorState((prev) => ({ ...prev, isSaving: true }));
+
+    const blocksToSave = blocksToPersist.map(({ width, ...block }) => ({
+      ...block,
+      colSpan: block.colSpan || 4,
+    }));
+
+    const contentData: any = {
+      blocks: blocksToSave,
+      html: editorState.content.html,
+      css: editorState.content.css,
+      js: editorState.content.js || '',
+    };
+
+    dispatch(
+      updateWebPageRequest({
+        id: pageId,
+        data: {
+          name: currentWebPage.name,
+          url: currentWebPage.url,
+          isActive: currentWebPage.isActive,
+          content: contentData,
+        },
+      })
+    );
+
+    setEditorState((prev) => ({
+      ...prev,
+      isDirty: false,
+      isSaving: false,
+    }));
+
+    toast.success("Addon saved successfully!");
+  };
+
+  const handleUpdateBlock = (updatedBlock: ContentBlock, shouldPersist: boolean = false, markDirty: boolean = true) => {
     const gridUpdate = {
       gridRowStart: updatedBlock.gridRowStart ?? 1,
       gridColumnStart: updatedBlock.gridColumnStart ?? 1,
       rowSpan: updatedBlock.rowSpan ?? 2,
       colSpan: Math.max(1, Math.min(12, updatedBlock.colSpan ?? 4)),
     };
-    setContentBlocks(contentBlocks.map(block => {
-      if (block.id !== updatedBlock.id) return block;
-      const layoutByBreakpoint = {
-        ...block.layoutByBreakpoint,
-        [activeBreakpointName]: gridUpdate,
-      };
-      return {
-        ...block,
-        layoutByBreakpoint,
-        ...(activeBreakpointName === '2xl' ? gridUpdate : {}),
-        // Preserve settings (e.g. backgroundColor) from dialog updates; allow clearing when dialog sends settings
-        settings: 'settings' in updatedBlock ? updatedBlock.settings : block.settings,
-      };
-    }));
-    setEditorState((prev) => ({ ...prev, isDirty: true }));
+
+    let nextBlocks: ContentBlock[] = [];
+    setContentBlocks((prev) => {
+      nextBlocks = prev.map((block) => {
+        if (block.id !== updatedBlock.id) return block;
+        const layoutByBreakpoint = {
+          ...block.layoutByBreakpoint,
+          [activeBreakpointName]: gridUpdate,
+        };
+        return {
+          ...block,
+          content: updatedBlock.content ?? block.content,
+          type: updatedBlock.type ?? block.type,
+          addons: updatedBlock.addons ?? block.addons,
+          layoutByBreakpoint,
+          ...(activeBreakpointName === '2xl' ? gridUpdate : {}),
+          // Preserve settings (e.g. backgroundColor) from dialog updates; allow clearing when dialog sends settings
+          settings: 'settings' in updatedBlock ? updatedBlock.settings : block.settings,
+        };
+      });
+      return nextBlocks;
+    });
+
+    if (shouldPersist) {
+      persistBlocksToDatabase(nextBlocks.length ? nextBlocks : contentBlocks);
+    } else {
+      if (markDirty) {
+        setEditorState((prev) => ({ ...prev, isDirty: true }));
+      }
+    }
   };
 
   const handleDeleteBlock = (id: string) => {
@@ -225,22 +281,17 @@ export const WebpageEditor = (props: WebpageEditorProps = {}) => {
   };
 
   const handlePreview = () => {
-    const previewWindow = window.open('', '_blank');
-    if (previewWindow) {
-      previewWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <style>${editorState.content.css}</style>
-          </head>
-          <body>
-            ${editorState.content.html}
-            ${editorState.content.js ? `<script>${editorState.content.js}</script>` : ''}
-          </body>
-        </html>
-      `);
-      previewWindow.document.close();
+    if (!currentWebPage?.companyId || !currentWebPage?.url) {
+      toast.error("Cannot preview page: missing company or page URL");
+      return;
     }
+
+    const normalizedPath = currentWebPage.url.startsWith('/')
+      ? currentWebPage.url
+      : `/${currentWebPage.url}`;
+    const previewUrl = `${window.location.origin}/web/${currentWebPage.companyId}${normalizedPath}`;
+
+    window.open(previewUrl, '_blank', 'noopener,noreferrer');
   };
 
   const handleBack = () => {
@@ -347,6 +398,7 @@ export const WebpageEditor = (props: WebpageEditorProps = {}) => {
           viewMode={viewMode}
           contentBlocks={contentBlocks}
           activeBreakpointName={activeBreakpointName}
+          companyId={currentWebPage?.companyId}
           onUpdateBlock={handleUpdateBlock}
           onDeleteBlock={handleDeleteBlock}
         />

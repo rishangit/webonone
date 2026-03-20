@@ -1,11 +1,13 @@
 import { useRef, useLayoutEffect, useState } from "react";
 import { ContentBlock, resolveBlockLayout, getBreakpointFromWidth } from "../types";
+import { ContentAddonsRenderer } from "../addons";
 
 interface WebpageContentRendererProps {
   contentBlocks: ContentBlock[];
   css?: string;
   js?: string;
   html?: string;
+  companyId?: string;
   defaultContainerWidth?: number;
   rowHeight?: number;
   showBorders?: boolean;
@@ -21,6 +23,7 @@ export const WebpageContentRenderer = ({
   css = '',
   js = '',
   html = '',
+  companyId,
   defaultContainerWidth = 1200,
   rowHeight = 60,
   showBorders = false,
@@ -70,6 +73,8 @@ export const WebpageContentRenderer = ({
             const colStart = block.gridColumnStart ?? 1;
             const rSpan = block.rowSpan ?? 2;
             const cSpan = block.colSpan ?? 4;
+            const safeContentHtml =
+              block.content && block.content !== 'New Content Block' ? block.content : '';
 
             return (
               <div
@@ -78,22 +83,34 @@ export const WebpageContentRenderer = ({
                 style={{
                   gridRow: `${rowStart} / span ${rSpan}`,
                   gridColumn: `${colStart} / span ${cSpan}`,
+                  height: `${rSpan * rowHeight}px`,
                   minHeight: `${rSpan * rowHeight}px`,
                 }}
               >
                 <div
-                  className={`relative w-full h-full p-4 ${!block.settings?.backgroundColor ? 'bg-white' : ''} ${
+                  className={`relative w-full h-full ${!block.settings?.backgroundColor ? 'bg-white' : ''} ${
                     showBorders ? 'border-2 border-blue-500 shadow-lg' : ''
                   }`}
                   style={{
+                    height: `${rSpan * rowHeight}px`,
                     minHeight: `${rSpan * rowHeight}px`,
                     boxSizing: 'border-box',
                     overflow: 'auto',
                     wordWrap: 'break-word',
                     ...(block.settings?.backgroundColor ? { backgroundColor: block.settings.backgroundColor } : {}),
                   }}
-                  dangerouslySetInnerHTML={{ __html: block.content || 'Content Block' }}
-                />
+                >
+                  {safeContentHtml ? (
+                    <div className="w-full h-full min-h-0 flex flex-col">
+                      <div dangerouslySetInnerHTML={{ __html: safeContentHtml }} />
+                      <div className="flex-1 min-h-0 overflow-hidden">
+                        <ContentAddonsRenderer addons={block.addons} companyId={companyId} />
+                      </div>
+                    </div>
+                  ) : (
+                    <ContentAddonsRenderer addons={block.addons} companyId={companyId} />
+                  )}
+                </div>
               </div>
             );
           })}

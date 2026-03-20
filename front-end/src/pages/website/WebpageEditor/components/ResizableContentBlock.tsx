@@ -1,15 +1,22 @@
 import { useState, useRef, useEffect } from "react";
-import { ContentBlock } from "../types";
-import { X, Pencil } from "lucide-react";
+import { ContentAddon, ContentBlock } from "../types";
+import { X, Pencil, Plus, GripVertical } from "lucide-react";
 import { Button } from "../../../../components/ui/button";
 import { ContentBlockSettingsDialog } from "./ContentBlockSettingsDialog";
+import { AddAddonDialog, getAddonModuleByType } from "../addons";
+
+// Shared drag lock between all content blocks on the page.
+// If a second block starts dragging, this prevents the first block's
+// (still-attached) mousemove handlers from updating the grid.
+let activeDragBlockId: string | null = null;
 
 interface ResizableContentBlockProps {
   block: ContentBlock;
-  onUpdate: (block: ContentBlock) => void;
+  onUpdate: (block: ContentBlock, shouldPersist?: boolean, markDirty?: boolean) => void;
   onDelete?: (id: string) => void;
   gridColumnWidth: number;
   gridRowHeight: number;
+  companyId?: string;
 }
 
 type ResizeHandle = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw' | null;
@@ -20,6 +27,7 @@ export const ResizableContentBlock = ({
   onDelete,
   gridColumnWidth,
   gridRowHeight,
+  companyId,
 }: ResizableContentBlockProps) => {
   const [isResizing, setIsResizing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -34,7 +42,22 @@ export const ResizableContentBlock = ({
   const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 });
   const [dragStartGrid, setDragStartGrid] = useState({ gridRowStart: 1, gridColumnStart: 1 });
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
+  const [addAddonDialogOpen, setAddAddonDialogOpen] = useState(false);
+  const [editingAddonId, setEditingAddonId] = useState<string | null>(null);
+  const [hoveredAddonId, setHoveredAddonId] = useState<string | null>(null);
   const blockRef = useRef<HTMLDivElement>(null);
+  const onUpdateRef = useRef(onUpdate);
+  const blockSnapshotRef = useRef(block);
+  const dragRafRef = useRef<number | null>(null);
+  const dragLastAppliedGridRef = useRef<{ gridRowStart: number; gridColumnStart: number } | null>(null);
+
+  useEffect(() => {
+    onUpdateRef.current = onUpdate;
+  }, [onUpdate]);
+
+  useEffect(() => {
+    blockSnapshotRef.current = block;
+  }, [block]);
 
   const gridRowStart = block.gridRowStart ?? 1;
   const gridColumnStart = block.gridColumnStart ?? 1;
@@ -42,6 +65,102 @@ export const ResizableContentBlock = ({
   const colSpan = Math.max(1, Math.min(12, block.colSpan ?? 4));
   const blockHeight = rowSpan * gridRowHeight;
   const bgColor = block.settings?.backgroundColor;
+  const addons = block.addons || [];
+  const editingAddon = editingAddonId ? addons.find((addon) => addon.id === editingAddonId) : null;
+  const editingAddonModule = editingAddon ? getAddonModuleByType(editingAddon.type) : undefined;
+
+  const startDrag = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isDragging) return;
+
+    activeDragBlockId = block.id;
+    const targetId = block.id;
+
+    const startPos = { x: e.clientX, y: e.clientY };
+    const startGrid = {
+      gridRowStart: block.gridRowStart ?? 1,
+      gridColumnStart: block.gridColumnStart ?? 1,
+    };
+    const colSpanAtStart = Math.max(1, Math.min(12, block.colSpan ?? 4));
+
+    setIsDragging(true);
+    setDragStartPos(startPos);
+    setDragStartGrid(startGrid);
+    dragLastAppliedGridRef.current = { ...startGrid };
+
+    let latestMouse: { x: number; y: number } | null = null;
+
+    const applyDrag = () => {
+      if (activeDragBlockId !== targetId) return;
+      if (!latestMouse) return;
+      const deltaX = latestMouse.x - startPos.x;
+      const deltaY = latestMouse.y - startPos.y;
+      const deltaCols = Math.round(deltaX / gridColumnWidth);
+      const deltaRows = Math.round(deltaY / gridRowHeight);
+
+      let newColStart = Math.max(1, Math.min(13 - colSpanAtStart, startGrid.gridColumnStart + deltaCols));
+      let newRowStart = Math.max(1, startGrid.gridRowStart + deltaRows);
+
+      const last = dragLastAppliedGridRef.current;
+      if (last && last.gridColumnStart === newColStart && last.gridRowStart === newRowStart) {
+        return;
+      }
+
+      dragLastAppliedGridRef.current = { gridRowStart: newRowStart, gridColumnStart: newColStart };
+
+      const currentBlock = blockSnapshotRef.current;
+      if (currentBlock.id !== targetId) return;
+      onUpdateRef.current({
+        ...currentBlock,
+        gridRowStart: newRowStart,
+        gridColumnStart: newColStart,
+      }, false, false);
+    };
+
+    const onMouseMove = (ev: MouseEvent) => {
+      latestMouse = { x: ev.clientX, y: ev.clientY };
+      if (dragRafRef.current != null) return;
+      dragRafRef.current = window.requestAnimationFrame(() => {
+        dragRafRef.current = null;
+        applyDrag();
+      });
+    };
+
+    const onMouseUp = () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+      if (dragRafRef.current != null) {
+        window.cancelAnimationFrame(dragRafRef.current);
+        dragRafRef.current = null;
+      }
+      latestMouse = null;
+      const last = dragLastAppliedGridRef.current;
+      setIsDragging(false);
+
+      // Mark editor as dirty once (not on every mousemove).
+      if (last) {
+        const currentBlock = blockSnapshotRef.current;
+        onUpdateRef.current(
+          {
+            ...currentBlock,
+            gridRowStart: last.gridRowStart,
+            gridColumnStart: last.gridColumnStart,
+          },
+          false,
+          true
+        );
+      }
+
+      dragLastAppliedGridRef.current = null;
+      if (activeDragBlockId === targetId) {
+        activeDragBlockId = null;
+      }
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  };
 
   const handleMouseDown = (e: React.MouseEvent, handle: ResizeHandle) => {
     e.preventDefault();
@@ -57,25 +176,35 @@ export const ResizableContentBlock = ({
     });
   };
 
-  const handleContentMouseDown = (e: React.MouseEvent) => {
-    const target = e.target as HTMLElement;
-    if (target.classList.contains('resize-handle') || target.closest('.delete-button') || target.closest('.edit-button')) {
-      return;
-    }
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-    setDragStartPos({ x: e.clientX, y: e.clientY });
-    setDragStartGrid({
-      gridRowStart: block.gridRowStart ?? 1,
-      gridColumnStart: block.gridColumnStart ?? 1,
-    });
-  };
-
   const handleDelete = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (onDelete) onDelete(block.id);
+  };
+
+  const handleAddAddon = (addon: ContentAddon) => {
+    onUpdate({
+      ...block,
+      addons: [...addons, addon],
+    }, true);
+    setEditingAddonId(addon.id);
+  };
+
+  const handleUpdateAddon = (updatedAddon: ContentAddon) => {
+    onUpdate({
+      ...block,
+      addons: addons.map((addon) => (addon.id === updatedAddon.id ? updatedAddon : addon)),
+    }, true);
+  };
+
+  const handleDeleteAddon = (addonId: string) => {
+    onUpdate({
+      ...block,
+      addons: addons.filter((addon) => addon.id !== addonId),
+    }, true);
+    if (editingAddonId === addonId) {
+      setEditingAddonId(null);
+    }
   };
 
   const emitGridUpdate = (updates: Partial<Pick<ContentBlock, 'gridRowStart' | 'gridColumnStart' | 'rowSpan' | 'colSpan'>>) => {
@@ -152,29 +281,14 @@ export const ResizableContentBlock = ({
 
   // Drag: update gridRowStart and gridColumnStart
   useEffect(() => {
-    if (!isDragging) return;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const deltaX = e.clientX - dragStartPos.x;
-      const deltaY = e.clientY - dragStartPos.y;
-      const deltaCols = Math.round(deltaX / gridColumnWidth);
-      const deltaRows = Math.round(deltaY / gridRowHeight);
-      const newColStart = Math.max(1, Math.min(13 - colSpan, dragStartGrid.gridColumnStart + deltaCols));
-      const newRowStart = Math.max(1, dragStartGrid.gridRowStart + deltaRows);
-      emitGridUpdate({ gridRowStart: newRowStart, gridColumnStart: newColStart });
-    };
-
-    const handleMouseUp = () => {
-      setIsDragging(false);
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
+    // Cleanup RAF if component unmounts mid-drag.
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      if (dragRafRef.current != null) {
+        window.cancelAnimationFrame(dragRafRef.current);
+        dragRafRef.current = null;
+      }
     };
-  }, [isDragging, dragStartPos, dragStartGrid, colSpan, block, onUpdate, gridColumnWidth, gridRowHeight]);
+  }, []);
 
   return (
     <>
@@ -188,15 +302,41 @@ export const ResizableContentBlock = ({
           height: `${blockHeight}px`,
           minWidth: `${gridColumnWidth}px`,
           minHeight: `${gridRowHeight}px`,
-          cursor: isDragging ? 'grabbing' : isResizing ? 'auto' : 'grab',
+          cursor: isDragging ? 'grabbing' : isResizing ? 'auto' : 'default',
           userSelect: isDragging || isResizing ? 'none' : 'auto',
           ...(bgColor ? { backgroundColor: bgColor } : {}),
         }}
       >
         <div
-          className="edit-button delete-button absolute top-2 right-2 z-40 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity"
+          className="edit-button delete-button move-button absolute top-2 right-2 z-40 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity"
           onMouseDown={(e) => e.stopPropagation()}
         >
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-[var(--accent-text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)]"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setAddAddonDialogOpen(true);
+            }}
+            aria-label="Add addon"
+          >
+            <Plus className="w-4 h-4" />
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-muted-foreground hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)] move-button cursor-grab active:cursor-grabbing"
+            onMouseDown={startDrag}
+            aria-label="Move content element"
+          >
+            <GripVertical className="w-4 h-4" />
+          </Button>
+
           <Button
             type="button"
             variant="ghost"
@@ -226,14 +366,134 @@ export const ResizableContentBlock = ({
         </div>
 
       <div
-        className={`w-full h-full p-4 overflow-auto ${!bgColor ? 'bg-white' : ''}`}
+        className={`w-full h-full overflow-auto ${!bgColor ? 'bg-white' : ''}`}
         style={{
-          cursor: isDragging ? 'grabbing' : 'grab',
+          cursor: 'default',
           ...(bgColor ? { backgroundColor: bgColor } : {}),
         }}
-        onMouseDown={handleContentMouseDown}
       >
-        {block.content || 'Content Block'}
+        <div className="h-full flex flex-col min-h-0">
+          {block.content && block.content !== 'New Content Block' ? (
+            <div className="p-4">{block.content}</div>
+          ) : null}
+
+          <div className="flex-1 min-h-0 overflow-hidden">
+            {addons.length ? (
+              addons.length === 1 ? (
+                (() => {
+                  const addon = addons[0];
+                  const module = getAddonModuleByType(addon.type);
+                  if (!module) return null;
+                  const RenderComponent = module.RenderComponent;
+                  return (
+                    <div
+                      className="relative w-full h-full min-h-0 overflow-hidden"
+                      onMouseEnter={() => setHoveredAddonId(addon.id)}
+                      onMouseLeave={() => setHoveredAddonId((prev) => (prev === addon.id ? null : prev))}
+                    >
+                      <div
+                        className={`absolute top-2 left-2 z-[60] flex items-center gap-1.5 transition-opacity pointer-events-auto ${
+                          hoveredAddonId === addon.id ? "opacity-100" : "opacity-0"
+                        }`}
+                        onMouseDown={(e) => e.stopPropagation()}
+                      >
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-[var(--accent-text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)]"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setEditingAddonId(addon.id);
+                          }}
+                          aria-label="Edit addon"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-muted-foreground hover:bg-destructive hover:text-white hover:border-destructive/50"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleDeleteAddon(addon.id);
+                          }}
+                          aria-label="Delete addon"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+
+                      <RenderComponent addon={addon} companyId={companyId} />
+                    </div>
+                  );
+                })()
+              ) : (
+                <div className="h-full overflow-auto">
+                  {addons.map((addon) => {
+                    const module = getAddonModuleByType(addon.type);
+                    if (!module) return null;
+                    const RenderComponent = module.RenderComponent;
+
+                    return (
+                      <div
+                        key={addon.id}
+                        className="relative w-full"
+                        onMouseEnter={() => setHoveredAddonId(addon.id)}
+                        onMouseLeave={() => setHoveredAddonId((prev) => (prev === addon.id ? null : prev))}
+                      >
+                        <div
+                          className={`absolute top-2 left-2 z-[60] flex items-center gap-1.5 transition-opacity pointer-events-auto ${
+                            hoveredAddonId === addon.id ? "opacity-100" : "opacity-0"
+                          }`}
+                          onMouseDown={(e) => e.stopPropagation()}
+                        >
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-[var(--accent-text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)]"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setEditingAddonId(addon.id);
+                            }}
+                            aria-label="Edit addon"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-muted-foreground hover:bg-destructive hover:text-white hover:border-destructive/50"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleDeleteAddon(addon.id);
+                            }}
+                            aria-label="Delete addon"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+
+                        <RenderComponent addon={addon} companyId={companyId} />
+                      </div>
+                    );
+                  })}
+                </div>
+              )
+            ) : (
+              <div className="h-full min-h-[80px] flex items-center justify-center text-xs text-muted-foreground">
+                No addons yet. Hover to add an addon.
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Resize handles */}
@@ -253,6 +513,27 @@ export const ResizableContentBlock = ({
         block={block}
         onSave={(updated) => onUpdate(updated)}
       />
+
+      <AddAddonDialog
+        open={addAddonDialogOpen}
+        onOpenChange={setAddAddonDialogOpen}
+        contentElementId={block.id}
+        companyId={companyId}
+        onAddonAdded={handleAddAddon}
+      />
+
+      {editingAddon && editingAddonModule && (
+        <editingAddonModule.EditComponent
+          open={!!editingAddonId}
+          onOpenChange={(isOpen) => {
+            if (!isOpen) setEditingAddonId(null);
+          }}
+          addon={editingAddon}
+          companyId={companyId}
+          contentElementId={block.id}
+          onSave={handleUpdateAddon}
+        />
+      )}
     </>
   );
 };

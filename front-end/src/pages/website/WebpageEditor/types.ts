@@ -48,6 +48,28 @@ export interface ContentBlockSettings {
   backgroundColor?: string;
 }
 
+export type ContentAddonType = 'image' | (string & {});
+
+export interface ContentAddonBaseData {
+  companyId?: string;
+  contentElementId?: string;
+}
+
+export interface ImageContentAddonData extends ContentAddonBaseData {
+  imagePath: string;
+  view: 'best-fit' | 'full-width';
+  /** Optional fixed height in px. If missing/empty => auto height. */
+  height?: number;
+}
+
+export type ContentAddonData = ImageContentAddonData;
+
+export interface ContentAddon {
+  id: string;
+  type: ContentAddonType;
+  data: ContentAddonData;
+}
+
 export interface ContentBlock {
   id: string;
   content: string;
@@ -65,6 +87,8 @@ export interface ContentBlock {
   layoutByBreakpoint?: LayoutByBreakpoint;
   /** Display settings (background color, etc.) - saved with the block */
   settings?: ContentBlockSettings;
+  /** Addons attached to this content block */
+  addons?: ContentAddon[];
   responsiveCols?: { sm?: number; md?: number; lg?: number; xl?: number };
   width?: number;
 }

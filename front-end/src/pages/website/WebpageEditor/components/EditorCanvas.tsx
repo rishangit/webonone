@@ -8,7 +8,8 @@ interface EditorCanvasProps {
   viewMode?: ViewMode;
   contentBlocks?: ContentBlock[];
   activeBreakpointName?: BreakpointName;
-  onUpdateBlock?: (block: ContentBlock) => void;
+  companyId?: string;
+  onUpdateBlock?: (block: ContentBlock, shouldPersist?: boolean, markDirty?: boolean) => void;
   onDeleteBlock?: (id: string) => void;
 }
 
@@ -17,6 +18,7 @@ export const EditorCanvas = ({
   viewMode = 'visual',
   contentBlocks = [],
   activeBreakpointName = '2xl',
+  companyId,
   onUpdateBlock,
   onDeleteBlock,
 }: EditorCanvasProps) => {
@@ -152,10 +154,13 @@ export const EditorCanvas = ({
                   >
                     <ResizableContentBlock
                       block={blockToShow}
-                      onUpdate={onUpdateBlock || (() => {})}
+                      onUpdate={(updatedBlock, shouldPersist, markDirty) =>
+                        onUpdateBlock?.(updatedBlock, shouldPersist, markDirty)
+                      }
                       onDelete={onDeleteBlock}
                       gridColumnWidth={columnWidth}
                       gridRowHeight={rowHeight}
+                      companyId={companyId}
                     />
                   </div>
                 );
@@ -194,6 +199,7 @@ export const EditorCanvas = ({
             css={localContent.css}
             js={localContent.js}
             html={localContent.html}
+            companyId={companyId}
             defaultContainerWidth={containerWidth}
             rowHeight={rowHeight}
             showBorders={true}

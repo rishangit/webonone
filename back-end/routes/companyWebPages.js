@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const CompanyWebPage = require('../models/CompanyWebPage');
+const CompanyWebContent = require('../models/CompanyWebContent');
 const { authenticateToken, requirePermission } = require('../middleware/auth');
 const { asyncHandler, notFoundError, validationError } = require('../middleware/errorHandler');
 const Joi = require('joi');
@@ -151,6 +152,17 @@ router.put('/:id',
     
     if (!webpage) {
       throw notFoundError('Webpage not found');
+    }
+
+    // Always sync addons from the content actually stored in DB.
+    // (Using `webpage.content` avoids edge cases where request-body parsing/validation
+    // changes `value.content` shape.)
+    if (webpage?.content && typeof webpage.content === 'object') {
+      await CompanyWebContent.syncFromWebPageContent({
+        companyId: webpage.companyId,
+        pageId: webpage.id,
+        blocks: webpage.content.blocks,
+      });
     }
     
     res.json({

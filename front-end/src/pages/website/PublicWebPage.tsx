@@ -63,7 +63,11 @@ export const PublicWebPage = () => {
           
           // Load content blocks
           if (savedContent.blocks && Array.isArray(savedContent.blocks)) {
-            setContentBlocks(savedContent.blocks);
+            const normalizedBlocks = savedContent.blocks.map((block) => ({
+              ...block,
+              addons: block.addons || [],
+            })) as ContentBlock[];
+            setContentBlocks(normalizedBlocks);
           }
           
           // Load HTML, CSS, JS
@@ -119,7 +123,7 @@ export const PublicWebPage = () => {
   
   // Calculate container height based on content blocks
   const maxY = contentBlocks.length > 0 
-    ? Math.max(...contentBlocks.map(block => block.y + block.height), 0)
+    ? Math.max(...contentBlocks.map((block) => (block.y ?? 0) + (block.height ?? 0)), 0)
     : 0;
   const containerHeight = Math.max(maxY + 200, 1000);
 
@@ -139,6 +143,7 @@ export const PublicWebPage = () => {
             css={editorContent?.css}
             js={editorContent?.js}
             html={editorContent?.html}
+            companyId={webPage.companyId}
             defaultContainerWidth={defaultContainerWidth}
             rowHeight={rowHeight}
             showBorders={false}
