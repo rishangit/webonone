@@ -4,6 +4,7 @@ import { X, Pencil, Plus, GripVertical } from "lucide-react";
 import { Button } from "../../../../components/ui/button";
 import { ContentBlockSettingsDialog } from "./ContentBlockSettingsDialog";
 import { AddAddonDialog, getAddonModuleByType } from "../addons";
+import type { ThemeTextSetting } from "../../../../services/companyWebThemes";
 
 // Shared drag lock between all content blocks on the page.
 // If a second block starts dragging, this prevents the first block's
@@ -17,6 +18,7 @@ interface ResizableContentBlockProps {
   gridColumnWidth: number;
   gridRowHeight: number;
   companyId?: string;
+  themeTextSettings?: ThemeTextSetting[];
 }
 
 type ResizeHandle = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw' | null;
@@ -28,6 +30,7 @@ export const ResizableContentBlock = ({
   gridColumnWidth,
   gridRowHeight,
   companyId,
+  themeTextSettings,
 }: ResizableContentBlockProps) => {
   const [isResizing, setIsResizing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -427,7 +430,11 @@ export const ResizableContentBlock = ({
                         </Button>
                       </div>
 
-                      <RenderComponent addon={addon} companyId={companyId} />
+                      <RenderComponent
+                        addon={addon}
+                        companyId={companyId}
+                        themeTextSettings={themeTextSettings}
+                      />
                     </div>
                   );
                 })()
@@ -481,7 +488,11 @@ export const ResizableContentBlock = ({
                           </Button>
                         </div>
 
-                        <RenderComponent addon={addon} companyId={companyId} />
+                        <RenderComponent
+                          addon={addon}
+                          companyId={companyId}
+                          themeTextSettings={themeTextSettings}
+                        />
                       </div>
                     );
                   })}
@@ -532,6 +543,7 @@ export const ResizableContentBlock = ({
           companyId={companyId}
           contentElementId={block.id}
           onSave={handleUpdateAddon}
+          themeTextSettings={themeTextSettings}
         />
       )}
     </>

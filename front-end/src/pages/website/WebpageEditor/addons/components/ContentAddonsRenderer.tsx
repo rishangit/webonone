@@ -1,12 +1,14 @@
 import { ContentAddon } from "../../types";
 import { getAddonModuleByType } from "../registry";
+import type { ThemeTextSetting } from "../../../../../services/companyWebThemes";
 
 interface ContentAddonsRendererProps {
   addons?: ContentAddon[];
   companyId?: string;
+  themeTextSettings?: ThemeTextSetting[];
 }
 
-export const ContentAddonsRenderer = ({ addons = [], companyId }: ContentAddonsRendererProps) => {
+export const ContentAddonsRenderer = ({ addons = [], companyId, themeTextSettings }: ContentAddonsRendererProps) => {
   if (!addons.length) return null;
 
   return (
@@ -15,7 +17,14 @@ export const ContentAddonsRenderer = ({ addons = [], companyId }: ContentAddonsR
         const module = getAddonModuleByType(addon.type);
         if (!module) return null;
         const RenderComponent = module.RenderComponent;
-        return <RenderComponent key={addon.id} addon={addon} companyId={companyId} />;
+        return (
+          <RenderComponent
+            key={addon.id}
+            addon={addon}
+            companyId={companyId}
+            themeTextSettings={themeTextSettings}
+          />
+        );
       })}
     </>
   );

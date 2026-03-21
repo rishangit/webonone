@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { EditorContent, ViewMode, ContentBlock, BreakpointName, resolveBlockLayout, getBreakpointFromWidth } from "../types";
 import { ResizableContentBlock } from "./ResizableContentBlock";
 import { WebpageContentRenderer } from "./WebpageContentRenderer";
+import type { ThemeTextSetting } from "../../../../services/companyWebThemes";
 
 interface EditorCanvasProps {
   content: EditorContent;
@@ -9,6 +10,7 @@ interface EditorCanvasProps {
   contentBlocks?: ContentBlock[];
   activeBreakpointName?: BreakpointName;
   companyId?: string;
+  themeTextSettings?: ThemeTextSetting[];
   onUpdateBlock?: (block: ContentBlock, shouldPersist?: boolean, markDirty?: boolean) => void;
   onDeleteBlock?: (id: string) => void;
 }
@@ -19,6 +21,7 @@ export const EditorCanvas = ({
   contentBlocks = [],
   activeBreakpointName = '2xl',
   companyId,
+  themeTextSettings,
   onUpdateBlock,
   onDeleteBlock,
 }: EditorCanvasProps) => {
@@ -161,6 +164,7 @@ export const EditorCanvas = ({
                       gridColumnWidth={columnWidth}
                       gridRowHeight={rowHeight}
                       companyId={companyId}
+                      themeTextSettings={themeTextSettings}
                     />
                   </div>
                 );
@@ -200,6 +204,7 @@ export const EditorCanvas = ({
             js={localContent.js}
             html={localContent.html}
             companyId={companyId}
+            themeTextSettings={themeTextSettings}
             defaultContainerWidth={containerWidth}
             rowHeight={rowHeight}
             showBorders={true}

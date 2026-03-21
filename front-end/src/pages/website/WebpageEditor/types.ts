@@ -48,7 +48,7 @@ export interface ContentBlockSettings {
   backgroundColor?: string;
 }
 
-export type ContentAddonType = 'image' | (string & {});
+export type ContentAddonType = 'image' | 'text' | (string & {});
 
 export interface ContentAddonBaseData {
   companyId?: string;
@@ -62,7 +62,21 @@ export interface ImageContentAddonData extends ContentAddonBaseData {
   height?: number;
 }
 
-export type ContentAddonData = ImageContentAddonData;
+/** Theme text style name from `themeData.textSettings` (or font fallback). */
+export interface TextContentAddonData extends ContentAddonBaseData {
+  text: string;
+  textStyleName: string;
+  /**
+   * Snapshot of the selected theme text style at save time — used for public view
+   * when theme list is not loaded (e.g. unauthenticated).
+   */
+  googleFontUrl?: string;
+  fontFamily?: string;
+  fontSize?: string;
+  fontColor?: string;
+}
+
+export type ContentAddonData = ImageContentAddonData | TextContentAddonData;
 
 export interface ContentAddon {
   id: string;

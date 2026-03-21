@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect } from "react";
+import { useState, useEffect, useLayoutEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Monitor } from "lucide-react";
 import { Button } from "../../../components/ui/button";
@@ -9,8 +9,10 @@ import {
   updateWebPageRequest,
   clearError,
 } from "../../../store/slices/companyWebPagesSlice";
+import { fetchThemesRequest } from "../../../store/slices/companyWebThemesSlice";
 import { EditorContent, EditorState, ViewMode, ContentBlock, BreakpointName } from "./types";
 import { EditorToolbar, EditorCanvas } from "./components";
+import { pickCompanyThemeForTextStyles, getThemeTextSettingsList } from "./addons/themeTextSettings";
 import { toast } from "sonner";
 import { nanoid } from "nanoid";
 
@@ -24,6 +26,12 @@ export const WebpageEditor = (props: WebpageEditorProps = {}) => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { currentWebPage, error } = useAppSelector((state) => state.companyWebPages);
+  const { themes: companyThemes } = useAppSelector((state) => state.companyWebThemes);
+
+  const themeTextSettings = useMemo(() => {
+    const theme = pickCompanyThemeForTextStyles(companyThemes);
+    return getThemeTextSettingsList(theme);
+  }, [companyThemes]);
 
   const [editorState, setEditorState] = useState<EditorState>({
     content: { html: '', css: '', js: '' },
@@ -72,6 +80,12 @@ export const WebpageEditor = (props: WebpageEditorProps = {}) => {
       dispatch(fetchWebPageRequest(pageId));
     }
   }, [dispatch, pageId]);
+
+  useEffect(() => {
+    if (currentWebPage?.companyId) {
+      dispatch(fetchThemesRequest({ companyId: currentWebPage.companyId }));
+    }
+  }, [dispatch, currentWebPage?.companyId]);
 
   // Initialize editor content from webpage
   useEffect(() => {
@@ -399,6 +413,7 @@ export const WebpageEditor = (props: WebpageEditorProps = {}) => {
           contentBlocks={contentBlocks}
           activeBreakpointName={activeBreakpointName}
           companyId={currentWebPage?.companyId}
+          themeTextSettings={themeTextSettings}
           onUpdateBlock={handleUpdateBlock}
           onDeleteBlock={handleDeleteBlock}
         />

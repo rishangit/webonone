@@ -1,6 +1,7 @@
 import { useRef, useLayoutEffect, useState } from "react";
 import { ContentBlock, resolveBlockLayout, getBreakpointFromWidth } from "../types";
 import { ContentAddonsRenderer } from "../addons";
+import type { ThemeTextSetting } from "../../../../services/companyWebThemes";
 
 interface WebpageContentRendererProps {
   contentBlocks: ContentBlock[];
@@ -8,6 +9,7 @@ interface WebpageContentRendererProps {
   js?: string;
   html?: string;
   companyId?: string;
+  themeTextSettings?: ThemeTextSetting[];
   defaultContainerWidth?: number;
   rowHeight?: number;
   showBorders?: boolean;
@@ -24,6 +26,7 @@ export const WebpageContentRenderer = ({
   js = '',
   html = '',
   companyId,
+  themeTextSettings,
   defaultContainerWidth = 1200,
   rowHeight = 60,
   showBorders = false,
@@ -104,11 +107,19 @@ export const WebpageContentRenderer = ({
                     <div className="w-full h-full min-h-0 flex flex-col">
                       <div dangerouslySetInnerHTML={{ __html: safeContentHtml }} />
                       <div className="flex-1 min-h-0 overflow-hidden">
-                        <ContentAddonsRenderer addons={block.addons} companyId={companyId} />
+                        <ContentAddonsRenderer
+                          addons={block.addons}
+                          companyId={companyId}
+                          themeTextSettings={themeTextSettings}
+                        />
                       </div>
                     </div>
                   ) : (
-                    <ContentAddonsRenderer addons={block.addons} companyId={companyId} />
+                    <ContentAddonsRenderer
+                      addons={block.addons}
+                      companyId={companyId}
+                      themeTextSettings={themeTextSettings}
+                    />
                   )}
                 </div>
               </div>

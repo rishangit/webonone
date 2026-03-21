@@ -37,6 +37,12 @@ const buttonSchema = Joi.object({
   borderRadius: Joi.string().max(50).required(),
 });
 
+/** Accepts true/false and common DB/JSON encodings (1/0, "1"/"0"). */
+const optionalLooseBoolean = Joi.boolean()
+  .truthy(1, '1', 'true')
+  .falsy(0, '0', 'false')
+  .optional();
+
 const themeSchema = {
   create: Joi.object({
     companyId: Joi.string().length(10).required(),
@@ -52,8 +58,8 @@ const themeSchema = {
       colors: Joi.array().items(colorSchema).default([]),
       buttons: Joi.array().items(buttonSchema).default([]),
     }).required(),
-    isActive: Joi.boolean().optional(),
-    isDefault: Joi.boolean().optional(),
+    isActive: optionalLooseBoolean,
+    isDefault: optionalLooseBoolean,
   }),
   update: Joi.object({
     name: Joi.string().min(1).max(255).optional(),
@@ -68,8 +74,8 @@ const themeSchema = {
       colors: Joi.array().items(colorSchema).default([]),
       buttons: Joi.array().items(buttonSchema).default([]),
     }).optional(),
-    isActive: Joi.boolean().optional(),
-    isDefault: Joi.boolean().optional(),
+    isActive: optionalLooseBoolean,
+    isDefault: optionalLooseBoolean,
   }).min(1),
 };
 

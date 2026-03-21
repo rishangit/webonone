@@ -1,0 +1,60 @@
+---
+description: Conventions for WebpageEditor content addons (follow the image addon pattern).
+globs: front-end/src/pages/website/WebpageEditor/addons/**/*
+alwaysApply: false
+---
+
+# WebpageEditor content addons
+
+Use **`front-end/src/pages/website/WebpageEditor/addons/image/ImageAddon.tsx`** as the reference implementation. New addons must match its structure, props contracts, and UI patterns.
+
+## Types (`WebpageEditor/types.ts`)
+
+1. Add a literal to **`ContentAddonType`** (e.g. `'image' | 'my-addon'`).
+2. Define **`MyAddonContentAddonData extends ContentAddonBaseData`** with addon-specific fields. Include **`companyId`** and **`contentElementId`** on saved data when the editor passes them (same as image).
+3. Extend **`ContentAddonData`** as a union that includes the new interface.
+
+Do not widen `data` with ad-hoc `as any` at save sites; keep shapes typed in `types.ts`.
+
+## Module file layout
+
+- One folder per addon: **`addons/<kebab-or-short-name>/`** (e.g. `image/`).
+- Single entry file **`ImageAddon.tsx`** (same base name pattern for others) that exports one **`AddonModule`** constant, e.g. **`imageAddonModule`**.
+
+## `AddonModule` contract (`addons/types.ts`)
+
+Each module exports an object with:
+
+| Field | Rule |
+|--------|------|
+| `type` | Matches `ContentAddonType` literal. |
+| `label` / `description` | Shown in **Add addon** (`AddAddonDialog`); keep short. |
+| `createDefaultAddon` | Returns `ContentAddon` with **`id: nanoid(10)`**, correct `type`, and `data` including **`companyId`**, **`contentElementId`**, and sensible defaults. |
+| `RenderComponent` | Implements **`AddonRenderProps`**: read `addon` + optional `companyId` + optional **`themeTextSettings`** (theme `textSettings` for styling). |
+| `EditComponent` | Implements **`AddonEditProps`**: same as above + dialog controls (**`open` / `onOpenChange`**, **`onSave`**, **`contentElementId`**). |
+
+## Renderer (`RenderComponent`)
+
+- Cast or narrow **`addon.data`** to your addon data type; prefer aligning with `ContentAddonData` union members.
+- If required data is missing, render a **compact placeholder** (dashed border, muted text) like the image addon’s empty state—do not throw.
+- Use **`companyId` from props** when present; fall back to **`data.companyId`** if the reference does.
+
+## Edit dialog (`EditComponent`)
+
+- Use **`CustomDialog`** with **`title`**, **`description`**, **`icon`** (Lucide), and **`footer`**: **Cancel** (`onOpenChange(false)`) + **OK** (submit).
+- Prefer **`react-hook-form`** + **`yup`** + **`yupResolver`** for forms; mirror validation style from the image addon.
+- On open, **`reset`** default values from **`addon.data`** (see image **`useEffect`** tied to `open`).
+- On save, build **`updatedAddon`**: **`{ ...addon, data: { ...addon.data, ...fields, companyId: effectiveCompanyId, contentElementId } }`**, then **`onSave(updatedAddon)`** and **`onOpenChange(false)`**.
+- Styling: **`border-[var(--glass-border)]`**, **`bg-[var(--input-background)]`**, **`text-muted-foreground`**, **`text-destructive`** for errors—match existing editor/addon controls.
+
+## Theme text styles (optional)
+
+**`WebpageEditor`** loads company themes and passes **`themeTextSettings`** into **`EditorCanvas`** → **`ResizableContentBlock`** → addon render/edit. Helpers: **`addons/themeTextSettings.ts`** (`pickCompanyThemeForTextStyles`, `getThemeTextSettingsList`). The **Text** addon uses this list for the “Text type” dropdown; on save it also stores a **snapshot** of font fields on addon data for public pages when the theme API is not loaded.
+
+## Registry
+
+In **`addons/registry.ts`**: **import** the new module and **append** it to the **`modules`** array. **`AddAddonDialog`** and **`ContentAddonsRenderer`** discover addons only via this list—no extra wiring unless the feature requires it.
+
+## Imports
+
+From inside an addon file, shared contracts come from **`../types`** (`AddonModule`, `AddonRenderProps`, `AddonEditProps`); **`ContentAddon`** from **`../../types`**.

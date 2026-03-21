@@ -1,8 +1,9 @@
 import { AddonModule } from "./types";
 import { imageAddonModule } from "./image/ImageAddon";
+import { textAddonModule } from "./text/TextAddon";
 import { ContentAddonType } from "../types";
 
-const modules: AddonModule[] = [imageAddonModule];
+const modules: AddonModule[] = [imageAddonModule, textAddonModule];
 
 export const getAddonModules = () => modules;
 
