@@ -2,7 +2,9 @@ import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { EditorContent, ViewMode, ContentBlock, BreakpointName, resolveBlockLayout, getBreakpointFromWidth } from "../types";
 import { ResizableContentBlock } from "./ResizableContentBlock";
 import { WebpageContentRenderer } from "./WebpageContentRenderer";
-import type { ThemeTextSetting } from "../../../../services/companyWebThemes";
+import type { ThemeButtonSetting, ThemeTextSetting } from "../../../../services/companyWebThemes";
+import type { CompanyWebPage } from "../../../../services/companyWebPages";
+import type { AddonRenderContext } from "../addons/types";
 
 interface EditorCanvasProps {
   content: EditorContent;
@@ -11,6 +13,9 @@ interface EditorCanvasProps {
   activeBreakpointName?: BreakpointName;
   companyId?: string;
   themeTextSettings?: ThemeTextSetting[];
+  themeButtonSettings?: ThemeButtonSetting[];
+  companyWebPages?: CompanyWebPage[];
+  addonRenderContext?: AddonRenderContext;
   onUpdateBlock?: (block: ContentBlock, shouldPersist?: boolean, markDirty?: boolean) => void;
   onDeleteBlock?: (id: string) => void;
 }
@@ -22,6 +27,9 @@ export const EditorCanvas = ({
   activeBreakpointName = '2xl',
   companyId,
   themeTextSettings,
+  themeButtonSettings,
+  companyWebPages,
+  addonRenderContext = "editor",
   onUpdateBlock,
   onDeleteBlock,
 }: EditorCanvasProps) => {
@@ -153,6 +161,7 @@ export const EditorCanvas = ({
                       gridRow: `${resolved.gridRowStart} / span ${resolved.rowSpan}`,
                       gridColumn: `${resolved.gridColumnStart} / span ${resolved.colSpan}`,
                       minHeight: `${resolved.rowSpan * rowHeight}px`,
+                      zIndex: block.zIndex ?? 0,
                     }}
                   >
                     <ResizableContentBlock
@@ -165,6 +174,9 @@ export const EditorCanvas = ({
                       gridRowHeight={rowHeight}
                       companyId={companyId}
                       themeTextSettings={themeTextSettings}
+                      themeButtonSettings={themeButtonSettings}
+                      companyWebPages={companyWebPages}
+                      addonRenderContext={addonRenderContext}
                     />
                   </div>
                 );
@@ -205,6 +217,9 @@ export const EditorCanvas = ({
             html={localContent.html}
             companyId={companyId}
             themeTextSettings={themeTextSettings}
+            themeButtonSettings={themeButtonSettings}
+            companyWebPages={companyWebPages}
+            addonRenderContext={addonRenderContext}
             defaultContainerWidth={containerWidth}
             rowHeight={rowHeight}
             showBorders={true}

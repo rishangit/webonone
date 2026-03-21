@@ -13,6 +13,8 @@ Use **`front-end/src/pages/website/WebpageEditor/addons/image/ImageAddon.tsx`** 
 1. Add a literal to **`ContentAddonType`** (e.g. `'image' | 'my-addon'`).
 2. Define **`MyAddonContentAddonData extends ContentAddonBaseData`** with addon-specific fields. Include **`companyId`** and **`contentElementId`** on saved data when the editor passes them (same as image).
 3. Extend **`ContentAddonData`** as a union that includes the new interface.
+4. **`ContentAddon.layout`** (`AddonGridLayout`): optional inner **12-column grid** (`gridRowStart`, `gridColumnStart`, `rowSpan`, `colSpan`) relative to the content block. Assigned by **`addonGridUtils`** when missing; do not duplicate layout logic inside addons.
+5. **`ContentAddon.zIndex`** / **`ContentBlock.zIndex`**: optional stacking integers (clamped in UI). Display z-index uses **`computeAddonDisplayZIndex`** in **`addonGridUtils`** (stored value × 100 + tie-break + interaction boost).
 
 Do not widen `data` with ad-hoc `as any` at save sites; keep shapes typed in `types.ts`.
 
@@ -50,6 +52,10 @@ Each module exports an object with:
 ## Theme text styles (optional)
 
 **`WebpageEditor`** loads company themes and passes **`themeTextSettings`** into **`EditorCanvas`** → **`ResizableContentBlock`** → addon render/edit. Helpers: **`addons/themeTextSettings.ts`** (`pickCompanyThemeForTextStyles`, `getThemeTextSettingsList`). The **Text** addon uses this list for the “Text type” dropdown; on save it also stores a **snapshot** of font fields on addon data for public pages when the theme API is not loaded.
+
+## Theme buttons & web page links (Button addon)
+
+**`themeButtonSettings`** comes from **`getThemeButtonSettingsList`** (same theme pipeline). **`companyWebPages`** is the company’s pages list (Redux fetch in the editor; **`PublicWebPage`** loads pages for resolving link targets). **`addonRenderContext`**: **`editor`** disables real navigation while editing; **`published`** uses **`react-router-dom`** **`Link`** to `/web/:companyId/...`. Helpers: **`addons/webPageLinkUtils.ts`** (`normalizeWebPagePath`, `buildPublicWebPageHref`, `resolveButtonLinkHref`). On save, store **`linkWebPageId`** plus **`linkPagePublicPath`** snapshot (like Text addon snapshots).
 
 ## Registry
 

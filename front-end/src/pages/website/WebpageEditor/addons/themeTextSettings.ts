@@ -1,4 +1,4 @@
-import type { CompanyWebTheme, ThemeTextSetting } from "../../../../services/companyWebThemes";
+import type { CompanyWebTheme, ThemeButtonSetting, ThemeTextSetting } from "../../../../services/companyWebThemes";
 
 /**
  * Pick the theme used for resolving text styles in the editor (default → active → first).
@@ -24,4 +24,10 @@ export function getThemeTextSettingsList(theme: CompanyWebTheme | null): ThemeTe
     fontSize: f.fontSize,
     fontColor: undefined,
   }));
+}
+
+/** Buttons from `themeData.buttons` for the selected company theme. */
+export function getThemeButtonSettingsList(theme: CompanyWebTheme | null): ThemeButtonSetting[] {
+  if (!theme?.themeData?.buttons?.length) return [];
+  return theme.themeData.buttons;
 }

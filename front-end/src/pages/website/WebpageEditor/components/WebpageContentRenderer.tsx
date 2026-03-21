@@ -1,7 +1,9 @@
 import { useRef, useLayoutEffect, useState } from "react";
 import { ContentBlock, resolveBlockLayout, getBreakpointFromWidth } from "../types";
 import { ContentAddonsRenderer } from "../addons";
-import type { ThemeTextSetting } from "../../../../services/companyWebThemes";
+import type { ThemeButtonSetting, ThemeTextSetting } from "../../../../services/companyWebThemes";
+import type { CompanyWebPage } from "../../../../services/companyWebPages";
+import type { AddonRenderContext } from "../addons/types";
 
 interface WebpageContentRendererProps {
   contentBlocks: ContentBlock[];
@@ -10,6 +12,9 @@ interface WebpageContentRendererProps {
   html?: string;
   companyId?: string;
   themeTextSettings?: ThemeTextSetting[];
+  themeButtonSettings?: ThemeButtonSetting[];
+  companyWebPages?: CompanyWebPage[];
+  addonRenderContext?: AddonRenderContext;
   defaultContainerWidth?: number;
   rowHeight?: number;
   showBorders?: boolean;
@@ -27,6 +32,9 @@ export const WebpageContentRenderer = ({
   html = '',
   companyId,
   themeTextSettings,
+  themeButtonSettings,
+  companyWebPages,
+  addonRenderContext = "published",
   defaultContainerWidth = 1200,
   rowHeight = 60,
   showBorders = false,
@@ -88,6 +96,7 @@ export const WebpageContentRenderer = ({
                   gridColumn: `${colStart} / span ${cSpan}`,
                   height: `${rSpan * rowHeight}px`,
                   minHeight: `${rSpan * rowHeight}px`,
+                  zIndex: block.zIndex ?? 0,
                 }}
               >
                 <div
@@ -111,6 +120,10 @@ export const WebpageContentRenderer = ({
                           addons={block.addons}
                           companyId={companyId}
                           themeTextSettings={themeTextSettings}
+                          themeButtonSettings={themeButtonSettings}
+                          companyWebPages={companyWebPages}
+                          addonRenderContext={addonRenderContext}
+                          rowHeight={rowHeight}
                         />
                       </div>
                     </div>
@@ -119,6 +132,10 @@ export const WebpageContentRenderer = ({
                       addons={block.addons}
                       companyId={companyId}
                       themeTextSettings={themeTextSettings}
+                      themeButtonSettings={themeButtonSettings}
+                      companyWebPages={companyWebPages}
+                      addonRenderContext={addonRenderContext}
+                      rowHeight={rowHeight}
                     />
                   )}
                 </div>

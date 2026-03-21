@@ -48,7 +48,7 @@ export interface ContentBlockSettings {
   backgroundColor?: string;
 }
 
-export type ContentAddonType = 'image' | 'text' | (string & {});
+export type ContentAddonType = 'image' | 'text' | 'button' | (string & {});
 
 export interface ContentAddonBaseData {
   companyId?: string;
@@ -76,12 +76,48 @@ export interface TextContentAddonData extends ContentAddonBaseData {
   fontColor?: string;
 }
 
-export type ContentAddonData = ImageContentAddonData | TextContentAddonData;
+/** Theme button (`themeData.buttons`) — `buttonName` selects the style. */
+export interface ButtonContentAddonData extends ContentAddonBaseData {
+  /** Visible label on the button */
+  label: string;
+  /** Matches `ThemeButtonSetting.buttonName` */
+  buttonName: string;
+  backgroundColor?: string;
+  fontColor?: string;
+  textStyleName?: string;
+  borderColor?: string;
+  borderRadius?: string;
+  /** Snapshot of label typography when theme is unavailable */
+  labelFontFamily?: string;
+  labelFontSize?: string;
+  labelFontColor?: string;
+  labelGoogleFontUrl?: string;
+  /** Target company web page id (from Website → Webpages). */
+  linkWebPageId?: string;
+  /** Snapshot of `CompanyWebPage.url` at save time for public view when page list is not loaded. */
+  linkPagePublicPath?: string;
+}
+
+export type ContentAddonData = ImageContentAddonData | TextContentAddonData | ButtonContentAddonData;
+
+/**
+ * Inner 12-column grid inside a content block (same model as page blocks).
+ * Row height is fixed (e.g. 60px) per grid row unit; `rowSpan` stacks units.
+ */
+export interface AddonGridLayout {
+  gridRowStart: number;
+  gridColumnStart: number;
+  rowSpan: number;
+  colSpan: number;
+}
 
 export interface ContentAddon {
   id: string;
   type: ContentAddonType;
   data: ContentAddonData;
+  layout?: AddonGridLayout;
+  /** Stacking order inside the content block (higher = more in front). */
+  zIndex?: number;
 }
 
 export interface ContentBlock {
@@ -103,6 +139,8 @@ export interface ContentBlock {
   settings?: ContentBlockSettings;
   /** Addons attached to this content block */
   addons?: ContentAddon[];
+  /** Stacking order on the page canvas (higher = more in front when blocks overlap). */
+  zIndex?: number;
   responsiveCols?: { sm?: number; md?: number; lg?: number; xl?: number };
   width?: number;
 }

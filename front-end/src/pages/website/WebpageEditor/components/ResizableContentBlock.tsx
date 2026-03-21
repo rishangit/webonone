@@ -1,10 +1,14 @@
 import { useState, useRef, useEffect } from "react";
 import { ContentAddon, ContentBlock } from "../types";
-import { X, Pencil, Plus, GripVertical } from "lucide-react";
+import { X, Pencil, Plus, Move, ChevronUp, ChevronDown } from "lucide-react";
 import { Button } from "../../../../components/ui/button";
 import { ContentBlockSettingsDialog } from "./ContentBlockSettingsDialog";
 import { AddAddonDialog, getAddonModuleByType } from "../addons";
-import type { ThemeTextSetting } from "../../../../services/companyWebThemes";
+import { clampStackZIndex, defaultLayoutForNewAddon } from "../addons/addonGridUtils";
+import type { ThemeButtonSetting, ThemeTextSetting } from "../../../../services/companyWebThemes";
+import type { CompanyWebPage } from "../../../../services/companyWebPages";
+import type { AddonRenderContext } from "../addons/types";
+import { AddonGridEditor } from "./AddonGridEditor";
 
 // Shared drag lock between all content blocks on the page.
 // If a second block starts dragging, this prevents the first block's
@@ -19,6 +23,9 @@ interface ResizableContentBlockProps {
   gridRowHeight: number;
   companyId?: string;
   themeTextSettings?: ThemeTextSetting[];
+  themeButtonSettings?: ThemeButtonSetting[];
+  companyWebPages?: CompanyWebPage[];
+  addonRenderContext?: AddonRenderContext;
 }
 
 type ResizeHandle = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw' | null;
@@ -31,6 +38,9 @@ export const ResizableContentBlock = ({
   gridRowHeight,
   companyId,
   themeTextSettings,
+  themeButtonSettings,
+  companyWebPages,
+  addonRenderContext,
 }: ResizableContentBlockProps) => {
   const [isResizing, setIsResizing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -47,7 +57,6 @@ export const ResizableContentBlock = ({
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
   const [addAddonDialogOpen, setAddAddonDialogOpen] = useState(false);
   const [editingAddonId, setEditingAddonId] = useState<string | null>(null);
-  const [hoveredAddonId, setHoveredAddonId] = useState<string | null>(null);
   const blockRef = useRef<HTMLDivElement>(null);
   const onUpdateRef = useRef(onUpdate);
   const blockSnapshotRef = useRef(block);
@@ -185,12 +194,28 @@ export const ResizableContentBlock = ({
     if (onDelete) onDelete(block.id);
   };
 
+  const bumpBlockZIndex = (delta: number) => {
+    onUpdate(
+      {
+        ...block,
+        zIndex: clampStackZIndex((block.zIndex ?? 0) + delta),
+      },
+      true,
+      true
+    );
+  };
+
   const handleAddAddon = (addon: ContentAddon) => {
-    onUpdate({
-      ...block,
-      addons: [...addons, addon],
-    }, true);
-    setEditingAddonId(addon.id);
+    const layout = defaultLayoutForNewAddon(addons);
+    const withLayout: ContentAddon = { ...addon, layout };
+    onUpdate(
+      {
+        ...block,
+        addons: [...addons, withLayout],
+      },
+      true
+    );
+    setEditingAddonId(withLayout.id);
   };
 
   const handleUpdateAddon = (updatedAddon: ContentAddon) => {
@@ -311,14 +336,14 @@ export const ResizableContentBlock = ({
         }}
       >
         <div
-          className="edit-button delete-button move-button absolute top-2 right-2 z-40 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity"
+          className="edit-button delete-button move-button absolute top-2 right-2 z-40 flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity"
           onMouseDown={(e) => e.stopPropagation()}
         >
           <Button
             type="button"
             variant="ghost"
             size="icon"
-            className="h-8 w-8 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-[var(--accent-text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)]"
+            className="h-8 w-8 shrink-0 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-[var(--accent-text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)]"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -333,18 +358,49 @@ export const ResizableContentBlock = ({
             type="button"
             variant="ghost"
             size="icon"
-            className="h-8 w-8 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-muted-foreground hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)] move-button cursor-grab active:cursor-grabbing"
+            className="h-8 w-8 shrink-0 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-[var(--accent-text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)] move-button cursor-grab active:cursor-grabbing"
             onMouseDown={startDrag}
             aria-label="Move content element"
           >
-            <GripVertical className="w-4 h-4" />
+            <Move className="w-4 h-4" strokeWidth={2.25} aria-hidden />
           </Button>
 
           <Button
             type="button"
             variant="ghost"
             size="icon"
-            className="h-8 w-8 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-[var(--accent-text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)]"
+            className="h-8 w-8 shrink-0 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-[var(--accent-text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)]"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              bumpBlockZIndex(1);
+            }}
+            aria-label="Bring content element forward (increase z-index)"
+            title="Layer up"
+          >
+            <ChevronUp className="w-4 h-4" />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 shrink-0 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-[var(--accent-text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)]"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              bumpBlockZIndex(-1);
+            }}
+            aria-label="Send content element backward (decrease z-index)"
+            title="Layer down"
+          >
+            <ChevronDown className="w-4 h-4" />
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 shrink-0 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-[var(--accent-text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)]"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -359,7 +415,7 @@ export const ResizableContentBlock = ({
               type="button"
               variant="ghost"
               size="icon"
-              className="h-8 w-8 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-muted-foreground hover:bg-destructive hover:text-white hover:border-destructive/50"
+              className="h-8 w-8 shrink-0 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-muted-foreground hover:bg-destructive hover:text-white hover:border-destructive/50"
               onClick={handleDelete}
               aria-label="Delete content block"
             >
@@ -380,124 +436,28 @@ export const ResizableContentBlock = ({
             <div className="p-4">{block.content}</div>
           ) : null}
 
-          <div className="flex-1 min-h-0 overflow-hidden">
+          <div className="flex-1 min-h-0 overflow-auto">
             {addons.length ? (
-              addons.length === 1 ? (
-                (() => {
-                  const addon = addons[0];
-                  const module = getAddonModuleByType(addon.type);
-                  if (!module) return null;
-                  const RenderComponent = module.RenderComponent;
-                  return (
-                    <div
-                      className="relative w-full h-full min-h-0 overflow-hidden"
-                      onMouseEnter={() => setHoveredAddonId(addon.id)}
-                      onMouseLeave={() => setHoveredAddonId((prev) => (prev === addon.id ? null : prev))}
-                    >
-                      <div
-                        className={`absolute top-2 left-2 z-[60] flex items-center gap-1.5 transition-opacity pointer-events-auto ${
-                          hoveredAddonId === addon.id ? "opacity-100" : "opacity-0"
-                        }`}
-                        onMouseDown={(e) => e.stopPropagation()}
-                      >
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-[var(--accent-text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)]"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setEditingAddonId(addon.id);
-                          }}
-                          aria-label="Edit addon"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-muted-foreground hover:bg-destructive hover:text-white hover:border-destructive/50"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleDeleteAddon(addon.id);
-                          }}
-                          aria-label="Delete addon"
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </div>
-
-                      <RenderComponent
-                        addon={addon}
-                        companyId={companyId}
-                        themeTextSettings={themeTextSettings}
-                      />
-                    </div>
+              <AddonGridEditor
+                block={block}
+                addons={addons}
+                gridColumnWidth={gridColumnWidth}
+                gridRowHeight={gridRowHeight}
+                companyId={companyId}
+                themeTextSettings={themeTextSettings}
+                themeButtonSettings={themeButtonSettings}
+                companyWebPages={companyWebPages}
+                addonRenderContext={addonRenderContext}
+                onUpdateAddons={(next, shouldPersist, markDirty) => {
+                  onUpdate(
+                    { ...block, addons: next },
+                    shouldPersist ?? true,
+                    markDirty ?? true
                   );
-                })()
-              ) : (
-                <div className="h-full overflow-auto">
-                  {addons.map((addon) => {
-                    const module = getAddonModuleByType(addon.type);
-                    if (!module) return null;
-                    const RenderComponent = module.RenderComponent;
-
-                    return (
-                      <div
-                        key={addon.id}
-                        className="relative w-full"
-                        onMouseEnter={() => setHoveredAddonId(addon.id)}
-                        onMouseLeave={() => setHoveredAddonId((prev) => (prev === addon.id ? null : prev))}
-                      >
-                        <div
-                          className={`absolute top-2 left-2 z-[60] flex items-center gap-1.5 transition-opacity pointer-events-auto ${
-                            hoveredAddonId === addon.id ? "opacity-100" : "opacity-0"
-                          }`}
-                          onMouseDown={(e) => e.stopPropagation()}
-                        >
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-[var(--accent-text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)]"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setEditingAddonId(addon.id);
-                            }}
-                            aria-label="Edit addon"
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-muted-foreground hover:bg-destructive hover:text-white hover:border-destructive/50"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              handleDeleteAddon(addon.id);
-                            }}
-                            aria-label="Delete addon"
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
-                        </div>
-
-                        <RenderComponent
-                          addon={addon}
-                          companyId={companyId}
-                          themeTextSettings={themeTextSettings}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              )
+                }}
+                onEditAddon={(id) => setEditingAddonId(id)}
+                onDeleteAddon={handleDeleteAddon}
+              />
             ) : (
               <div className="h-full min-h-[80px] flex items-center justify-center text-xs text-muted-foreground">
                 No addons yet. Hover to add an addon.
@@ -544,6 +504,8 @@ export const ResizableContentBlock = ({
           contentElementId={block.id}
           onSave={handleUpdateAddon}
           themeTextSettings={themeTextSettings}
+          themeButtonSettings={themeButtonSettings}
+          companyWebPages={companyWebPages}
         />
       )}
     </>

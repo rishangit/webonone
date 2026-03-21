@@ -1,9 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { companyWebPagesService } from "../../services/companyWebPages";
 import { CompanyWebPage } from "../../services/companyWebPages";
-import { ContentBlock } from "./WebpageEditor/types";
+import { companyWebThemesService, type CompanyWebTheme } from "../../services/companyWebThemes";
+import { ContentAddon, ContentBlock } from "./WebpageEditor/types";
 import { WebpageContentRenderer } from "./WebpageEditor/components/WebpageContentRenderer";
+import { ensureAddonLayouts } from "./WebpageEditor/addons/addonGridUtils";
+import {
+  pickCompanyThemeForTextStyles,
+  getThemeTextSettingsList,
+  getThemeButtonSettingsList,
+} from "./WebpageEditor/addons/themeTextSettings";
 
 export const PublicWebPage = () => {
   const { companyId, '*': pageUrlSplat } = useParams<{ companyId: string; '*': string }>();
@@ -14,6 +21,18 @@ export const PublicWebPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
   const [editorContent, setEditorContent] = useState<{ html: string; css: string; js?: string } | null>(null);
+  const [companyThemes, setCompanyThemes] = useState<CompanyWebTheme[]>([]);
+  const [companyWebPagesList, setCompanyWebPagesList] = useState<CompanyWebPage[]>([]);
+
+  const themeTextSettings = useMemo(() => {
+    const theme = pickCompanyThemeForTextStyles(companyThemes);
+    return getThemeTextSettingsList(theme);
+  }, [companyThemes]);
+
+  const themeButtonSettings = useMemo(() => {
+    const theme = pickCompanyThemeForTextStyles(companyThemes);
+    return getThemeButtonSettingsList(theme);
+  }, [companyThemes]);
 
   // Extract pageUrl from the pathname or splat parameter
   const getPageUrl = () => {
@@ -56,6 +75,20 @@ export const PublicWebPage = () => {
         // Allow viewing inactive pages (for preview/testing)
         // In production, you might want to check isActive here
         setWebPage(page);
+
+        try {
+          const themes = await companyWebThemesService.getThemes(page.companyId);
+          setCompanyThemes(themes ?? []);
+        } catch {
+          setCompanyThemes([]);
+        }
+
+        try {
+          const pages = await companyWebPagesService.getWebPages(page.companyId);
+          setCompanyWebPagesList(pages ?? []);
+        } catch {
+          setCompanyWebPagesList([]);
+        }
         
         // Load content blocks and editor content from saved data
         if (page.content) {
@@ -65,7 +98,7 @@ export const PublicWebPage = () => {
           if (savedContent.blocks && Array.isArray(savedContent.blocks)) {
             const normalizedBlocks = savedContent.blocks.map((block) => ({
               ...block,
-              addons: block.addons || [],
+              addons: ensureAddonLayouts((block.addons || []) as ContentAddon[]),
             })) as ContentBlock[];
             setContentBlocks(normalizedBlocks);
           }
@@ -144,6 +177,10 @@ export const PublicWebPage = () => {
             js={editorContent?.js}
             html={editorContent?.html}
             companyId={webPage.companyId}
+            themeTextSettings={themeTextSettings}
+            themeButtonSettings={themeButtonSettings}
+            companyWebPages={companyWebPagesList}
+            addonRenderContext="published"
             defaultContainerWidth={defaultContainerWidth}
             rowHeight={rowHeight}
             showBorders={false}

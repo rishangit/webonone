@@ -1,31 +1,76 @@
 import { ContentAddon } from "../../types";
 import { getAddonModuleByType } from "../registry";
-import type { ThemeTextSetting } from "../../../../../services/companyWebThemes";
+import type { ThemeButtonSetting, ThemeTextSetting } from "../../../../../services/companyWebThemes";
+import type { CompanyWebPage } from "../../../../../services/companyWebPages";
+import type { AddonRenderContext } from "../types";
+import {
+  computeAddonDisplayZIndex,
+  ensureAddonLayouts,
+  layoutToGridStyle,
+  maxLayoutRowEnd,
+} from "../addonGridUtils";
 
 interface ContentAddonsRendererProps {
   addons?: ContentAddon[];
   companyId?: string;
   themeTextSettings?: ThemeTextSetting[];
+  themeButtonSettings?: ThemeButtonSetting[];
+  companyWebPages?: CompanyWebPage[];
+  addonRenderContext?: AddonRenderContext;
+  /** Match content block row height (default 60). */
+  rowHeight?: number;
 }
 
-export const ContentAddonsRenderer = ({ addons = [], companyId, themeTextSettings }: ContentAddonsRendererProps) => {
+/**
+ * Read-only 12-column grid for addons (public + visual preview).
+ */
+export const ContentAddonsRenderer = ({
+  addons = [],
+  companyId,
+  themeTextSettings,
+  themeButtonSettings,
+  companyWebPages,
+  addonRenderContext = "published",
+  rowHeight = 60,
+}: ContentAddonsRendererProps) => {
   if (!addons.length) return null;
 
+  const list = ensureAddonLayouts(addons);
+  const maxRow = maxLayoutRowEnd(list);
+  const minH = Math.max(maxRow, 1) * rowHeight;
+
   return (
-    <>
-      {addons.map((addon) => {
+    <div
+      className="grid w-full grid-cols-12 gap-1"
+      style={{
+        gridAutoRows: `${rowHeight}px`,
+        minHeight: `${minH}px`,
+      }}
+    >
+      {list.map((addon, i) => {
         const module = getAddonModuleByType(addon.type);
-        if (!module) return null;
+        if (!module || !addon.layout) return null;
         const RenderComponent = module.RenderComponent;
         return (
-          <RenderComponent
+          <div
             key={addon.id}
-            addon={addon}
-            companyId={companyId}
-            themeTextSettings={themeTextSettings}
-          />
+            className="relative min-h-0 h-full overflow-hidden"
+            style={{
+              ...layoutToGridStyle(addon.layout),
+              zIndex: computeAddonDisplayZIndex(addon, i, "none"),
+            }}
+          >
+            <RenderComponent
+              addon={addon}
+              companyId={companyId}
+              themeTextSettings={themeTextSettings}
+              themeButtonSettings={themeButtonSettings}
+              companyWebPages={companyWebPages}
+              addonRenderContext={addonRenderContext}
+            />
+          </div>
         );
       })}
-    </>
+    </div>
   );
 };

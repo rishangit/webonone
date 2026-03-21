@@ -6,13 +6,19 @@ import { Badge } from "../../../components/ui/badge";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import {
   fetchWebPageRequest,
+  fetchWebPagesRequest,
   updateWebPageRequest,
   clearError,
 } from "../../../store/slices/companyWebPagesSlice";
 import { fetchThemesRequest } from "../../../store/slices/companyWebThemesSlice";
 import { EditorContent, EditorState, ViewMode, ContentBlock, BreakpointName } from "./types";
 import { EditorToolbar, EditorCanvas } from "./components";
-import { pickCompanyThemeForTextStyles, getThemeTextSettingsList } from "./addons/themeTextSettings";
+import {
+  pickCompanyThemeForTextStyles,
+  getThemeTextSettingsList,
+  getThemeButtonSettingsList,
+} from "./addons/themeTextSettings";
+import { ensureAddonLayouts } from "./addons/addonGridUtils";
 import { toast } from "sonner";
 import { nanoid } from "nanoid";
 
@@ -25,12 +31,17 @@ export const WebpageEditor = (props: WebpageEditorProps = {}) => {
   const { pageId } = useParams<{ pageId: string }>();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { currentWebPage, error } = useAppSelector((state) => state.companyWebPages);
+  const { currentWebPage, webPages, error } = useAppSelector((state) => state.companyWebPages);
   const { themes: companyThemes } = useAppSelector((state) => state.companyWebThemes);
 
   const themeTextSettings = useMemo(() => {
     const theme = pickCompanyThemeForTextStyles(companyThemes);
     return getThemeTextSettingsList(theme);
+  }, [companyThemes]);
+
+  const themeButtonSettings = useMemo(() => {
+    const theme = pickCompanyThemeForTextStyles(companyThemes);
+    return getThemeButtonSettingsList(theme);
   }, [companyThemes]);
 
   const [editorState, setEditorState] = useState<EditorState>({
@@ -84,6 +95,7 @@ export const WebpageEditor = (props: WebpageEditorProps = {}) => {
   useEffect(() => {
     if (currentWebPage?.companyId) {
       dispatch(fetchThemesRequest({ companyId: currentWebPage.companyId }));
+      dispatch(fetchWebPagesRequest({ companyId: currentWebPage.companyId }));
     }
   }, [dispatch, currentWebPage?.companyId]);
 
@@ -98,15 +110,20 @@ export const WebpageEditor = (props: WebpageEditorProps = {}) => {
         if (savedContent.blocks && Array.isArray(savedContent.blocks)) {
           // Migrate old blocks to use colSpan instead of width
           const migratedBlocks = savedContent.blocks.map((block: any) => {
+            let next = { ...block };
             // If colSpan is missing, calculate it from width (backward compatibility)
-            if (!block.colSpan && block.width) {
+            if (!next.colSpan && next.width) {
               const defaultContainerWidth = 1200;
               const columnWidth = defaultContainerWidth / 12;
-              const colSpan = Math.round(block.width / columnWidth);
-              return { ...block, colSpan: Math.max(1, Math.min(12, colSpan)) };
+              const colSpan = Math.round(next.width / columnWidth);
+              next = { ...next, colSpan: Math.max(1, Math.min(12, colSpan)) };
             }
-            // Ensure colSpan exists (default to 4 if missing)
-            return { ...block, colSpan: block.colSpan || 4 };
+            next = { ...next, colSpan: next.colSpan || 4 };
+            const rawAddons = Array.isArray(next.addons) ? next.addons : [];
+            return {
+              ...next,
+              addons: ensureAddonLayouts(rawAddons),
+            };
           });
           setContentBlocks(migratedBlocks);
         } else {
@@ -231,6 +248,7 @@ export const WebpageEditor = (props: WebpageEditorProps = {}) => {
           ...(activeBreakpointName === '2xl' ? gridUpdate : {}),
           // Preserve settings (e.g. backgroundColor) from dialog updates; allow clearing when dialog sends settings
           settings: 'settings' in updatedBlock ? updatedBlock.settings : block.settings,
+          ...('zIndex' in updatedBlock ? { zIndex: updatedBlock.zIndex } : {}),
         };
       });
       return nextBlocks;
@@ -414,6 +432,9 @@ export const WebpageEditor = (props: WebpageEditorProps = {}) => {
           activeBreakpointName={activeBreakpointName}
           companyId={currentWebPage?.companyId}
           themeTextSettings={themeTextSettings}
+          themeButtonSettings={themeButtonSettings}
+          companyWebPages={webPages}
+          addonRenderContext="editor"
           onUpdateBlock={handleUpdateBlock}
           onDeleteBlock={handleDeleteBlock}
         />
