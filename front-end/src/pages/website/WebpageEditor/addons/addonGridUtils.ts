@@ -96,22 +96,47 @@ export function clampStackZIndex(z: number): number {
   return Math.max(ADDON_Z_MIN, Math.min(ADDON_Z_MAX, z));
 }
 
-const Z_BOOST_DRAG = 1_000_000;
-const Z_BOOST_HOVER = 100_000;
-const Z_BOOST_RESIZE = 50_000;
+/** Highest stored stacking value among addons in a block (for assigning the next layer). */
+export function maxStoredAddonZIndex(addons: ContentAddon[]): number {
+  let m = 0;
+  for (const a of addons) {
+    if (a.zIndex != null && a.zIndex > m) m = a.zIndex;
+  }
+  return m;
+}
 
-/** CSS `z-index` for an addon cell (stored zIndex + tie-break + interaction). */
+/** Next `zIndex` for a newly added addon so it starts on its own layer above existing ones. */
+export function nextAddonStackZIndex(addons: ContentAddon[]): number {
+  return clampStackZIndex(maxStoredAddonZIndex(addons) + 1);
+}
+
+/** Multiplier so stored `zIndex` always beats array-order tie-break (max ~100 addons). */
+const Z_INDEX_LAYER_STRIDE = 1000;
+
+/**
+ * Max value from `(zIndex × stride) + stackIndex`. Interaction boosts sit above this so
+ * selected/drag/resize never paint under another addon; stored `addon.zIndex` is unchanged.
+ */
+const MAX_ADDON_BASE_LAYER = ADDON_Z_MAX * Z_INDEX_LAYER_STRIDE + 1000;
+
+const Z_BOOST_SELECTED = MAX_ADDON_BASE_LAYER + 1;
+const Z_BOOST_RESIZE = MAX_ADDON_BASE_LAYER + 2;
+const Z_BOOST_DRAG = MAX_ADDON_BASE_LAYER + 3;
+
+export type AddonDisplayInteraction = "drag" | "selected" | "resize" | "none";
+
+/** CSS `z-index`: stored stacking + temporary interaction lift (not persisted). */
 export function computeAddonDisplayZIndex(
   addon: ContentAddon,
   stackIndex: number,
-  interaction: "drag" | "hover" | "resize" | "none"
+  interaction: AddonDisplayInteraction
 ): number {
-  const base = (addon.zIndex ?? 0) * 100 + stackIndex;
+  const base = (addon.zIndex ?? 0) * Z_INDEX_LAYER_STRIDE + stackIndex;
   const boost =
     interaction === "drag"
       ? Z_BOOST_DRAG
-      : interaction === "hover"
-        ? Z_BOOST_HOVER
+      : interaction === "selected"
+        ? Z_BOOST_SELECTED
         : interaction === "resize"
           ? Z_BOOST_RESIZE
           : 0;

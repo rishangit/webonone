@@ -6,6 +6,11 @@ import type { ThemeButtonSetting, ThemeTextSetting } from "../../../../services/
 import type { CompanyWebPage } from "../../../../services/companyWebPages";
 import type { AddonRenderContext } from "../addons/types";
 
+/** At most one of: a content block, or an addon inside a block. */
+export type EditorSelection =
+  | { type: "block"; id: string }
+  | { type: "addon"; blockId: string; addonId: string };
+
 interface EditorCanvasProps {
   content: EditorContent;
   viewMode?: ViewMode;
@@ -36,10 +41,25 @@ export const EditorCanvas = ({
   const [localContent, setLocalContent] = useState(content);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(1200);
+  const [selection, setSelection] = useState<EditorSelection | null>(null);
 
   useEffect(() => {
     setLocalContent(content);
   }, [content]);
+
+  useEffect(() => {
+    if (!selection) return;
+    if (selection.type === "block") {
+      if (!contentBlocks.some((b) => b.id === selection.id)) {
+        setSelection(null);
+      }
+    } else {
+      const block = contentBlocks.find((b) => b.id === selection.blockId);
+      if (!block?.addons?.some((a) => a.id === selection.addonId)) {
+        setSelection(null);
+      }
+    }
+  }, [contentBlocks, selection]);
 
   // Update container width dynamically for responsive grid (for both edit and visual modes)
   useLayoutEffect(() => {
@@ -68,7 +88,14 @@ export const EditorCanvas = ({
         {/* Full width canvas - treated as the page with Tailwind grid */}
         <div className="w-full bg-white relative min-h-screen p-5">
           {/* Canvas Container - relative positioning for content layer */}
-          <div className="relative w-full min-h-screen">
+          <div
+            className="relative w-full min-h-screen"
+            onMouseDown={(e) => {
+              if (e.target === e.currentTarget) {
+                setSelection(null);
+              }
+            }}
+          >
             
             {/* Grid Background Canvas - absolute, z-index -1 (behind everything) */}
             <div 
@@ -94,18 +121,19 @@ export const EditorCanvas = ({
             {/* Guidelines Layer - absolute, behind content */}
             <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }}>
               {/* Vertical Column Lines */}
-              <div className="relative w-full h-full">
-                {Array.from({ length: 13 }).map((_, i) => {
-                  const leftPosition = (i * 100) / 12;
-                  return (
-                    <div
-                      key={`col-line-${i}`}
-                      className="absolute top-0 bottom-0 w-px border-l border-dashed border-blue-200/40"
-                      style={{ left: `${leftPosition}%` }}
-                    />
-                  );
-                })}
-              </div>
+              {Array.from({ length: 13 }).map((_, i) => {
+                const leftPosition = (i * 100) / 12;
+                return (
+                  <div
+                    key={`col-line-${i}`}
+                    className="absolute top-0 bottom-0 w-px"
+                    style={{
+                      left: `${leftPosition}%`,
+                      borderLeft: "1px dashed rgba(96, 165, 250, 0.45)",
+                    }}
+                  />
+                );
+              })}
 
               {/* Horizontal Row Lines */}
               {Array.from({ length: 100 }).map((_, i) => (
@@ -140,7 +168,8 @@ export const EditorCanvas = ({
                 gridTemplateColumns: 'repeat(12, minmax(0, 1fr))',
                 width: '100%',
                 boxSizing: 'border-box',
-                gridAutoRows: 'min-content'
+                // Keep edit-grid tracks fixed so dragging one block never reflows others.
+                gridAutoRows: `${rowHeight}px`
               }}
             >
             {/* Content Blocks - layout resolved for active breakpoint; use grid-area (row/col/rowSpan/colSpan) directly */}
@@ -166,6 +195,25 @@ export const EditorCanvas = ({
                   >
                     <ResizableContentBlock
                       block={blockToShow}
+                      isSelected={
+                        selection?.type === "block" && selection.id === block.id
+                      }
+                      selectedAddonId={
+                        selection?.type === "addon" &&
+                        selection.blockId === block.id
+                          ? selection.addonId
+                          : null
+                      }
+                      onSelectBlock={() =>
+                        setSelection({ type: "block", id: block.id })
+                      }
+                      onSelectAddon={(addonId) =>
+                        setSelection({
+                          type: "addon",
+                          blockId: block.id,
+                          addonId,
+                        })
+                      }
                       onUpdate={(updatedBlock, shouldPersist, markDirty) =>
                         onUpdateBlock?.(updatedBlock, shouldPersist, markDirty)
                       }
