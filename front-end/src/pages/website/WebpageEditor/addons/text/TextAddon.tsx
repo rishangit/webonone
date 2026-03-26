@@ -5,18 +5,18 @@ import * as yup from "yup";
 import { nanoid } from "nanoid";
 import { Type } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "../../../../../components/ui/button";
-import { Label } from "../../../../../components/ui/label";
-import { CustomDialog } from "../../../../../components/ui/custom-dialog";
-import { Textarea } from "../../../../../components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { CustomDialog } from "@/components/ui/custom-dialog";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../../../../components/ui/select";
-import type { ThemeTextSetting } from "../../../../../services/companyWebThemes";
+} from "@/components/ui/select";
+import type { ThemeTextSetting } from "@/services/companyWebThemes";
 import { AddonEditProps, AddonModule, AddonRenderProps } from "../types";
 import { ContentAddon, TextContentAddonData } from "../../types";
 

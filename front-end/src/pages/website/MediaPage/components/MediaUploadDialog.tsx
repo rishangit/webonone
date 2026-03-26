@@ -1,10 +1,10 @@
 import { useState, useRef } from "react";
 import { Upload, FileUp, Loader2 } from "lucide-react";
-import { CustomDialog } from "../../../../components/ui/custom-dialog";
-import FileUpload from "../../../../components/ui/file-upload";
-import { Button } from "../../../../components/ui/button";
-import { ProgressBar } from "../../../../components/ui/progress-bar";
-import { companyWebMediaService } from "../../../../services/companyWebMedia";
+import { CustomDialog } from "@/components/ui/custom-dialog";
+import FileUpload from "@/components/ui/file-upload";
+import { Button } from "@/components/ui/button";
+import { ProgressBar } from "@/components/ui/progress-bar";
+import { companyWebMediaService } from "@/services/companyWebMedia";
 import { toast } from "sonner";
 
 export interface MediaUploadDialogProps {

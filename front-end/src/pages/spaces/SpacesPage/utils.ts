@@ -1,4 +1,4 @@
-import { Space } from "../../../services/spaces";
+import { Space } from "@/services/spaces";
 import { formatAvatarUrl } from "../../../utils";
 
 export const getStatusColor = (status: string): string => {

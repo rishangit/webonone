@@ -1,7 +1,7 @@
 import { Calendar, Briefcase, Users, MapPin, User, FileText, CheckCircle } from "lucide-react";
-import { Card } from "../../../../components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "../../../../components/ui/avatar";
-import { DateDisplay } from "../../../../components/common/DateDisplay";
+import { Card } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DateDisplay } from "@/components/common/DateDisplay";
 import { formatAvatarUrl } from "../../../../utils";
 
 interface SummaryCardProps {

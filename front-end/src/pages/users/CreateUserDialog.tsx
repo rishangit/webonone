@@ -2,14 +2,14 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { CustomDialog } from "../../components/ui/custom-dialog";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
+import { CustomDialog } from "@/components/ui/custom-dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { UserPlus } from "lucide-react";
 import { toast } from "sonner";
-import { usersService } from "../../services/users";
-import { UserRole } from "../../types/user";
+import { usersService } from "@/services/users";
+import { UserRole } from "@/types/user";
 
 interface CreateUserDialogProps {
   open: boolean;
@@ -40,7 +40,7 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, companyId }: C
     try {
       const createdUser = await usersService.preCreateUser({
         ...data,
-        companyId: companyId,
+        companyId,
       });
       
       toast.success("User created and added to your company successfully");

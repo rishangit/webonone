@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Card } from "../../../../components/ui/card";
+import { Card } from "@/components/ui/card";
 import { StaffViewProps } from "../types";
 import { StaffAvatar } from "./StaffAvatar";
 import { StaffStatus } from "./StaffStatus";

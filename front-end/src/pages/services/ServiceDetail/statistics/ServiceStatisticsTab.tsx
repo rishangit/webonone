@@ -1,11 +1,11 @@
 import { Calendar, DollarSign, TrendingUp, Users, Clock } from "lucide-react";
-import { Card } from "../../../../components/ui/card";
-import { Separator } from "../../../../components/ui/separator";
-import { Service } from "../../../../services/services";
-import { Currency } from "../../../../services/currencies";
-import { DateDisplay } from "../../../../components/common/DateDisplay";
-import { CardTitle } from "../../../../components/common/CardTitle";
-import { Badge } from "../../../../components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Service } from "@/services/services";
+import { Currency } from "@/services/currencies";
+import { DateDisplay } from "@/components/common/DateDisplay";
+import { CardTitle } from "@/components/common/CardTitle";
+import { Badge } from "@/components/ui/badge";
 
 interface ServiceStatisticsTabProps {
   service: Service;

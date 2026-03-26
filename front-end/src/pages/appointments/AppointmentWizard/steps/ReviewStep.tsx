@@ -1,5 +1,5 @@
-import { Avatar, AvatarFallback, AvatarImage } from "../../../../components/ui/avatar";
-import { DateDisplay } from "../../../../components/common/DateDisplay";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DateDisplay } from "@/components/common/DateDisplay";
 import { formatAvatarUrl } from "../../../../utils";
 
 interface ReviewStepProps {

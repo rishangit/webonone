@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import { BreakpointName, ContentAddon, ContentBlock } from "../types";
 import { X, Pencil, Plus, Move, ChevronUp, ChevronDown } from "lucide-react";
-import { Button } from "../../../../components/ui/button";
+import { Button } from "@/components/ui/button";
 import { ContentBlockSettingsDialog } from "./ContentBlockSettingsDialog";
 import { AddAddonDialog, getAddonModuleByType } from "../addons";
 import { clampStackZIndex, defaultLayoutForNewAddon, nextAddonStackZIndex } from "../addons/addonGridUtils";
-import type { ThemeButtonSetting, ThemeTextSetting } from "../../../../services/companyWebThemes";
-import type { CompanyWebPage } from "../../../../services/companyWebPages";
+import type { ThemeButtonSetting, ThemeTextSetting } from "@/services/companyWebThemes";
+import type { CompanyWebPage } from "@/services/companyWebPages";
 import type { AddonRenderContext } from "../addons/types";
 import { AddonGridEditor } from "./AddonGridEditor";
 
@@ -124,8 +124,8 @@ export const ResizableContentBlock = ({
       const deltaCols = Math.round(deltaX / gridColumnWidth);
       const deltaRows = Math.round(deltaY / gridRowHeight);
 
-      let newColStart = Math.max(1, Math.min(13 - colSpanAtStart, startGrid.gridColumnStart + deltaCols));
-      let newRowStart = Math.max(1, startGrid.gridRowStart + deltaRows);
+      const newColStart = Math.max(1, Math.min(13 - colSpanAtStart, startGrid.gridColumnStart + deltaCols));
+      const newRowStart = Math.max(1, startGrid.gridRowStart + deltaRows);
 
       const last = dragLastAppliedGridRef.current;
       if (last && last.gridColumnStart === newColStart && last.gridRowStart === newRowStart) {

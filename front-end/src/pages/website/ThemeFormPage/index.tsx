@@ -1,17 +1,17 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Save, Pencil } from "lucide-react";
-import { Button } from "../../../components/ui/button";
-import { Input } from "../../../components/ui/input";
-import { Label } from "../../../components/ui/label";
-import { TabSwitcher } from "../../../components/ui/tab-switcher";
-import { useAppDispatch, useAppSelector } from "../../../store/hooks";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { TabSwitcher } from "@/components/ui/tab-switcher";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   fetchThemeRequest,
   createThemeRequest,
   updateThemeRequest,
   clearError,
-} from "../../../store/slices/companyWebThemesSlice";
+} from "@/store/slices/companyWebThemesSlice";
 import {
   CreateThemeData,
   type ThemeData,
@@ -20,7 +20,7 @@ import {
   type ThemeColorSetting,
   type UpdateThemeData,
   type ThemeButtonSetting,
-} from "../../../services/companyWebThemes";
+} from "@/services/companyWebThemes";
 import { toast } from "sonner";
 import {
   TextStyleEditDialog,

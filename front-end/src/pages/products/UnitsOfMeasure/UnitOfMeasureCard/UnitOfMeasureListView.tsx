@@ -1,5 +1,5 @@
 import { Ruler } from "lucide-react";
-import { Card } from "../../../../components/ui/card";
+import { Card } from "@/components/ui/card";
 import { UnitOfMeasureViewProps } from "./types";
 import { UnitStatus } from "./components/UnitStatus";
 import { UnitActions } from "./components/UnitActions";

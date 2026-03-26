@@ -1,13 +1,13 @@
 import { MapPin, Users, Mail, Phone, Eye, MoreVertical, Tag, User } from "lucide-react";
-import { Button } from "../../../components/ui/button";
-import { Badge } from "../../../components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../../components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { formatAvatarUrl } from "../../../utils";
-import { DateDisplay } from "../../../components/common/DateDisplay";
-import { useAppSelector, useAppDispatch } from "../../../store/hooks";
-import { approveCompanyRequest, rejectCompanyRequest, fetchCompaniesRequest } from "../../../store/slices/companiesSlice";
-import { isRole, UserRole } from "../../../types/user";
+import { DateDisplay } from "@/components/common/DateDisplay";
+import { useAppSelector, useAppDispatch } from "@/store/hooks";
+import { approveCompanyRequest, rejectCompanyRequest, fetchCompaniesRequest } from "@/store/slices/companiesSlice";
+import { isRole, UserRole } from "@/types/user";
 import { CompanyViewProps } from "./types";
 
 export const CompanyListView = ({

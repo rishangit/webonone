@@ -1,5 +1,5 @@
-import { Card } from "../../../../components/ui/card";
-import { ImageWithFallback } from "../../../../components/figma/ImageWithFallback";
+import { Card } from "@/components/ui/card";
+import { ImageWithFallback } from "@/components/figma/ImageWithFallback";
 import { formatAvatarUrl } from "../../../../utils";
 
 interface ProductDetailImageProps {

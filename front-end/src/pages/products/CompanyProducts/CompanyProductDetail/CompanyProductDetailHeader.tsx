@@ -1,8 +1,8 @@
 import { Package, Edit, Save, X } from "lucide-react";
-import { Button } from "../../../../components/ui/button";
-import { Badge } from "../../../../components/ui/badge";
-import { BackButton } from "../../../../components/common/BackButton";
-import { CompanyProduct } from "../../../../services/companyProducts";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { BackButton } from "@/components/common/BackButton";
+import { CompanyProduct } from "@/services/companyProducts";
 
 interface CompanyProductDetailHeaderProps {
   product: CompanyProduct;

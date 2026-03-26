@@ -1,4 +1,4 @@
-import { Badge } from "../../../../../components/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { AttributeInfoProps } from "../types";
 
 export const AttributeInfo = ({ attribute, unit, variant = "grid" }: AttributeInfoProps) => {

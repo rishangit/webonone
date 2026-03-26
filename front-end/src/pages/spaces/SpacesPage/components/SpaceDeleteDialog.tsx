@@ -1,4 +1,4 @@
-import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogAction } from "../../../../components/ui/alert-dialog";
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogAction } from "@/components/ui/alert-dialog";
 import { SpaceDeleteDialogProps } from "../types";
 
 export const SpaceDeleteDialog = ({ open, onOpenChange, space, onDelete }: SpaceDeleteDialogProps) => {

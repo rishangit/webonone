@@ -1,6 +1,6 @@
 import { Tag as TagIcon, CheckCircle, X } from "lucide-react";
-import { Card } from "../../../../components/ui/card";
-import { Carousel, CarouselContent, CarouselItem } from "../../../../components/ui/carousel";
+import { Card } from "@/components/ui/card";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { TagsStatsProps } from "../types";
 
 export const TagsStats = ({ total, active, inactive, usage }: TagsStatsProps) => {

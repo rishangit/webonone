@@ -1,8 +1,8 @@
 import { useRef, useLayoutEffect, useState } from "react";
 import { ContentBlock, resolveBlockLayout, getBreakpointFromWidth, type BreakpointName } from "../types";
 import { ContentAddonsRenderer } from "../addons";
-import type { ThemeButtonSetting, ThemeTextSetting } from "../../../../services/companyWebThemes";
-import type { CompanyWebPage } from "../../../../services/companyWebPages";
+import type { ThemeButtonSetting, ThemeTextSetting } from "@/services/companyWebThemes";
+import type { CompanyWebPage } from "@/services/companyWebPages";
 import type { AddonRenderContext } from "../addons/types";
 
 interface WebpageContentRendererProps {

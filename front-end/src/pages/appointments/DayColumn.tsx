@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
-import { Badge } from "../../components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
-import { Button } from "../../components/ui/button";
-import { normalizeAppointmentStatus, AppointmentStatus, getAppointmentStatusLabel } from "../../types/appointmentStatus";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { normalizeAppointmentStatus, AppointmentStatus, getAppointmentStatusLabel } from "@/types/appointmentStatus";
 import { Briefcase, MapPin, ChevronDown, ChevronUp } from "lucide-react";
 
 interface Appointment {

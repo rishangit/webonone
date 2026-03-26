@@ -1,7 +1,7 @@
 import { ServiceDetailImage } from "./ServiceDetailImage";
 import { ServiceDetailInfo } from "./ServiceDetailInfo";
-import { Service } from "../../../../services/services";
-import { Currency } from "../../../../services/currencies";
+import { Service } from "@/services/services";
+import { Currency } from "@/services/currencies";
 
 interface ServiceOverviewTabProps {
   service: Service;

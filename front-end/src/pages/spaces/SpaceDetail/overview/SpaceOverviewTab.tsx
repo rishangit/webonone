@@ -1,6 +1,6 @@
 import { SpaceDetailImage } from "./SpaceDetailImage";
 import { SpaceDetailInfo } from "./SpaceDetailInfo";
-import { Space } from "../../../../services/spaces";
+import { Space } from "@/services/spaces";
 
 interface SpaceOverviewTabProps {
   space: Space;

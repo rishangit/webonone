@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Service, CreateServiceData, UpdateServiceData } from '../../services/services';
+import { Service, CreateServiceData, UpdateServiceData } from '@/services/services';
 
-import { PaginationMeta } from '../../services/services';
+import { PaginationMeta } from '@/services/services';
 
 interface ServicesState {
   services: Service[];

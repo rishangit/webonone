@@ -1,19 +1,19 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { Calendar, TrendingUp, TrendingDown, DollarSign, Users, Package, Building, Star, Activity, ArrowUp, ArrowDown, BarChart3, PieChart, LineChart, Filter, Download, RefreshCw } from "lucide-react";
-import { Card } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { Badge } from "../../components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
-import { useIsMobile } from "../../components/ui/use-mobile";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useIsMobile } from "@/components/ui/use-mobile";
 import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart as RechartsBarChart, Bar, PieChart as RechartsPieChart, Cell, Pie, AreaChart, Area } from "recharts";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { store } from "../../store";
-import { fetchAppointmentHistoryRequest } from "../../store/slices/appointmentHistorySlice";
-import { fetchAppointmentsRequest } from "../../store/slices/appointmentsSlice";
-import { fetchServicesRequest } from "../../store/slices/servicesSlice";
-import { companySalesService, CompanySale } from "../../services/companySales";
+import { fetchAppointmentHistoryRequest } from "@/store/slices/appointmentHistorySlice";
+import { fetchAppointmentsRequest } from "@/store/slices/appointmentsSlice";
+import { fetchServicesRequest } from "@/store/slices/servicesSlice";
+import { companySalesService, CompanySale } from "@/services/companySales";
 import { toast } from "sonner";
-import { Carousel, CarouselContent, CarouselItem } from "../../components/ui/carousel";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 
 interface AnalyticsPageProps {
   currentUser?: {

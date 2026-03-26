@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { UnitsOfMeasure, CreateUnitsOfMeasureData, UpdateUnitsOfMeasureData, PaginationMeta } from '../../services/unitsOfMeasure';
+import { UnitsOfMeasure, CreateUnitsOfMeasureData, UpdateUnitsOfMeasureData, PaginationMeta } from '@/services/unitsOfMeasure';
 
 interface UnitsOfMeasureState {
   unitsOfMeasure: UnitsOfMeasure[];

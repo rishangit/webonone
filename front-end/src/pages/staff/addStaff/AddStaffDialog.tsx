@@ -1,16 +1,16 @@
 import { useState, useEffect } from "react";
-import { CustomDialog } from "../../../components/ui/custom-dialog";
-import { Button } from "../../../components/ui/button";
+import { CustomDialog } from "@/components/ui/custom-dialog";
+import { Button } from "@/components/ui/button";
 import { UserPlus, Users, Settings, CheckCircle, ChevronLeft, ChevronRight, Clock, Shield } from "lucide-react";
 import { toast } from "sonner";
-import { useAppSelector } from "../../../store/hooks";
+import { useAppSelector } from "@/store/hooks";
 import { AddStaffDialogProps, UserForSelection } from "./types";
 import { daysOfWeek } from "./constants";
 import { UserSearchSection } from "./UserSearchSection";
 import { SelectedUserSummary } from "./SelectedUserSummary";
 import { WorkScheduleSection } from "./WorkScheduleSection";
 import { PermissionsSection } from "./PermissionsSection";
-import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatAvatarUrl } from "../../../utils";
 
 export const AddStaffDialog = ({

@@ -1,4 +1,4 @@
-import { User as UserType } from "../../../types/user";
+import { User as UserType } from "@/types/user";
 import { ProfileHeaderCard } from "./ProfileHeaderCard";
 import { PersonalInformationCard } from "./PersonalInformationCard";
 import { ProfessionalInformationCard } from "./ProfessionalInformationCard";

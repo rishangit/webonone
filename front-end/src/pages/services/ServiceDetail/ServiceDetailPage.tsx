@@ -1,17 +1,17 @@
 import { useState, useEffect } from "react";
 import { Stethoscope } from "lucide-react";
-import { Button } from "../../../components/ui/button";
-import { Card } from "../../../components/ui/card";
-import { TabSwitcher } from "../../../components/ui/tab-switcher";
-import { servicesService, Service } from "../../../services/services";
-import { currenciesService } from "../../../services/currencies";
-import type { Currency } from "../../../services/currencies";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { TabSwitcher } from "@/components/ui/tab-switcher";
+import { servicesService, Service } from "@/services/services";
+import { currenciesService } from "@/services/currencies";
+import type { Currency } from "@/services/currencies";
 import { toast } from "sonner";
-import { isRole, UserRole } from "../../../types/user";
-import { useAppDispatch, useAppSelector } from "../../../store/hooks";
+import { isRole, UserRole } from "@/types/user";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useNavigate } from "react-router-dom";
-import { fetchServiceRequest } from "../../../store/slices/servicesSlice";
-import { CustomDialog } from "../../../components/ui/custom-dialog";
+import { fetchServiceRequest } from "@/store/slices/servicesSlice";
+import { CustomDialog } from "@/components/ui/custom-dialog";
 import { ServiceDetailHeader } from "./ServiceDetailHeader";
 import { ServiceOverviewTab } from "./overview/ServiceOverviewTab";
 import { ServiceGalleryTab } from "./gallery/ServiceGalleryTab";
@@ -84,7 +84,7 @@ export const ServiceDetailPage = ({ serviceId, onBack }: ServiceDetailPageProps)
         
         if (!company || String(company.id) !== String(companyId)) {
           try {
-            const { companiesService } = await import("../../../services/companies");
+            const { companiesService } = await import("@/services/companies");
             company = await companiesService.getCompanyById(String(companyId));
           } catch (fetchError) {
             console.error('Error fetching company:', fetchError);

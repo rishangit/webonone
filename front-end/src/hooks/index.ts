@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 // Re-export hooks from components/ui to maintain compatibility
-export { useIsMobile } from "../components/ui/use-mobile";
+export { useIsMobile } from "@/components/ui/use-mobile";
 
 // Re-export profile hook
 export { useProfile } from "./useProfile";

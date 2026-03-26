@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import { Card } from "../../../../components/ui/card";
-import { Label } from "../../../../components/ui/label";
-import { Separator } from "../../../../components/ui/separator";
-import { ProductRelatedAttribute } from "../../../../services/productRelatedAttributes";
-import { productRelatedAttributesService } from "../../../../services/productRelatedAttributes";
-import { productRelatedAttributeValuesService } from "../../../../services/productRelatedAttributeValues";
-import { unitsOfMeasureService, UnitsOfMeasure } from "../../../../services/unitsOfMeasure";
-import { ProductVariant as SystemProductVariant } from "../../../../services/productVariants";
+import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { ProductRelatedAttribute } from "@/services/productRelatedAttributes";
+import { productRelatedAttributesService } from "@/services/productRelatedAttributes";
+import { productRelatedAttributeValuesService } from "@/services/productRelatedAttributeValues";
+import { unitsOfMeasureService, UnitsOfMeasure } from "@/services/unitsOfMeasure";
+import { ProductVariant as SystemProductVariant } from "@/services/productVariants";
 
 interface ProductAttributesDisplayProps {
   productId: string | null;

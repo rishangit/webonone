@@ -3,18 +3,18 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { Tag as TagIcon } from "lucide-react";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
-import { Textarea } from "../../components/ui/textarea";
-import { CustomDialog } from "../../components/ui/custom-dialog";
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { CustomDialog } from "@/components/ui/custom-dialog";
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { 
   createTagRequest, 
   updateTagRequest,
   clearTagsError
-} from '../../store/slices/tagsSlice';
-import { Tag, CreateTagData } from '../../services/tags';
+} from '@/store/slices/tagsSlice';
+import { Tag, CreateTagData } from '@/services/tags';
 import { toast } from "sonner";
 
 const tagSchema = yup.object({

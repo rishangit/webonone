@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Appointment, CreateAppointmentData, UpdateAppointmentData } from '../../services/appointments';
-import { AppointmentStatus, AppointmentStatusType } from '../../types/appointmentStatus';
-import { PaginationMeta } from '../../services/products';
+import { Appointment, CreateAppointmentData, UpdateAppointmentData } from '@/services/appointments';
+import { AppointmentStatus, AppointmentStatusType } from '@/types/appointmentStatus';
+import { PaginationMeta } from '@/services/products';
 
 interface AppointmentsState {
   appointments: Appointment[];

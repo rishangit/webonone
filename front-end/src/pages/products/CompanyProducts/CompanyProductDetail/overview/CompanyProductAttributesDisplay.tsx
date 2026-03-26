@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { ListChecks } from "lucide-react";
-import { Card } from "../../../../../components/ui/card";
-import { Label } from "../../../../../components/ui/label";
-import { Separator } from "../../../../../components/ui/separator";
-import { CardTitle } from "../../../../../components/common/CardTitle";
-import { ProductRelatedAttribute } from "../../../../../services/productRelatedAttributes";
-import { productRelatedAttributesService } from "../../../../../services/productRelatedAttributes";
-import { productRelatedAttributeValuesService } from "../../../../../services/productRelatedAttributeValues";
-import { unitsOfMeasureService, UnitsOfMeasure } from "../../../../../services/unitsOfMeasure";
-import { CompanyProductVariant } from "../../../../../services/companyProductVariants";
+import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { CardTitle } from "@/components/common/CardTitle";
+import { ProductRelatedAttribute } from "@/services/productRelatedAttributes";
+import { productRelatedAttributesService } from "@/services/productRelatedAttributes";
+import { productRelatedAttributeValuesService } from "@/services/productRelatedAttributeValues";
+import { unitsOfMeasureService, UnitsOfMeasure } from "@/services/unitsOfMeasure";
+import { CompanyProductVariant } from "@/services/companyProductVariants";
 
 interface CompanyProductAttributesDisplayProps {
   systemProductId: string | null;

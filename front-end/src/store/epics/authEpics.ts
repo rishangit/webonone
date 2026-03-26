@@ -16,7 +16,7 @@ import {
   roleSelectionRequired,
   completeLoginWithRole
 } from '../slices/authSlice';
-import { authService } from '../../services/auth';
+import { authService } from '@/services/auth';
 
 // Track ongoing requests to prevent duplicates
 let ongoingSignUpRequest: string | null = null;
@@ -34,7 +34,7 @@ export const signUpEpic: Epic<any, any, RootState> = (action$) =>
       }
       
       // Check if this is a duplicate request based on email and timestamp
-      const currentRequestId = action.payload.email + '_' + action.payload.firstName + '_' + action.payload.lastName;
+      const currentRequestId = `${action.payload.email  }_${  action.payload.firstName  }_${  action.payload.lastName}`;
       if (lastProcessedRequestId === currentRequestId) {
         return false;
       }

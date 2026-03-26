@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import { Menu, Bell, User, Settings } from "lucide-react";
-import { Button } from "../../components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
-import { Badge } from "../../components/ui/badge";
-import { User as UserType } from "../../types/user";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { User as UserType } from "@/types/user";
 import { formatAvatarUrl } from "../../utils";
-import { UserRoleBadge } from "../../components/UserRoleBadge";
-import { Icon } from "../../components/common/Icon";
+import { UserRoleBadge } from "@/components/UserRoleBadge";
+import { Icon } from "@/components/common/Icon";
 
 interface HeaderProps {
   onMenuClick: () => void;

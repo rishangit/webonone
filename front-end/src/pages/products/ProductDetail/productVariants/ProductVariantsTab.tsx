@@ -1,9 +1,9 @@
 import { ProductVariantList } from "./ProductVariantList";
 import { ProductVariantAddForm } from "./ProductVariantAddForm";
 import { VariantDialog } from "../../Variants/VariantDialog";
-import { ProductVariant as SystemProductVariant } from "../../../../services/productVariants";
-import { CompanyProductVariant } from "../../../../services/companyProductVariants";
-import { VariantFormData } from "../../../../schemas/variantValidation";
+import { ProductVariant as SystemProductVariant } from "@/services/productVariants";
+import { CompanyProductVariant } from "@/services/companyProductVariants";
+import { VariantFormData } from "@/schemas/variantValidation";
 
 interface LegacyProductVariant {
   id: string;

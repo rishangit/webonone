@@ -1,8 +1,8 @@
 import { User } from "lucide-react";
-import { Card } from "../../../../components/ui/card";
-import { Label } from "../../../../components/ui/label";
-import { DateDisplay } from "../../../../components/common/DateDisplay";
-import { CardTitle } from "../../../../components/common/CardTitle";
+import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { DateDisplay } from "@/components/common/DateDisplay";
+import { CardTitle } from "@/components/common/CardTitle";
 import { PersonalInfoCardProps } from "../types";
 
 export const PersonalInfoCard = ({ staff, userInfo }: PersonalInfoCardProps) => {

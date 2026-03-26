@@ -1,8 +1,8 @@
 import { MoreVertical, Edit, Trash2, CheckCircle, Calendar, Building2, Hash, Clock } from "lucide-react";
-import { Button } from "../../../../../components/ui/button";
-import { Badge } from "../../../../../components/ui/badge";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../../../../../components/ui/dropdown-menu";
-import { DateDisplay } from "../../../../../components/common/DateDisplay";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DateDisplay } from "@/components/common/DateDisplay";
 import { StockEntryCardProps } from "../types";
 
 export const StockEntryCard = ({

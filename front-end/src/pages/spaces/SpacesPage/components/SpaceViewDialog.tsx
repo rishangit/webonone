@@ -1,9 +1,9 @@
-import { CustomDialog } from "../../../../components/ui/custom-dialog";
-import { Label } from "../../../../components/ui/label";
-import { Badge } from "../../../../components/ui/badge";
+import { CustomDialog } from "@/components/ui/custom-dialog";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { SpaceViewDialogProps } from "../types";
 import { getImageUrl, getStatusColor } from "../utils";
-import { Space } from "../../../../services/spaces";
+import { Space } from "@/services/spaces";
 
 export const SpaceViewDialog = ({ open, onOpenChange, space }: SpaceViewDialogProps) => {
   if (!space) return null;

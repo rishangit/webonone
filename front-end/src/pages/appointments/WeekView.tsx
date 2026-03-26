@@ -1,9 +1,9 @@
 import { useState, useMemo, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Card } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { Badge } from "../../components/ui/badge";
-import { TimelineView } from "../../components/TimelineView";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { TimelineView } from "@/components/TimelineView";
 
 interface User {
   email: string;

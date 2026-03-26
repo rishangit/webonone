@@ -1,18 +1,18 @@
 import { useState, useEffect } from "react";
 import { User, Mail, Phone, MapPin, Shield, Building, CheckCircle, Clock } from "lucide-react";
-import { Card } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { Badge } from "../../components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
-import { Label } from "../../components/ui/label";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { fetchUserRequest, clearError } from "../../store/slices/usersSlice";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Label } from "@/components/ui/label";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchUserRequest, clearError } from "@/store/slices/usersSlice";
 import { toast } from "sonner";
 import { formatAvatarUrl } from "../../utils";
-import { UserRoleNames, UserRole } from "../../types/user";
-import { DateDisplay } from "../../components/common/DateDisplay";
-import { CardTitle } from "../../components/common/CardTitle";
-import { BackButton } from "../../components/common/BackButton";
+import { UserRoleNames, UserRole } from "@/types/user";
+import { DateDisplay } from "@/components/common/DateDisplay";
+import { CardTitle } from "@/components/common/CardTitle";
+import { BackButton } from "@/components/common/BackButton";
 
 interface UserProfilePageProps {
   userId: string;

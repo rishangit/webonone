@@ -1,9 +1,9 @@
 import { FileText, Edit, Trash2 } from "lucide-react";
-import { Button } from "../../../components/ui/button";
-import { Badge } from "../../../components/ui/badge";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../../components/ui/dropdown-menu";
-import { BackButton } from "../../../components/common/BackButton";
-import { Service } from "../../../services/services";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { BackButton } from "@/components/common/BackButton";
+import { Service } from "@/services/services";
 
 interface ServiceDetailHeaderProps {
   service: Service;

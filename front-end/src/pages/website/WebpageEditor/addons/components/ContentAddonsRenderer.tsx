@@ -1,7 +1,7 @@
 import { ContentAddon } from "../../types";
 import { getAddonModuleByType } from "../registry";
-import type { ThemeButtonSetting, ThemeTextSetting } from "../../../../../services/companyWebThemes";
-import type { CompanyWebPage } from "../../../../../services/companyWebPages";
+import type { ThemeButtonSetting, ThemeTextSetting } from "@/services/companyWebThemes";
+import type { CompanyWebPage } from "@/services/companyWebPages";
 import type { AddonRenderContext } from "../types";
 import type { BreakpointName } from "../../types";
 import {

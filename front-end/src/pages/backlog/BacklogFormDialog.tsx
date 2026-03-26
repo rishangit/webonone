@@ -3,22 +3,22 @@ import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { Bug, Sparkles } from "lucide-react";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
-import { Textarea } from "../../components/ui/textarea";
-import { CustomDialog } from "../../components/ui/custom-dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
-import FileUpload from "../../components/ui/file-upload";
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { CustomDialog } from "@/components/ui/custom-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import FileUpload from "@/components/ui/file-upload";
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { 
   createBacklogItemRequest, 
   updateBacklogItemRequest,
   clearBacklogError
-} from '../../store/slices/backlogSlice';
-import { BacklogItem, CreateBacklogItemData } from '../../services/backlog';
+} from '@/store/slices/backlogSlice';
+import { BacklogItem, CreateBacklogItemData } from '@/services/backlog';
 import { toast } from "sonner";
-import { formatAvatarUrl } from "../../utils";
+import { formatAvatarUrl } from "@/utils";
 
 const backlogSchema = yup.object({
   title: yup.string().required("Title is required").min(3, "Title must be at least 3 characters"),

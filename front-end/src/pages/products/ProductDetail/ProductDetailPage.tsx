@@ -1,21 +1,21 @@
 import { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
-import { Card } from "../../../components/ui/card";
-import { Button } from "../../../components/ui/button";
-import { useAppDispatch, useAppSelector } from "../../../store/hooks";
-import { fetchSystemProductRequest, clearError as clearSystemProductsError } from "../../../store/slices/systemProductsSlice";
-import { Product } from "../../../services/products";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchSystemProductRequest, clearError as clearSystemProductsError } from "@/store/slices/systemProductsSlice";
+import { Product } from "@/services/products";
 import { toast } from "sonner";
-import { productVariantsService, ProductVariant as SystemProductVariant } from "../../../services/productVariants";
-import { VariantFormData } from "../../../schemas/variantValidation";
-import { CompanyProductVariant } from "../../../services/companyProductVariants";
-import { UserRole, isRole } from "../../../types/user";
-import { database } from "../../../services";
+import { productVariantsService, ProductVariant as SystemProductVariant } from "@/services/productVariants";
+import { VariantFormData } from "@/schemas/variantValidation";
+import { CompanyProductVariant } from "@/services/companyProductVariants";
+import { UserRole, isRole } from "@/types/user";
+import { database } from "@/services";
 import { ProductDetailHeader } from "./ProductDetailHeader";
 import { ProductOverviewTab } from "./overview/ProductOverviewTab";
 import { ProductVariantsTab } from "./productVariants/ProductVariantsTab";
 import { ProductAttributesTab } from "./attributes/ProductAttributesTab";
-import { TabSwitcher } from "../../../components/ui/tab-switcher";
+import { TabSwitcher } from "@/components/ui/tab-switcher";
 
 // Legacy ProductVariant interface for company products (kept for backward compatibility)
 interface LegacyProductVariant {
@@ -265,7 +265,7 @@ export function ProductDetailPage({ productId, onBack, productType = "system", c
       // Save variant-defining attributes and attribute values
       if (savedVariantId) {
         try {
-          const { productRelatedAttributesService } = await import("../../../services/productRelatedAttributes");
+          const { productRelatedAttributesService } = await import("@/services/productRelatedAttributes");
           const productAttributes = await productRelatedAttributesService.getAttributesByProductId(productId);
           
           // Update variant-defining status for all attributes
@@ -290,7 +290,7 @@ export function ProductDetailPage({ productId, onBack, productType = "system", c
               .filter((v) => v.attributeValue !== null && v.attributeValue !== "");
 
             if (valuesToSave.length > 0) {
-              const { productRelatedAttributeValuesService } = await import("../../../services/productRelatedAttributeValues");
+              const { productRelatedAttributeValuesService } = await import("@/services/productRelatedAttributeValues");
               await productRelatedAttributeValuesService.bulkUpsertValues(savedVariantId, valuesToSave);
             }
           }

@@ -1,8 +1,8 @@
 import { Building } from "lucide-react";
-import { Card } from "../../../components/ui/card";
-import { Label } from "../../../components/ui/label";
-import { CardTitle } from "../../../components/common/CardTitle";
-import { User as UserType, UserRoleNames } from "../../../types/user";
+import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { CardTitle } from "@/components/common/CardTitle";
+import { User as UserType, UserRoleNames } from "@/types/user";
 
 interface ProfessionalInformationCardProps {
   user: UserType;

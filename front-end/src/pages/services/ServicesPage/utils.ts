@@ -1,5 +1,5 @@
-import { Service as ServiceType } from "../../../services/services";
-import { Currency } from "../../../services/currencies";
+import { Service as ServiceType } from "@/services/services";
+import { Currency } from "@/services/currencies";
 import { formatAvatarUrl } from "../../../utils";
 
 export const formatDuration = (minutes: number): string => {

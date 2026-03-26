@@ -1,13 +1,13 @@
-import { Card } from "../../../../components/ui/card";
-import { Badge } from "../../../../components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { ServiceViewProps } from "../types";
 import { ServiceImage } from "./ServiceImage";
 import { ServiceStatus } from "./ServiceStatus";
 import { ServiceActions } from "./ServiceActions";
 import { ServiceTags } from "./ServiceTags";
 import { ServiceInfo } from "./ServiceInfo";
-import { useAppSelector } from "../../../../store/hooks";
-import { isRole, UserRole } from "../../../../types/user";
+import { useAppSelector } from "@/store/hooks";
+import { isRole, UserRole } from "@/types/user";
 
 export const ServiceCardView = ({
   service,

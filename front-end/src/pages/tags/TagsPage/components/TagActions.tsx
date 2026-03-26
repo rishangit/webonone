@@ -1,6 +1,6 @@
 import { MoreVertical, Edit, Trash2, CheckCircle, X } from "lucide-react";
-import { Button } from "../../../../components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../../../../components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { TagActionsProps } from "../types";
 
 export const TagActions = ({ tag, onEdit, onDelete, onToggleStatus }: TagActionsProps) => {

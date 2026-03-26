@@ -1,5 +1,5 @@
 import { Clock } from "lucide-react";
-import { Badge } from "../../../../components/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { ServiceInfoProps } from "../types";
 
 export const ServiceInfo = ({ service, formatPrice, formatDuration, variant = "grid" }: ServiceInfoProps) => {

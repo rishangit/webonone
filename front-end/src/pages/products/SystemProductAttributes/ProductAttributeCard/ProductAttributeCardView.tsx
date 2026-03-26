@@ -1,4 +1,4 @@
-import { Card } from "../../../../components/ui/card";
+import { Card } from "@/components/ui/card";
 import { ProductAttributeViewProps } from "./types";
 import { AttributeIcon } from "./components/AttributeIcon";
 import { AttributeStatus } from "./components/AttributeStatus";

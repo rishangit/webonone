@@ -1,6 +1,6 @@
 import { Package } from "lucide-react";
-import { Card } from "../../../../components/ui/card";
-import { DateDisplay } from "../../../../components/common/DateDisplay";
+import { Card } from "@/components/ui/card";
+import { DateDisplay } from "@/components/common/DateDisplay";
 import { ProductSaleCardProps } from "../types";
 
 export const ProductSaleCard = ({

@@ -1,4 +1,4 @@
-import { ProgressBar } from "../../../../components/ui/progress-bar";
+import { ProgressBar } from "@/components/ui/progress-bar";
 import { WizardStep } from "../types";
 
 interface WizardProgressProps {

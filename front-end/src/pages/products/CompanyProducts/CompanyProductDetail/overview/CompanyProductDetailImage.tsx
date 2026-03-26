@@ -1,6 +1,6 @@
-import { Card } from "../../../../../components/ui/card";
-import { ImageWithFallback } from "../../../../../components/figma/ImageWithFallback";
-import { formatAvatarUrl } from "../../../../../utils";
+import { Card } from "@/components/ui/card";
+import { ImageWithFallback } from "@/components/figma/ImageWithFallback";
+import { formatAvatarUrl } from "@/utils";
 
 interface CompanyProductDetailImageProps {
   imageUrl?: string;

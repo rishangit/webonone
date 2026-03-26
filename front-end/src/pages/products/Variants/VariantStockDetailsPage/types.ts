@@ -1,6 +1,6 @@
-import { CompanyProductVariant } from "../../../../services/companyProductVariants";
-import { CompanyProductStock } from "../../../../services/companyProductStock";
-import { Currency } from "../../../../services/currencies";
+import { CompanyProductVariant } from "@/services/companyProductVariants";
+import { CompanyProductStock } from "@/services/companyProductStock";
+import { Currency } from "@/services/currencies";
 
 export interface VariantStockDetailsPageProps {
   productId: string;

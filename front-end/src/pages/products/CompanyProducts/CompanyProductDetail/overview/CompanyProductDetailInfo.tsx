@@ -1,11 +1,11 @@
 import { Package } from "lucide-react";
-import { Card } from "../../../../../components/ui/card";
-import { Label } from "../../../../../components/ui/label";
-import { Textarea } from "../../../../../components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../../components/ui/select";
-import { CardTitle } from "../../../../../components/common/CardTitle";
-import { CompanyProduct } from "../../../../../services/companyProducts";
-import { CompanyProductVariant } from "../../../../../services/companyProductVariants";
+import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CardTitle } from "@/components/common/CardTitle";
+import { CompanyProduct } from "@/services/companyProducts";
+import { CompanyProductVariant } from "@/services/companyProductVariants";
 
 interface CompanyProductDetailInfoProps {
   product: CompanyProduct;

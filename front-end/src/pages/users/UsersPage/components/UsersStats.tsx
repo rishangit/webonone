@@ -1,6 +1,6 @@
 import { Users, TrendingUp, Building2, Briefcase } from "lucide-react";
-import { Card } from "../../../../components/ui/card";
-import { Carousel, CarouselContent, CarouselItem } from "../../../../components/ui/carousel";
+import { Card } from "@/components/ui/card";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { UsersStatsProps } from "../types";
 
 export const UsersStats = ({

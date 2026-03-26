@@ -1,15 +1,15 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, ChevronDown, ChevronRight, Layers } from "lucide-react";
-import { Button } from "../../../components/ui/button";
-import { useAppDispatch, useAppSelector } from "../../../store/hooks";
+import { Button } from "@/components/ui/button";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   fetchWebPageRequest,
   fetchWebPagesRequest,
   updateWebPageRequest,
   clearError,
-} from "../../../store/slices/companyWebPagesSlice";
-import { fetchThemesRequest } from "../../../store/slices/companyWebThemesSlice";
+} from "@/store/slices/companyWebPagesSlice";
+import { fetchThemesRequest } from "@/store/slices/companyWebThemesSlice";
 import {
   EditorContent,
   EditorState,

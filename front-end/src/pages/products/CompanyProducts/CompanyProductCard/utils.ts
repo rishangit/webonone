@@ -1,6 +1,6 @@
-import { CompanyProductVariant } from "../../../../services/companyProductVariants";
-import { Currency } from "../../../../services/currencies";
-import { CompanyProduct } from "../../../../services/companyProducts";
+import { CompanyProductVariant } from "@/services/companyProductVariants";
+import { Currency } from "@/services/currencies";
+import { CompanyProduct } from "@/services/companyProducts";
 import { formatAvatarUrl } from "../../../../utils";
 
 export const getImageUrl = (product: CompanyProduct, imageError: boolean): string | null => {
@@ -100,8 +100,8 @@ export const getAvailabilityStatus = (
   
   return {
     isAvailable: true,
-    type: type,
-    text: text
+    type,
+    text
   };
 };
 

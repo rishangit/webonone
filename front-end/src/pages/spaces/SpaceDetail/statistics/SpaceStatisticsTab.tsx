@@ -1,10 +1,10 @@
 import { Calendar, Users, TrendingUp, MapPin } from "lucide-react";
-import { Card } from "../../../../components/ui/card";
-import { Separator } from "../../../../components/ui/separator";
-import { Space } from "../../../../services/spaces";
-import { DateDisplay } from "../../../../components/common/DateDisplay";
-import { CardTitle } from "../../../../components/common/CardTitle";
-import { Badge } from "../../../../components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Space } from "@/services/spaces";
+import { DateDisplay } from "@/components/common/DateDisplay";
+import { CardTitle } from "@/components/common/CardTitle";
+import { Badge } from "@/components/ui/badge";
 
 interface SpaceStatisticsTabProps {
   space: Space;

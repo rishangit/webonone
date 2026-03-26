@@ -1,16 +1,16 @@
 import { useState, useEffect } from "react";
 import { Package, Filter, Eye, MoreVertical } from "lucide-react";
-import { Card } from "../../../../../components/ui/card";
-import { Button } from "../../../../../components/ui/button";
-import { Badge } from "../../../../../components/ui/badge";
-import { SearchInput } from "../../../../../components/common/SearchInput";
-import { ViewSwitcher } from "../../../../../components/ui/view-switcher";
-import { Pagination } from "../../../../../components/common/Pagination";
-import { RightPanel } from "../../../../../components/common/RightPanel";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../../components/ui/select";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../../../../components/ui/dropdown-menu";
-import { systemProductAttributesService, SystemProductAttribute } from "../../../../../services/systemProductAttributes";
-import { unitsOfMeasureService, UnitsOfMeasure } from "../../../../../services/unitsOfMeasure";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { SearchInput } from "@/components/common/SearchInput";
+import { ViewSwitcher } from "@/components/ui/view-switcher";
+import { Pagination } from "@/components/common/Pagination";
+import { RightPanel } from "@/components/common/RightPanel";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { systemProductAttributesService, SystemProductAttribute } from "@/services/systemProductAttributes";
+import { unitsOfMeasureService, UnitsOfMeasure } from "@/services/unitsOfMeasure";
 import { toast } from "sonner";
 
 export const CompanyProductAttributesTab = () => {

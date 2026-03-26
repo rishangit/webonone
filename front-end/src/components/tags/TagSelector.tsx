@@ -4,9 +4,9 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Badge } from "../ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { fetchTagsRequest, createTagRequest } from "../../store/slices/tagsSlice";
-import { Tag } from "../../services/tags";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchTagsRequest, createTagRequest } from "@/store/slices/tagsSlice";
+import { Tag } from "@/services/tags";
 
 interface TagSelectorProps {
   value: string[];

@@ -1,6 +1,6 @@
-import { Card } from "../../../components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar";
-import { Badge } from "../../../components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Mail, Phone, MapPin } from "lucide-react";
 import { formatAvatarUrl } from "../../../utils";
 import { UserForSelection } from "./types";

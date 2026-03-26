@@ -1,6 +1,6 @@
 import { DollarSign, Users, Package, TrendingUp } from "lucide-react";
-import { Card } from "../../../../components/ui/card";
-import { Carousel, CarouselContent, CarouselItem } from "../../../../components/ui/carousel";
+import { Card } from "@/components/ui/card";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { SalesStatsProps } from "../types";
 
 export const SalesStats = ({

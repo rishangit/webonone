@@ -1,15 +1,15 @@
 import { useState } from "react";
 import { Check, FileText, Clock, AlertCircle } from "lucide-react";
-import { Button } from "../../components/ui/button";
-import { Icon } from "../../components/common/Icon";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
-import { Textarea } from "../../components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
-import { CustomDialog } from "../../components/ui/custom-dialog";
-import { Separator } from "../../components/ui/separator";
-import { Badge } from "../../components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/common/Icon";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CustomDialog } from "@/components/ui/custom-dialog";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 
 interface AppointmentCompletionDialogProps {

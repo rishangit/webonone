@@ -1,11 +1,11 @@
-import { DateDisplay } from "../../../components/common/DateDisplay";
+import { DateDisplay } from "@/components/common/DateDisplay";
 import { CompanyViewProps } from "./types";
 import { CompanyCardHeader } from "./components/CompanyCardHeader";
 import { CompanyDetails } from "./components/CompanyDetails";
 import { CompanyActions } from "./components/CompanyActions";
 import { CompanyOwnerInfo } from "./components/CompanyOwnerInfo";
-import { useAppSelector } from "../../../store/hooks";
-import { isRole, UserRole } from "../../../types/user";
+import { useAppSelector } from "@/store/hooks";
+import { isRole, UserRole } from "@/types/user";
 
 export const CompanyCardView = ({
   company,

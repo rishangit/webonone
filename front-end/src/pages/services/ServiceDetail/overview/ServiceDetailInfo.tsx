@@ -1,8 +1,8 @@
 import { Clock, DollarSign, Tag as TagIcon } from "lucide-react";
-import { Card } from "../../../../components/ui/card";
-import { Badge } from "../../../../components/ui/badge";
-import { Service } from "../../../../services/services";
-import { Currency } from "../../../../services/currencies";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Service } from "@/services/services";
+import { Currency } from "@/services/currencies";
 
 interface ServiceDetailInfoProps {
   service: Service;

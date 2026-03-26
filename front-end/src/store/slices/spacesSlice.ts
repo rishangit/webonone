@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Space, CreateSpaceData, UpdateSpaceData } from '../../services/spaces';
-import { PaginationMeta } from '../../services/products';
+import { Space, CreateSpaceData, UpdateSpaceData } from '@/services/spaces';
+import { PaginationMeta } from '@/services/products';
 
 interface SpacesState {
   spaces: Space[];

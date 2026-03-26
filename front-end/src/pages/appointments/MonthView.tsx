@@ -1,11 +1,11 @@
 import { useState, useMemo } from "react";
 import { ChevronLeft, ChevronRight, Briefcase, MapPin, Clock } from "lucide-react";
-import { Card } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { Badge } from "../../components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
-import { cn } from "../../components/ui/utils";
-import { normalizeAppointmentStatus, AppointmentStatus, getAppointmentStatusLabel } from "../../types/appointmentStatus";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { cn } from "@/components/ui/utils";
+import { normalizeAppointmentStatus, AppointmentStatus, getAppointmentStatusLabel } from "@/types/appointmentStatus";
 
 interface User {
   email: string;

@@ -1,22 +1,22 @@
 import { useState, useEffect } from "react";
 import { Calendar, Clock, CreditCard, DollarSign, Package, User, Users, FileText, Trash2 } from "lucide-react";
-import { Card } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { Badge } from "../../components/ui/badge";
-import { Separator } from "../../components/ui/separator";
-import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
-import { useIsMobile } from "../../components/ui/use-mobile";
-import { companySalesService, CompanySale } from "../../services/companySales";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useIsMobile } from "@/components/ui/use-mobile";
+import { companySalesService, CompanySale } from "@/services/companySales";
 import { formatAvatarUrl } from "../../utils";
 import { toast } from "sonner";
-import { DateDisplay } from "../../components/common/DateDisplay";
-import { isRole, UserRole } from "../../types/user";
-import { useAppSelector } from "../../store/hooks";
+import { DateDisplay } from "@/components/common/DateDisplay";
+import { isRole, UserRole } from "@/types/user";
+import { useAppSelector } from "@/store/hooks";
 import { useNavigate } from "react-router-dom";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../components/ui/dropdown-menu";
-import { CustomDialog } from "../../components/ui/custom-dialog";
-import { currenciesService, Currency } from "../../services/currencies";
-import { BackButton } from "../../components/common/BackButton";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { CustomDialog } from "@/components/ui/custom-dialog";
+import { currenciesService, Currency } from "@/services/currencies";
+import { BackButton } from "@/components/common/BackButton";
 
 interface SalesDetailPageProps {
   saleId: string;
@@ -75,7 +75,7 @@ export const SalesDetailPage = ({ saleId, onBack }: SalesDetailPageProps) => {
         
         if (!company || String(company.id) !== String(companyId)) {
           try {
-            const { companiesService } = await import("../../services/companies");
+            const { companiesService } = await import("@/services/companies");
             company = await companiesService.getCompanyById(String(companyId));
           } catch (fetchError) {
             console.error('Error fetching company:', fetchError);

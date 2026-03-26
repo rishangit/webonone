@@ -1,6 +1,6 @@
 import { ListChecks } from "lucide-react";
 import { AttributeIconProps } from "../types";
-import { cn } from "../../../../../components/ui/utils";
+import { cn } from "@/components/ui/utils";
 
 export const AttributeIcon = ({ className }: AttributeIconProps) => {
   return (

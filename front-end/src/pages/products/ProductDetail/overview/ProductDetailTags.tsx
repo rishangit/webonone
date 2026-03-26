@@ -1,6 +1,6 @@
 import { Tag } from "lucide-react";
-import { Card } from "../../../../components/ui/card";
-import { Badge } from "../../../../components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface ProductDetailTagsProps {
   tags: string[] | Array<{ id: string | number; name: string; color?: string; icon?: string }>;

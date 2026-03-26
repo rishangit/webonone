@@ -1,7 +1,7 @@
 import { Observable, of, from } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { ofType } from 'redux-observable';
-import { companyWebThemesService } from '../../services/companyWebThemes';
+import { companyWebThemesService } from '@/services/companyWebThemes';
 import { toast } from 'sonner';
 import {
   fetchThemesRequest,

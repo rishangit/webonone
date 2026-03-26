@@ -1,6 +1,6 @@
-import { Card } from "../../../../components/ui/card";
+import { Card } from "@/components/ui/card";
 import { FolderOpen, File } from "lucide-react";
-import { getMediaFileUrl } from "../../../../services/companyWebMedia";
+import { getMediaFileUrl } from "@/services/companyWebMedia";
 import type { MediaItem } from "./MediaActions";
 import { MediaActions } from "./MediaActions";
 

@@ -1,7 +1,7 @@
 import { WizardHeader } from "../components/WizardHeader";
 import { SummaryCard } from "../components/SummaryCard";
 import { CompanyFormData } from "../types";
-import { Tag } from "../../../../services/tags";
+import { Tag } from "@/services/tags";
 
 interface ReviewStepProps {
   formData: CompanyFormData;

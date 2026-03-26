@@ -1,8 +1,8 @@
 import { Observable, throwError, of, from } from 'rxjs';
 import { map, catchError, switchMap } from 'rxjs/operators';
-import { User } from '../types/user';
+import { User } from '@/types/user';
 import { apiService } from './api';
-import { config } from '../config/environment';
+import { config } from '@/config/environment';
 
 export interface ProfileUpdateData {
   firstName?: string;

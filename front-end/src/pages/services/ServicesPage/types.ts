@@ -1,4 +1,4 @@
-import { Service as ServiceType } from "../../../services/services";
+import { Service as ServiceType } from "@/services/services";
 
 export interface ServiceCardProps {
   service: ServiceType;

@@ -1,10 +1,10 @@
 import { Calendar, User } from "lucide-react";
-import { Label } from "../../../../../components/ui/label";
-import { Input } from "../../../../../components/ui/input";
-import { Button } from "../../../../../components/ui/button";
-import { Avatar, AvatarImage, AvatarFallback } from "../../../../../components/ui/avatar";
-import { DatePicker } from "../../../../../components/common/DatePicker";
-import { UserSelectionDialog } from "../../../../../components/common/UserSelectionDialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { DatePicker } from "@/components/common/DatePicker";
+import { UserSelectionDialog } from "@/components/common/UserSelectionDialog";
 import { Controller } from "react-hook-form";
 import { formatAvatarUrl } from "../../../../../utils";
 import { X } from "lucide-react";

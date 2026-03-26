@@ -1,14 +1,14 @@
 import { MoreVertical, Calendar, User, MapPin, Mail, Phone, UserCheck, History, LogIn } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Card } from "../../components/ui/card";
-import { Badge } from "../../components/ui/badge";
-import { Button } from "../../components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../components/ui/dropdown-menu";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { formatAvatarUrl } from "../../utils";
-import { UserRoleBadge } from "../../components/UserRoleBadge";
-import { UserRoleNames, UserRole } from "../../types/user";
-import { DateDisplay } from "../../components/common/DateDisplay";
+import { UserRoleBadge } from "@/components/UserRoleBadge";
+import { UserRoleNames, UserRole } from "@/types/user";
+import { DateDisplay } from "@/components/common/DateDisplay";
 
 interface UserCardProps {
   id: string;

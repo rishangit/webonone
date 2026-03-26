@@ -1,13 +1,13 @@
 import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
-import { useAppSelector, useAppDispatch } from "../../../../store/hooks";
+import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { 
   fetchTagsRequest,
   deleteTagRequest,
   updateTagRequest,
   clearTagsError
-} from "../../../../store/slices/tagsSlice";
-import { Tag } from "../../../../services/tags";
+} from "@/store/slices/tagsSlice";
+import { Tag } from "@/services/tags";
 import { TagsPageProps } from "../types";
 
 export const useTagsPage = (currentUser?: TagsPageProps["currentUser"]) => {
@@ -32,7 +32,7 @@ export const useTagsPage = (currentUser?: TagsPageProps["currentUser"]) => {
     const offset = (currentPage - 1) * itemsPerPage;
     const filters: any = {
       limit: itemsPerPage,
-      offset: offset,
+      offset,
       page: currentPage,
     };
 
@@ -106,7 +106,7 @@ export const useTagsPage = (currentUser?: TagsPageProps["currentUser"]) => {
     const offset = (currentPage - 1) * itemsPerPage;
     const filters: any = {
       limit: itemsPerPage,
-      offset: offset,
+      offset,
       page: currentPage,
     };
     if (debouncedSearchTerm.trim()) {

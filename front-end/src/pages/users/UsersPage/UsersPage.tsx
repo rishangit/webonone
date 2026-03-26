@@ -1,11 +1,11 @@
 import { UserPlus, Users } from "lucide-react";
-import { Button } from "../../../components/ui/button";
-import { Card } from "../../../components/ui/card";
-import { Pagination } from "../../../components/common/Pagination";
-import { EmptyState } from "../../../components/common/EmptyState";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Pagination } from "@/components/common/Pagination";
+import { EmptyState } from "@/components/common/EmptyState";
 import { CreateUserDialog } from "../CreateUserDialog";
-import { RoleSelectionDialog } from "../../../components/auth/RoleSelectionDialog";
-import { UserSelectionDialog } from "../../../components/common/UserSelectionDialog";
+import { RoleSelectionDialog } from "@/components/auth/RoleSelectionDialog";
+import { UserSelectionDialog } from "@/components/common/UserSelectionDialog";
 import { useUsersPage } from "./hooks/useUsersPage";
 import {
   UsersStats,
@@ -14,10 +14,10 @@ import {
   LoadingSkeleton,
 } from "./components";
 import { UsersPageProps } from "./types";
-import { UserRoleNames, UserRole } from "../../../types/user";
-import { useAppDispatch } from "../../../store/hooks";
-import { fetchUsersRequest } from "../../../store/slices/usersSlice";
-import { usersService } from "../../../services/users";
+import { UserRoleNames, UserRole } from "@/types/user";
+import { useAppDispatch } from "@/store/hooks";
+import { fetchUsersRequest } from "@/store/slices/usersSlice";
+import { usersService } from "@/services/users";
 import { toast } from "sonner";
 
 export const UsersPage = (props: UsersPageProps) => {

@@ -1,8 +1,8 @@
 import { FileText, Edit, Trash2 } from "lucide-react";
-import { Button } from "../../../components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../../components/ui/dropdown-menu";
-import { BackButton } from "../../../components/common/BackButton";
-import { Space } from "../../../services/spaces";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { BackButton } from "@/components/common/BackButton";
+import { Space } from "@/services/spaces";
 
 interface SpaceDetailHeaderProps {
   space: Space;

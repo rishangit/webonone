@@ -1,5 +1,5 @@
 import { formatCurrency } from "../../../../utils";
-import { Currency } from "../../../../services/currencies";
+import { Currency } from "@/services/currencies";
 
 export const formatPrice = (price: number | undefined | null, companyCurrency: Currency | null): string => {
   const numPrice = Number(price) || 0;

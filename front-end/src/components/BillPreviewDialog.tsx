@@ -7,7 +7,7 @@ import { Badge } from "./ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Card } from "./ui/card";
 import { toast } from "sonner";
-import { appointmentHistoryService } from "../services/appointmentHistory";
+import { appointmentHistoryService } from "@/services/appointmentHistory";
 import { formatAvatarUrl } from "../utils";
 
 interface BillingItem {
@@ -131,7 +131,7 @@ export function BillPreviewDialog({ open, onOpenChange, appointmentId, billData 
         image: undefined,
         specialization: 'Staff'
       } : undefined,
-      billingItems: billingItems,
+      billingItems,
       subtotal: historyData.subtotal || 0,
       discountAmount: historyData.discountAmount || 0,
       finalAmount: historyData.totalAmount || 0,

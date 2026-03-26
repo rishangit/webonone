@@ -1,7 +1,7 @@
 import { Clock, CheckCircle, Building } from "lucide-react";
-import { Card } from "../../../components/ui/card";
-import { Button } from "../../../components/ui/button";
-import { Company } from "../../../services/companies";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Company } from "@/services/companies";
 import { CompanyCard } from "./CompanyCard";
 import { CompanyRegistrationSection } from "./CompanyRegistrationSection";
 

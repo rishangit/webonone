@@ -1,7 +1,7 @@
 import { Observable, of, from } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { ofType } from 'redux-observable';
-import { systemProductAttributesService } from '../../services/systemProductAttributes';
+import { systemProductAttributesService } from '@/services/systemProductAttributes';
 import { toast } from 'sonner';
 import {
   fetchSystemProductAttributesRequest,

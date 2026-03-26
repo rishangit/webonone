@@ -1,6 +1,6 @@
-import { Label } from "../../../../components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../components/ui/select";
-import { TagSelector } from "../../../../components/tags/TagSelector";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { TagSelector } from "@/components/tags/TagSelector";
 import { WizardHeader } from "../components/WizardHeader";
 import { CompanyFormData } from "../types";
 import { employeeSizes } from "../constants";

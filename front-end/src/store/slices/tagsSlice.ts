@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Tag, CreateTagData, UpdateTagData } from '../../services/tags';
-import { PaginationMeta } from '../../services/products';
+import { Tag, CreateTagData, UpdateTagData } from '@/services/tags';
+import { PaginationMeta } from '@/services/products';
 
 interface TagsState {
   tags: Tag[];

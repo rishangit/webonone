@@ -1,10 +1,10 @@
 import { ReactNode, useState } from "react";
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
-import { useIsMobile } from "../../components/ui/use-mobile";
-import { Toaster } from "../../components/ui/sonner";
+import { useIsMobile } from "@/components/ui/use-mobile";
+import { Toaster } from "@/components/ui/sonner";
 
-import { User } from "../../types/user";
+import { User } from "@/types/user";
 
 interface MainLayoutProps {
   children: ReactNode;

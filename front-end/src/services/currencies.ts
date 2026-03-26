@@ -1,4 +1,4 @@
-import { apiEndpoints } from '../config/environment';
+import { apiEndpoints } from '@/config/environment';
 
 export interface Currency {
   id: string;

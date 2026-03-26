@@ -3,8 +3,8 @@ import { ofType } from 'redux-observable';
 import { switchMap, catchError, map, tap, mergeMap } from 'rxjs/operators';
 import { RootAction } from '../index';
 import { RootState } from '../index';
-import { profileService } from '../../services/profile';
-import { User } from '../../types/user';
+import { profileService } from '@/services/profile';
+import { User } from '@/types/user';
 import {
   loadProfileRequest,
   loadProfileSuccess,

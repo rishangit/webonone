@@ -1,11 +1,11 @@
 import { Plus, Tag as TagIcon, AlertTriangle } from "lucide-react";
-import { Card } from "../../../components/ui/card";
-import { Button } from "../../../components/ui/button";
-import { Badge } from "../../../components/ui/badge";
-import { Pagination } from "../../../components/common/Pagination";
-import { EmptyState } from "../../../components/common/EmptyState";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Pagination } from "@/components/common/Pagination";
+import { EmptyState } from "@/components/common/EmptyState";
 import { TagFormDialog } from "../TagFormDialog";
-import { UserRole, isRole } from "../../../types/user";
+import { UserRole, isRole } from "@/types/user";
 import { useTagsPage } from "./hooks/useTagsPage";
 import {
   TagCard,

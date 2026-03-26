@@ -1,6 +1,6 @@
 import { Save, Eye, FileText, Edit, Plus } from "lucide-react";
-import { Button } from "../../../../components/ui/button";
-import { Separator } from "../../../../components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 interface EditorToolbarProps {
   onSave: () => void;

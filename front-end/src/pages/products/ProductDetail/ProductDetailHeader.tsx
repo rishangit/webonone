@@ -1,7 +1,7 @@
 import { Package, CheckCircle2, XCircle } from "lucide-react";
-import { Badge } from "../../../components/ui/badge";
-import { BackButton } from "../../../components/common/BackButton";
-import { Product } from "../../../services/products";
+import { Badge } from "@/components/ui/badge";
+import { BackButton } from "@/components/common/BackButton";
+import { Product } from "@/services/products";
 
 interface SystemProduct {
   id: string;

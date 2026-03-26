@@ -5,7 +5,7 @@ import { ProductDetailInfo } from "./ProductDetailInfo";
 import { ProductDetailTags } from "./ProductDetailTags";
 import { ProductDetailNotes } from "./ProductDetailNotes";
 import { ProductAttributesDisplay } from "./ProductAttributesDisplay";
-import { ProductVariant as SystemProductVariant } from "../../../../services/productVariants";
+import { ProductVariant as SystemProductVariant } from "@/services/productVariants";
 
 interface SystemProduct {
   id: string;

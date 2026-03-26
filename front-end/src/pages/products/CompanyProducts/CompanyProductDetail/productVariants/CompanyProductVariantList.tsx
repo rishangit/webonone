@@ -1,18 +1,18 @@
 import { useState, useEffect } from "react";
 import { Plus, Package, Star, MoreVertical, Warehouse, Eye, Edit, Trash2, Filter } from "lucide-react";
-import { Card } from "../../../../../components/ui/card";
-import { Button } from "../../../../../components/ui/button";
-import { Badge } from "../../../../../components/ui/badge";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../../../../components/ui/dropdown-menu";
-import { SearchInput } from "../../../../../components/common/SearchInput";
-import { ViewSwitcher } from "../../../../../components/ui/view-switcher";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../../components/ui/select";
-import { RightPanel } from "../../../../../components/common/RightPanel";
-import { cn } from "../../../../../components/ui/utils";
-import { CompanyProductVariant } from "../../../../../services/companyProductVariants";
-import { DeleteConfirmationDialog } from "../../../../../components/common/DeleteConfirmationDialog";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { SearchInput } from "@/components/common/SearchInput";
+import { ViewSwitcher } from "@/components/ui/view-switcher";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RightPanel } from "@/components/common/RightPanel";
+import { cn } from "@/components/ui/utils";
+import { CompanyProductVariant } from "@/services/companyProductVariants";
+import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
 import { VariantDialog } from "../../../Variants/VariantDialog";
-import { VariantFormData } from "../../../../../schemas/variantValidation";
+import { VariantFormData } from "@/schemas/variantValidation";
 
 interface CompanyProductVariantListProps {
   variants: CompanyProductVariant[];

@@ -1,13 +1,13 @@
 import { Edit, Eye, MoreVertical, Star, Trash2 } from "lucide-react";
-import { Button } from "../../../../components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../../../../components/ui/dropdown-menu";
-import type { CompanyWebTheme } from "../../../../services/companyWebThemes";
+} from "@/components/ui/dropdown-menu";
+import type { CompanyWebTheme } from "@/services/companyWebThemes";
 
 export interface ThemeActionsProps {
   theme: CompanyWebTheme;

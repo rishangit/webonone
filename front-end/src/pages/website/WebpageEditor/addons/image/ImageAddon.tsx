@@ -5,19 +5,19 @@ import * as yup from "yup";
 import { nanoid } from "nanoid";
 import { Image as ImageIcon, Pencil } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "../../../../../components/ui/button";
-import { Label } from "../../../../../components/ui/label";
-import { Input } from "../../../../../components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../../../../components/ui/select";
-import { CustomDialog } from "../../../../../components/ui/custom-dialog";
-import { getMediaFileUrl } from "../../../../../services/companyWebMedia";
-import { SelectMediaDialog } from "../../../../../components/common/SelectMediaDialog";
+} from "@/components/ui/select";
+import { CustomDialog } from "@/components/ui/custom-dialog";
+import { getMediaFileUrl } from "@/services/companyWebMedia";
+import { SelectMediaDialog } from "@/components/common/SelectMediaDialog";
 import { AddonEditProps, AddonModule, AddonRenderProps } from "../types";
 import { ContentAddon } from "../../types";
 

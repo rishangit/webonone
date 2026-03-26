@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "../../../../../store/hooks";
-import { fetchCompanyProductRequest } from "../../../../../store/slices/companyProductsSlice";
-import { fetchUsersRequest } from "../../../../../store/slices/usersSlice";
-import { companyProductVariantsService, CompanyProductVariant } from "../../../../../services/companyProductVariants";
-import { companyProductStockService, CompanyProductStock } from "../../../../../services/companyProductStock";
-import { currenciesService, Currency } from "../../../../../services/currencies";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchCompanyProductRequest } from "@/store/slices/companyProductsSlice";
+import { fetchUsersRequest } from "@/store/slices/usersSlice";
+import { companyProductVariantsService, CompanyProductVariant } from "@/services/companyProductVariants";
+import { companyProductStockService, CompanyProductStock } from "@/services/companyProductStock";
+import { currenciesService, Currency } from "@/services/currencies";
 import { toast } from "sonner";
 
 export const useVariantStockDetails = (productId: string, variantId: string) => {

@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { Eye, EyeOff, Lock, ArrowLeft, Zap, Shield, CheckCircle } from "lucide-react";
-import { Card } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { authService } from "../../services/auth";
+import { authService } from "@/services/auth";
 
 export const ResetPasswordPage = () => {
   const navigate = useNavigate();

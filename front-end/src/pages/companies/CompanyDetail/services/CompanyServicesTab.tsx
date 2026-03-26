@@ -1,16 +1,16 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card } from "../../../../components/ui/card";
-import { EmptyState } from "../../../../components/common/EmptyState";
-import { Pagination } from "../../../../components/common/Pagination";
-import { ViewSwitcher } from "../../../../components/ui/view-switcher";
+import { Card } from "@/components/ui/card";
+import { EmptyState } from "@/components/common/EmptyState";
+import { Pagination } from "@/components/common/Pagination";
+import { ViewSwitcher } from "@/components/ui/view-switcher";
 import { Stethoscope } from "lucide-react";
-import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
-import { fetchServicesRequest } from "../../../../store/slices/servicesSlice";
-import { Service as ServiceType } from "../../../../services/services";
-import { ServiceCard } from "../../../services/ServicesPage/components";
-import { formatDuration, formatPrice as formatPriceUtil, getImageUrl, getStatusColor } from "../../../services/ServicesPage/utils";
-import { currenciesService, Currency } from "../../../../services/currencies";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchServicesRequest } from "@/store/slices/servicesSlice";
+import { Service as ServiceType } from "@/services/services";
+import { ServiceCard } from "@/pages/services/ServicesPage/components";
+import { formatDuration, formatPrice as formatPriceUtil, getImageUrl, getStatusColor } from "@/pages/services/ServicesPage/utils";
+import { currenciesService, Currency } from "@/services/currencies";
 
 interface CompanyServicesTabProps {
   companyId: string;
@@ -52,7 +52,7 @@ export const CompanyServicesTab = ({ companyId }: CompanyServicesTabProps) => {
         
         if (!company || String(company.id) !== String(companyId)) {
           try {
-            const { companiesService } = await import("../../../../services/companies");
+            const { companiesService } = await import("@/services/companies");
             company = await companiesService.getCompanyById(String(companyId));
           } catch (fetchError) {
             console.error('Error fetching company:', fetchError);

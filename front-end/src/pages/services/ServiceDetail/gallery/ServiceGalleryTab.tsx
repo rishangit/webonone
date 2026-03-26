@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
-import { Card } from "../../../../components/ui/card";
-import { Button } from "../../../../components/ui/button";
-import FileUpload from "../../../../components/ui/file-upload";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import FileUpload from "@/components/ui/file-upload";
 import { formatAvatarUrl } from "../../../../utils";
-import { Service } from "../../../../services/services";
-import { servicesService } from "../../../../services/services";
+import { Service } from "@/services/services";
+import { servicesService } from "@/services/services";
 import { toast } from "sonner";
-import { useAppDispatch } from "../../../../store/hooks";
-import { fetchServiceRequest } from "../../../../store/slices/servicesSlice";
-import { CardTitle } from "../../../../components/common/CardTitle";
+import { useAppDispatch } from "@/store/hooks";
+import { fetchServiceRequest } from "@/store/slices/servicesSlice";
+import { CardTitle } from "@/components/common/CardTitle";
 
 interface ServiceGalleryTabProps {
   service: Service;

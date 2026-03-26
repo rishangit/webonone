@@ -1,26 +1,26 @@
 import { useState, useEffect, useMemo } from "react";
 import { Plus, ListChecks, AlertTriangle, Filter } from "lucide-react";
-import { Card } from "../../../components/ui/card";
-import { Button } from "../../../components/ui/button";
-import { SearchInput } from "../../../components/common/SearchInput";
-import { EmptyState } from "../../../components/common/EmptyState";
-import { ViewSwitcher } from "../../../components/ui/view-switcher";
-import { useIsMobile } from "../../../components/ui/use-mobile";
-import { cn } from "../../../components/ui/utils";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { SearchInput } from "@/components/common/SearchInput";
+import { EmptyState } from "@/components/common/EmptyState";
+import { ViewSwitcher } from "@/components/ui/view-switcher";
+import { useIsMobile } from "@/components/ui/use-mobile";
+import { cn } from "@/components/ui/utils";
 import { toast } from "sonner";
-import { useAppDispatch, useAppSelector } from "../../../store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   fetchSystemProductAttributesRequest,
   createSystemProductAttributeRequest,
   updateSystemProductAttributeRequest,
   deleteSystemProductAttributeRequest,
   clearError as clearSystemProductAttributesError,
-} from "../../../store/slices/systemProductAttributesSlice";
-import { fetchUnitsOfMeasureRequest } from "../../../store/slices/unitsOfMeasureSlice";
-import { SystemProductAttribute, CreateSystemProductAttributeData } from "../../../services/systemProductAttributes";
-import { UserRole, isRole } from "../../../types/user";
-import { DeleteConfirmationDialog } from "../../../components/common/DeleteConfirmationDialog";
-import { Pagination } from "../../../components/common/Pagination";
+} from "@/store/slices/systemProductAttributesSlice";
+import { fetchUnitsOfMeasureRequest } from "@/store/slices/unitsOfMeasureSlice";
+import { SystemProductAttribute, CreateSystemProductAttributeData } from "@/services/systemProductAttributes";
+import { UserRole, isRole } from "@/types/user";
+import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
+import { Pagination } from "@/components/common/Pagination";
 import { ProductAttributeAddEditDialog } from "./ProductAttributeAddEditDialog";
 import { ProductAttributeCard } from "./ProductAttributeCard";
 import { ProductAttributeFilters } from "./ProductAttributeFilters";

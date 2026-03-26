@@ -1,7 +1,7 @@
 import { Package, Plus } from "lucide-react";
-import { Card } from "../../../../../components/ui/card";
-import { Button } from "../../../../../components/ui/button";
-import { Badge } from "../../../../../components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { StockEntriesListProps } from "../types";
 import { StockEntryCard } from "./StockEntryCard";
 

@@ -60,7 +60,3 @@ export const hasPermission = (permission: string): boolean => {
   return (user.roleLevel ?? 3) <= requiredRole;
 };
 
-
-
-
-

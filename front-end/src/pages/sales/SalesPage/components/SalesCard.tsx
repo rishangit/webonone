@@ -1,10 +1,10 @@
 import { Calendar, Clock, CreditCard, Users, Package, FileText, MoreVertical, Eye, Trash2 } from "lucide-react";
-import { Card } from "../../../../components/ui/card";
-import { Button } from "../../../../components/ui/button";
-import { Badge } from "../../../../components/ui/badge";
-import { Avatar, AvatarImage, AvatarFallback } from "../../../../components/ui/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../../../components/ui/dropdown-menu";
-import { DateDisplay } from "../../../../components/common/DateDisplay";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DateDisplay } from "@/components/common/DateDisplay";
 import { SalesCardProps } from "../types";
 
 export const SalesCard = ({

@@ -1,5 +1,5 @@
 import { PaginationMeta } from './products';
-import { config } from '../config/environment';
+import { config } from '@/config/environment';
 
 const API_BASE_URL = config.apiBaseUrl;
 
@@ -87,7 +87,7 @@ class BacklogService {
     try {
       const response = await fetch(url.toString(), {
         method: 'GET',
-        headers: headers,
+        headers,
       });
 
       if (!response.ok) {

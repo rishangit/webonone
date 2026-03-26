@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { ArrowLeft, Warehouse, Plus } from "lucide-react";
-import { Card } from "../../../../components/ui/card";
-import { Button } from "../../../../components/ui/button";
-import { BackButton } from "../../../../components/common/BackButton";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { BackButton } from "@/components/common/BackButton";
 import { toast } from "sonner";
-import { companyProductVariantsService } from "../../../../services/companyProductVariants";
-import { companyProductStockService, CreateCompanyProductStockData } from "../../../../services/companyProductStock";
+import { companyProductVariantsService } from "@/services/companyProductVariants";
+import { companyProductStockService, CreateCompanyProductStockData } from "@/services/companyProductStock";
 import { useVariantStockDetails } from "./hooks/useVariantStockDetails";
 import { formatPrice } from "./utils";
 import { VariantStockDetailsPageProps } from "./types";

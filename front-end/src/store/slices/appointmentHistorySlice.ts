@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { AppointmentHistoryItem } from '../../services/appointmentHistory';
-import { PaginationMeta } from '../../services/companySales';
+import { AppointmentHistoryItem } from '@/services/appointmentHistory';
+import { PaginationMeta } from '@/services/companySales';
 
 interface AppointmentHistoryState {
   history: AppointmentHistoryItem[];

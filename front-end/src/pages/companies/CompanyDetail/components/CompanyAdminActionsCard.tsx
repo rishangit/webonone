@@ -1,7 +1,7 @@
 import { CheckCircle, XCircle } from "lucide-react";
-import { Card } from "../../../../components/ui/card";
-import { Button } from "../../../../components/ui/button";
-import { CardTitle } from "../../../../components/common/CardTitle";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { CardTitle } from "@/components/common/CardTitle";
 import { Company } from "../types";
 
 interface CompanyAdminActionsCardProps {

@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Shield, Mail, Phone, MapPin, User, Edit } from "lucide-react";
-import { Card } from "../../../components/ui/card";
-import { Badge } from "../../../components/ui/badge";
-import { Button } from "../../../components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar";
-import FileUpload from "../../../components/ui/file-upload";
-import { User as UserType, UserRoleNames } from "../../../types/user";
-import { formatAvatarUrl } from "../../../utils";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import FileUpload from "@/components/ui/file-upload";
+import { User as UserType, UserRoleNames } from "@/types/user";
+import { formatAvatarUrl } from "@/utils";
 
 interface ProfileHeaderCardProps {
   user: UserType;

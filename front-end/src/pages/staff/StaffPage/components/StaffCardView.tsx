@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { Card } from "../../../../components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "../../../../components/ui/avatar";
+import { Card } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatAvatarUrl } from "../../../../utils";
 import { StaffViewProps } from "../types";
 import { StaffStatus } from "./StaffStatus";

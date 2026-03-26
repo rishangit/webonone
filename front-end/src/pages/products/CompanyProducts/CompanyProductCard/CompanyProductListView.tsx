@@ -1,7 +1,7 @@
-import { Card } from "../../../../components/ui/card";
-import { Badge } from "../../../../components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Package, DollarSign, TrendingUp } from "lucide-react";
-import { CompanyProduct } from "../../../../services/companyProducts";
+import { CompanyProduct } from "@/services/companyProducts";
 import { ProductImage } from "./components/ProductImage";
 import { VariantSelector } from "./components/VariantSelector";
 import { ProductActions } from "./components/ProductActions";

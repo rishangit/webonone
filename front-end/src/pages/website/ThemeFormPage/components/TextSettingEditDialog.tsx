@@ -1,20 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
-import { CustomDialog } from "../../../../components/ui/custom-dialog";
-import { Button } from "../../../../components/ui/button";
-import { Input } from "../../../../components/ui/input";
-import { Label } from "../../../../components/ui/label";
+import { CustomDialog } from "@/components/ui/custom-dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../../../components/ui/select";
+} from "@/components/ui/select";
 import { Type } from "lucide-react";
 import type {
   ThemeColorSetting,
   ThemeFontSetting,
-} from "../../../../services/companyWebThemes";
+} from "@/services/companyWebThemes";
 
 export interface ThemeTextSettingItem {
   styleName: string; // display name for the text style

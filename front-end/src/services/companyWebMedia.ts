@@ -1,4 +1,4 @@
-import { config } from '../config/environment';
+import { config } from '@/config/environment';
 
 const API_BASE_URL = config.apiBaseUrl;
 const API_URL = config.apiUrl;

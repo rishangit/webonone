@@ -1,8 +1,8 @@
 import { Building, CheckCircle, XCircle, Clock } from "lucide-react";
-import { Card } from "../../../../components/ui/card";
-import { Badge } from "../../../../components/ui/badge";
-import { CardTitle } from "../../../../components/common/CardTitle";
-import { DateDisplay } from "../../../../components/common/DateDisplay";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { CardTitle } from "@/components/common/CardTitle";
+import { DateDisplay } from "@/components/common/DateDisplay";
 import { Company } from "../types";
 
 interface CompanyStatusCardProps {

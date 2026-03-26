@@ -1,17 +1,17 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Save, Globe, FileText } from "lucide-react";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   fetchWebPageRequest,
   createWebPageRequest,
   updateWebPageRequest,
   clearError,
-} from "../../store/slices/companyWebPagesSlice";
-import { CreateWebPageData } from "../../services/companyWebPages";
+} from "@/store/slices/companyWebPagesSlice";
+import { CreateWebPageData } from "@/services/companyWebPages";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";

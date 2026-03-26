@@ -1,4 +1,4 @@
-import { Staff } from "../../../services/staff";
+import { Staff } from "@/services/staff";
 
 export const getStatusColor = (status: string): string => {
   switch (status) {

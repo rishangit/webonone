@@ -2,8 +2,8 @@ import { Observable, of, from } from 'rxjs';
 import { switchMap, map, catchError } from 'rxjs/operators';
 import { ofType } from 'redux-observable';
 import { toast } from 'sonner';
-import { appointmentHistoryService } from '../../services/appointmentHistory';
-import { companySalesService } from '../../services/companySales';
+import { appointmentHistoryService } from '@/services/appointmentHistory';
+import { companySalesService } from '@/services/companySales';
 import {
   fetchAppointmentHistoryRequest,
   fetchAppointmentHistorySuccess,

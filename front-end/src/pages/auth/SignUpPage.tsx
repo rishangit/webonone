@@ -3,17 +3,17 @@ import { useNavigate, Link } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Eye, EyeOff, Lock, Mail, Shield, Zap, User, UserPlus, Check, Phone } from "lucide-react";
-import { Card } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
-import { Checkbox } from "../../components/ui/checkbox";
-import { PhoneInput } from "../../components/common/PhoneInput";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { PhoneInput } from "@/components/common/PhoneInput";
 import { toast } from "sonner";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { signUpRequest, clearError } from "../../store/slices/authSlice";
-import { signUpSchema, SignUpFormData } from "../../schemas/authValidation";
-import { UserRole } from "../../types/user";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { signUpRequest, clearError } from "@/store/slices/authSlice";
+import { signUpSchema, SignUpFormData } from "@/schemas/authValidation";
+import { UserRole } from "@/types/user";
 
 export function SignUpPage() {
   const navigate = useNavigate();

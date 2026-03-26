@@ -1,6 +1,6 @@
-import { CompanyProduct } from "../../../../services/companyProducts";
-import { CompanyProductVariant } from "../../../../services/companyProductVariants";
-import { Currency } from "../../../../services/currencies";
+import { CompanyProduct } from "@/services/companyProducts";
+import { CompanyProductVariant } from "@/services/companyProductVariants";
+import { Currency } from "@/services/currencies";
 
 export interface CompanyProductCardProps {
   product: CompanyProduct;

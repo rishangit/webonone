@@ -1,8 +1,8 @@
 import { Package, AlertTriangle } from "lucide-react";
-import { Card } from "../../../../../components/ui/card";
-import { Badge } from "../../../../../components/ui/badge";
-import { CardTitle } from "../../../../../components/common/CardTitle";
-import { ImageWithFallback } from "../../../../../components/figma/ImageWithFallback";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { CardTitle } from "@/components/common/CardTitle";
+import { ImageWithFallback } from "@/components/figma/ImageWithFallback";
 import { formatAvatarUrl } from "../../../../../utils";
 import { VariantInfoSidebarProps } from "../types";
 

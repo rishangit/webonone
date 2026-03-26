@@ -1,15 +1,15 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { 
   fetchStaffRequest, 
   createStaffRequest, 
   updateStaffRequest, 
   deleteStaffRequest,
   clearError 
-} from "../../../../store/slices/staffSlice";
-import { Staff } from "../../../../services/staff";
+} from "@/store/slices/staffSlice";
+import { Staff } from "@/services/staff";
 import { StaffPageProps } from "../types";
 
 export const useStaffPage = (currentUser?: StaffPageProps["currentUser"]) => {

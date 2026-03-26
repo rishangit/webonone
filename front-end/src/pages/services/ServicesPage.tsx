@@ -1,37 +1,37 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, Clock, MoreVertical, Edit, Trash2, Eye, Copy, Archive, Stethoscope, Filter } from "lucide-react";
-import { Card } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Badge } from "../../components/ui/badge";
-import { SearchInput } from "../../components/common/SearchInput";
-import { Pagination } from "../../components/common/Pagination";
-import { EmptyState } from "../../components/common/EmptyState";
-import { RightPanel } from "../../components/common/RightPanel";
-import { cn } from "../../components/ui/utils";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "../../components/ui/dropdown-menu";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
-import FileUpload from "../../components/ui/file-upload";
-import { CustomDialog } from "../../components/ui/custom-dialog";
-import { Label } from "../../components/ui/label";
-import { Textarea } from "../../components/ui/textarea";
-import { TagSelector } from "../../components/tags/TagSelector";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../../components/ui/alert-dialog";
-import { useIsMobile } from "../../components/ui/use-mobile";
-import { ViewSwitcher } from "../../components/ui/view-switcher";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { SearchInput } from "@/components/common/SearchInput";
+import { Pagination } from "@/components/common/Pagination";
+import { EmptyState } from "@/components/common/EmptyState";
+import { RightPanel } from "@/components/common/RightPanel";
+import { cn } from "@/components/ui/utils";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import FileUpload from "@/components/ui/file-upload";
+import { CustomDialog } from "@/components/ui/custom-dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { TagSelector } from "@/components/tags/TagSelector";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { useIsMobile } from "@/components/ui/use-mobile";
+import { ViewSwitcher } from "@/components/ui/view-switcher";
 import { toast } from "sonner";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { 
   fetchServicesRequest, 
   createServiceRequest, 
   updateServiceRequest, 
   deleteServiceRequest,
   clearError 
-} from "../../store/slices/servicesSlice";
-import { Service as ServiceType } from "../../services/services";
+} from "@/store/slices/servicesSlice";
+import { Service as ServiceType } from "@/services/services";
 import { formatAvatarUrl } from "../../utils";
-import { currenciesService, Currency } from "../../services/currencies";
+import { currenciesService, Currency } from "@/services/currencies";
 import { ServiceCard } from "./ServicesPage/components";
 import { formatDuration, formatPrice as formatPriceUtil, getImageUrl, getStatusColor } from "./ServicesPage/utils";
 import { ServiceTags } from "./ServicesPage/components/ServiceTags";
@@ -147,7 +147,7 @@ export function ServicesPage() {
         // If company not found in Redux, fetch it directly via API
         if (!company || String(company.id) !== String(companyId)) {
           try {
-            const { companiesService } = await import("../../services/companies");
+            const { companiesService } = await import("@/services/companies");
             company = await companiesService.getCompanyById(String(companyId));
           } catch (fetchError) {
             console.error('Error fetching company:', fetchError);

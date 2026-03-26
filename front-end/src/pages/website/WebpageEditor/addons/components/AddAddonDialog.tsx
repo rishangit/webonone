@@ -1,6 +1,6 @@
 import { Plus } from "lucide-react";
-import { CustomDialog } from "../../../../../components/ui/custom-dialog";
-import { Button } from "../../../../../components/ui/button";
+import { CustomDialog } from "@/components/ui/custom-dialog";
+import { Button } from "@/components/ui/button";
 import { getAddonModules } from "../registry";
 import { ContentAddon } from "../../types";
 

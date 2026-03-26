@@ -1,4 +1,4 @@
-import { AppointmentStatus } from "../../../types/appointmentStatus";
+import { AppointmentStatus } from "@/types/appointmentStatus";
 
 export interface AppointmentCardProps {
   id: string;

@@ -1,19 +1,19 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, Palette } from "lucide-react";
-import { Card } from "../../../components/ui/card";
-import { Button } from "../../../components/ui/button";
-import { useAppDispatch, useAppSelector } from "../../../store/hooks";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   fetchThemesRequest,
   updateThemeRequest,
   deleteThemeRequest,
   clearError,
-} from "../../../store/slices/companyWebThemesSlice";
-import type { CompanyWebTheme } from "../../../services/companyWebThemes";
-import { EmptyState } from "../../../components/common/EmptyState";
-import { DeleteConfirmationDialog } from "../../../components/common/DeleteConfirmationDialog";
-import { Pagination } from "../../../components/common/Pagination";
+} from "@/store/slices/companyWebThemesSlice";
+import type { CompanyWebTheme } from "@/services/companyWebThemes";
+import { EmptyState } from "@/components/common/EmptyState";
+import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
+import { Pagination } from "@/components/common/Pagination";
 import { ThemeFilters, ThemeCard } from "./components";
 
 export const ThemePage = () => {

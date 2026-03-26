@@ -4,7 +4,7 @@ import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { Building2, User, Shield, Briefcase, Users } from "lucide-react";
-import { UserRole, UserRoleNames } from "../../types/user";
+import { UserRole, UserRoleNames } from "@/types/user";
 import { formatAvatarUrl } from "../../utils";
 import { Icon } from "../common/Icon";
 

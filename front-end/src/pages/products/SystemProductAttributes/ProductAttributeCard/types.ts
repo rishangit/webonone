@@ -1,5 +1,5 @@
-import { SystemProductAttribute } from "../../../../services/systemProductAttributes";
-import { UnitsOfMeasure } from "../../../../services/unitsOfMeasure";
+import { SystemProductAttribute } from "@/services/systemProductAttributes";
+import { UnitsOfMeasure } from "@/services/unitsOfMeasure";
 
 export interface ProductAttributeCardProps {
   attribute: SystemProductAttribute;

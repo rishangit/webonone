@@ -1,5 +1,5 @@
-import { Tag } from "../../../services/tags";
-import { UserRole } from "../../../types/user";
+import { Tag } from "@/services/tags";
+import { UserRole } from "@/types/user";
 
 export interface TagsPageProps {
   currentUser?: {

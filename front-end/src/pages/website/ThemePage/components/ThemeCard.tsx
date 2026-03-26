@@ -1,4 +1,4 @@
-import type { CompanyWebTheme } from "../../../../services/companyWebThemes";
+import type { CompanyWebTheme } from "@/services/companyWebThemes";
 import { ThemeListView } from "./ThemeListView";
 import { ThemeCardView } from "./ThemeCardView";
 

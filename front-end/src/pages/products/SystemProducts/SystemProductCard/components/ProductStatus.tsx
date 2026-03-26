@@ -1,5 +1,5 @@
 import { CheckCircle, AlertTriangle } from "lucide-react";
-import { Badge } from "../../../../../components/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { ProductStatusProps } from "../types";
 
 export const ProductStatus = ({ isActive, isVerified, variant = "grid" }: ProductStatusProps) => {

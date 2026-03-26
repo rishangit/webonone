@@ -1,31 +1,31 @@
 import { useState, useMemo, useEffect } from "react";
-import { useIsMobile } from "../../components/ui/use-mobile";
+import { useIsMobile } from "@/components/ui/use-mobile";
 import { 
   Check, FileText, Clock, Search, Plus, X, Trash2, Calculator, 
   Package, DollarSign, Percent, ShoppingCart, Receipt, User, Calendar
 } from "lucide-react";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
-import { Textarea } from "../../components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-import { CustomDialog } from "../../components/ui/custom-dialog";
-import { Separator } from "../../components/ui/separator";
-import { Badge } from "../../components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
-import { Card } from "../../components/ui/card";
+import { CustomDialog } from "@/components/ui/custom-dialog";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { fetchCompanyProductsRequest } from "../../store/slices/companyProductsSlice";
-import { fetchServicesRequest } from "../../store/slices/servicesSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchCompanyProductsRequest } from "@/store/slices/companyProductsSlice";
+import { fetchServicesRequest } from "@/store/slices/servicesSlice";
 import { formatAvatarUrl } from "../../utils";
-import { CompanyProduct } from "../../services/companyProducts";
-import { CompanyProductVariant } from "../../services/companyProductVariants";
-import { Service as ServiceType } from "../../services/services";
-import { companyProductVariantsService } from "../../services/companyProductVariants";
-import { Currency } from "../../services/currencies";
-import { fetchCurrencyRequest } from "../../store/slices/currenciesSlice";
+import { CompanyProduct } from "@/services/companyProducts";
+import { CompanyProductVariant } from "@/services/companyProductVariants";
+import { Service as ServiceType } from "@/services/services";
+import { companyProductVariantsService } from "@/services/companyProductVariants";
+import { Currency } from "@/services/currencies";
+import { fetchCurrencyRequest } from "@/store/slices/currenciesSlice";
 
 interface ProductVariant {
   id: string;
@@ -150,7 +150,7 @@ export function AppointmentBillingDialog({
     }
     
     // Use userCompany if it matches the current user's companyId (cached)
-    let company = (userCompany && String(userCompany.id) === String(companyId)) 
+    const company = (userCompany && String(userCompany.id) === String(companyId)) 
       ? userCompany 
       : companies.find(c => String(c.id) === String(companyId)) || currentCompany;
     
@@ -495,12 +495,12 @@ export function AppointmentBillingDialog({
       variantId: variant?.id,
       name: effectiveName,
       description: effectiveDescription,
-      quantity: quantity,
-      unitPrice: unitPrice, // Per-unit price for calculations
+      quantity,
+      unitPrice, // Per-unit price for calculations
       discount: 0,
       unit: effectiveUnit,
       variantVolume: variant?.attributes?.volume,
-      displayPrice: displayPrice // Full volume price for display
+      displayPrice // Full volume price for display
     };
     setBillingItems(prev => [...prev, newItem]);
     

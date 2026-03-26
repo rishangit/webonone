@@ -1,7 +1,7 @@
-import { Card } from "../../../../components/ui/card";
-import { ImageWithFallback } from "../../../../components/figma/ImageWithFallback";
+import { Card } from "@/components/ui/card";
+import { ImageWithFallback } from "@/components/figma/ImageWithFallback";
 import { formatAvatarUrl } from "../../../../utils";
-import { Service } from "../../../../services/services";
+import { Service } from "@/services/services";
 
 interface ServiceDetailImageProps {
   service: Service;

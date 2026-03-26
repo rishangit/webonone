@@ -1,7 +1,7 @@
 import { Eye, Trash2, MoreVertical } from "lucide-react";
-import { Button } from "../../../../../components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../../../../components/ui/dropdown-menu";
-import { CompanyProduct } from "../../../../../services/companyProducts";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { CompanyProduct } from "@/services/companyProducts";
 
 interface ProductActionsProps {
   product: CompanyProduct;

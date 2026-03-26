@@ -1,7 +1,7 @@
 import { Tag } from "lucide-react";
-import { Badge } from "../../../../../components/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { ProductTagsProps } from "../types";
-import { Tag as TagType } from "../../../../../services/products";
+import { Tag as TagType } from "@/services/products";
 
 export const ProductTags = ({ tags, variant = "grid" }: ProductTagsProps) => {
   if (!tags || tags.length === 0) {

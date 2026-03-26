@@ -1,7 +1,7 @@
 import { ComponentType } from "react";
 import { ContentAddon, ContentAddonType } from "../types";
-import type { ThemeButtonSetting, ThemeTextSetting } from "../../../../services/companyWebThemes";
-import type { CompanyWebPage } from "../../../../services/companyWebPages";
+import type { ThemeButtonSetting, ThemeTextSetting } from "@/services/companyWebThemes";
+import type { CompanyWebPage } from "@/services/companyWebPages";
 
 /** `published` = real navigation (public site). `editor` = same look, links disabled in the editor. */
 export type AddonRenderContext = "editor" | "published";

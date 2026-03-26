@@ -1,19 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
-import { Textarea } from "../../components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
-import { MultiSelect } from "../../components/ui/multi-select";
-import { Checkbox } from "../../components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "../../components/ui/radio-group";
-import { Switch } from "../../components/ui/switch";
-import { Slider } from "../../components/ui/slider";
-import { Badge } from "../../components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../../components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MultiSelect } from "@/components/ui/multi-select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -24,16 +24,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "../../components/ui/alert-dialog";
-import { CustomDialog } from "../../components/ui/custom-dialog";
-import { Popover, PopoverContent, PopoverTrigger } from "../../components/ui/popover";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "../../components/ui/sheet";
-import { RightPanel } from "../../components/common/RightPanel";
-import { EmptyState } from "../../components/common/EmptyState";
-import { TabSwitcher } from "../../components/ui/tab-switcher";
-import { Separator } from "../../components/ui/separator";
-import { Progress } from "../../components/ui/progress";
-import { Skeleton } from "../../components/ui/skeleton";
+} from "@/components/ui/alert-dialog";
+import { CustomDialog } from "@/components/ui/custom-dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { RightPanel } from "@/components/common/RightPanel";
+import { EmptyState } from "@/components/common/EmptyState";
+import { TabSwitcher } from "@/components/ui/tab-switcher";
+import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import { 
   Package, 
   Plus, 
@@ -56,12 +56,12 @@ import {
   UserCheck
 } from "lucide-react";
 import type { Theme, AccentColor } from "../../types";
-import { ViewSwitcher } from "../../components/ui/view-switcher";
+import { ViewSwitcher } from "@/components/ui/view-switcher";
 import { AppointmentCard } from "../appointments/AppointmentCard";
 import { CompanyCard, CompanyListView } from "../companies/CompanyCard";
 import { CompanyProductCard } from "../products/CompanyProducts";
 import { UserCard } from "../users/UserCard";
-import { AppointmentStatus } from "../../types/appointmentStatus";
+import { AppointmentStatus } from "@/types/appointmentStatus";
 
 interface ShowcasePageProps {
   onThemeChange?: (theme: Theme) => void;

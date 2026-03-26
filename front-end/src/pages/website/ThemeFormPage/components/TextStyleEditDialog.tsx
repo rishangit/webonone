@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Type } from "lucide-react";
-import { CustomDialog } from "../../../../components/ui/custom-dialog";
-import { Button } from "../../../../components/ui/button";
-import { Input } from "../../../../components/ui/input";
-import { Label } from "../../../../components/ui/label";
+import { CustomDialog } from "@/components/ui/custom-dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export interface ThemeTextStyle {
   styleName: string;

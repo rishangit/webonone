@@ -1,4 +1,4 @@
-import { config } from '../config/environment';
+import { config } from '@/config/environment';
 
 const API_BASE_URL = config.apiBaseUrl;
 
@@ -137,7 +137,7 @@ class CompanyWebPagesService {
    */
   async getWebPageByCompanyAndUrl(companyId: string, url: string): Promise<CompanyWebPage> {
     // Ensure URL starts with / and encode it
-    const normalizedUrl = url.startsWith('/') ? url : '/' + url;
+    const normalizedUrl = url.startsWith('/') ? url : `/${  url}`;
     // Remove leading slash for the API call since it will be in the path
     const urlPath = normalizedUrl.substring(1);
     const encodedUrl = encodeURIComponent(urlPath);

@@ -7,18 +7,18 @@ import { nanoid } from "nanoid";
 import { Link } from "react-router-dom";
 import { MousePointerClick } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "../../../../../components/ui/button";
-import { Label } from "../../../../../components/ui/label";
-import { Input } from "../../../../../components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../../../../components/ui/select";
-import { CustomDialog } from "../../../../../components/ui/custom-dialog";
-import type { ThemeButtonSetting, ThemeTextSetting } from "../../../../../services/companyWebThemes";
+} from "@/components/ui/select";
+import { CustomDialog } from "@/components/ui/custom-dialog";
+import type { ThemeButtonSetting, ThemeTextSetting } from "@/services/companyWebThemes";
 import { AddonEditProps, AddonModule, AddonRenderProps } from "../types";
 import { ContentAddon, ButtonContentAddonData } from "../../types";
 import { normalizeWebPagePath, resolveButtonLinkHref } from "../webPageLinkUtils";

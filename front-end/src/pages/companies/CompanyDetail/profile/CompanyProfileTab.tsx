@@ -1,7 +1,7 @@
 import { CheckCircle, XCircle } from "lucide-react";
-import { Card } from "../../../../components/ui/card";
-import { Button } from "../../../../components/ui/button";
-import { Textarea } from "../../../../components/ui/textarea";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { Company } from "../types";
 import {
   CompanyProfileCard,

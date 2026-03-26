@@ -1,5 +1,5 @@
 import { PaginationMeta } from './products';
-import { config } from '../config/environment';
+import { config } from '@/config/environment';
 
 const API_BASE_URL = config.apiBaseUrl;
 

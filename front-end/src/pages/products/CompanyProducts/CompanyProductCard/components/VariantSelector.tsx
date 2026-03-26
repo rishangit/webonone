@@ -1,6 +1,6 @@
-import { Label } from "../../../../../components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../../components/ui/select";
-import { CompanyProductVariant } from "../../../../../services/companyProductVariants";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CompanyProductVariant } from "@/services/companyProductVariants";
 
 interface VariantSelectorProps {
   variants: CompanyProductVariant[];

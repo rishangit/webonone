@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
-import { AppointmentStatus } from "../../../types/appointmentStatus";
-import { CustomDialog } from "../../../components/ui/custom-dialog";
-import { VisuallyHidden } from "../../../components/ui/visually-hidden";
-import { Button } from "../../../components/ui/button";
-import { Card } from "../../../components/ui/card";
+import { AppointmentStatus } from "@/types/appointmentStatus";
+import { CustomDialog } from "@/components/ui/custom-dialog";
+import { VisuallyHidden } from "@/components/ui/visually-hidden";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 // Import extracted components
 import { WizardHeader } from "./components/WizardHeader";
 import { WizardProgress } from "./components/WizardProgress";
@@ -11,12 +11,12 @@ import { SummaryCard } from "./components/SummaryCard";
 import { DateTimeStep, ServiceStep, StaffStep, SpaceStep, ClientStep, NotesStep, ReviewStep } from "./steps";
 import { getSteps } from "./stepDefinitions";
 import { convertTo24Hour } from "./utils";
-import { Badge } from "../../../components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar";
-import { Input } from "../../../components/ui/input";
-import { Textarea } from "../../../components/ui/textarea";
-import { Calendar as CalendarComponent } from "../../../components/ui/calendar";
-import { ImageWithFallback } from '../../../components/figma/ImageWithFallback';
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 import { 
   Calendar, 
   Briefcase, 
@@ -34,18 +34,18 @@ import {
   Check,
   UserPlus
 } from "lucide-react";
-import { ViewSwitcher } from "../../../components/ui/view-switcher";
+import { ViewSwitcher } from "@/components/ui/view-switcher";
 import { toast } from "sonner";
-import { useAppDispatch, useAppSelector } from "../../../store/hooks";
-import { fetchServicesRequest } from "../../../store/slices/servicesSlice";
-import { fetchStaffRequest } from "../../../store/slices/staffSlice";
-import { fetchUsersRequest } from "../../../store/slices/usersSlice";
-import { fetchSpacesRequest } from "../../../store/slices/spacesSlice";
-import { createAppointmentRequest } from "../../../store/slices/appointmentsSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchServicesRequest } from "@/store/slices/servicesSlice";
+import { fetchStaffRequest } from "@/store/slices/staffSlice";
+import { fetchUsersRequest } from "@/store/slices/usersSlice";
+import { fetchSpacesRequest } from "@/store/slices/spacesSlice";
+import { createAppointmentRequest } from "@/store/slices/appointmentsSlice";
 import { formatAvatarUrl } from "../../../utils";
-import { DateDisplay } from "../../../components/common/DateDisplay";
-import { Currency } from "../../../services/currencies";
-import { fetchCurrencyRequest } from "../../../store/slices/currenciesSlice";
+import { DateDisplay } from "@/components/common/DateDisplay";
+import { Currency } from "@/services/currencies";
+import { fetchCurrencyRequest } from "@/store/slices/currenciesSlice";
 import { CreateUserDialog } from "../../users/CreateUserDialog";
 
 interface AppointmentWizardProps {
@@ -405,7 +405,7 @@ export function AppointmentWizard({ currentUser: currentUserProp, selectedDate, 
     }
     
     // Use userCompany if it matches the current user's companyId (cached)
-    let company = (userCompany && String(userCompany.id) === String(companyId)) 
+    const company = (userCompany && String(userCompany.id) === String(companyId)) 
       ? userCompany 
       : companies.find(c => String(c.id) === String(companyId)) || currentCompany;
     
@@ -821,7 +821,7 @@ export function AppointmentWizard({ currentUser: currentUserProp, selectedDate, 
       const formattedDate = `${year}-${month}-${day}`;
       
       const appointmentData: any = {
-        companyId: companyId,
+        companyId,
         clientId: selectedUser,
         date: formattedDate,
         time: appointmentTime,

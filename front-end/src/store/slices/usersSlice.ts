@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { User } from '../../types/user';
-import { PaginationMeta } from '../../services/products';
+import { User } from '@/types/user';
+import { PaginationMeta } from '@/services/products';
 
 export interface UsersState {
   users: User[];

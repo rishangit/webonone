@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Staff, CreateStaffData, UpdateStaffData } from '../../services/staff';
-import { PaginationMeta } from '../../services/products';
+import { Staff, CreateStaffData, UpdateStaffData } from '@/services/staff';
+import { PaginationMeta } from '@/services/products';
 
 interface StaffState {
   staff: Staff[];

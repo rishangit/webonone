@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { CustomDialog } from "../../../components/ui/custom-dialog";
-import { Button } from "../../../components/ui/button";
-import { Label } from "../../../components/ui/label";
-import { Input } from "../../../components/ui/input";
+import { CustomDialog } from "@/components/ui/custom-dialog";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { AlertCircle, Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { VariantForm } from "./VariantForm";
 import { SystemProductVariantSelector } from "./SystemProductVariantSelector";
 import { VariantAttributeValues } from "./VariantAttributeValues";
 import { VariantAttributeSelector } from "./VariantAttributeSelector";
-import { ProductVariant as SystemProductVariant } from "../../../services/productVariants";
-import { CompanyProductVariant } from "../../../services/companyProductVariants";
-import { variantSchema, VariantFormData } from "../../../schemas/variantValidation";
-import { productRelatedAttributeValuesService } from "../../../services/productRelatedAttributeValues";
+import { ProductVariant as SystemProductVariant } from "@/services/productVariants";
+import { CompanyProductVariant } from "@/services/companyProductVariants";
+import { variantSchema, VariantFormData } from "@/schemas/variantValidation";
+import { productRelatedAttributeValuesService } from "@/services/productRelatedAttributeValues";
 import { toast } from "sonner";
 
 interface VariantDialogProps {
@@ -87,7 +87,7 @@ export const VariantDialog = ({
           setAttributeValues(valuesMap);
 
             // Load variant-defining attributes
-            const { productRelatedAttributesService } = await import("../../../services/productRelatedAttributes");
+            const { productRelatedAttributesService } = await import("@/services/productRelatedAttributes");
             const attrs = await productRelatedAttributesService.getAttributesByProductId(productId);
             setProductAttributes(attrs);
             
@@ -121,7 +121,7 @@ export const VariantDialog = ({
       } else if (open && mode === 'add') {
           // Load variant-defining attributes for add mode (to show which are already marked)
           try {
-            const { productRelatedAttributesService } = await import("../../../services/productRelatedAttributes");
+            const { productRelatedAttributesService } = await import("@/services/productRelatedAttributes");
             const attrs = await productRelatedAttributesService.getAttributesByProductId(productId);
             setProductAttributes(attrs);
             const variantDefiningAttrIds = attrs
@@ -221,18 +221,18 @@ export const VariantDialog = ({
           const value = currentAttributeValues[attr.id] || '';
           return {
             attributeName: attr.attributeName || '',
-            value: value
+            value
           };
         })
         .filter(attr => attr.value && attr.value.trim() !== '');
 
       // Generate SKU if we have attribute values
       if (attributeValuesForSKU.length > 0) {
-        const { generateVariantSKUFromAttributes } = await import("../../../utils/skuGenerator");
+        const { generateVariantSKUFromAttributes } = await import("@/utils/skuGenerator");
         // Try to get product name, fallback to variant name or 'Product'
         let productName = 'Product';
         try {
-          const { productsService } = await import("../../../services/products");
+          const { productsService } = await import("@/services/products");
           const product = await productsService.getProduct(productId);
           productName = product?.name || watch('name') || 'Product';
         } catch {
@@ -286,7 +286,7 @@ export const VariantDialog = ({
       // The parent component will handle saving both variant and attribute values
       const variantData = {
         ...data,
-        variantDefiningAttributes: variantDefiningAttributes,
+        variantDefiningAttributes,
         variantAttributeValues: attributeValues,
       };
       const attributeValuesToSave = productId && variantMode === 'system' ? attributeValues : undefined;
@@ -621,7 +621,7 @@ export const VariantDialog = ({
                     // The SystemProductVariantSelector will handle refreshing the list
                     setValue('systemProductVariantId', systemVariantId);
                     // Fetch the variant name from the product variants service
-                    import("../../../services/productVariants").then(({ productVariantsService }) => {
+                    import("@/services/productVariants").then(({ productVariantsService }) => {
                       productVariantsService.getVariant(systemVariantId).then((newVariant) => {
                         if (newVariant) {
                           setValue('name', newVariant.name);

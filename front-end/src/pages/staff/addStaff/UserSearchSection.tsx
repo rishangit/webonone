@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { SearchInput } from "../../../components/common/SearchInput";
+import { SearchInput } from "@/components/common/SearchInput";
 import { Users } from "lucide-react";
-import { useAppDispatch, useAppSelector } from "../../../store/hooks";
-import { fetchUsersRequest } from "../../../store/slices/usersSlice";
-import { User, UserRole, UserRoleNames } from "../../../types/user";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchUsersRequest } from "@/store/slices/usersSlice";
+import { User, UserRole, UserRoleNames } from "@/types/user";
 import { UserForSelection } from "./types";
 import { UserCard } from "./UserCard";
 import { UserSkeleton } from "./UserSkeleton";

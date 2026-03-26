@@ -1,4 +1,4 @@
-import { Badge } from "../../../../components/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { ServiceStatusProps } from "../types";
 
 export const ServiceStatus = ({ status, getStatusColor, variant = "grid" }: ServiceStatusProps) => {

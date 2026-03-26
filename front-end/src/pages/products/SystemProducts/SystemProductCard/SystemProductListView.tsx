@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Card } from "../../../../components/ui/card";
+import { Card } from "@/components/ui/card";
 import { SystemProductViewProps } from "./types";
 import { ProductImage } from "./components/ProductImage";
 import { ProductStatus } from "./components/ProductStatus";

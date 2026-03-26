@@ -1,8 +1,8 @@
 import { Plus, MapPin } from "lucide-react";
-import { Button } from "../../../components/ui/button";
-import { Card } from "../../../components/ui/card";
-import { Pagination } from "../../../components/common/Pagination";
-import { EmptyState } from "../../../components/common/EmptyState";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Pagination } from "@/components/common/Pagination";
+import { EmptyState } from "@/components/common/EmptyState";
 import { useSpacesPage } from "./hooks/useSpacesPage";
 import {
   SpaceCard,

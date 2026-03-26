@@ -1,6 +1,6 @@
 import { Calendar, Clock } from "lucide-react";
-import { Button } from "../../../../components/ui/button";
-import { Calendar as CalendarComponent } from "../../../../components/ui/calendar";
+import { Button } from "@/components/ui/button";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { timeSlots } from "../constants";
 
 interface DateTimeStepProps {

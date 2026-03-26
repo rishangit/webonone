@@ -101,7 +101,7 @@ export const useWebpagesPage = () => {
         // keep original
       }
     }
-    if (!pageUrl.startsWith("/")) pageUrl = "/" + pageUrl;
+    if (!pageUrl.startsWith("/")) pageUrl = `/${  pageUrl}`;
     const publicUrl = `${window.location.origin}/web/${companyId}${pageUrl}`;
     window.open(publicUrl, "_blank", "noopener,noreferrer");
   };

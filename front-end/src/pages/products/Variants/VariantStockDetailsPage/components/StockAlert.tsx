@@ -1,5 +1,5 @@
 import { AlertTriangle } from "lucide-react";
-import { Card } from "../../../../../components/ui/card";
+import { Card } from "@/components/ui/card";
 import { StockAlertProps } from "../types";
 
 export const StockAlert = ({ isOutOfStock }: StockAlertProps) => {

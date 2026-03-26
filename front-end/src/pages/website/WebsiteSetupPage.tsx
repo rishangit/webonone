@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { Card } from "../../components/ui/card";
+import { Card } from "@/components/ui/card";
 import { WebsiteLayout } from "../layout/WebsiteLayout";
-import { useAppSelector, useAppDispatch } from "../../store/hooks";
-import { logout } from "../../store/slices/authSlice";
+import { useAppSelector, useAppDispatch } from "@/store/hooks";
+import { logout } from "@/store/slices/authSlice";
 import { toast } from "sonner";
 import { ThemePage } from "./ThemePage/index";
 

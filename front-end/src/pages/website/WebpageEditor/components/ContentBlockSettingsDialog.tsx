@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { ContentBlock, ContentBlockSettings } from "../types";
-import { CustomDialog } from "../../../../components/ui/custom-dialog";
-import { TabSwitcher } from "../../../../components/ui/tab-switcher";
-import { Input } from "../../../../components/ui/input";
-import { Label } from "../../../../components/ui/label";
-import { Button } from "../../../../components/ui/button";
+import { CustomDialog } from "@/components/ui/custom-dialog";
+import { TabSwitcher } from "@/components/ui/tab-switcher";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { Settings2 } from "lucide-react";
 
 export type ContentBlockSettingsTab = "basic" | "advanced";

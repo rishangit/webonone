@@ -1,9 +1,9 @@
 import { Eye, MoreVertical, CheckCircle, XCircle } from "lucide-react";
-import { Button } from "../../../../components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../../../components/ui/dropdown-menu";
-import { useAppSelector, useAppDispatch } from "../../../../store/hooks";
-import { approveCompanyRequest, rejectCompanyRequest, fetchCompaniesRequest } from "../../../../store/slices/companiesSlice";
-import { isRole, UserRole } from "../../../../types/user";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useAppSelector, useAppDispatch } from "@/store/hooks";
+import { approveCompanyRequest, rejectCompanyRequest, fetchCompaniesRequest } from "@/store/slices/companiesSlice";
+import { isRole, UserRole } from "@/types/user";
 import { Company } from "../types";
 
 interface CompanyActionsProps {

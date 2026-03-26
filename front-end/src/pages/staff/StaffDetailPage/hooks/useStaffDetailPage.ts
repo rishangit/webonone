@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { 
   fetchStaffMemberRequest,
   updateStaffRequest,
   clearError 
-} from "../../../../store/slices/staffSlice";
-import { fetchUserRequest } from "../../../../store/slices/usersSlice";
-import { Staff } from "../../../../services/staff";
+} from "@/store/slices/staffSlice";
+import { fetchUserRequest } from "@/store/slices/usersSlice";
+import { Staff } from "@/services/staff";
 import { daysOfWeek } from "../constants";
 import { StaffDetailPageProps } from "../types";
 

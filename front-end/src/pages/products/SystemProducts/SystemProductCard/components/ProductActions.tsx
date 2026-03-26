@@ -1,6 +1,6 @@
 import { Edit, Trash2, MoreVertical, Eye, Settings } from "lucide-react";
-import { Button } from "../../../../../components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "../../../../../components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { ProductActionsProps } from "../types";
 
 export const ProductActions = ({

@@ -41,11 +41,9 @@ export const generateVariantSKU = (
     
     if (nameWords.length > 0) {
       variantCode = nameWords
-        .map(word => {
-          // Take first 3-4 letters of each word, uppercase
-          const code = word.substring(0, 4).toUpperCase().replace(/[^A-Z0-9]/g, '');
-          return code;
-        })
+        .map((word) =>
+          word.substring(0, 4).toUpperCase().replace(/[^A-Z0-9]/g, '')
+        )
         .filter(code => code.length > 0) // Remove empty codes
         .join('-')
         .substring(0, 12); // Limit total length

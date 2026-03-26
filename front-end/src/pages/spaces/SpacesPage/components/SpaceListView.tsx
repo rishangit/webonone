@@ -1,4 +1,4 @@
-import { Card } from "../../../../components/ui/card";
+import { Card } from "@/components/ui/card";
 import { SpaceViewProps } from "../types";
 import { SpaceImage } from "./SpaceImage";
 import { SpaceStatus } from "./SpaceStatus";

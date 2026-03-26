@@ -1,16 +1,16 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Eye, EyeOff, Lock, Mail, Shield, Zap, AlertCircle } from "lucide-react";
-import { Card } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
-import { Checkbox } from "../../components/ui/checkbox";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { loginRequest, clearError, setLoading } from "../../store/slices/authSlice";
-import { RoleSelectionDialog } from "../../components/auth/RoleSelectionDialog";
-import { cn } from "../../components/ui/utils";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { loginRequest, clearError, setLoading } from "@/store/slices/authSlice";
+import { RoleSelectionDialog } from "@/components/auth/RoleSelectionDialog";
+import { cn } from "@/components/ui/utils";
 
 export function LoginPage() {
   const navigate = useNavigate();

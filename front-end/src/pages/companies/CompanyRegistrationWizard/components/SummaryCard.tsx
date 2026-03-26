@@ -1,7 +1,7 @@
-import { Card } from "../../../../components/ui/card";
-import { Badge } from "../../../../components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { CompanyFormData } from "../types";
-import { Tag } from "../../../../services/tags";
+import { Tag } from "@/services/tags";
 
 interface SummaryCardProps {
   formData: CompanyFormData;

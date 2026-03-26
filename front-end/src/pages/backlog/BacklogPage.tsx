@@ -1,29 +1,29 @@
 import { useState, useEffect, useMemo } from "react";
 import { Plus, Edit, Trash2, MoreVertical, Bug, Sparkles, AlertTriangle, CheckCircle, Filter, Eye, GripVertical } from "lucide-react";
-import { Card } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { Badge } from "../../components/ui/badge";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "../../components/ui/dropdown-menu";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
-import { ViewSwitcher } from "../../components/ui/view-switcher";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ViewSwitcher } from "@/components/ui/view-switcher";
 import { toast } from "sonner";
-import { UserRole, isRole, User as UserType } from "../../types/user";
-import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import { UserRole, isRole, User as UserType } from "@/types/user";
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { 
   fetchBacklogItemsRequest,
   deleteBacklogItemRequest,
   updateBacklogItemRequest,
   clearBacklogError
-} from '../../store/slices/backlogSlice';
-import { BacklogItem } from '../../services/backlog';
+} from '@/store/slices/backlogSlice';
+import { BacklogItem } from '@/services/backlog';
 import { BacklogFormDialog } from './BacklogFormDialog';
 import { BacklogViewDialog } from './BacklogViewDialog';
-import { SearchInput } from "../../components/common/SearchInput";
-import { Pagination } from "../../components/common/Pagination";
-import { EmptyState } from "../../components/common/EmptyState";
-import { RightPanel } from "../../components/common/RightPanel";
-import { cn } from "../../components/ui/utils";
-import { Carousel, CarouselContent, CarouselItem } from "../../components/ui/carousel";
+import { SearchInput } from "@/components/common/SearchInput";
+import { Pagination } from "@/components/common/Pagination";
+import { EmptyState } from "@/components/common/EmptyState";
+import { RightPanel } from "@/components/common/RightPanel";
+import { cn } from "@/components/ui/utils";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { formatAvatarUrl } from "../../utils";
 import {
   DndContext,
@@ -92,7 +92,7 @@ export const BacklogPage = ({ currentUser }: BacklogPageProps) => {
     const offset = (currentPage - 1) * itemsPerPage;
     const filters: any = {
       limit: itemsPerPage,
-      offset: offset,
+      offset,
       page: currentPage,
     };
 
@@ -242,7 +242,7 @@ export const BacklogPage = ({ currentUser }: BacklogPageProps) => {
           const offset = (currentPage - 1) * itemsPerPage;
           const filters: any = {
             limit: itemsPerPage,
-            offset: offset,
+            offset,
             page: currentPage,
           };
           if (debouncedSearchTerm.trim()) {
@@ -264,7 +264,7 @@ export const BacklogPage = ({ currentUser }: BacklogPageProps) => {
       const offset = (currentPage - 1) * itemsPerPage;
       const filters: any = {
         limit: itemsPerPage,
-        offset: offset,
+        offset,
         page: currentPage,
       };
       if (debouncedSearchTerm.trim()) {
@@ -848,7 +848,7 @@ export const BacklogPage = ({ currentUser }: BacklogPageProps) => {
           const offset = (currentPage - 1) * itemsPerPage;
           const filters: any = {
             limit: itemsPerPage,
-            offset: offset,
+            offset,
             page: currentPage,
           };
           if (debouncedSearchTerm.trim()) {

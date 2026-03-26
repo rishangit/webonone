@@ -1,10 +1,10 @@
 import { Mail, Phone, MapPin, Clock, CheckCircle, MoreVertical, Eye, Edit, Trash2, LogIn, XCircle } from "lucide-react";
-import { Card } from "../../../components/ui/card";
-import { Button } from "../../../components/ui/button";
-import { Badge } from "../../../components/ui/badge";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../../components/ui/dropdown-menu";
-import { DateDisplay } from "../../../components/common/DateDisplay";
-import { Company } from "../../../services/companies";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DateDisplay } from "@/components/common/DateDisplay";
+import { Company } from "@/services/companies";
 
 interface CompanyCardProps {
   company: Company;

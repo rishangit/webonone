@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { CompanyProduct } from "../../../../../services/companyProducts";
-import { CompanyProductVariant } from "../../../../../services/companyProductVariants";
+import { CompanyProduct } from "@/services/companyProducts";
+import { CompanyProductVariant } from "@/services/companyProductVariants";
 import { formatAvatarUrl } from "../../../../../utils";
 import { CompanyProductDetailImage } from "./CompanyProductDetailImage";
 import { CompanyProductDetailInfo } from "./CompanyProductDetailInfo";

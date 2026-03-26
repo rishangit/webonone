@@ -1,7 +1,7 @@
 import { Observable, of, from } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { ofType } from 'redux-observable';
-import { unitsOfMeasureService } from '../../services/unitsOfMeasure';
+import { unitsOfMeasureService } from '@/services/unitsOfMeasure';
 import { toast } from 'sonner';
 import {
   fetchUnitsOfMeasureRequest,

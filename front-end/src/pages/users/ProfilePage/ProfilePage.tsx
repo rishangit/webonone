@@ -1,16 +1,16 @@
 import { useState, useEffect, useMemo } from "react";
-import { useAppSelector, useAppDispatch } from "../../../store/hooks";
-import { updateProfileRequest, clearProfileError } from "../../../store/slices/profileSlice";
-import { fetchCompaniesRequest, approveCompanyRequest, rejectCompanyRequest, deleteCompanyRequest } from "../../../store/slices/companiesSlice";
+import { useAppSelector, useAppDispatch } from "@/store/hooks";
+import { updateProfileRequest, clearProfileError } from "@/store/slices/profileSlice";
+import { fetchCompaniesRequest, approveCompanyRequest, rejectCompanyRequest, deleteCompanyRequest } from "@/store/slices/companiesSlice";
 import { toast } from "sonner";
-import { UserRole, isRole } from "../../../types/user";
+import { UserRole, isRole } from "@/types/user";
 import { useNavigate } from "react-router-dom";
-import { DeleteConfirmationDialog } from "../../../components/common/DeleteConfirmationDialog";
-import { TabSwitcher } from "../../../components/ui/tab-switcher";
+import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
+import { TabSwitcher } from "@/components/ui/tab-switcher";
 import { ProfileTab } from "./ProfileTab";
 import { CompaniesTab } from "./CompaniesTab";
-import { Company } from "../../../services/companies";
-import { BackButton } from "../../../components/common/BackButton";
+import { Company } from "@/services/companies";
+import { BackButton } from "@/components/common/BackButton";
 
 interface ProfilePageProps {
   userId?: string;
@@ -65,7 +65,7 @@ export const ProfilePage = ({ userId, onBack }: ProfilePageProps) => {
     try {
       dispatch({ 
         type: 'auth/completeLoginWithRoleRequest', 
-        payload: { email: user.email, roleId: roleId } 
+        payload: { email: user.email, roleId } 
       });
       
       toast.success("Logging in to company account...");

@@ -1,8 +1,8 @@
-import { Card } from "../../../../components/ui/card";
-import { Label } from "../../../../components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../components/ui/select";
-import { DateTime } from "../../../../components/common/DateTime";
-import { ProductVariant as SystemProductVariant } from "../../../../services/productVariants";
+import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DateTime } from "@/components/common/DateTime";
+import { ProductVariant as SystemProductVariant } from "@/services/productVariants";
 
 interface SystemProduct {
   id: string;

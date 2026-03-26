@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
-import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
-import { fetchUsersRequest } from "../../../../store/slices/usersSlice";
-import { authService } from "../../../../services/auth";
-import { usersService } from "../../../../services/users";
-import { isRole, UserRole, User, UserRoleNames } from "../../../../types/user";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchUsersRequest } from "@/store/slices/usersSlice";
+import { authService } from "@/services/auth";
+import { usersService } from "@/services/users";
+import { isRole, UserRole, User, UserRoleNames } from "@/types/user";
 import { UsersPageProps } from "../types";
 
 export const useUsersPage = ({
@@ -181,7 +181,7 @@ export const useUsersPage = ({
         avatar: user.avatar,
         role: primaryRoleName,
         roles: displayRoles,
-        roleNames: roleNames,
+        roleNames,
         specialty: primaryRoleName,
         location: user.address || "N/A",
         lastVisit: user.lastLogin || user.updatedAt || "N/A",

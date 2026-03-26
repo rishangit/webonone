@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { CompanyWebPage, CreateWebPageData, UpdateWebPageData } from '../../services/companyWebPages';
+import { CompanyWebPage, CreateWebPageData, UpdateWebPageData } from '@/services/companyWebPages';
 
 interface CompanyWebPagesState {
   webPages: CompanyWebPage[];

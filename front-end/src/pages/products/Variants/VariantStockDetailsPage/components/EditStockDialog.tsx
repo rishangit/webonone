@@ -1,11 +1,11 @@
 import { Edit } from "lucide-react";
-import { Button } from "../../../../../components/ui/button";
-import { CustomDialog } from "../../../../../components/ui/custom-dialog";
+import { Button } from "@/components/ui/button";
+import { CustomDialog } from "@/components/ui/custom-dialog";
 import { StockFormFields } from "./StockFormFields";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { CompanyProductStock } from "../../../../../services/companyProductStock";
+import { CompanyProductStock } from "@/services/companyProductStock";
 import { useEffect } from "react";
 
 const addStockSchema = yup.object({

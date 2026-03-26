@@ -1,12 +1,12 @@
 import { Calendar, Users, Clock, BarChart3, FileText, MessageSquare, Settings, CreditCard, Building, UserCheck, MapPin, Package, PackageCheck, DollarSign, ChevronRight, Tag, Globe } from "lucide-react";
-import { Button } from "../../components/ui/button";
-import { useIsMobile } from "../../components/ui/use-mobile";
-import { User as UserType, UserRole } from "../../types/user";
+import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/components/ui/use-mobile";
+import { User as UserType, UserRole } from "@/types/user";
 import { useState, useEffect, useMemo } from "react";
-import { Icon } from "../../components/common/Icon";
-import { config } from "../../config/environment";
-import { Tooltip, TooltipTrigger, TooltipContent } from "../../components/ui/tooltip";
-import { useAppSelector } from "../../store/hooks";
+import { Icon } from "@/components/common/Icon";
+import { config } from "@/config/environment";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { useAppSelector } from "@/store/hooks";
 
 const getNavigationItems = (role: UserRole, selectedEntities?: string[] | null) => {
   const baseItems = [

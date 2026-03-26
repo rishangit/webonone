@@ -1,27 +1,27 @@
 import { useState, useEffect, useMemo } from "react";
 import { Plus, Package, DollarSign, MoreVertical, Edit, Trash2, Eye, Settings, TrendingUp, TrendingDown, AlertTriangle, CheckCircle, ShoppingCart, Store, Star, PackageCheck, Tag, Filter } from "lucide-react";
-import { Card } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { Badge } from "../../components/ui/badge";
-import { SearchInput } from "../../components/common/SearchInput";
-import { Pagination } from "../../components/common/Pagination";
-import { EmptyState } from "../../components/common/EmptyState";
-import { RightPanel } from "../../components/common/RightPanel";
-import { cn } from "../../components/ui/utils";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../components/ui/dropdown-menu";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
-import { useIsMobile } from "../../components/ui/use-mobile";
-import { ViewSwitcher } from "../../components/ui/view-switcher";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { SearchInput } from "@/components/common/SearchInput";
+import { Pagination } from "@/components/common/Pagination";
+import { EmptyState } from "@/components/common/EmptyState";
+import { RightPanel } from "@/components/common/RightPanel";
+import { cn } from "@/components/ui/utils";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useIsMobile } from "@/components/ui/use-mobile";
+import { ViewSwitcher } from "@/components/ui/view-switcher";
 import { AddProductToCompanyDialog } from "./CompanyProducts/AddProductToCompanyDialog";
 import { CompanyProductCard } from "./CompanyProducts";
 import { toast } from "sonner";
 import { database } from "../../services";
-import { isRole, UserRole } from "../../types/user";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { fetchCompanyProductsRequest, deleteCompanyProductRequest } from "../../store/slices/companyProductsSlice";
-import { CompanyProduct } from "../../services/companyProducts";
-import { DeleteConfirmationDialog } from "../../components/common/DeleteConfirmationDialog";
-import { currenciesService, Currency } from "../../services/currencies";
+import { isRole, UserRole } from "@/types/user";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchCompanyProductsRequest, deleteCompanyProductRequest } from "@/store/slices/companyProductsSlice";
+import { CompanyProduct } from "@/services/companyProducts";
+import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
+import { currenciesService, Currency } from "@/services/currencies";
 
 interface ProductVariant {
   id: string;
@@ -220,7 +220,7 @@ export function ProductsPage({ currentUser, onNavigate, onViewProduct }: Product
         // If company not found in Redux, fetch it directly via API
         if (!company || String(company.id) !== String(companyId)) {
           try {
-            const { companiesService } = await import("../../services/companies");
+            const { companiesService } = await import("@/services/companies");
             company = await companiesService.getCompanyById(String(companyId));
           } catch (fetchError) {
             console.error('Error fetching company:', fetchError);

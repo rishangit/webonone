@@ -1,4 +1,4 @@
-import { config } from '../config/environment';
+import { config } from '@/config/environment';
 
 // API service for making HTTP requests
 class ApiService {

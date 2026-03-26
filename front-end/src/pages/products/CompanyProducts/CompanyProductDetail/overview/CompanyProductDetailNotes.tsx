@@ -1,6 +1,6 @@
 import { FileText } from "lucide-react";
-import { Card } from "../../../../../components/ui/card";
-import { CardTitle } from "../../../../../components/common/CardTitle";
+import { Card } from "@/components/ui/card";
+import { CardTitle } from "@/components/common/CardTitle";
 
 interface CompanyProductDetailNotesProps {
   notes: string;

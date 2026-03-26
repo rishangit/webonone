@@ -1,4 +1,4 @@
-import { Staff } from "../../../services/staff";
+import { Staff } from "@/services/staff";
 
 export interface StaffDetailPageProps {
   staffId: string;

@@ -1,11 +1,11 @@
-import { CustomDialog } from "../../../../components/ui/custom-dialog";
-import { Button } from "../../../../components/ui/button";
-import { Label } from "../../../../components/ui/label";
-import { Input } from "../../../../components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../components/ui/select";
-import { Textarea } from "../../../../components/ui/textarea";
-import { TagSelector } from "../../../../components/tags/TagSelector";
-import FileUpload from "../../../../components/ui/file-upload";
+import { CustomDialog } from "@/components/ui/custom-dialog";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { TagSelector } from "@/components/tags/TagSelector";
+import FileUpload from "@/components/ui/file-upload";
 import { formatAvatarUrl } from "../../../../utils";
 import { SpaceAddEditDialogProps, Space } from "../types";
 

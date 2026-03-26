@@ -1,6 +1,6 @@
-import { Card } from "../../../../components/ui/card";
-import { SearchInput } from "../../../../components/common/SearchInput";
-import { ViewSwitcher } from "../../../../components/ui/view-switcher";
+import { Card } from "@/components/ui/card";
+import { SearchInput } from "@/components/common/SearchInput";
+import { ViewSwitcher } from "@/components/ui/view-switcher";
 
 export interface MediaFiltersProps {
   searchTerm: string;

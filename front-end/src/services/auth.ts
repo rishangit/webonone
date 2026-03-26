@@ -1,5 +1,5 @@
-import { SignUpFormData, AuthResponse, User, UserRole } from '../types/user';
-import { apiEndpoints } from '../config/environment';
+import { SignUpFormData, AuthResponse, User, UserRole } from '@/types/user';
+import { apiEndpoints } from '@/config/environment';
 
 // Auth service for handling authentication
 class AuthService {

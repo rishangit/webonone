@@ -1,5 +1,5 @@
 import { User } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "../../../../components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatAvatarUrl } from "../../../../utils";
 import { Company } from "../types";
 

@@ -8,8 +8,8 @@ import {
 } from "../types";
 import { ResizableContentBlock } from "./ResizableContentBlock";
 import { WebpageContentRenderer } from "./WebpageContentRenderer";
-import type { ThemeButtonSetting, ThemeTextSetting } from "../../../../services/companyWebThemes";
-import type { CompanyWebPage } from "../../../../services/companyWebPages";
+import type { ThemeButtonSetting, ThemeTextSetting } from "@/services/companyWebThemes";
+import type { CompanyWebPage } from "@/services/companyWebPages";
 import type { AddonRenderContext } from "../addons/types";
 
 /** At most one of: a content block, or an addon inside a block. */

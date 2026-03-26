@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { CustomDialog } from "../../components/ui/custom-dialog";
-import { Button } from "../../components/ui/button";
-import { Card } from "../../components/ui/card";
-import { Badge } from "../../components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
+import { CustomDialog } from "@/components/ui/custom-dialog";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CheckCircle, Users, Star, X } from "lucide-react";
 
 interface StaffMember {

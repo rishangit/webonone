@@ -1,8 +1,8 @@
 import { MapPin } from "lucide-react";
-import { Card } from "../../../../components/ui/card";
-import { Label } from "../../../../components/ui/label";
-import { GoogleMapComponent } from "../../../../components/GoogleMapComponent";
-import { CardTitle } from "../../../../components/common/CardTitle";
+import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { GoogleMapComponent } from "@/components/GoogleMapComponent";
+import { CardTitle } from "@/components/common/CardTitle";
 import { Company } from "../types";
 
 interface CompanyLocationCardProps {

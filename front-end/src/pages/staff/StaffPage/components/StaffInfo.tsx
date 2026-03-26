@@ -1,6 +1,6 @@
 import { Mail, Phone, Calendar } from "lucide-react";
-import { Badge } from "../../../../components/ui/badge";
-import { formatDate } from "../../../../utils";
+import { Badge } from "@/components/ui/badge";
+import { formatDate } from "@/utils";
 import { StaffInfoProps } from "../types";
 import { StaffRole } from "./StaffRole";
 

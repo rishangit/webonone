@@ -1,4 +1,4 @@
-import type { CompanyWebTheme, ThemeButtonSetting, ThemeTextSetting } from "../../../../services/companyWebThemes";
+import type { CompanyWebTheme, ThemeButtonSetting, ThemeTextSetting } from "@/services/companyWebThemes";
 
 /**
  * Pick the theme used for resolving text styles in the editor (default → active → first).

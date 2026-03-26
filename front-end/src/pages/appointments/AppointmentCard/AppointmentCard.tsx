@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card } from "../../../components/ui/card";
+import { Card } from "@/components/ui/card";
 import { StaffAssignmentDialog } from "../../staff";
 import { AppointmentBillingDialog } from "../AppointmentBillingDialog";
-import { BillPreviewDialog } from "../../../components/BillPreviewDialog";
+import { BillPreviewDialog } from "@/components/BillPreviewDialog";
 import { formatDate } from "../../../utils";
 import { toast } from "sonner";
-import { AppointmentStatus, normalizeAppointmentStatus, getAppointmentStatusLabel } from "../../../types/appointmentStatus";
-import { useAppDispatch } from "../../../store/hooks";
-import { updateAppointmentRequest } from "../../../store/slices/appointmentsSlice";
+import { AppointmentStatus, normalizeAppointmentStatus, getAppointmentStatusLabel } from "@/types/appointmentStatus";
+import { useAppDispatch } from "@/store/hooks";
+import { updateAppointmentRequest } from "@/store/slices/appointmentsSlice";
 import { AppointmentCardProps } from "./types";
 import { AppointmentCardHeader } from "./components/AppointmentCardHeader";
 import { AppointmentCardView } from "./AppointmentCardView";
@@ -164,7 +164,7 @@ export const AppointmentCard = ({
     const appointmentId = _originalAppointment?.appointmentId || _originalAppointment?.id || id;
 
     const billData = {
-      appointmentId: appointmentId,
+      appointmentId,
       patientName,
       patientImage,
       service: service || type,
@@ -185,8 +185,8 @@ export const AppointmentCard = ({
         unit: item.unit,
         total: (item.quantity * item.unitPrice) * (1 - (item.discount || 0) / 100)
       })),
-      subtotal: subtotal,
-      discountAmount: discountAmount,
+      subtotal,
+      discountAmount,
       finalAmount: completionData.totalAmount,
       generatedAt: new Date().toISOString(),
       billNumber: `BILL-${Date.now()}`

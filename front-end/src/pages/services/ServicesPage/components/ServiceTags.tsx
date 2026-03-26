@@ -1,4 +1,4 @@
-import { Badge } from "../../../../components/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { ServiceTagsProps } from "../types";
 
 export const ServiceTags = ({ tags }: Omit<ServiceTagsProps, 'renderTags'>) => {

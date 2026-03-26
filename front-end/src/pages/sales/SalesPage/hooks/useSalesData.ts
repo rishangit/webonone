@@ -1,16 +1,16 @@
 import { useState, useEffect, useMemo } from "react";
-import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
-import { fetchAppointmentHistoryRequest } from "../../../../store/slices/appointmentHistorySlice";
-import { fetchStaffRequest } from "../../../../store/slices/staffSlice";
-import { companySalesService } from "../../../../services/companySales";
-import { currenciesService, Currency } from "../../../../services/currencies";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchAppointmentHistoryRequest } from "@/store/slices/appointmentHistorySlice";
+import { fetchStaffRequest } from "@/store/slices/staffSlice";
+import { companySalesService } from "@/services/companySales";
+import { currenciesService, Currency } from "@/services/currencies";
 import { formatAvatarUrl } from "../../../../utils";
 import { SaleData, SaleItem } from "../types";
 
 const getDateRange = (range: string) => {
   const now = new Date();
   let dateFrom: string;
-  let dateTo: string = now.toISOString().split('T')[0];
+  const dateTo: string = now.toISOString().split('T')[0];
 
   switch (range) {
     case '7days':
@@ -95,7 +95,7 @@ export const useSalesData = (
   const getDateRange = (range: string) => {
     const now = new Date();
     let dateFrom: string;
-    let dateTo: string = now.toISOString().split('T')[0];
+    const dateTo: string = now.toISOString().split('T')[0];
 
     switch (range) {
       case '7days':

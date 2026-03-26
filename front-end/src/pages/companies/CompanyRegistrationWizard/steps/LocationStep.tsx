@@ -1,6 +1,6 @@
-import { Input } from "../../../../components/ui/input";
-import { Label } from "../../../../components/ui/label";
-import { GoogleMapComponent } from "../../../../components/GoogleMapComponent";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { GoogleMapComponent } from "@/components/GoogleMapComponent";
 import { WizardHeader } from "../components/WizardHeader";
 import { CompanyFormData } from "../types";
 

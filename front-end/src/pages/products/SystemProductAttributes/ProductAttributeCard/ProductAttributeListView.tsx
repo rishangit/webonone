@@ -1,5 +1,5 @@
 import { ListChecks } from "lucide-react";
-import { Card } from "../../../../components/ui/card";
+import { Card } from "@/components/ui/card";
 import { ProductAttributeViewProps } from "./types";
 import { AttributeStatus } from "./components/AttributeStatus";
 import { AttributeActions } from "./components/AttributeActions";

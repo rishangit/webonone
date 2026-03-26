@@ -1,5 +1,5 @@
 import { Clock, Phone, MapPin, Calendar } from "lucide-react";
-import { DateDisplay } from "../../../../components/common/DateDisplay";
+import { DateDisplay } from "@/components/common/DateDisplay";
 import { formatDate } from "../../../../utils";
 
 interface AppointmentDetailsProps {

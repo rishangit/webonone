@@ -1,15 +1,15 @@
 import { useState, useEffect, useRef } from "react";
-import { CustomDialog } from "../../../components/ui/custom-dialog";
-import { Button } from "../../../components/ui/button";
+import { CustomDialog } from "@/components/ui/custom-dialog";
+import { Button } from "@/components/ui/button";
 import { Building, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
-import { useAppDispatch, useAppSelector } from "../../../store/hooks";
-import { fetchTagsRequest } from "../../../store/slices/tagsSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchTagsRequest } from "@/store/slices/tagsSlice";
 import {
   createCompanyRequest,
   clearError as clearCompaniesError
-} from "../../../store/slices/companiesSlice";
-import { ImageCropDialog } from "../../../components/ui/image-crop-dialog";
+} from "@/store/slices/companiesSlice";
+import { ImageCropDialog } from "@/components/ui/image-crop-dialog";
 import { CompanyRegistrationWizardProps, CompanyFormData } from "./types";
 import { defaultSelectedEntities, TOTAL_STEPS } from "./constants";
 import { WizardProgress } from "./components/WizardProgress";

@@ -1,4 +1,4 @@
-import { Card } from "../../../../components/ui/card";
+import { Card } from "@/components/ui/card";
 import { UnitOfMeasureViewProps } from "./types";
 import { UnitIcon } from "./components/UnitIcon";
 import { UnitStatus } from "./components/UnitStatus";

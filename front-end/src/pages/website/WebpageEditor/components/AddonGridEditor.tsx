@@ -1,9 +1,9 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Move, Pencil, X, ChevronUp, ChevronDown } from "lucide-react";
-import { Button } from "../../../../components/ui/button";
+import { Button } from "@/components/ui/button";
 import { getAddonModuleByType } from "../addons/registry";
-import type { ThemeButtonSetting, ThemeTextSetting } from "../../../../services/companyWebThemes";
-import type { CompanyWebPage } from "../../../../services/companyWebPages";
+import type { ThemeButtonSetting, ThemeTextSetting } from "@/services/companyWebThemes";
+import type { CompanyWebPage } from "@/services/companyWebPages";
 import type { AddonRenderContext } from "../addons/types";
 import type { AddonGridLayout, BreakpointName, ContentAddon, ContentBlock } from "../types";
 import {

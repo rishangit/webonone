@@ -1,4 +1,4 @@
-import { Space } from "../../../services/spaces";
+import { Space } from "@/services/spaces";
 
 export interface SpaceCardProps {
   space: Space & { appointments?: { today: number; thisWeek: number } };

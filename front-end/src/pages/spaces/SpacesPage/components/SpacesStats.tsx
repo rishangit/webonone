@@ -1,6 +1,6 @@
 import { MapPin, Users, Calendar } from "lucide-react";
-import { Card } from "../../../../components/ui/card";
-import { Carousel, CarouselContent, CarouselItem } from "../../../../components/ui/carousel";
+import { Card } from "@/components/ui/card";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { SpacesStatsProps } from "../types";
 
 export const SpacesStats = ({ totalSpaces, activeSpaces, todayBookings }: SpacesStatsProps) => {

@@ -1,5 +1,5 @@
-import type { Theme, AccentColor } from '../types';
-import { config } from '../config/environment';
+import type { Theme, AccentColor } from '@/types';
+import { config } from '@/config/environment';
 
 // Theme management utilities
 export const applyTheme = (theme: Theme, accentColor: AccentColor) => {

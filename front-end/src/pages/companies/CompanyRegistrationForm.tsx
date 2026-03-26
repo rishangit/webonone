@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { MapPin, Building, Phone, Mail, Globe, Users, X, Check, Upload, Camera, Trash2 } from "lucide-react";
-import { Card } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
-import { Textarea } from "../../components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ImageCropDialog } from "../../components/ui/image-crop-dialog";
+import { ImageCropDialog } from "@/components/ui/image-crop-dialog";
 
 interface CompanyFormData {
   companyName: string;
@@ -117,7 +117,7 @@ export function CompanyRegistrationForm({ onSubmit, onCancel }: CompanyRegistrat
     const categoryData = businessCategories.find(cat => cat.category === category);
     setFormData(prev => ({
       ...prev,
-      category: category,
+      category,
       subCategory: categoryData ? categoryData.subCategories[0] : ""
     }));
   };

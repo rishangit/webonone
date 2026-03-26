@@ -4,7 +4,7 @@ import { Card } from './card';
 import { Alert, AlertDescription } from './alert';
 import { Upload, X, Loader2 } from 'lucide-react';
 import { ProgressBar } from './progress-bar';
-import { fileUploadService, FileUploadData } from '../../services/fileUploadService';
+import { fileUploadService, FileUploadData } from '@/services/fileUploadService';
 import { toast } from 'sonner';
 import { formatAvatarUrl } from '../../utils';
 import { ImageCropDialog } from './image-crop-dialog';

@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { Building, CreditCard, Package, User } from "lucide-react";
-import { Card } from "../../../components/ui/card";
-import { TabSwitcher } from "../../../components/ui/tab-switcher";
-import { useAppDispatch, useAppSelector } from "../../../store/hooks";
-import { fetchCompanyRequest, clearError, approveCompanyRequest, rejectCompanyRequest } from "../../../store/slices/companiesSlice";
+import { Card } from "@/components/ui/card";
+import { TabSwitcher } from "@/components/ui/tab-switcher";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchCompanyRequest, clearError, approveCompanyRequest, rejectCompanyRequest } from "@/store/slices/companiesSlice";
 import { toast } from "sonner";
-import { BackButton } from "../../../components/common/BackButton";
+import { BackButton } from "@/components/common/BackButton";
 import { CompanyDetailHeader } from "./CompanyDetailHeader";
 import { CompanyProfileTab } from "./profile";
 import { CompanyServicesTab } from "./services";
@@ -75,17 +75,17 @@ export const CompanyDetailPage = ({ companyId, onBack }: CompanyDetailPageProps)
       email: companyData.email || "",
       phone: companyData.phone || "",
       website: companyData.website || "",
-      address: address,
-      city: city,
-      state: state,
-      country: country,
-      postalCode: postalCode,
+      address,
+      city,
+      state,
+      country,
+      postalCode,
       latitude: companyData.latitude !== undefined && companyData.latitude !== null ? companyData.latitude : null,
       longitude: companyData.longitude !== undefined && companyData.longitude !== null ? companyData.longitude : null,
       category: companyData.category || "",
       subCategory: companyData.subcategory || "",
       employees: companyData.companySize || "",
-      status: status,
+      status,
       submittedDate: companyData.createdAt || new Date().toISOString(),
       logo: companyData.logo || "",
       isActive: companyData.isActive

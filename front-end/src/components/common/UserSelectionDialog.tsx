@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { User } from "lucide-react";
 import { CustomDialog } from "../ui/custom-dialog";
 import { UserSelector } from "./UserSelector";
-import { User as UserType } from "../../types/user";
+import { User as UserType } from "@/types/user";
 
 interface UserSelectionDialogProps {
   open: boolean;

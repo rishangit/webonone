@@ -1,7 +1,7 @@
-import { Card } from "../../../../components/ui/card";
-import { ImageWithFallback } from "../../../../components/figma/ImageWithFallback";
+import { Card } from "@/components/ui/card";
+import { ImageWithFallback } from "@/components/figma/ImageWithFallback";
 import { formatAvatarUrl } from "../../../../utils";
-import { Space } from "../../../../services/spaces";
+import { Space } from "@/services/spaces";
 
 interface SpaceDetailImageProps {
   space: Space;

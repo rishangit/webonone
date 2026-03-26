@@ -7,7 +7,7 @@ module.exports = {
   },
   extends: [
     'eslint:recommended',
-    '@typescript-eslint/recommended',
+    'plugin:@typescript-eslint/recommended',
     'plugin:react/recommended',
     'plugin:react-hooks/recommended',
     'plugin:jsx-a11y/recommended',
@@ -58,7 +58,7 @@ module.exports = {
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-non-null-assertion': 'warn',
-    '@typescript-eslint/prefer-const': 'error',
+    // prefer-const: use core ESLint rule; @typescript-eslint/prefer-const was removed in plugin v7
     '@typescript-eslint/no-var-requires': 'error',
 
     // General rules

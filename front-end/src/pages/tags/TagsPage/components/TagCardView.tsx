@@ -1,4 +1,4 @@
-import { Card } from "../../../../components/ui/card";
+import { Card } from "@/components/ui/card";
 import { TagViewProps } from "../types";
 import { TagIconComponent } from "./TagIcon";
 import { TagStatus } from "./TagStatus";

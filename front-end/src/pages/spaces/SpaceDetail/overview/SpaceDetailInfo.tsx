@@ -1,7 +1,7 @@
 import { Users, Tag as TagIcon } from "lucide-react";
-import { Card } from "../../../../components/ui/card";
-import { Badge } from "../../../../components/ui/badge";
-import { Space } from "../../../../services/spaces";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Space } from "@/services/spaces";
 
 interface SpaceDetailInfoProps {
   space: Space;

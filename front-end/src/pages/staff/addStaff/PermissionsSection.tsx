@@ -1,4 +1,4 @@
-import { Label } from "../../../components/ui/label";
+import { Label } from "@/components/ui/label";
 import { defaultPermissions } from "./constants";
 
 interface PermissionsSectionProps {

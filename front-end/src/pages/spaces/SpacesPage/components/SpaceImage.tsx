@@ -1,6 +1,6 @@
 import { SpaceImageProps } from "../types";
 import { getImageUrl } from "../utils";
-import { Space } from "../../../../services/spaces";
+import { Space } from "@/services/spaces";
 
 export const SpaceImage = ({ imageUrl, spaceName, variant = "grid" }: SpaceImageProps) => {
   const space = { imageUrl } as Space;

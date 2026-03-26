@@ -1,5 +1,5 @@
 import { Ruler } from "lucide-react";
-import { cn } from "../../../../../components/ui/utils";
+import { cn } from "@/components/ui/utils";
 import { UnitIconProps } from "../types";
 
 export const UnitIcon = ({ className }: UnitIconProps) => {

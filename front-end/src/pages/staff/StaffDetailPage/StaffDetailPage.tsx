@@ -1,4 +1,4 @@
-import { BackButton } from "../../../components/common/BackButton";
+import { BackButton } from "@/components/common/BackButton";
 import { useStaffDetailPage } from "./hooks/useStaffDetailPage";
 import {
   StaffDetailHeader,

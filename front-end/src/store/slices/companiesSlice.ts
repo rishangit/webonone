@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Company } from '../../services/companies';
-import { PaginationMeta } from '../../services/products';
+import { Company } from '@/services/companies';
+import { PaginationMeta } from '@/services/products';
 
 interface CompaniesState {
   companies: Company[];

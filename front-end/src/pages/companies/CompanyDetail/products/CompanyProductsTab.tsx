@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Package } from "lucide-react";
-import { EmptyState } from "../../../../components/common/EmptyState";
-import { Pagination } from "../../../../components/common/Pagination";
-import { ViewSwitcher } from "../../../../components/ui/view-switcher";
-import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
-import { fetchCompanyProductsRequest } from "../../../../store/slices/companyProductsSlice";
+import { EmptyState } from "@/components/common/EmptyState";
+import { Pagination } from "@/components/common/Pagination";
+import { ViewSwitcher } from "@/components/ui/view-switcher";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchCompanyProductsRequest } from "@/store/slices/companyProductsSlice";
 import { CompanyProductCard } from "../../../products/CompanyProducts";
 
 interface CompanyProductsTabProps {

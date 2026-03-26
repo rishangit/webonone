@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { companyWebPagesService } from "../../services/companyWebPages";
-import { CompanyWebPage } from "../../services/companyWebPages";
-import { companyWebThemesService, type CompanyWebTheme } from "../../services/companyWebThemes";
+import { companyWebPagesService } from "@/services/companyWebPages";
+import { CompanyWebPage } from "@/services/companyWebPages";
+import { companyWebThemesService, type CompanyWebTheme } from "@/services/companyWebThemes";
 import { ContentAddon, ContentBlock } from "./WebpageEditor/types";
 import { WebpageContentRenderer } from "./WebpageEditor/components/WebpageContentRenderer";
 import { ensureAddonLayouts } from "./WebpageEditor/addons/addonGridUtils";
@@ -38,7 +38,7 @@ export const PublicWebPage = () => {
   const getPageUrl = () => {
     if (pageUrlSplat) {
       // If splat parameter exists, use it and ensure it starts with /
-      return pageUrlSplat.startsWith('/') ? pageUrlSplat : '/' + pageUrlSplat;
+      return pageUrlSplat.startsWith('/') ? pageUrlSplat : `/${  pageUrlSplat}`;
     }
     
     // Fallback: extract from pathname
@@ -47,7 +47,7 @@ export const PublicWebPage = () => {
     if (webIndex !== -1 && pathParts.length > webIndex + 2) {
       // Get everything after companyId
       const urlParts = pathParts.slice(webIndex + 2);
-      return '/' + urlParts.join('/');
+      return `/${  urlParts.join('/')}`;
     }
     return '/';
   };

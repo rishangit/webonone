@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { Search, Filter, X, Clock, TrendingUp, Zap, MoreHorizontal } from "lucide-react";
-import { Button } from "../../components/ui/button";
-import { Card } from "../../components/ui/card";
-import { Input } from "../../components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
-import { Badge } from "../../components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { SearchResultCard } from "./SearchResultCard";
 import { SearchResultRenderer } from "./SearchResultRenderer";
 import { toast } from "sonner";
@@ -316,7 +316,7 @@ export function SearchPage({ currentUser, onNavigate }: SearchPageProps) {
   const searchResults = useMemo(() => {
     if (!searchQuery.trim()) return [];
 
-    let filtered = mockSearchData.filter(item => {
+    const filtered = mockSearchData.filter(item => {
       const searchableText = `${item.title} ${item.subtitle} ${item.description} ${item.metadata?.tags?.join(' ') || ''}`.toLowerCase();
       const query = searchQuery.toLowerCase();
       

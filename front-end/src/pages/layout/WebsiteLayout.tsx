@@ -1,10 +1,10 @@
 import { ReactNode, useState } from "react";
 import { Header } from "./Header";
-import { useIsMobile } from "../../components/ui/use-mobile";
-import { Toaster } from "../../components/ui/sonner";
-import { User } from "../../types/user";
+import { useIsMobile } from "@/components/ui/use-mobile";
+import { Toaster } from "@/components/ui/sonner";
+import { User } from "@/types/user";
 import { LayoutDashboard, FileText, Palette, Settings, Layout, ChevronRight } from "lucide-react";
-import { Button } from "../../components/ui/button";
+import { Button } from "@/components/ui/button";
 
 interface WebsiteLayoutProps {
   children: ReactNode;

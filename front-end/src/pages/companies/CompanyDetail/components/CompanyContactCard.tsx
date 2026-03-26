@@ -1,7 +1,7 @@
 import { Phone, Mail, Globe } from "lucide-react";
-import { Card } from "../../../../components/ui/card";
-import { Label } from "../../../../components/ui/label";
-import { CardTitle } from "../../../../components/common/CardTitle";
+import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { CardTitle } from "@/components/common/CardTitle";
 import { Company } from "../types";
 
 interface CompanyContactCardProps {

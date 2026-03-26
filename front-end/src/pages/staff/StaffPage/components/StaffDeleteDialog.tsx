@@ -1,4 +1,4 @@
-import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogAction } from "../../../../components/ui/alert-dialog";
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogAction } from "@/components/ui/alert-dialog";
 import { StaffDeleteDialogProps } from "../types";
 
 export const StaffDeleteDialog = ({ open, onOpenChange, member, onDelete }: StaffDeleteDialogProps) => {

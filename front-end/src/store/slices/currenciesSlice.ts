@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Currency } from '../../services/currencies';
+import { Currency } from '@/services/currencies';
 
 interface CurrenciesState {
   currencies: Currency[]; // All currencies (cached)

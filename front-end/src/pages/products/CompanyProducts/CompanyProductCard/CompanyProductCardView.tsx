@@ -1,6 +1,6 @@
-import { Card } from "../../../../components/ui/card";
-import { Badge } from "../../../../components/ui/badge";
-import { CompanyProduct } from "../../../../services/companyProducts";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { CompanyProduct } from "@/services/companyProducts";
 import { ProductImage } from "./components/ProductImage";
 import { VariantSelector } from "./components/VariantSelector";
 import { ProductActions } from "./components/ProductActions";

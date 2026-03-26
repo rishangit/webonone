@@ -1,5 +1,5 @@
 import { XCircle } from "lucide-react";
-import { Card } from "../../../../components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Company } from "../types";
 
 interface CompanyRejectionCardProps {

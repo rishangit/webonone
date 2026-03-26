@@ -1,25 +1,25 @@
 import { useState, useEffect, useMemo } from "react";
 import { Search, Package, ShoppingCart, X, Trash2, Calculator, Check, User } from "lucide-react";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
-import { Card } from "../../components/ui/card";
-import { Badge } from "../../components/ui/badge";
-import { Separator } from "../../components/ui/separator";
-import { useIsMobile } from "../../components/ui/use-mobile";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { useIsMobile } from "@/components/ui/use-mobile";
 import { toast } from "sonner";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { fetchCompanyProductsRequest } from "../../store/slices/companyProductsSlice";
-import { fetchAppointmentHistoryRequest } from "../../store/slices/appointmentHistorySlice";
-import { CompanyProduct } from "../../services/companyProducts";
-import { CompanyProductVariant } from "../../services/companyProductVariants";
-import { companyProductVariantsService } from "../../services/companyProductVariants";
-import { CustomDialog } from "../../components/ui/custom-dialog";
-import { salesService, CreateSaleData } from "../../services/sales";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchCompanyProductsRequest } from "@/store/slices/companyProductsSlice";
+import { fetchAppointmentHistoryRequest } from "@/store/slices/appointmentHistorySlice";
+import { CompanyProduct } from "@/services/companyProducts";
+import { CompanyProductVariant } from "@/services/companyProductVariants";
+import { companyProductVariantsService } from "@/services/companyProductVariants";
+import { CustomDialog } from "@/components/ui/custom-dialog";
+import { salesService, CreateSaleData } from "@/services/sales";
 import { formatAvatarUrl } from "../../utils";
-import { UserSelector } from "../../components/common/UserSelector";
-import { fetchUsersRequest } from "../../store/slices/usersSlice";
-import { currenciesService, Currency } from "../../services/currencies";
+import { UserSelector } from "@/components/common/UserSelector";
+import { fetchUsersRequest } from "@/store/slices/usersSlice";
+import { currenciesService, Currency } from "@/services/currencies";
 
 interface ProductVariant {
   id: string;
@@ -125,7 +125,7 @@ export const POSSalesPage = ({ onBack, currentUser }: POSSalesPageProps) => {
         
         if (!company || String(company.id) !== String(companyId)) {
           try {
-            const { companiesService } = await import("../../services/companies");
+            const { companiesService } = await import("@/services/companies");
             company = await companiesService.getCompanyById(String(companyId));
           } catch (fetchError) {
             console.error('Error fetching company:', fetchError);
@@ -245,7 +245,7 @@ export const POSSalesPage = ({ onBack, currentUser }: POSSalesPageProps) => {
               ...(variant.weight && { weight: variant.weight }),
               ...(variant.material && { material: variant.material }),
             },
-            price: price,
+            price,
             inStock: stockQuantity,
             isActive: variant.isActive
           };
@@ -441,8 +441,8 @@ export const POSSalesPage = ({ onBack, currentUser }: POSSalesPageProps) => {
       name: effectiveName,
       description: effectiveDescription,
       image: getImageUrl(), // Store formatted product image
-      quantity: quantity,
-      unitPrice: unitPrice,
+      quantity,
+      unitPrice,
       discount: 0,
       unit: effectiveUnit,
       variantId: variant?.id,
@@ -497,7 +497,7 @@ export const POSSalesPage = ({ onBack, currentUser }: POSSalesPageProps) => {
       }
 
       const saleData: CreateSaleData = {
-        companyId: companyId,
+        companyId,
         clientId: selectedCustomerId, // Selected customer (userId)
         amount: calculations.finalAmount,
         paymentMethod: 'Cash', // Default payment method

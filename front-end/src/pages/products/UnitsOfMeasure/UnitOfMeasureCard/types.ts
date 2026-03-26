@@ -1,4 +1,4 @@
-import { UnitsOfMeasure } from "../../../../services/unitsOfMeasure";
+import { UnitsOfMeasure } from "@/services/unitsOfMeasure";
 
 export interface UnitOfMeasureCardProps {
   unit: UnitsOfMeasure;

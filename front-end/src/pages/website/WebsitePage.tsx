@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Card } from "../../components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Palette, Layout, FolderOpen } from "lucide-react";
-import { useAppSelector } from "../../store/hooks";
+import { useAppSelector } from "@/store/hooks";
 import { ThemePage } from "./ThemePage/index";
 import { WebpagesPage } from "./WebpagesPage/index";
 import { MediaPage } from "./MediaPage";

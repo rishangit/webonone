@@ -1,18 +1,18 @@
 import { useState, useEffect, useMemo } from "react";
 import { Plus, Package, AlertTriangle, CheckCircle, Filter, Users } from "lucide-react";
-import { Card } from "../../../components/ui/card";
-import { Button } from "../../../components/ui/button";
-import { Badge } from "../../../components/ui/badge";
-import { DeleteConfirmationDialog } from "../../../components/common/DeleteConfirmationDialog";
-import { Pagination } from "../../../components/common/Pagination";
-import { SearchInput } from "../../../components/common/SearchInput";
-import { EmptyState } from "../../../components/common/EmptyState";
-import { cn } from "../../../components/ui/utils";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
+import { Pagination } from "@/components/common/Pagination";
+import { SearchInput } from "@/components/common/SearchInput";
+import { EmptyState } from "@/components/common/EmptyState";
+import { cn } from "@/components/ui/utils";
 import { CreateSystemProductDialog } from "./CreateSystemProductDialog";
-import { ViewSwitcher } from "../../../components/ui/view-switcher";
-import { Carousel, CarouselContent, CarouselItem } from "../../../components/ui/carousel";
+import { ViewSwitcher } from "@/components/ui/view-switcher";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { toast } from "sonner";
-import { useAppDispatch, useAppSelector } from "../../../store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { SystemProductCard } from "./SystemProductCard";
 import { SystemProductFilters } from "./SystemProductFilters";
 import { SystemProductAddEditDialog } from "./SystemProductAddEditDialog";
@@ -21,14 +21,14 @@ import {
   updateSystemProductRequest,
   deleteSystemProductRequest,
   clearError as clearSystemProductsError,
-} from "../../../store/slices/systemProductsSlice";
+} from "@/store/slices/systemProductsSlice";
 import {
   fetchCompanyProductsRequest,
   clearError as clearCompanyProductsError,
-} from "../../../store/slices/companyProductsSlice";
-import { fetchTagsRequest } from "../../../store/slices/tagsSlice";
-import { Product, Tag } from "../../../services/products";
-import { CompanyProduct } from "../../../services/companyProducts";
+} from "@/store/slices/companyProductsSlice";
+import { fetchTagsRequest } from "@/store/slices/tagsSlice";
+import { Product, Tag } from "@/services/products";
+import { CompanyProduct } from "@/services/companyProducts";
 
 interface SystemProduct {
   id: string;
@@ -80,13 +80,13 @@ const mapProductToSystemProduct = (product: Product): SystemProduct => {
     usageCount: product.usageCount || 0,
     createdDate: product.createdDate,
     lastModified: product.lastModified,
-    tags: tags,
+    tags,
   };
 };
 
 // Mock data removed - now using Redux
 
-import { UserRole, isRole } from "../../../types/user";
+import { UserRole, isRole } from "@/types/user";
 
 interface SystemProductsPageProps {
   currentUser?: {
@@ -193,7 +193,7 @@ export function SystemProductsPage({ currentUser, onViewProduct }: SystemProduct
       const offset = (currentPage - 1) * itemsPerPage;
       const filters: any = {
         limit: itemsPerPage,
-        offset: offset,
+        offset,
         page: currentPage,
       };
 
@@ -336,7 +336,7 @@ export function SystemProductsPage({ currentUser, onViewProduct }: SystemProduct
       description: product.description,
       imageUrl: productFromRedux?.imageUrl || product.imageUrl || "",
       isActive: product.isActive,
-      tagIds: tagIds
+      tagIds
     });
     setIsEditDialogOpen(true);
   };

@@ -1,6 +1,6 @@
 import { AlertTriangle } from "lucide-react";
-import { Card } from "../../../../components/ui/card";
-import { Button } from "../../../../components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { TagDeleteDialogProps } from "../types";
 
 export const TagDeleteDialog = ({ open, onOpenChange, tag, onDelete, loading }: TagDeleteDialogProps) => {

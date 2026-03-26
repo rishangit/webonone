@@ -3,7 +3,7 @@ import { catchError, map, switchMap, filter } from 'rxjs/operators';
 import { ofType } from 'redux-observable';
 import { Epic } from 'redux-observable';
 import { RootState } from '../index';
-import { companiesService } from '../../services/companies';
+import { companiesService } from '@/services/companies';
 import {
   fetchCompaniesRequest,
   fetchCompaniesSuccess,

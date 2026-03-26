@@ -1,21 +1,21 @@
 import { useState, useEffect, useMemo } from "react";
 import { Calendar, CheckCircle, Clock, UserPlus, BarChart3, Settings, Bug, Play, XCircle } from "lucide-react";
-import { Button } from "../../components/ui/button";
-import { Card } from "../../components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { AppointmentCard } from "../appointments/AppointmentCard";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { fetchAppointmentsRequest } from "../../store/slices/appointmentsSlice";
-import { fetchUsersRequest } from "../../store/slices/usersSlice";
-import { fetchServicesRequest } from "../../store/slices/servicesSlice";
-import { fetchStaffRequest } from "../../store/slices/staffSlice";
-import { fetchSpacesRequest } from "../../store/slices/spacesSlice";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchAppointmentsRequest } from "@/store/slices/appointmentsSlice";
+import { fetchUsersRequest } from "@/store/slices/usersSlice";
+import { fetchServicesRequest } from "@/store/slices/servicesSlice";
+import { fetchStaffRequest } from "@/store/slices/staffSlice";
+import { fetchSpacesRequest } from "@/store/slices/spacesSlice";
 import { formatAvatarUrl, formatDate } from "../../utils";
-import { AppointmentStatus, normalizeAppointmentStatus, getAppointmentStatusLabel } from "../../types/appointmentStatus";
-import { Appointment } from "../../services/appointments";
+import { AppointmentStatus, normalizeAppointmentStatus, getAppointmentStatusLabel } from "@/types/appointmentStatus";
+import { Appointment } from "@/services/appointments";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { CardTitle } from "../../components/common/CardTitle";
+import { CardTitle } from "@/components/common/CardTitle";
 
 // Stats will be calculated from real data
 
@@ -234,7 +234,7 @@ export const Dashboard = ({ onNavigate }: DashboardProps = {}) => {
           service: serviceName,
           status: statusDisplay,
           phone: clientPhone,
-          location: location,
+          location,
           staff: staffData,
           _originalAppointment: appointment
         };

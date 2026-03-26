@@ -1,43 +1,43 @@
 import { Plus, Calendar, Filter, Search, ChevronDown, Clock, Users, CheckCircle, XCircle, Phone, MapPin, Play, User, Building, CalendarDays } from "lucide-react";
-import { Button } from "../../components/ui/button";
-import { Card } from "../../components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { AppointmentCard } from "./AppointmentCard";
-import { Input } from "../../components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
-import { Badge } from "../../components/ui/badge";
-import { Calendar as CalendarComponent } from "../../components/ui/calendar";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { AppointmentWizard } from "./AppointmentWizard/index";
-import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
-import { TimelineView } from "../../components/TimelineView";
-import { MultiSelect } from "../../components/ui/multi-select";
-import { ViewSwitcher } from "../../components/ui/view-switcher";
-import { TabSwitcher } from "../../components/ui/tab-switcher";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { TimelineView } from "@/components/TimelineView";
+import { MultiSelect } from "@/components/ui/multi-select";
+import { ViewSwitcher } from "@/components/ui/view-switcher";
+import { TabSwitcher } from "@/components/ui/tab-switcher";
 import { WeekView } from "./WeekView";
 import { MonthView } from "./MonthView";
 import { useState, useMemo, useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   fetchAppointmentsRequest,
   updateAppointmentStatusRequest,
   deleteAppointmentRequest,
   clearError
-} from "../../store/slices/appointmentsSlice";
-import { fetchUsersRequest, fetchUserRequest } from "../../store/slices/usersSlice";
-import { fetchServicesRequest } from "../../store/slices/servicesSlice";
-import { fetchStaffRequest } from "../../store/slices/staffSlice";
-import { fetchSpacesRequest } from "../../store/slices/spacesSlice";
-import { fetchCurrenciesRequest } from "../../store/slices/currenciesSlice";
-import { Appointment } from "../../services/appointments";
+} from "@/store/slices/appointmentsSlice";
+import { fetchUsersRequest, fetchUserRequest } from "@/store/slices/usersSlice";
+import { fetchServicesRequest } from "@/store/slices/servicesSlice";
+import { fetchStaffRequest } from "@/store/slices/staffSlice";
+import { fetchSpacesRequest } from "@/store/slices/spacesSlice";
+import { fetchCurrenciesRequest } from "@/store/slices/currenciesSlice";
+import { Appointment } from "@/services/appointments";
 import { toast } from "sonner";
 import { formatAvatarUrl } from "../../utils";
-import { AppointmentStatus, normalizeAppointmentStatus, getAppointmentStatusLabel, AppointmentStatusValues } from "../../types/appointmentStatus";
-import { DeleteConfirmationDialog } from "../../components/common/DeleteConfirmationDialog";
-import { SearchInput } from "../../components/common/SearchInput";
-import { Pagination } from "../../components/common/Pagination";
-import { isRole, UserRole } from "../../types/user";
-import { Carousel, CarouselContent, CarouselItem } from "../../components/ui/carousel";
-import { RightPanel } from "../../components/common/RightPanel";
-import { cn } from "../../components/ui/utils";
+import { AppointmentStatus, normalizeAppointmentStatus, getAppointmentStatusLabel, AppointmentStatusValues } from "@/types/appointmentStatus";
+import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
+import { SearchInput } from "@/components/common/SearchInput";
+import { Pagination } from "@/components/common/Pagination";
+import { isRole, UserRole } from "@/types/user";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
+import { RightPanel } from "@/components/common/RightPanel";
+import { cn } from "@/components/ui/utils";
 
 interface User {
   email: string;
@@ -99,7 +99,7 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
         const filters: any = {
           page: currentPage,
           limit: itemsPerPage,
-          offset: offset,
+          offset,
         };
 
         // Add search
@@ -673,7 +673,7 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
                         dispatch(updateAppointmentStatusRequest({
                           id: appointment._originalAppointment.id,
                           status: status as Appointment['status'],
-                          completionData: completionData
+                          completionData
                         }));
                       }
                     }}
@@ -712,7 +712,7 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
                         dispatch(updateAppointmentStatusRequest({
                           id: appointment._originalAppointment.id,
                           status: status as Appointment['status'],
-                          completionData: completionData
+                          completionData
                         }));
                       }
                     }}

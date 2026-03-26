@@ -3,34 +3,34 @@ import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useParams, useNavigate } from "react-router-dom";
 import { Building, Camera, Upload, X, Phone, MapPin, Edit, Save, Check, AlertCircle, Settings, Plus, Globe, Calendar, Users, Wrench, Package, Square } from "lucide-react";
-import { GoogleMapComponent } from "../../components/GoogleMapComponent";
-import { Card } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
-import { Textarea } from "../../components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
-import { Badge } from "../../components/ui/badge";
-import { Separator } from "../../components/ui/separator";
-import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
+import { GoogleMapComponent } from "@/components/GoogleMapComponent";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { fetchCompanyRequest, updateCompanyRequest, clearError } from "../../store/slices/companiesSlice";
-import FileUpload from "../../components/ui/file-upload";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchCompanyRequest, updateCompanyRequest, clearError } from "@/store/slices/companiesSlice";
+import FileUpload from "@/components/ui/file-upload";
 import { formatAvatarUrl } from "../../utils";
-import { DateDisplay } from "../../components/common/DateDisplay";
-import { CardTitle } from "../../components/common/CardTitle";
-import { UserRoleNames, UserRole } from "../../types/user";
-import { companyUpdateSchema, CompanyUpdateFormData } from "../../schemas/companyValidation";
-import { PhoneInput } from "../../components/common/PhoneInput";
-import { currenciesService, Currency } from "../../services/currencies";
-import { CustomDialog } from "../../components/ui/custom-dialog";
+import { DateDisplay } from "@/components/common/DateDisplay";
+import { CardTitle } from "@/components/common/CardTitle";
+import { UserRoleNames, UserRole } from "@/types/user";
+import { companyUpdateSchema, CompanyUpdateFormData } from "@/schemas/companyValidation";
+import { PhoneInput } from "@/components/common/PhoneInput";
+import { currenciesService, Currency } from "@/services/currencies";
+import { CustomDialog } from "@/components/ui/custom-dialog";
 
 interface CompanySettingsPageProps {
   onBack?: () => void;
 }
 
-import { CompanySize } from "../../services/companies";
+import { CompanySize } from "@/services/companies";
 
 interface CompanyInfo {
   name: string;
@@ -197,7 +197,7 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
       let city = "";
       let state = "";
       let country = "";
-      let postalCode = "";
+      const postalCode = "";
       let address = company?.address || "";
       
       if (company?.address) {
@@ -222,9 +222,9 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
         email: company?.email || "",
         phone: company?.phone || "",
         website: company?.website || undefined,
-        address: address,
-        city: city,
-        state: state,
+        address,
+        city,
+        state,
         country: country || undefined,
         postalCode: postalCode || undefined,
         latitude: company?.latitude !== undefined && company?.latitude !== null ? company.latitude : undefined,

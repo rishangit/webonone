@@ -9,12 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { HoverCard, HoverCardTrigger, HoverCardContent, HoverCardArrow } from "./ui/hover-card";
 import { DateDisplay } from "./common/DateDisplay";
 import { AppointmentWizard } from "../pages/appointments";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { updateAppointmentRequest, deleteAppointmentRequest } from "../store/slices/appointmentsSlice";
-import { fetchStaffRequest } from "../store/slices/staffSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { updateAppointmentRequest, deleteAppointmentRequest } from "@/store/slices/appointmentsSlice";
+import { fetchStaffRequest } from "@/store/slices/staffSlice";
 import { toast } from "sonner";
 import { formatAvatarUrl } from "../utils";
-import { normalizeAppointmentStatus, getAppointmentStatusLabel, AppointmentStatus } from "../types/appointmentStatus";
+import { normalizeAppointmentStatus, getAppointmentStatusLabel, AppointmentStatus } from "@/types/appointmentStatus";
 
 interface User {
   email: string;
@@ -1202,7 +1202,7 @@ export function TimelineView({ currentUser, selectedDate, appointments, onDateCh
                                     dispatch(updateAppointmentRequest({
                                       id: originalAppointmentId,
                                       data: {
-                                        staffId: staffId,
+                                        staffId,
                                         status: 'Confirmed'
                                       }
                                     }));

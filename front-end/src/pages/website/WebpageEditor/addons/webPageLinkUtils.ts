@@ -1,4 +1,4 @@
-import type { CompanyWebPage } from "../../../../services/companyWebPages";
+import type { CompanyWebPage } from "@/services/companyWebPages";
 import type { ButtonContentAddonData } from "../types";
 
 /** Normalize stored page URL to a path starting with `/` (matches preview / public routes). */

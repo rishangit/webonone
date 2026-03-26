@@ -1,5 +1,5 @@
 import { CheckCircle, X } from "lucide-react";
-import { Badge } from "../../../../components/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { TagStatusProps } from "../types";
 
 export const TagStatus = ({ isActive }: TagStatusProps) => {

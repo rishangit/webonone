@@ -1,25 +1,25 @@
 import { useState, useEffect, useMemo } from "react";
 import { Plus, Ruler, AlertTriangle, Filter } from "lucide-react";
-import { Card } from "../../../components/ui/card";
-import { Button } from "../../../components/ui/button";
-import { SearchInput } from "../../../components/common/SearchInput";
-import { EmptyState } from "../../../components/common/EmptyState";
-import { ViewSwitcher } from "../../../components/ui/view-switcher";
-import { useIsMobile } from "../../../components/ui/use-mobile";
-import { cn } from "../../../components/ui/utils";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { SearchInput } from "@/components/common/SearchInput";
+import { EmptyState } from "@/components/common/EmptyState";
+import { ViewSwitcher } from "@/components/ui/view-switcher";
+import { useIsMobile } from "@/components/ui/use-mobile";
+import { cn } from "@/components/ui/utils";
 import { toast } from "sonner";
-import { useAppDispatch, useAppSelector } from "../../../store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   fetchUnitsOfMeasureRequest,
   createUnitOfMeasureRequest,
   updateUnitOfMeasureRequest,
   deleteUnitOfMeasureRequest,
   clearError as clearUnitsOfMeasureError,
-} from "../../../store/slices/unitsOfMeasureSlice";
-import { UnitsOfMeasure, CreateUnitsOfMeasureData } from "../../../services/unitsOfMeasure";
-import { UserRole, isRole } from "../../../types/user";
-import { DeleteConfirmationDialog } from "../../../components/common/DeleteConfirmationDialog";
-import { Pagination } from "../../../components/common/Pagination";
+} from "@/store/slices/unitsOfMeasureSlice";
+import { UnitsOfMeasure, CreateUnitsOfMeasureData } from "@/services/unitsOfMeasure";
+import { UserRole, isRole } from "@/types/user";
+import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
+import { Pagination } from "@/components/common/Pagination";
 import { UnitOfMeasureAddEditDialog } from "./UnitOfMeasureAddEditDialog";
 import { UnitOfMeasureCard } from "./UnitOfMeasureCard";
 import { UnitOfMeasureFilters } from "./UnitOfMeasureFilters";

@@ -1,4 +1,4 @@
-import { Card } from "../../../../components/ui/card";
+import { Card } from "@/components/ui/card";
 import { LoadingSkeletonProps } from "../types";
 
 export const LoadingSkeleton = ({ viewMode }: LoadingSkeletonProps) => {

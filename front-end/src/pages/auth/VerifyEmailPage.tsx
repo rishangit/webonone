@@ -3,15 +3,15 @@ import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Mail, CheckCircle, XCircle, Loader2, Eye, EyeOff, Lock } from "lucide-react";
-import { Card } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
-import { authService } from "../../services/auth";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { authService } from "@/services/auth";
 import { toast } from "sonner";
 import * as yup from "yup";
-import { useAppDispatch } from "../../store/hooks";
-import { loginSuccess } from "../../store/slices/authSlice";
+import { useAppDispatch } from "@/store/hooks";
+import { loginSuccess } from "@/store/slices/authSlice";
 
 const passwordSchema = yup.object({
   password: yup

@@ -1,6 +1,6 @@
 import { Shield, UserCog, User, Users } from "lucide-react";
 import { Badge } from "./ui/badge";
-import { UserRole, UserRoleNames, isRole, getRoleFromString } from "../types/user";
+import { UserRole, UserRoleNames, isRole, getRoleFromString } from "@/types/user";
 import { cn } from "./ui/utils";
 
 interface UserRoleBadgeProps {

@@ -1,7 +1,7 @@
 import { Warehouse, TrendingUp, DollarSign, AlertTriangle, CheckCircle } from "lucide-react";
-import { Card } from "../../../../../components/ui/card";
-import { Badge } from "../../../../../components/ui/badge";
-import { Label } from "../../../../../components/ui/label";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import { StockOverviewProps } from "../types";
 
 export const StockOverview = ({

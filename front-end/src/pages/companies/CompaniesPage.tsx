@@ -1,20 +1,20 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { Building, CheckCircle, Clock, XCircle, Filter } from "lucide-react";
-import { Card } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { Badge } from "../../components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
-import { ViewSwitcher } from "../../components/ui/view-switcher";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { fetchCompaniesRequest, clearError } from "../../store/slices/companiesSlice";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ViewSwitcher } from "@/components/ui/view-switcher";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchCompaniesRequest, clearError } from "@/store/slices/companiesSlice";
 import { toast } from "sonner";
 import { CompanyCard, CompanyListView } from "./CompanyCard";
-import { SearchInput } from "../../components/common/SearchInput";
-import { Pagination } from "../../components/common/Pagination";
-import { EmptyState } from "../../components/common/EmptyState";
-import { RightPanel } from "../../components/common/RightPanel";
-import { cn } from "../../components/ui/utils";
-import { Carousel, CarouselContent, CarouselItem } from "../../components/ui/carousel";
+import { SearchInput } from "@/components/common/SearchInput";
+import { Pagination } from "@/components/common/Pagination";
+import { EmptyState } from "@/components/common/EmptyState";
+import { RightPanel } from "@/components/common/RightPanel";
+import { cn } from "@/components/ui/utils";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 
 interface Tag {
   id: number;
@@ -83,7 +83,7 @@ export function CompaniesPage({ onViewCompany }: CompaniesPageProps) {
     const offset = (currentPage - 1) * itemsPerPage;
     const filters: any = {
       limit: itemsPerPage,
-      offset: offset,
+      offset,
       page: currentPage,
     };
 
@@ -168,13 +168,13 @@ export function CompaniesPage({ onViewCompany }: CompaniesPageProps) {
       phone: company.phone || "",
       website: company.website || "",
       address: company.address || "",
-      city: city,
-      state: state,
-      country: country,
+      city,
+      state,
+      country,
       category: company.category || "",
       subCategory: company.subcategory || "",
       employees: "", // Not stored in database currently
-      status: status,
+      status,
       submittedDate: company.createdAt || new Date().toISOString(),
       logo: company.logo || "",
       isActive: company.isActive, // Pass isActive to components for validation

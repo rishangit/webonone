@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { BacklogItem, CreateBacklogItemData, UpdateBacklogItemData } from '../../services/backlog';
-import { PaginationMeta } from '../../services/products';
+import { BacklogItem, CreateBacklogItemData, UpdateBacklogItemData } from '@/services/backlog';
+import { PaginationMeta } from '@/services/products';
 
 interface BacklogState {
   items: BacklogItem[];

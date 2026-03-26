@@ -3,17 +3,17 @@ import { useNavigate, Link } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Eye, EyeOff, Lock, Mail, User, UserPlus, Phone, ArrowLeft, ArrowRight, Check, X } from "lucide-react";
-import { Card } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
-import { ProgressBar } from "../../components/ui/progress-bar";
-import { PhoneInput } from "../../components/common/PhoneInput";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ProgressBar } from "@/components/ui/progress-bar";
+import { PhoneInput } from "@/components/common/PhoneInput";
 import { toast } from "sonner";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { signUpRequest } from "../../store/slices/authSlice";
-import { authService } from "../../services/auth";
-import { UserRole } from "../../types/user";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { signUpRequest } from "@/store/slices/authSlice";
+import { authService } from "@/services/auth";
+import { UserRole } from "@/types/user";
 import * as yup from "yup";
 
 // Step 1: Email validation schema

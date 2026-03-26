@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { CompanyWebTheme, CreateThemeData, UpdateThemeData } from '../../services/companyWebThemes';
+import { CompanyWebTheme, CreateThemeData, UpdateThemeData } from '@/services/companyWebThemes';
 
 interface CompanyWebThemesState {
   themes: CompanyWebTheme[];

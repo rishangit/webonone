@@ -1,19 +1,19 @@
 import { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
-import { Card } from "../../../../components/ui/card";
-import { Button } from "../../../../components/ui/button";
-import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { 
   fetchCompanyProductRequest, 
   updateCompanyProductRequest,
   clearError as clearCompanyProductsError 
-} from "../../../../store/slices/companyProductsSlice";
-import { fetchSystemProductRequest } from "../../../../store/slices/systemProductsSlice";
-import { CompanyProductVariant } from "../../../../services/companyProductVariants";
-import { companyProductVariantsService } from "../../../../services/companyProductVariants";
+} from "@/store/slices/companyProductsSlice";
+import { fetchSystemProductRequest } from "@/store/slices/systemProductsSlice";
+import { CompanyProductVariant } from "@/services/companyProductVariants";
+import { companyProductVariantsService } from "@/services/companyProductVariants";
 import { toast } from "sonner";
-import { VariantFormData } from "../../../../schemas/variantValidation";
-import { TabSwitcher } from "../../../../components/ui/tab-switcher";
+import { VariantFormData } from "@/schemas/variantValidation";
+import { TabSwitcher } from "@/components/ui/tab-switcher";
 import { CompanyProductDetailHeader } from "./CompanyProductDetailHeader";
 import { CompanyProductOverviewTab } from "./overview/CompanyProductOverviewTab";
 import { CompanyProductAttributesTab } from "./attributes/CompanyProductAttributesTab";

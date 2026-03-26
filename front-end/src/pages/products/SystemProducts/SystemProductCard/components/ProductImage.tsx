@@ -1,4 +1,4 @@
-import { ImageWithFallback } from "../../../../../components/figma/ImageWithFallback";
+import { ImageWithFallback } from "@/components/figma/ImageWithFallback";
 import { ProductImageProps } from "../types";
 import { getImageUrl, getFallbackImage } from "../utils";
 

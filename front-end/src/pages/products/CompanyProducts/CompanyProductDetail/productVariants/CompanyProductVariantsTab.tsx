@@ -1,6 +1,6 @@
-import { CompanyProduct } from "../../../../../services/companyProducts";
-import { CompanyProductVariant } from "../../../../../services/companyProductVariants";
-import { VariantFormData } from "../../../../../schemas/variantValidation";
+import { CompanyProduct } from "@/services/companyProducts";
+import { CompanyProductVariant } from "@/services/companyProductVariants";
+import { VariantFormData } from "@/schemas/variantValidation";
 import { CompanyProductVariantList } from "./CompanyProductVariantList";
 
 interface CompanyProductVariantsTabProps {

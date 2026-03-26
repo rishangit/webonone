@@ -1,9 +1,9 @@
 import { Building } from "lucide-react";
-import { Card } from "../../../../components/ui/card";
-import { Label } from "../../../../components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "../../../../components/ui/avatar";
-import { CardTitle } from "../../../../components/common/CardTitle";
-import { formatAvatarUrl } from "../../../../utils";
+import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CardTitle } from "@/components/common/CardTitle";
+import { formatAvatarUrl } from "@/utils";
 import { Company } from "../types";
 
 interface CompanyProfileCardProps {

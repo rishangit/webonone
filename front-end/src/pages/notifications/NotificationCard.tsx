@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { MoreVertical, Bell, Check, X, Clock, Users, Calendar, AlertTriangle, Info, CheckCircle, Star, Eye } from "lucide-react";
-import { Card } from "../../components/ui/card";
-import { Icon } from "../../components/common/Icon";
-import { Badge } from "../../components/ui/badge";
-import { Button } from "../../components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../../components/ui/dropdown-menu";
-import { DateDisplay } from "../../components/common/DateDisplay";
+import { Card } from "@/components/ui/card";
+import { Icon } from "@/components/common/Icon";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DateDisplay } from "@/components/common/DateDisplay";
 
 interface NotificationCardProps {
   notification: {

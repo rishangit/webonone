@@ -1,4 +1,4 @@
-import { Tag } from "../../../../services/products";
+import { Tag } from "@/services/products";
 
 export interface SystemProduct {
   id: string;

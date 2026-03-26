@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ServiceCard } from "../services/ServicesPage/components/ServiceCard";
+import { ServiceCard } from "@/pages/services/ServicesPage/components/ServiceCard";
 import { SpaceCard } from "../spaces/SpacesPage/components/SpaceCard";
 import { UserCard } from "../users/UserCard";
 import { StaffCard } from "../staff/StaffPage/components/StaffCard";

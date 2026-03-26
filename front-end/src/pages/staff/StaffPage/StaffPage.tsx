@@ -1,8 +1,8 @@
 import { UserPlus, Shield } from "lucide-react";
-import { Button } from "../../../components/ui/button";
-import { Card } from "../../../components/ui/card";
-import { Pagination } from "../../../components/common/Pagination";
-import { EmptyState } from "../../../components/common/EmptyState";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Pagination } from "@/components/common/Pagination";
+import { EmptyState } from "@/components/common/EmptyState";
 import { StaffDetailPage } from "../StaffDetailPage";
 import { AddStaffDialog } from "../addStaff/AddStaffDialog";
 import { StaffDetailDialog } from "../StaffDetailDialog";

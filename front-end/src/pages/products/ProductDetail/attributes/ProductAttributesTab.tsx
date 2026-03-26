@@ -1,19 +1,19 @@
 import { useState, useEffect } from "react";
 import { Plus, Trash2, Package, Star, MoreVertical } from "lucide-react";
-import { Card } from "../../../../components/ui/card";
-import { Button } from "../../../../components/ui/button";
-import { Badge } from "../../../../components/ui/badge";
-import { SearchInput } from "../../../../components/common/SearchInput";
-import { Checkbox } from "../../../../components/ui/checkbox";
-import { systemProductAttributesService, SystemProductAttribute } from "../../../../services/systemProductAttributes";
-import { productRelatedAttributesService, ProductRelatedAttribute } from "../../../../services/productRelatedAttributes";
-import { unitsOfMeasureService, UnitsOfMeasure } from "../../../../services/unitsOfMeasure";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { SearchInput } from "@/components/common/SearchInput";
+import { Checkbox } from "@/components/ui/checkbox";
+import { systemProductAttributesService, SystemProductAttribute } from "@/services/systemProductAttributes";
+import { productRelatedAttributesService, ProductRelatedAttribute } from "@/services/productRelatedAttributes";
+import { unitsOfMeasureService, UnitsOfMeasure } from "@/services/unitsOfMeasure";
 import { toast } from "sonner";
-import { CustomDialog } from "../../../../components/ui/custom-dialog";
-import { Label } from "../../../../components/ui/label";
-import { ViewSwitcher } from "../../../../components/ui/view-switcher";
-import { Pagination } from "../../../../components/common/Pagination";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../../../components/ui/dropdown-menu";
+import { CustomDialog } from "@/components/ui/custom-dialog";
+import { Label } from "@/components/ui/label";
+import { ViewSwitcher } from "@/components/ui/view-switcher";
+import { Pagination } from "@/components/common/Pagination";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface ProductAttributesTabProps {
   productId: string;

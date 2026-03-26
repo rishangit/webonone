@@ -1,5 +1,5 @@
 import { Users, CheckCircle } from "lucide-react";
-import { DateDisplay } from "../../../../../components/common/DateDisplay";
+import { DateDisplay } from "@/components/common/DateDisplay";
 import { ProductInfoProps } from "../types";
 
 export const ProductInfo = ({ product, variant = "grid" }: ProductInfoProps) => {

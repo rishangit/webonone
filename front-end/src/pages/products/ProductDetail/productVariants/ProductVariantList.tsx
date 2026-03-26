@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
 import { Plus, Package, Filter } from "lucide-react";
-import { Card } from "../../../../components/ui/card";
-import { Button } from "../../../../components/ui/button";
-import { Badge } from "../../../../components/ui/badge";
-import { SearchInput } from "../../../../components/common/SearchInput";
-import { ViewSwitcher } from "../../../../components/ui/view-switcher";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../components/ui/select";
-import { RightPanel } from "../../../../components/common/RightPanel";
-import { cn } from "../../../../components/ui/utils";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { SearchInput } from "@/components/common/SearchInput";
+import { ViewSwitcher } from "@/components/ui/view-switcher";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RightPanel } from "@/components/common/RightPanel";
+import { cn } from "@/components/ui/utils";
 import { ProductVariantCard } from "./ProductVariantCard";
-import { ProductVariant as SystemProductVariant } from "../../../../services/productVariants";
+import { ProductVariant as SystemProductVariant } from "@/services/productVariants";
 
 interface LegacyProductVariant {
   id: string;

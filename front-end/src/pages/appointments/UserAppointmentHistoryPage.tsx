@@ -1,20 +1,20 @@
 import { useState, useEffect, useMemo } from "react";
 import { ArrowLeft, Calendar, Clock, Users, CheckCircle, XCircle, Phone, MapPin, Search, Filter, User, Mail } from "lucide-react";
-import { Card } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
-import { Badge } from "../../components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AppointmentCard } from "./AppointmentCard";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { fetchUserAppointmentHistoryRequest } from "../../store/slices/appointmentHistorySlice";
-import { fetchUsersRequest } from "../../store/slices/usersSlice";
-import { fetchStaffRequest } from "../../store/slices/staffSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchUserAppointmentHistoryRequest } from "@/store/slices/appointmentHistorySlice";
+import { fetchUsersRequest } from "@/store/slices/usersSlice";
+import { fetchStaffRequest } from "@/store/slices/staffSlice";
 import { formatAvatarUrl } from "../../utils";
 import { toast } from "sonner";
-import { DateDisplay } from "../../components/common/DateDisplay";
-import { AppointmentStatus, normalizeAppointmentStatus, getAppointmentStatusLabel } from "../../types/appointmentStatus";
+import { DateDisplay } from "@/components/common/DateDisplay";
+import { AppointmentStatus, normalizeAppointmentStatus, getAppointmentStatusLabel } from "@/types/appointmentStatus";
 
 interface User {
   email: string;

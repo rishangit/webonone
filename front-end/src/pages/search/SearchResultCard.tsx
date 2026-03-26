@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Calendar, User, Building, Package, MapPin, Bell, Users, CreditCard, MoreVertical, Eye, ExternalLink } from "lucide-react";
-import { Card } from "../../components/ui/card";
-import { Badge } from "../../components/ui/badge";
-import { Button } from "../../components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../../components/ui/dropdown-menu";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface SearchResult {
   id: string;

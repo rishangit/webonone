@@ -1,6 +1,6 @@
 import { Shield } from "lucide-react";
-import { Card } from "../../../../components/ui/card";
-import { CardTitle } from "../../../../components/common/CardTitle";
+import { Card } from "@/components/ui/card";
+import { CardTitle } from "@/components/common/CardTitle";
 import { PermissionsCardProps } from "../types";
 import { PERMISSIONS } from "../constants";
 

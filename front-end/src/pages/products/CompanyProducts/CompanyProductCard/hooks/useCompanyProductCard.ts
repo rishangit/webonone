@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "../../../../../store/hooks";
-import { fetchCompanyRequest } from "../../../../../store/slices/companiesSlice";
-import { companiesService } from "../../../../../services/companies";
-import { currenciesService, Currency } from "../../../../../services/currencies";
-import { companyProductVariantsService } from "../../../../../services/companyProductVariants";
-import { CompanyProduct } from "../../../../../services/companyProducts";
-import { CompanyProductVariant } from "../../../../../services/companyProductVariants";
-import { isRole, UserRole } from "../../../../../types/user";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchCompanyRequest } from "@/store/slices/companiesSlice";
+import { companiesService } from "@/services/companies";
+import { currenciesService, Currency } from "@/services/currencies";
+import { companyProductVariantsService } from "@/services/companyProductVariants";
+import { CompanyProduct } from "@/services/companyProducts";
+import { CompanyProductVariant } from "@/services/companyProductVariants";
+import { isRole, UserRole } from "@/types/user";
 import {
   getImageUrl,
   formatPrice as formatPriceUtil,

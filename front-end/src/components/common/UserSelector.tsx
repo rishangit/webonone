@@ -6,7 +6,7 @@ import { Input } from "../ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { cn } from "../ui/utils";
 import { formatAvatarUrl } from "../../utils";
-import { User } from "../../types/user";
+import { User } from "@/types/user";
 
 interface UserSelectorProps {
   value: string | null;

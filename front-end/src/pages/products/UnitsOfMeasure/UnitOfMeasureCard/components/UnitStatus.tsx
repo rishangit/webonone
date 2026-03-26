@@ -1,4 +1,4 @@
-import { Badge } from "../../../../../components/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { UnitStatusProps } from "../types";
 
 export const UnitStatus = ({ isActive, className = "" }: UnitStatusProps) => {

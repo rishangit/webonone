@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { Moon, Sun, Monitor, User, Bell, Lock, Globe, Palette, Eye, Shield, Smartphone, Mail, MessageSquare, Calendar, Clock } from "lucide-react";
-import { Card } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { Switch } from "../../components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
-import { Separator } from "../../components/ui/separator";
-import { Badge } from "../../components/ui/badge";
-import { TabSwitcher } from "../../components/ui/tab-switcher";
-import { useIsMobile } from "../../components/ui/use-mobile";
-import { config } from "../../config/environment";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { TabSwitcher } from "@/components/ui/tab-switcher";
+import { useIsMobile } from "@/components/ui/use-mobile";
+import { config } from "@/config/environment";
 import { CompanySettingsPage } from "../companies/CompanySettingsPage";
 
 interface SettingsPageProps {

@@ -1,12 +1,12 @@
 import { Filter } from "lucide-react";
-import { Card } from "../../../../components/ui/card";
-import { Button } from "../../../../components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../components/ui/select";
-import { Badge } from "../../../../components/ui/badge";
-import { SearchInput } from "../../../../components/common/SearchInput";
-import { ViewSwitcher } from "../../../../components/ui/view-switcher";
-import { RightPanel } from "../../../../components/common/RightPanel";
-import { cn } from "../../../../components/ui/utils";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { SearchInput } from "@/components/common/SearchInput";
+import { ViewSwitcher } from "@/components/ui/view-switcher";
+import { RightPanel } from "@/components/common/RightPanel";
+import { cn } from "@/components/ui/utils";
 import { SpacesFiltersProps } from "../types";
 
 export const SpacesFilters = ({

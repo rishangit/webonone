@@ -1,6 +1,6 @@
 import { Clock } from "lucide-react";
-import { Card } from "../../../../components/ui/card";
-import { CardTitle } from "../../../../components/common/CardTitle";
+import { Card } from "@/components/ui/card";
+import { CardTitle } from "@/components/common/CardTitle";
 import { WorkScheduleCardProps } from "../types";
 import { daysOfWeek } from "../constants";
 import { DayScheduleItem } from "./DayScheduleItem";

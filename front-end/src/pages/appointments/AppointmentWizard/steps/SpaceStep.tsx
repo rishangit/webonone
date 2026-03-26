@@ -1,10 +1,10 @@
 import { MapPin, Users, Search, Check } from "lucide-react";
-import { Button } from "../../../../components/ui/button";
-import { Card } from "../../../../components/ui/card";
-import { Input } from "../../../../components/ui/input";
-import { Badge } from "../../../../components/ui/badge";
-import { ViewSwitcher } from "../../../../components/ui/view-switcher";
-import { ImageWithFallback } from "../../../../components/figma/ImageWithFallback";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { ViewSwitcher } from "@/components/ui/view-switcher";
+import { ImageWithFallback } from "@/components/figma/ImageWithFallback";
 import { formatAvatarUrl } from "../../../../utils";
 import { toast } from "sonner";
 

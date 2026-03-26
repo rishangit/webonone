@@ -1,15 +1,15 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { 
   fetchSpacesRequest, 
   createSpaceRequest, 
   updateSpaceRequest, 
   deleteSpaceRequest,
   clearError 
-} from "../../../../store/slices/spacesSlice";
-import { Space, CreateSpaceData } from "../../../../services/spaces";
+} from "@/store/slices/spacesSlice";
+import { Space, CreateSpaceData } from "@/services/spaces";
 import { SpaceFormData } from "../types";
 
 export const useSpacesPage = () => {
@@ -75,7 +75,7 @@ export const useSpacesPage = () => {
       const filters: any = {
         companyId,
         limit: itemsPerPage,
-        offset: offset,
+        offset,
         page: currentPage,
       };
 
@@ -151,7 +151,7 @@ export const useSpacesPage = () => {
       status: space.status,
       description: space.description || "",
       imageUrl: space.imageUrl || "",
-      tagIds: tagIds
+      tagIds
     });
     setIsEditDialogOpen(true);
   };

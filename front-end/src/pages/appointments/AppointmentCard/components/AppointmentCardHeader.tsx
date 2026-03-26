@@ -1,9 +1,9 @@
 import { MoreVertical, CheckCircle, XCircle, Eye, FileText, RotateCcw, Play, Check, Receipt, Trash2 } from "lucide-react";
-import { Badge } from "../../../../components/ui/badge";
-import { Button } from "../../../../components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "../../../../components/ui/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../../../../components/ui/dropdown-menu";
-import { AppointmentStatus } from "../../../../types/appointmentStatus";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { AppointmentStatus } from "@/types/appointmentStatus";
 
 interface AppointmentCardHeaderProps {
   patientName: string;

@@ -1,7 +1,7 @@
 import { Observable, of, from } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { ofType } from 'redux-observable';
-import { usersService } from '../../services/users';
+import { usersService } from '@/services/users';
 import {
   fetchUsersRequest,
   fetchUsersSuccess,

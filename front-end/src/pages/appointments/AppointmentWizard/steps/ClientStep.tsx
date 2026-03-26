@@ -1,9 +1,9 @@
 import { User, Search, Check, UserPlus } from "lucide-react";
-import { Button } from "../../../../components/ui/button";
-import { Card } from "../../../../components/ui/card";
-import { Input } from "../../../../components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "../../../../components/ui/avatar";
-import { DateDisplay } from "../../../../components/common/DateDisplay";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DateDisplay } from "@/components/common/DateDisplay";
 import { formatAvatarUrl } from "../../../../utils";
 
 interface ClientStepProps {

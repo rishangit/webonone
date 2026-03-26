@@ -1,8 +1,8 @@
 import { Bug, Sparkles } from "lucide-react";
-import { CustomDialog } from "../../components/ui/custom-dialog";
-import { Badge } from "../../components/ui/badge";
-import { BacklogItem } from '../../services/backlog';
-import { formatAvatarUrl } from "../../utils";
+import { CustomDialog } from "@/components/ui/custom-dialog";
+import { Badge } from "@/components/ui/badge";
+import { BacklogItem } from '@/services/backlog';
+import { formatAvatarUrl } from "@/utils";
 
 interface BacklogViewDialogProps {
   open: boolean;
