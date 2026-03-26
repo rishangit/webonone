@@ -162,7 +162,7 @@ const ImageAddonEditDialog = ({
         title="Image addon settings"
         description="Select an existing media image or upload a new one."
         icon={<ImageIcon className="w-5 h-5" />}
-        maxWidth="max-w-4xl"
+        size="xlarge"
         footer={
           <>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

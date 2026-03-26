@@ -393,13 +393,8 @@ export const ResizableContentBlock = ({
         >
           {isSelected && (
           <div
-            className="edit-button delete-button move-button absolute left-2 right-2 top-2 z-50 flex min-h-8 items-center justify-end gap-1.5 px-1 py-0.5"
-            style={{
-              borderWidth: 1,
-              borderStyle: 'solid',
-              borderColor: 'var(--accent-border)',
-              backgroundColor: 'color-mix(in oklab, var(--accent-bg) 88%, transparent)',
-            }}
+            className="edit-button delete-button move-button absolute top-1 right-1 z-50 flex items-center gap-1 pointer-events-auto"
+            style={{ zIndex: 200 }}
             onMouseDown={(e) => {
               e.stopPropagation();
               onSelectBlock?.();

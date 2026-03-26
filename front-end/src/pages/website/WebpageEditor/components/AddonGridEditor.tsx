@@ -513,7 +513,7 @@ export const AddonGridEditor = ({
             >
               {isAddonSelected && (
               <div
-                className="absolute top-0.5 right-0.5 flex items-center gap-1 pointer-events-auto"
+                className="absolute top-1 right-1 flex items-center gap-1 pointer-events-auto"
                 style={{ zIndex: 200 }}
                 onMouseDown={(e) => e.stopPropagation()}
               >

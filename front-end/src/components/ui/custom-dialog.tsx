@@ -4,6 +4,8 @@ import { X } from "lucide-react";
 import { cn } from "./utils";
 import { Icon } from "../common/Icon";
 
+type CustomDialogSize = "small" | "medium" | "large" | "xlarge";
+
 interface CustomDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -13,6 +15,9 @@ interface CustomDialogProps {
   customHeader?: ReactNode; // For completely custom header layout
   children: ReactNode;
   footer?: ReactNode;
+  /** Standardized dialog sizing for consistency across the app. */
+  size?: CustomDialogSize;
+  /** Legacy/custom width override. Prefer `size`; keep for edge cases. */
   maxWidth?: string;
   className?: string;
   disableContentScroll?: boolean;
@@ -30,6 +35,7 @@ export function CustomDialog({
   customHeader,
   children,
   footer,
+  size = "medium",
   maxWidth = "max-w-lg",
   className,
   disableContentScroll = false,
@@ -44,24 +50,51 @@ export function CustomDialog({
     return `dialog-description-${id}`;
   }, [dialogId]);
 
+  const sizeClasses: Record<CustomDialogSize, string> = {
+    small: "",
+    medium: "",
+    large: "",
+    xlarge: "",
+  };
+
+  const sizeWidthByPreset: Record<CustomDialogSize, string> = {
+    small: "66.666667vw",
+    medium: "75vw",
+    large: "80vw",
+    xlarge: "83.333333vw",
+  };
+
+  // Legacy/custom width override classes for edge cases.
+  const effectiveWidthClass =
+    maxWidth && maxWidth !== "max-w-lg"
+      ? (maxWidth.includes("w-[") || maxWidth.includes("max-w-")
+          ? `sm:${maxWidth}`
+          : `sm:${maxWidth}`)
+      : sizeClasses[size];
+
+  // Use inline width for standardized sizes so it does not depend on generated Tailwind utilities.
+  const effectiveWidthStyle =
+    maxWidth && maxWidth !== "max-w-lg" ? undefined : sizeWidthByPreset[size];
+
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" />
-        <div className="fixed inset-0 z-50 w-full h-full px-2 py-2 sm:px-0 sm:py-0 pointer-events-none flex justify-center items-center">
+        <div className="fixed inset-0 z-50 w-full h-full px-2 py-2 sm:px-4 sm:py-4 pointer-events-none flex justify-center items-center">
           <DialogPrimitive.Content
             className={cn(
               "bg-background dark:bg-[var(--glass-bg)] border-[var(--glass-border)] backdrop-blur-sm rounded-lg shadow-lg",
               "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 border duration-200",
               "max-h-[calc(100vh-1rem)] flex flex-col pointer-events-auto",
-              // Use w-full on mobile, but respect maxWidth on desktop
-              "w-full sm:w-auto",
-              maxWidth.includes('w-[') || maxWidth.includes('max-w-') 
-                ? `sm:${maxWidth}` 
-                : `sm:${maxWidth}`,
+              // Keep side margins; desktop width comes from size/maxWidth preset.
+              "w-[calc(100vw-1rem)]",
+              effectiveWidthClass,
               className
             )}
-            style={{ maxHeight: 'calc(100vh - 1rem)' }}
+            style={{
+              maxHeight: "calc(100vh - 1rem)",
+              width: effectiveWidthStyle,
+            }}
             aria-describedby={describedBy}
           >
           {/* Header */}

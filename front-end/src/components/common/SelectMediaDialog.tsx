@@ -13,6 +13,7 @@ interface SelectMediaDialogProps {
   selectedPath?: string;
   onSelect: (path: string) => void;
   title?: string;
+  description?: string;
 }
 
 export const SelectMediaDialog = ({
@@ -22,6 +23,7 @@ export const SelectMediaDialog = ({
   selectedPath,
   onSelect,
   title = "Select media",
+  description = "Select an image from media library or upload a new one.",
 }: SelectMediaDialogProps) => {
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
   const [loadingMedia, setLoadingMedia] = useState(false);
@@ -52,9 +54,9 @@ export const SelectMediaDialog = ({
         open={open}
         onOpenChange={onOpenChange}
         title={title}
-        description="Select an image from media library or upload a new one."
+        description={description}
         icon={<ImageIcon className="w-5 h-5" />}
-        maxWidth="max-w-4xl"
+        size="xlarge"
         footer={
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             Close
@@ -62,7 +64,10 @@ export const SelectMediaDialog = ({
         }
       >
         <div className="space-y-4">
-          <div className="flex items-center justify-end">
+          <div className="flex items-center justify-between rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/50 px-3 py-2">
+            <p className="text-xs text-muted-foreground">
+              Select an image
+            </p>
             <Button
               type="button"
               variant="outline"
@@ -75,9 +80,11 @@ export const SelectMediaDialog = ({
           </div>
 
           {loadingMedia ? (
-            <div className="text-sm text-muted-foreground">Loading media...</div>
+            <div className="h-[30rem] rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/30 p-4 text-sm text-muted-foreground">
+              Loading media...
+            </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-h-80 overflow-auto pr-1">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 h-[30rem] overflow-auto pr-1 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/30 p-2">
               {mediaFiles.map((file) => {
                 const url = getMediaFileUrl(companyId, file.path);
                 const isSelected = selectedPath === file.path;
@@ -91,11 +98,11 @@ export const SelectMediaDialog = ({
                     }}
                     className={`rounded-md border p-2 text-left transition-colors ${
                       isSelected
-                        ? "border-[var(--accent-primary)] bg-[var(--accent-bg)]"
-                        : "border-[var(--glass-border)] hover:border-[var(--accent-primary)]/60"
+                        ? "border-[var(--accent-primary)] bg-[var(--accent-bg)] ring-1 ring-[var(--accent-primary)]/30"
+                        : "border-[var(--glass-border)] bg-background/70 hover:border-[var(--accent-primary)]/60 hover:bg-[var(--accent-bg)]/40"
                     }`}
                   >
-                    <img src={url} alt={file.name} className="w-full h-24 object-cover rounded-sm mb-2" />
+                    <img src={url} alt={file.name} className="w-full h-28 object-cover rounded-sm mb-2" />
                     <p className="text-xs text-foreground truncate">{file.name}</p>
                   </button>
                 );

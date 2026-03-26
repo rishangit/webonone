@@ -22,6 +22,8 @@ interface EditorCanvasProps {
   viewMode?: ViewMode;
   contentBlocks?: ContentBlock[];
   activeBreakpointName?: BreakpointName;
+  selection?: EditorSelection | null;
+  onSelectionChange?: (selection: EditorSelection | null) => void;
   /** Tailwind min-width (px) — canvas is centered at this width so editing matches that breakpoint without resizing the browser. */
   canvasPreviewWidthPx?: number;
   companyId?: string;
@@ -38,6 +40,8 @@ export const EditorCanvas = ({
   viewMode = "visual",
   contentBlocks = [],
   activeBreakpointName = "2xl",
+  selection: selectionProp,
+  onSelectionChange,
   canvasPreviewWidthPx,
   companyId,
   themeTextSettings,
@@ -50,7 +54,14 @@ export const EditorCanvas = ({
   const [localContent, setLocalContent] = useState(content);
   const canvasRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(1200);
-  const [selection, setSelection] = useState<EditorSelection | null>(null);
+  const [internalSelection, setInternalSelection] = useState<EditorSelection | null>(null);
+  const isSelectionControlled = selectionProp !== undefined;
+  const selection = isSelectionControlled ? selectionProp : internalSelection;
+
+  const updateSelection = (next: EditorSelection | null) => {
+    if (!isSelectionControlled) setInternalSelection(next);
+    onSelectionChange?.(next);
+  };
 
   useEffect(() => {
     setLocalContent(content);
@@ -60,15 +71,15 @@ export const EditorCanvas = ({
     if (!selection) return;
     if (selection.type === "block") {
       if (!contentBlocks.some((b) => b.id === selection.id)) {
-        setSelection(null);
+        updateSelection(null);
       }
     } else {
       const block = contentBlocks.find((b) => b.id === selection.blockId);
       if (!block?.addons?.some((a) => a.id === selection.addonId)) {
-        setSelection(null);
+        updateSelection(null);
       }
     }
-  }, [contentBlocks, selection]);
+  }, [contentBlocks, selection, isSelectionControlled]);
 
   useLayoutEffect(() => {
     const el = canvasRef.current;
@@ -111,7 +122,7 @@ export const EditorCanvas = ({
         className="relative w-full min-h-screen"
         onMouseDown={(e) => {
           if (e.target === e.currentTarget) {
-            setSelection(null);
+            updateSelection(null);
           }
         }}
       >
@@ -178,7 +189,7 @@ export const EditorCanvas = ({
           className="relative grid grid-cols-12 gap-0 w-full min-h-screen"
           onMouseDown={(e) => {
             if (e.target === e.currentTarget) {
-              setSelection(null);
+              updateSelection(null);
             }
           }}
           style={{
@@ -219,9 +230,9 @@ export const EditorCanvas = ({
                       ? selection.addonId
                       : null
                   }
-                  onSelectBlock={() => setSelection({ type: "block", id: block.id })}
+                  onSelectBlock={() => updateSelection({ type: "block", id: block.id })}
                   onSelectAddon={(addonId) =>
-                    setSelection({
+                    updateSelection({
                       type: "addon",
                       blockId: block.id,
                       addonId,

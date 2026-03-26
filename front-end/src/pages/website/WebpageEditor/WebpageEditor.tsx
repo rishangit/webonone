@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronRight, Layers } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import {
@@ -28,6 +28,7 @@ import {
 import { ensureAddonLayouts } from "./addons/addonGridUtils";
 import { toast } from "sonner";
 import { nanoid } from "nanoid";
+import type { EditorSelection } from "./components/EditorCanvas";
 
 interface WebpageEditorProps {
   fullWidth?: boolean; // If true, editor opens in full width without sidebar
@@ -59,6 +60,8 @@ export const WebpageEditor = (props: WebpageEditorProps = {}) => {
 
   const [viewMode, setViewMode] = useState<ViewMode>('visual');
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
+  const [editorSelection, setEditorSelection] = useState<EditorSelection | null>(null);
+  const [expandedBlocks, setExpandedBlocks] = useState<Record<string, boolean>>({});
 
   /** Layout being edited (canvas width + layoutByBreakpoint key) — independent of browser width. */
   const [editorBreakpoint, setEditorBreakpoint] = useState<BreakpointName>(() =>
@@ -147,6 +150,30 @@ export const WebpageEditor = (props: WebpageEditorProps = {}) => {
       }
     }
   }, [currentWebPage]);
+
+  useEffect(() => {
+    setExpandedBlocks((prev) => {
+      const next: Record<string, boolean> = {};
+      for (const block of contentBlocks) {
+        next[block.id] = prev[block.id] ?? true;
+      }
+      return next;
+    });
+  }, [contentBlocks]);
+
+  useEffect(() => {
+    if (!editorSelection) return;
+    if (editorSelection.type === "block") {
+      if (!contentBlocks.some((b) => b.id === editorSelection.id)) {
+        setEditorSelection(null);
+      }
+      return;
+    }
+    const block = contentBlocks.find((b) => b.id === editorSelection.blockId);
+    if (!block?.addons?.some((a) => a.id === editorSelection.addonId)) {
+      setEditorSelection(null);
+    }
+  }, [contentBlocks, editorSelection]);
 
   useEffect(() => {
     if (error) {
@@ -413,22 +440,107 @@ export const WebpageEditor = (props: WebpageEditorProps = {}) => {
         />
       </div>
 
-      {/* Editor Canvas - Full width */}
-      <div className="flex-1 min-h-0 overflow-hidden flex flex-col w-full">
-        <EditorCanvas
-          content={editorState.content}
-          viewMode={viewMode}
-          contentBlocks={contentBlocks}
-          activeBreakpointName={activeBreakpointName}
-          canvasPreviewWidthPx={TAILWIND_MIN_WIDTH_PX[editorBreakpoint]}
-          companyId={currentWebPage?.companyId}
-          themeTextSettings={themeTextSettings}
-          themeButtonSettings={themeButtonSettings}
-          companyWebPages={webPages}
-          addonRenderContext="editor"
-          onUpdateBlock={handleUpdateBlock}
-          onDeleteBlock={handleDeleteBlock}
-        />
+      {/* Content Tree + Editor Canvas */}
+      <div className="flex-1 min-h-0 overflow-hidden flex w-full">
+        {viewMode === "edit" && (
+          <aside className="w-72 shrink-0 border-r border-[var(--glass-border)] bg-[var(--glass-bg)]/70 backdrop-blur-sm overflow-auto">
+            <div className="p-3 border-b border-[var(--glass-border)] flex items-center gap-2">
+              <Layers className="w-4 h-4 text-[var(--accent-text)]" />
+              <span className="text-sm font-medium text-foreground">Content Tree</span>
+            </div>
+            <div className="p-2 space-y-1">
+              {contentBlocks.map((block) => {
+                const isBlockSelected =
+                  editorSelection?.type === "block" && editorSelection.id === block.id;
+                const isAddonSelectedInBlock =
+                  editorSelection?.type === "addon" && editorSelection.blockId === block.id;
+                const isExpanded = expandedBlocks[block.id] ?? true;
+                const titleText = block.content?.trim()
+                  ? block.content.replace(/\s+/g, " ").slice(0, 28)
+                  : "Content element";
+                return (
+                  <div key={block.id}>
+                    <button
+                      type="button"
+                      className={`w-full flex items-center gap-2 text-left px-2 py-1.5 rounded text-xs transition-colors ${
+                        isBlockSelected || isAddonSelectedInBlock
+                          ? "bg-[var(--accent-bg)] text-[var(--accent-text)]"
+                          : "text-muted-foreground hover:bg-[var(--accent-bg)] hover:text-[var(--accent-text)]"
+                      }`}
+                      onClick={() => {
+                        setEditorSelection({ type: "block", id: block.id });
+                        setExpandedBlocks((prev) => ({ ...prev, [block.id]: !isExpanded }));
+                      }}
+                    >
+                      {isExpanded ? (
+                        <ChevronDown className="w-5 h-5 md:w-4 md:h-4 shrink-0" />
+                      ) : (
+                        <ChevronRight className="w-5 h-5 md:w-4 md:h-4 shrink-0" />
+                      )}
+                      <span className="truncate">{titleText}</span>
+                    </button>
+                    {isExpanded && (
+                      <div className="ml-7 mr-1 mb-1.5 mt-1 space-y-1">
+                        {(block.addons || []).map((addon) => {
+                          const isAddonSelected =
+                            editorSelection?.type === "addon" &&
+                            editorSelection.blockId === block.id &&
+                            editorSelection.addonId === addon.id;
+                          return (
+                            <button
+                              key={addon.id}
+                              type="button"
+                              className={`w-full flex items-center gap-2 text-left px-2 py-1.5 rounded text-xs transition-colors ${
+                                isAddonSelected
+                                  ? "bg-[var(--accent-bg)] text-[var(--accent-text)]"
+                                  : "text-muted-foreground hover:bg-[var(--accent-bg)] hover:text-[var(--accent-text)]"
+                              }`}
+                              onClick={() =>
+                                setEditorSelection({
+                                  type: "addon",
+                                  blockId: block.id,
+                                  addonId: addon.id,
+                                })
+                              }
+                            >
+                              <span className="truncate">
+                                {addon.type} addon
+                              </span>
+                            </button>
+                          );
+                        })}
+                        {!block.addons?.length && (
+                          <div className="w-full flex items-center gap-2 text-left px-2 py-1.5 rounded text-xs text-muted-foreground/80">
+                            <span className="truncate">No addons</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </aside>
+        )}
+
+        <div className="flex-1 min-h-0 overflow-hidden flex flex-col w-full">
+          <EditorCanvas
+            content={editorState.content}
+            viewMode={viewMode}
+            contentBlocks={contentBlocks}
+            activeBreakpointName={activeBreakpointName}
+            selection={editorSelection}
+            onSelectionChange={setEditorSelection}
+            canvasPreviewWidthPx={TAILWIND_MIN_WIDTH_PX[editorBreakpoint]}
+            companyId={currentWebPage?.companyId}
+            themeTextSettings={themeTextSettings}
+            themeButtonSettings={themeButtonSettings}
+            companyWebPages={webPages}
+            addonRenderContext="editor"
+            onUpdateBlock={handleUpdateBlock}
+            onDeleteBlock={handleDeleteBlock}
+          />
+        </div>
       </div>
     </div>
   );
