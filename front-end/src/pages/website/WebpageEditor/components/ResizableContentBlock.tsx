@@ -485,43 +485,37 @@ export const ResizableContentBlock = ({
           </div>
           )}
 
-          <div className={isSelected ? 'pt-10' : ''}>
+          <div className={`h-full ${isSelected ? 'pt-10' : ''}`}>
           {block.content && block.content !== 'New Content Block' ? (
             <div className="p-3">{block.content}</div>
           ) : null}
 
-          <div className="flex-1 min-h-0 overflow-auto">
-            {addons.length ? (
-              <AddonGridEditor
-                block={block}
-                addons={addons}
-                selectedAddonId={selectedAddonId}
-                onSelectAddon={(id) => onSelectAddon?.(id)}
-                gridColumnWidth={gridColumnWidth}
-                gridRowHeight={gridRowHeight}
-                companyId={companyId}
-                themeTextSettings={themeTextSettings}
-                themeButtonSettings={themeButtonSettings}
-                companyWebPages={companyWebPages}
-                addonRenderContext={addonRenderContext}
-                onUpdateAddons={(next, shouldPersist, markDirty) => {
-                  onUpdate(
-                    { ...block, addons: next },
-                    shouldPersist ?? false,
-                    markDirty ?? true
-                  );
-                }}
-                onEditAddon={(id) => {
-                  onSelectAddon?.(id);
-                  setEditingAddonId(id);
-                }}
-                onDeleteAddon={handleDeleteAddon}
-              />
-            ) : (
-              <div className="h-full min-h-[80px] flex items-center justify-center text-xs text-muted-foreground">
-                No addons yet. Hover to add an addon.
-              </div>
-            )}
+          <div className="flex-1 min-h-0 h-full overflow-auto">
+            <AddonGridEditor
+              block={block}
+              addons={addons}
+              selectedAddonId={selectedAddonId}
+              onSelectAddon={(id) => onSelectAddon?.(id)}
+              gridColumnWidth={gridColumnWidth}
+              gridRowHeight={gridRowHeight}
+              companyId={companyId}
+              themeTextSettings={themeTextSettings}
+              themeButtonSettings={themeButtonSettings}
+              companyWebPages={companyWebPages}
+              addonRenderContext={addonRenderContext}
+              onUpdateAddons={(next, shouldPersist, markDirty) => {
+                onUpdate(
+                  { ...block, addons: next },
+                  shouldPersist ?? false,
+                  markDirty ?? true
+                );
+              }}
+              onEditAddon={(id) => {
+                onSelectAddon?.(id);
+                setEditingAddonId(id);
+              }}
+              onDeleteAddon={handleDeleteAddon}
+            />
           </div>
           </div>
         </div>

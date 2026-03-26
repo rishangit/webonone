@@ -74,13 +74,29 @@ export const AddonGridEditor = ({
   const addonGridRef = useRef<HTMLDivElement>(null);
   const addonColumnWidthPxRef = useRef(Math.max(1, gridColumnWidth));
 
+  const parseFirstTrackPx = (gridTemplateColumns: string): number | null => {
+    // Example computed value: "94.5px 94.5px ...", one entry per column.
+    const first = gridTemplateColumns.trim().split(/\s+/)[0];
+    if (!first) return null;
+    const px = Number.parseFloat(first);
+    return Number.isFinite(px) && px > 0 ? px : null;
+  };
+
   const measureAddonColumnWidth = () => {
     const el = addonGridRef.current;
     if (!el) return;
+    const computed = getComputedStyle(el);
+    const firstTrackPx = parseFirstTrackPx(computed.gridTemplateColumns);
+    if (firstTrackPx != null) {
+      // Use the browser-resolved CSS grid track width for exact snap alignment.
+      addonColumnWidthPxRef.current = Math.max(1, firstTrackPx);
+      return;
+    }
+    // Fallback when computed tracks are not in px.
     const w = el.clientWidth;
-    const gap = parseFloat(getComputedStyle(el).columnGap) || 0;
+    const gap = parseFloat(computed.columnGap) || 0;
     const gapsBetweenCols = 11;
-    addonColumnWidthPxRef.current = Math.max(4, (w - gapsBetweenCols * gap) / 12);
+    addonColumnWidthPxRef.current = Math.max(1, (w - gapsBetweenCols * gap) / 12);
   };
 
   useLayoutEffect(() => {
@@ -377,15 +393,19 @@ export const AddonGridEditor = ({
 
   return (
     <div
-      className="relative w-full min-h-0"
-      style={{ minHeight: `${gridMinHeight}px` }}
+      className="relative w-full h-full min-h-0"
+      style={{ height: "100%", minHeight: `${gridMinHeight}px` }}
     >
       <div
         ref={addonGridRef}
-        className="grid w-full grid-cols-12 gap-0"
+        className="grid w-full h-full grid-cols-12 gap-0"
         style={{
           position: "relative",
           isolation: "isolate",
+          display: "grid",
+          gridTemplateColumns: "repeat(12, minmax(0, 1fr))",
+          boxSizing: "border-box",
+          height: "100%",
           gridAutoRows: `${gridRowHeight}px`,
           minHeight: `${gridMinHeight}px`,
         }}
@@ -398,8 +418,11 @@ export const AddonGridEditor = ({
               return (
                 <div
                   key={`addon-col-line-${i}`}
-                  className="absolute top-0 bottom-0 w-px border-l border-dashed border-blue-200/40"
-                  style={{ left: `${leftPosition}%` }}
+                  className="absolute top-0 bottom-0 w-px"
+                  style={{
+                    left: `${leftPosition}%`,
+                    borderLeft: "1px dashed rgba(96, 165, 250, 0.45)",
+                  }}
                 />
               );
             })}
@@ -412,6 +435,15 @@ export const AddonGridEditor = ({
             />
           ))}
         </div>
+
+        {displayAddons.length === 0 && (
+          <div
+            className="absolute inset-0 flex items-center justify-center text-xs text-muted-foreground pointer-events-none"
+            style={{ zIndex: 1 }}
+          >
+            No addons yet. Hover to add an addon.
+          </div>
+        )}
 
         {displayAddons.map((addon, stackIndex) => {
           const module = getAddonModuleByType(addon.type);
