@@ -365,11 +365,9 @@ export const ResizableContentBlock = ({
         }}
       >
       <div
-        className={`w-full h-full overflow-auto ${!bgColor ? 'bg-white' : ''}`}
+        className={`w-full h-full overflow-clip ${!bgColor ? 'bg-white' : ''}`}
         style={{
           cursor: 'default',
-          /* Reserve space for vertical scrollbar so right-edge UI (addon east resize) is not covered */
-          scrollbarGutter: 'stable',
           ...(bgColor ? { backgroundColor: bgColor } : {}),
         }}
       >
@@ -486,12 +484,12 @@ export const ResizableContentBlock = ({
           </div>
           )}
 
-          <div className={`h-full ${isSelected ? 'pt-8' : ''}`}>
+          <div className="h-full">
           {block.content && block.content !== 'New Content Block' ? (
             <div>{block.content}</div>
           ) : null}
 
-          <div className="flex-1 min-h-0 h-full overflow-auto">
+          <div className="flex-1 min-h-0 h-full overflow-clip">
             <AddonGridEditor
               block={block}
               addons={addons}

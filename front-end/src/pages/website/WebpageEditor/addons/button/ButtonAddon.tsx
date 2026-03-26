@@ -9,6 +9,14 @@ import { MousePointerClick } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "../../../../../components/ui/button";
 import { Label } from "../../../../../components/ui/label";
+import { Input } from "../../../../../components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../../../components/ui/select";
 import { CustomDialog } from "../../../../../components/ui/custom-dialog";
 import type { ThemeButtonSetting, ThemeTextSetting } from "../../../../../services/companyWebThemes";
 import { AddonEditProps, AddonModule, AddonRenderProps } from "../types";
@@ -196,6 +204,7 @@ const ButtonAddonEditDialog = ({
     reset,
     setValue,
     getValues,
+    watch,
     formState: { errors },
   } = useForm<ButtonAddonFormValues>({
     resolver: yupResolver(buttonAddonSchema) as any,
@@ -205,6 +214,9 @@ const ButtonAddonEditDialog = ({
       linkWebPageId: data.linkWebPageId ?? "",
     },
   });
+
+  const currentButtonName = watch("buttonName");
+  const currentLinkWebPageId = watch("linkWebPageId");
 
   useEffect(() => {
     if (!open) return;
@@ -300,11 +312,9 @@ const ButtonAddonEditDialog = ({
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="button-addon-label">Text</Label>
-          <input
+          <Input
             id="button-addon-label"
-            type="text"
             placeholder="Button label…"
-            className="w-full rounded-md border border-[var(--glass-border)] bg-[var(--input-background)] px-3 py-2 text-sm text-foreground"
             {...register("label")}
           />
           {errors.label && <p className="text-xs text-destructive">{errors.label.message}</p>}
@@ -312,21 +322,33 @@ const ButtonAddonEditDialog = ({
 
         <div className="space-y-2">
           <Label htmlFor="button-addon-type">Button type (theme buttons)</Label>
-          <select
-            id="button-addon-type"
-            className="w-full rounded-md border border-[var(--glass-border)] bg-[var(--input-background)] px-3 py-2 text-sm text-foreground"
-            {...register("buttonName")}
+          <Select
+            value={currentButtonName || ""}
+            onValueChange={(v) =>
+              setValue("buttonName", v, { shouldDirty: true, shouldValidate: true })
+            }
+            disabled={themeButtonSettings.length === 0}
           >
-            {themeButtonSettings.length === 0 ? (
-              <option value="">No theme buttons — add them in Website → Themes</option>
-            ) : (
-              themeButtonSettings.map((b) => (
-                <option key={b.buttonName} value={b.buttonName}>
-                  {b.buttonName}
-                </option>
-              ))
-            )}
-          </select>
+            <SelectTrigger
+              id="button-addon-type"
+              className="w-full bg-[var(--input-background)] border-[var(--glass-border)]"
+            >
+              <SelectValue placeholder="Select a theme button" />
+            </SelectTrigger>
+            <SelectContent className="bg-popover border-border">
+              {themeButtonSettings.length === 0 ? (
+                <SelectItem value="" disabled>
+                  No theme buttons — add them in Website → Themes
+                </SelectItem>
+              ) : (
+                themeButtonSettings.map((b) => (
+                  <SelectItem key={b.buttonName} value={b.buttonName}>
+                    {b.buttonName}
+                  </SelectItem>
+                ))
+              )}
+            </SelectContent>
+          </Select>
           {themeButtonSettings.length === 0 && (
             <p className="text-xs text-muted-foreground">
               Configure buttons under your company web theme; they appear here for selection.
@@ -336,19 +358,28 @@ const ButtonAddonEditDialog = ({
 
         <div className="space-y-2">
           <Label htmlFor="button-addon-link">Link (company web page)</Label>
-          <select
-            id="button-addon-link"
-            className="w-full rounded-md border border-[var(--glass-border)] bg-[var(--input-background)] px-3 py-2 text-sm text-foreground"
-            {...register("linkWebPageId")}
+          <Select
+            value={currentLinkWebPageId || ""}
+            onValueChange={(v) =>
+              setValue("linkWebPageId", v, { shouldDirty: true, shouldValidate: true })
+            }
           >
-            <option value="">No link</option>
-            {sortedPages.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-                {p.url ? ` (${p.url})` : ""}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger
+              id="button-addon-link"
+              className="w-full bg-[var(--input-background)] border-[var(--glass-border)]"
+            >
+              <SelectValue placeholder="No link" />
+            </SelectTrigger>
+            <SelectContent className="bg-popover border-border">
+              <SelectItem value="">No link</SelectItem>
+              {sortedPages.map((p) => (
+                <SelectItem key={p.id} value={p.id}>
+                  {p.name}
+                  {p.url ? ` (${p.url})` : ""}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           {sortedPages.length === 0 && (
             <p className="text-xs text-muted-foreground">
               Add pages under Website → Webpages; they appear here for in-site navigation.

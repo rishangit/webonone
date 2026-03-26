@@ -589,9 +589,7 @@ export const AddonGridEditor = ({
               )}
 
               <div
-                className={`relative h-full min-h-0 w-full overflow-hidden ${
-                  isAddonSelected ? "pt-8" : ""
-                }`}
+                className="relative h-full min-h-0 w-full overflow-hidden"
                 style={{ zIndex: 0 }}
               >
                 <RenderComponent

@@ -56,15 +56,17 @@ export const SelectMediaDialog = ({
         title={title}
         description={description}
         icon={<ImageIcon className="w-5 h-5" />}
-        size="xlarge"
+        sizeWidth="medium"
+        sizeHeight="large"
+        disableContentScroll
         footer={
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             Close
           </Button>
         }
       >
-        <div className="space-y-4">
-          <div className="flex items-center justify-between rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/50 px-3 py-2">
+        <div className="flex flex-col flex-1 min-h-0 space-y-4 h-full">
+          <div className="flex items-center justify-between rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/50 px-3 py-2 shrink-0">
             <p className="text-xs text-muted-foreground">
               Select an image
             </p>
@@ -80,11 +82,12 @@ export const SelectMediaDialog = ({
           </div>
 
           {loadingMedia ? (
-            <div className="h-[30rem] rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/30 p-4 text-sm text-muted-foreground">
+            <div className="flex-1 min-h-0 overflow-auto rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/30 p-4 text-sm text-muted-foreground">
               Loading media...
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 h-[30rem] overflow-auto pr-1 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/30 p-2">
+            <div className="flex-1 min-h-0 overflow-auto rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/30 p-2 pr-1">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
               {mediaFiles.map((file) => {
                 const url = getMediaFileUrl(companyId, file.path);
                 const isSelected = selectedPath === file.path;
@@ -102,7 +105,9 @@ export const SelectMediaDialog = ({
                         : "border-[var(--glass-border)] bg-background/70 hover:border-[var(--accent-primary)]/60 hover:bg-[var(--accent-bg)]/40"
                     }`}
                   >
-                    <img src={url} alt={file.name} className="w-full h-28 object-cover rounded-sm mb-2" />
+                    <div className="w-full aspect-square overflow-hidden rounded-sm bg-background/50">
+                      <img src={url} alt={file.name} className="w-full h-full object-cover" />
+                    </div>
                     <p className="text-xs text-foreground truncate">{file.name}</p>
                   </button>
                 );
@@ -113,6 +118,7 @@ export const SelectMediaDialog = ({
                   No image media found. Upload one to continue.
                 </div>
               )}
+              </div>
             </div>
           )}
         </div>

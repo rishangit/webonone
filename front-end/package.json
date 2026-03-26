@@ -61,6 +61,7 @@
     "yup": "^1.7.1"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.2.2",
     "@types/node": "^20.10.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
@@ -73,6 +74,7 @@
     "eslint-plugin-react": "^7.34.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "prettier": "^3.2.5",
+    "tailwindcss": "^4.2.2",
     "typescript": "^5.5.3",
     "vite": "^6.3.5"
   },

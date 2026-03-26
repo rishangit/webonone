@@ -7,6 +7,14 @@ import { Image as ImageIcon, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "../../../../../components/ui/button";
 import { Label } from "../../../../../components/ui/label";
+import { Input } from "../../../../../components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../../../components/ui/select";
 import { CustomDialog } from "../../../../../components/ui/custom-dialog";
 import { getMediaFileUrl } from "../../../../../services/companyWebMedia";
 import { SelectMediaDialog } from "../../../../../components/common/SelectMediaDialog";
@@ -117,6 +125,7 @@ const ImageAddonEditDialog = ({
 
   const currentImagePath = watch("imagePath");
   const effectiveImagePath = currentImagePath || selectedPath;
+  const currentView = watch("view");
 
   useEffect(() => {
     if (!open) return;
@@ -162,7 +171,8 @@ const ImageAddonEditDialog = ({
         title="Image addon settings"
         description="Select an existing media image or upload a new one."
         icon={<ImageIcon className="w-5 h-5" />}
-        size="xlarge"
+        sizeWidth="medium"
+        sizeHeight="medium"
         footer={
           <>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
@@ -212,26 +222,40 @@ const ImageAddonEditDialog = ({
 
           <div className="space-y-2">
             <Label htmlFor="image-addon-view">View mode</Label>
-            <select
-              id="image-addon-view"
-              className="w-full rounded-md border border-[var(--glass-border)] bg-[var(--input-background)] px-3 py-2 text-sm text-foreground"
-              {...register("view")}
+            <Select
+              value={currentView}
+              onValueChange={(v) => {
+                setValue("view", v as ImageAddonFormValues["view"], {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                });
+              }}
             >
-              <option value="best-fit">Best view (fit to content element)</option>
-              <option value="full-width">Full width (height auto)</option>
-            </select>
+              <SelectTrigger
+                id="image-addon-view"
+                className="w-full bg-[var(--input-background)] border-[var(--glass-border)]"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border-border">
+                <SelectItem value="best-fit">
+                  Best view (fit to content element)
+                </SelectItem>
+                <SelectItem value="full-width">Full width (height auto)</SelectItem>
+              </SelectContent>
+            </Select>
             {errors.view && <p className="text-xs text-destructive">{errors.view.message}</p>}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="image-addon-height">Height (px)</Label>
-            <input
+            <Input
               id="image-addon-height"
               type="number"
               min={1}
               inputMode="numeric"
               placeholder="Auto (empty)"
-              className="w-full rounded-md border border-[var(--glass-border)] bg-[var(--input-background)] px-3 py-2 text-sm text-foreground"
+              className="bg-[var(--input-background)] border-[var(--glass-border)]"
               {...register("height")}
             />
             {errors.height && <p className="text-xs text-destructive">{errors.height.message}</p>}

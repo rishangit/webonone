@@ -8,6 +8,14 @@ import { toast } from "sonner";
 import { Button } from "../../../../../components/ui/button";
 import { Label } from "../../../../../components/ui/label";
 import { CustomDialog } from "../../../../../components/ui/custom-dialog";
+import { Textarea } from "../../../../../components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../../../components/ui/select";
 import type { ThemeTextSetting } from "../../../../../services/companyWebThemes";
 import { AddonEditProps, AddonModule, AddonRenderProps } from "../types";
 import { ContentAddon, TextContentAddonData } from "../../types";
@@ -113,6 +121,7 @@ const TextAddonEditDialog = ({
     reset,
     setValue,
     getValues,
+    watch,
     formState: { errors },
   } = useForm<TextAddonFormValues>({
     resolver: yupResolver(textAddonSchema) as any,
@@ -137,6 +146,8 @@ const TextAddonEditDialog = ({
       setValue("textStyleName", themeTextSettings[0].styleName);
     }
   }, [open, themeTextSettings, setValue, getValues]);
+
+  const currentTextStyleName = watch("textStyleName");
 
   const onSubmit = (values: TextAddonFormValues) => {
     if (themeTextSettings.length > 0 && !values.textStyleName?.trim()) {
@@ -188,11 +199,11 @@ const TextAddonEditDialog = ({
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="text-addon-body">Text</Label>
-          <textarea
+          <Textarea
             id="text-addon-body"
             rows={4}
             placeholder="Enter text…"
-            className="w-full rounded-md border border-[var(--glass-border)] bg-[var(--input-background)] px-3 py-2 text-sm text-foreground min-h-[100px]"
+            className="bg-[var(--input-background)] border-[var(--glass-border)] min-h-[100px]"
             {...register("text")}
           />
           {errors.text && <p className="text-xs text-destructive">{errors.text.message}</p>}
@@ -200,21 +211,33 @@ const TextAddonEditDialog = ({
 
         <div className="space-y-2">
           <Label htmlFor="text-addon-style">Text type (theme texts)</Label>
-          <select
-            id="text-addon-style"
-            className="w-full rounded-md border border-[var(--glass-border)] bg-[var(--input-background)] px-3 py-2 text-sm text-foreground"
-            {...register("textStyleName")}
+          <Select
+            value={currentTextStyleName || ""}
+            onValueChange={(v) => {
+              setValue("textStyleName", v, { shouldDirty: true, shouldValidate: true });
+            }}
+            disabled={themeTextSettings.length === 0}
           >
-            {themeTextSettings.length === 0 ? (
-              <option value="">No theme text styles — add them in Website → Themes</option>
-            ) : (
-              themeTextSettings.map((t) => (
-                <option key={t.styleName} value={t.styleName}>
-                  {t.styleName}
-                </option>
-              ))
-            )}
-          </select>
+            <SelectTrigger
+              id="text-addon-style"
+              className="w-full bg-[var(--input-background)] border-[var(--glass-border)]"
+            >
+              <SelectValue placeholder="Select a theme text" />
+            </SelectTrigger>
+            <SelectContent className="bg-popover border-border">
+              {themeTextSettings.length === 0 ? (
+                <SelectItem value="" disabled>
+                  No theme text styles — add them in Website → Themes
+                </SelectItem>
+              ) : (
+                themeTextSettings.map((t) => (
+                  <SelectItem key={t.styleName} value={t.styleName}>
+                    {t.styleName}
+                  </SelectItem>
+                ))
+              )}
+            </SelectContent>
+          </Select>
           {themeTextSettings.length === 0 && (
             <p className="text-xs text-muted-foreground">
               Configure text styles under your company web theme; they appear here for selection.

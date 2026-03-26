@@ -1,7 +1,7 @@
 ---
 description: Conventions for WebpageEditor content addons (follow the image addon pattern).
 globs: front-end/src/pages/website/WebpageEditor/addons/**/*
-alwaysApply: false
+alwaysApply: true
 ---
 
 # WebpageEditor content addons
@@ -47,7 +47,14 @@ Each module exports an object with:
 - Prefer **`react-hook-form`** + **`yup`** + **`yupResolver`** for forms; mirror validation style from the image addon.
 - On open, **`reset`** default values from **`addon.data`** (see image **`useEffect`** tied to `open`).
 - On save, build **`updatedAddon`**: **`{ ...addon, data: { ...addon.data, ...fields, companyId: effectiveCompanyId, contentElementId } }`**, then **`onSave(updatedAddon)`** and **`onOpenChange(false)`**.
-- Styling: **`border-[var(--glass-border)]`**, **`bg-[var(--input-background)]`**, **`text-muted-foreground`**, **`text-destructive`** for errors—match existing editor/addon controls.
+- Styling: use the shared editor theme variables (e.g. `border-[var(--glass-border)]`, `bg-[var(--input-background)]`, `text-muted-foreground`, `text-destructive` for errors).
+- Inputs must use shared system UI components from `front-end/src/components/ui` (do not use raw native `input`/`select`/`textarea` directly):
+  - `Input` for single-line fields
+  - `Textarea` for multi-line fields
+  - `Select` (`SelectTrigger`/`SelectContent`/`SelectItem`) for dropdowns
+  - `Button`, `Label`, and other existing shared controls as in the System Settings UI
+  - If an addon needs a new control, first check whether an existing one already exists in `components/ui` and reuse it.
+  - If you change an addon settings UI, always re-check this rule before committing.
 
 ## Theme text styles (optional)
 

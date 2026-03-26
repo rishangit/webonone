@@ -28,7 +28,8 @@ export const AddAddonDialog = ({
       title="Add addon"
       description="Select an addon module to attach to this content element."
       icon={<Plus className="w-5 h-5" />}
-      size="large"
+      sizeWidth="medium"
+      sizeHeight="medium"
     >
       <div className="space-y-3">
         {modules.map((module) => (

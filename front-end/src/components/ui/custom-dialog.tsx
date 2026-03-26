@@ -15,9 +15,11 @@ interface CustomDialogProps {
   customHeader?: ReactNode; // For completely custom header layout
   children: ReactNode;
   footer?: ReactNode;
-  /** Standardized dialog sizing for consistency across the app. */
-  size?: CustomDialogSize;
-  /** Legacy/custom width override. Prefer `size`; keep for edge cases. */
+  /** Dialog width preset. */
+  sizeWidth?: CustomDialogSize;
+  /** Dialog height preset. */
+  sizeHeight?: CustomDialogSize;
+  /** Legacy/custom width override. Prefer `sizeWidth`; keep for edge cases. */
   maxWidth?: string;
   className?: string;
   disableContentScroll?: boolean;
@@ -35,7 +37,8 @@ export function CustomDialog({
   customHeader,
   children,
   footer,
-  size = "medium",
+  sizeWidth = "medium",
+  sizeHeight,
   maxWidth = "max-w-lg",
   className,
   disableContentScroll = false,
@@ -50,31 +53,28 @@ export function CustomDialog({
     return `dialog-description-${id}`;
   }, [dialogId]);
 
-  const sizeClasses: Record<CustomDialogSize, string> = {
-    small: "",
-    medium: "",
-    large: "",
-    xlarge: "",
+  // Dialog width presets (percent of available container width).
+  // Note: `xlarge` is the "extra large" option.
+  const sizeWidthClasses: Record<CustomDialogSize, string> = {
+    small: "w-1/2",
+    medium: "w-2/3",
+    large: "w-3/4",
+    xlarge: "w-5/6",
   };
 
-  const sizeWidthByPreset: Record<CustomDialogSize, string> = {
-    small: "66.666667vw",
-    medium: "75vw",
-    large: "80vw",
-    xlarge: "83.333333vw",
+  // Dialog height presets (percent of available container height).
+  const sizeHeightClasses: Record<CustomDialogSize, string> = {
+    small: "h-1/3",
+    medium: "h-1/2",
+    large: "h-3/4",
+    xlarge: "h-9/10",
   };
 
-  // Legacy/custom width override classes for edge cases.
+  const effectiveSizeHeight = sizeHeight ?? sizeWidth;
+
+  // Custom width override classes for edge cases.
   const effectiveWidthClass =
-    maxWidth && maxWidth !== "max-w-lg"
-      ? (maxWidth.includes("w-[") || maxWidth.includes("max-w-")
-          ? `sm:${maxWidth}`
-          : `sm:${maxWidth}`)
-      : sizeClasses[size];
-
-  // Use inline width for standardized sizes so it does not depend on generated Tailwind utilities.
-  const effectiveWidthStyle =
-    maxWidth && maxWidth !== "max-w-lg" ? undefined : sizeWidthByPreset[size];
+    maxWidth && maxWidth !== "max-w-lg" ? `sm:${maxWidth}` : sizeWidthClasses[sizeWidth];
 
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
@@ -86,15 +86,11 @@ export function CustomDialog({
               "bg-background dark:bg-[var(--glass-bg)] border-[var(--glass-border)] backdrop-blur-sm rounded-lg shadow-lg",
               "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 border duration-200",
               "max-h-[calc(100vh-1rem)] flex flex-col pointer-events-auto",
-              // Keep side margins; desktop width comes from size/maxWidth preset.
-              "w-[calc(100vw-1rem)]",
               effectiveWidthClass,
+              sizeHeightClasses[effectiveSizeHeight],
               className
             )}
-            style={{
-              maxHeight: "calc(100vh - 1rem)",
-              width: effectiveWidthStyle,
-            }}
+            style={{ maxHeight: "calc(100vh - 1rem)" }}
             aria-describedby={describedBy}
           >
           {/* Header */}
