@@ -1,5 +1,11 @@
-import { useState, useEffect, useRef, useLayoutEffect } from "react";
-import { EditorContent, ViewMode, ContentBlock, BreakpointName, resolveBlockLayout, getBreakpointFromWidth } from "../types";
+import { useState, useEffect, useRef, useLayoutEffect, type ReactNode } from "react";
+import {
+  EditorContent,
+  ViewMode,
+  ContentBlock,
+  BreakpointName,
+  resolveBlockLayout,
+} from "../types";
 import { ResizableContentBlock } from "./ResizableContentBlock";
 import { WebpageContentRenderer } from "./WebpageContentRenderer";
 import type { ThemeButtonSetting, ThemeTextSetting } from "../../../../services/companyWebThemes";
@@ -16,6 +22,8 @@ interface EditorCanvasProps {
   viewMode?: ViewMode;
   contentBlocks?: ContentBlock[];
   activeBreakpointName?: BreakpointName;
+  /** Tailwind min-width (px) — canvas is centered at this width so editing matches that breakpoint without resizing the browser. */
+  canvasPreviewWidthPx?: number;
   companyId?: string;
   themeTextSettings?: ThemeTextSetting[];
   themeButtonSettings?: ThemeButtonSetting[];
@@ -27,9 +35,10 @@ interface EditorCanvasProps {
 
 export const EditorCanvas = ({
   content,
-  viewMode = 'visual',
+  viewMode = "visual",
   contentBlocks = [],
-  activeBreakpointName = '2xl',
+  activeBreakpointName = "2xl",
+  canvasPreviewWidthPx,
   companyId,
   themeTextSettings,
   themeButtonSettings,
@@ -39,7 +48,7 @@ export const EditorCanvas = ({
   onDeleteBlock,
 }: EditorCanvasProps) => {
   const [localContent, setLocalContent] = useState(content);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(1200);
   const [selection, setSelection] = useState<EditorSelection | null>(null);
 
@@ -61,228 +70,218 @@ export const EditorCanvas = ({
     }
   }, [contentBlocks, selection]);
 
-  // Update container width dynamically for responsive grid (for both edit and visual modes)
   useLayoutEffect(() => {
-    const updateWidth = () => {
-      if (containerRef.current) {
-        const width = containerRef.current.clientWidth;
-        setContainerWidth(width);
-      }
-    };
-    
-    updateWidth();
-    window.addEventListener('resize', updateWidth);
-    return () => window.removeEventListener('resize', updateWidth);
-  }, [viewMode, containerRef]);
+    const el = canvasRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      setContainerWidth(el.clientWidth);
+    });
+    ro.observe(el);
+    setContainerWidth(el.clientWidth);
+    return () => ro.disconnect();
+  }, [viewMode, canvasPreviewWidthPx, contentBlocks.length]);
+
+  const previewShell = (children: ReactNode) => (
+    <div className="flex-1 min-h-0 w-full relative bg-gray-100 overflow-auto">
+      <div
+        className={`min-h-full p-5 ${canvasPreviewWidthPx != null ? "flex justify-center" : ""}`}
+      >
+        <div
+          ref={canvasRef}
+          className="relative bg-white min-h-screen shadow-sm border border-border/30 rounded-sm"
+          style={
+            canvasPreviewWidthPx != null
+              ? { width: canvasPreviewWidthPx, maxWidth: "100%", minWidth: 0 }
+              : { width: "100%" }
+          }
+        >
+          {children}
+        </div>
+      </div>
+    </div>
+  );
 
   // Edit mode with 12-column Tailwind grid
-  if (viewMode === 'edit') {
+  if (viewMode === "edit") {
     const columnWidth = containerWidth / 12;
     const rowHeight = 60;
 
-    return (
-      <div 
-        className="flex-1 min-h-0 w-full relative bg-gray-100 overflow-auto" 
-        ref={containerRef}
+    return previewShell(
+      <div
+        className="relative w-full min-h-screen"
+        onMouseDown={(e) => {
+          if (e.target === e.currentTarget) {
+            setSelection(null);
+          }
+        }}
       >
-        {/* Full width canvas - treated as the page with Tailwind grid */}
-        <div className="w-full bg-white relative min-h-screen p-5">
-          {/* Canvas Container - relative positioning for content layer */}
-          <div
-            className="relative w-full min-h-screen"
-            onMouseDown={(e) => {
-              if (e.target === e.currentTarget) {
-                setSelection(null);
-              }
-            }}
-          >
-            
-            {/* Grid Background Canvas - absolute, z-index -1 (behind everything) */}
-            <div 
-              className="absolute inset-0 grid grid-cols-12 gap-0 w-full min-h-screen"
-              style={{ 
-                zIndex: -1,
-                display: 'grid', 
-                gridTemplateColumns: 'repeat(12, minmax(0, 1fr))',
-                width: '100%',
-                boxSizing: 'border-box'
-              }}
-            >
-              {/* Grid Column Backgrounds - 12 columns */}
-              {Array.from({ length: 12 }).map((_, i) => (
-                <div
-                  key={`col-bg-${i}`}
-                  className="col-span-1 bg-blue-50/5"
-                  style={{ minHeight: '100vh' }}
-                />
-              ))}
-            </div>
-
-            {/* Guidelines Layer - absolute, behind content */}
+        {/* Grid Background Canvas - absolute, z-index -1 (behind everything) */}
+        <div
+          className="absolute inset-0 grid grid-cols-12 gap-0 w-full min-h-screen"
+          style={{
+            zIndex: -1,
+            display: "grid",
+            gridTemplateColumns: "repeat(12, minmax(0, 1fr))",
+            width: "100%",
+            boxSizing: "border-box",
+          }}
+        >
+          {Array.from({ length: 12 }).map((_, i) => (
             <div
-              className="absolute inset-0 pointer-events-none"
-              style={{ zIndex: 0 }}
-            >
-              {/* Vertical Column Lines */}
-              {Array.from({ length: 13 }).map((_, i) => {
-                const leftPosition = (i * 100) / 12;
-                return (
-                  <div
-                    key={`col-line-${i}`}
-                    className="absolute top-0 bottom-0 w-px"
-                    style={{
-                      left: `${leftPosition}%`,
-                      borderLeft: "1px dashed rgba(96, 165, 250, 0.45)",
-                    }}
-                  />
-                );
-              })}
+              key={`col-bg-${i}`}
+              className="col-span-1 bg-blue-50/5"
+              style={{ minHeight: "100vh" }}
+            />
+          ))}
+        </div>
 
-              {/* Horizontal Row Lines */}
-              {Array.from({ length: 100 }).map((_, i) => (
-                <div
-                  key={`row-line-${i}`}
-                  className="absolute left-0 right-0 h-px border-t border-dashed border-blue-300/20"
-                  style={{ top: `${i * rowHeight}px` }}
+        {/* Guidelines Layer */}
+        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }}>
+          {Array.from({ length: 13 }).map((_, i) => {
+            const leftPosition = (i * 100) / 12;
+            return (
+              <div
+                key={`col-line-${i}`}
+                className="absolute top-0 bottom-0 w-px"
+                style={{
+                  left: `${leftPosition}%`,
+                  borderLeft: "1px dashed rgba(96, 165, 250, 0.45)",
+                }}
+              />
+            );
+          })}
+
+          {Array.from({ length: 100 }).map((_, i) => (
+            <div
+              key={`row-line-${i}`}
+              className="absolute left-0 right-0 h-px border-t border-dashed border-blue-300/20"
+              style={{ top: `${i * rowHeight}px` }}
+            />
+          ))}
+
+          {Array.from({ length: 12 }).map((_, i) => {
+            const leftPosition = ((i + 0.5) * 100) / 12;
+            return (
+              <div
+                key={`col-number-${i}`}
+                className="absolute top-2 text-xs text-blue-500 font-mono bg-white/80 px-1 rounded pointer-events-none"
+                style={{ left: `${leftPosition}%`, transform: "translateX(-50%)", zIndex: 1 }}
+              >
+                {i + 1}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Content Edit Layer */}
+        <div
+          className="relative grid grid-cols-12 gap-0 w-full min-h-screen"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) {
+              setSelection(null);
+            }
+          }}
+          style={{
+            zIndex: 10,
+            display: "grid",
+            gridTemplateColumns: "repeat(12, minmax(0, 1fr))",
+            width: "100%",
+            boxSizing: "border-box",
+            gridAutoRows: `${rowHeight}px`,
+          }}
+        >
+          {contentBlocks.map((block) => {
+            const resolved = resolveBlockLayout(block, activeBreakpointName, rowHeight, containerWidth);
+            const blockToShow: ContentBlock = {
+              ...block,
+              gridRowStart: resolved.gridRowStart,
+              gridColumnStart: resolved.gridColumnStart,
+              rowSpan: resolved.rowSpan,
+              colSpan: resolved.colSpan,
+            };
+            return (
+              <div
+                key={block.id}
+                className="relative"
+                style={{
+                  gridRow: `${resolved.gridRowStart} / span ${resolved.rowSpan}`,
+                  gridColumn: `${resolved.gridColumnStart} / span ${resolved.colSpan}`,
+                  minHeight: `${resolved.rowSpan * rowHeight}px`,
+                  zIndex: block.zIndex ?? 0,
+                }}
+              >
+                <ResizableContentBlock
+                  block={blockToShow}
+                  activeBreakpointName={activeBreakpointName}
+                  isSelected={selection?.type === "block" && selection.id === block.id}
+                  selectedAddonId={
+                    selection?.type === "addon" && selection.blockId === block.id
+                      ? selection.addonId
+                      : null
+                  }
+                  onSelectBlock={() => setSelection({ type: "block", id: block.id })}
+                  onSelectAddon={(addonId) =>
+                    setSelection({
+                      type: "addon",
+                      blockId: block.id,
+                      addonId,
+                    })
+                  }
+                  onUpdate={(updatedBlock, shouldPersist, markDirty) =>
+                    onUpdateBlock?.(updatedBlock, shouldPersist, markDirty)
+                  }
+                  onDelete={onDeleteBlock}
+                  gridColumnWidth={columnWidth}
+                  gridRowHeight={rowHeight}
+                  companyId={companyId}
+                  themeTextSettings={themeTextSettings}
+                  themeButtonSettings={themeButtonSettings}
+                  companyWebPages={companyWebPages}
+                  addonRenderContext={addonRenderContext}
                 />
-              ))}
-
-              {/* Column Number Indicators */}
-              {Array.from({ length: 12 }).map((_, i) => {
-                const leftPosition = ((i + 0.5) * 100) / 12;
-                return (
-                  <div
-                    key={`col-number-${i}`}
-                    className="absolute top-2 text-xs text-blue-500 font-mono bg-white/80 px-1 rounded pointer-events-none"
-                    style={{ left: `${leftPosition}%`, transform: 'translateX(-50%)', zIndex: 1 }}
-                  >
-                    {i + 1}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Content Edit Layer - relative positioning, content flows in grid */}
-            <div 
-              className="relative grid grid-cols-12 gap-0 w-full min-h-screen"
-              onMouseDown={(e) => {
-                // Clicked empty page area (not a block/addon) -> clear selection.
-                if (e.target === e.currentTarget) {
-                  setSelection(null);
-                }
-              }}
-              style={{ 
-                zIndex: 10,
-                display: 'grid', 
-                gridTemplateColumns: 'repeat(12, minmax(0, 1fr))',
-                width: '100%',
-                boxSizing: 'border-box',
-                // Keep edit-grid tracks fixed so dragging one block never reflows others.
-                gridAutoRows: `${rowHeight}px`
-              }}
-            >
-            {/* Content Blocks - layout resolved for active breakpoint; use grid-area (row/col/rowSpan/colSpan) directly */}
-            {contentBlocks.map((block) => {
-                const resolved = resolveBlockLayout(block, activeBreakpointName, rowHeight, containerWidth);
-                const blockToShow: ContentBlock = {
-                  ...block,
-                  gridRowStart: resolved.gridRowStart,
-                  gridColumnStart: resolved.gridColumnStart,
-                  rowSpan: resolved.rowSpan,
-                  colSpan: resolved.colSpan,
-                };
-                return (
-                  <div
-                    key={block.id}
-                    className="relative"
-                    style={{
-                      gridRow: `${resolved.gridRowStart} / span ${resolved.rowSpan}`,
-                      gridColumn: `${resolved.gridColumnStart} / span ${resolved.colSpan}`,
-                      minHeight: `${resolved.rowSpan * rowHeight}px`,
-                      zIndex: block.zIndex ?? 0,
-                    }}
-                  >
-                    <ResizableContentBlock
-                      block={blockToShow}
-                      activeBreakpointName={activeBreakpointName}
-                      isSelected={
-                        selection?.type === "block" && selection.id === block.id
-                      }
-                      selectedAddonId={
-                        selection?.type === "addon" &&
-                        selection.blockId === block.id
-                          ? selection.addonId
-                          : null
-                      }
-                      onSelectBlock={() =>
-                        setSelection({ type: "block", id: block.id })
-                      }
-                      onSelectAddon={(addonId) =>
-                        setSelection({
-                          type: "addon",
-                          blockId: block.id,
-                          addonId,
-                        })
-                      }
-                      onUpdate={(updatedBlock, shouldPersist, markDirty) =>
-                        onUpdateBlock?.(updatedBlock, shouldPersist, markDirty)
-                      }
-                      onDelete={onDeleteBlock}
-                      gridColumnWidth={columnWidth}
-                      gridRowHeight={rowHeight}
-                      companyId={companyId}
-                      themeTextSettings={themeTextSettings}
-                      themeButtonSettings={themeButtonSettings}
-                      companyWebPages={companyWebPages}
-                      addonRenderContext={addonRenderContext}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     );
   }
 
-  // Visual mode - preview; resolve block layout for current viewport breakpoint
-  if (viewMode === 'visual') {
+  // Visual mode — same canvas width + breakpoint as edit mode
+  if (viewMode === "visual") {
     const rowHeight = 60;
-    const breakpoint = getBreakpointFromWidth(containerWidth);
     const resolvedBlocks = contentBlocks.map((b) => {
-      const r = resolveBlockLayout(b, breakpoint, rowHeight, containerWidth);
+      const r = resolveBlockLayout(b, activeBreakpointName, rowHeight, containerWidth);
       return { ...b, ...r };
     });
-    const maxY = resolvedBlocks.length > 0
-      ? Math.max(...resolvedBlocks.map((b) => ((b.gridRowStart ?? 1) + (b.rowSpan ?? 1) - 1) * rowHeight), 0)
-      : 0;
+    const maxY =
+      resolvedBlocks.length > 0
+        ? Math.max(
+            ...resolvedBlocks.map(
+              (b) => ((b.gridRowStart ?? 1) + (b.rowSpan ?? 1) - 1) * rowHeight
+            ),
+            0
+          )
+        : 0;
     const containerHeight = Math.max(maxY + 200, 1000);
 
-    return (
-      <div 
-        className="flex-1 min-h-0 w-full relative bg-gray-100 overflow-auto"
-        ref={containerRef}
-      >
-        <div 
-          className="w-full bg-white relative min-h-screen p-5"
-          style={{ minHeight: containerHeight }}
-        >
-          <WebpageContentRenderer
-            contentBlocks={resolvedBlocks}
-            css={localContent.css}
-            js={localContent.js}
-            html={localContent.html}
-            companyId={companyId}
-            themeTextSettings={themeTextSettings}
-            themeButtonSettings={themeButtonSettings}
-            companyWebPages={companyWebPages}
-            addonRenderContext={addonRenderContext}
-            defaultContainerWidth={containerWidth}
-            rowHeight={rowHeight}
-            showBorders={true}
-          />
-        </div>
+    return previewShell(
+      <div className="w-full relative min-h-screen p-5" style={{ minHeight: containerHeight }}>
+        <WebpageContentRenderer
+          contentBlocks={contentBlocks}
+          css={localContent.css}
+          js={localContent.js}
+          html={localContent.html}
+          companyId={companyId}
+          themeTextSettings={themeTextSettings}
+          themeButtonSettings={themeButtonSettings}
+          companyWebPages={companyWebPages}
+          addonRenderContext={addonRenderContext}
+          defaultContainerWidth={containerWidth}
+          rowHeight={rowHeight}
+          showBorders={true}
+          breakpoint={activeBreakpointName}
+        />
       </div>
     );
   }

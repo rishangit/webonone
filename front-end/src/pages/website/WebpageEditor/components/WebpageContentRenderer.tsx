@@ -1,5 +1,5 @@
 import { useRef, useLayoutEffect, useState } from "react";
-import { ContentBlock, resolveBlockLayout, getBreakpointFromWidth } from "../types";
+import { ContentBlock, resolveBlockLayout, getBreakpointFromWidth, type BreakpointName } from "../types";
 import { ContentAddonsRenderer } from "../addons";
 import type { ThemeButtonSetting, ThemeTextSetting } from "../../../../services/companyWebThemes";
 import type { CompanyWebPage } from "../../../../services/companyWebPages";
@@ -18,6 +18,8 @@ interface WebpageContentRendererProps {
   defaultContainerWidth?: number;
   rowHeight?: number;
   showBorders?: boolean;
+  /** When set, layout resolves for this breakpoint instead of inferring from container width. */
+  breakpoint?: BreakpointName;
 }
 
 /**
@@ -38,6 +40,7 @@ export const WebpageContentRenderer = ({
   defaultContainerWidth = 1200,
   rowHeight = 60,
   showBorders = false,
+  breakpoint: breakpointProp,
 }: WebpageContentRendererProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(defaultContainerWidth);
@@ -53,7 +56,7 @@ export const WebpageContentRenderer = ({
     return () => window.removeEventListener('resize', updateWidth);
   }, [defaultContainerWidth]);
 
-  const breakpoint = getBreakpointFromWidth(containerWidth);
+  const breakpoint = breakpointProp ?? getBreakpointFromWidth(containerWidth);
   const resolvedBlocks = contentBlocks.map((b) => {
     const r = resolveBlockLayout(b, breakpoint, rowHeight, containerWidth);
     return { ...b, ...r };

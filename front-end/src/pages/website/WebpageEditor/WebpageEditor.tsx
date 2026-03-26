@@ -1,8 +1,7 @@
-import { useState, useEffect, useLayoutEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Monitor } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "../../../components/ui/button";
-import { Badge } from "../../../components/ui/badge";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import {
   fetchWebPageRequest,
@@ -11,7 +10,15 @@ import {
   clearError,
 } from "../../../store/slices/companyWebPagesSlice";
 import { fetchThemesRequest } from "../../../store/slices/companyWebThemesSlice";
-import { EditorContent, EditorState, ViewMode, ContentBlock, BreakpointName } from "./types";
+import {
+  EditorContent,
+  EditorState,
+  ViewMode,
+  ContentBlock,
+  BreakpointName,
+  TAILWIND_MIN_WIDTH_PX,
+  getBreakpointFromWidth,
+} from "./types";
 import { EditorToolbar, EditorCanvas } from "./components";
 import {
   pickCompanyThemeForTextStyles,
@@ -52,37 +59,20 @@ export const WebpageEditor = (props: WebpageEditorProps = {}) => {
 
   const [viewMode, setViewMode] = useState<ViewMode>('visual');
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
-  const [screenWidth, setScreenWidth] = useState(0);
 
-  // Track screen width for responsive breakpoint indicator
-  useLayoutEffect(() => {
-    const updateScreenWidth = () => {
-      setScreenWidth(window.innerWidth);
-    };
-    
-    updateScreenWidth();
-    window.addEventListener('resize', updateScreenWidth);
-    return () => window.removeEventListener('resize', updateScreenWidth);
-  }, []);
+  /** Layout being edited (canvas width + layoutByBreakpoint key) — independent of browser width. */
+  const [editorBreakpoint, setEditorBreakpoint] = useState<BreakpointName>(() =>
+    typeof window !== "undefined" ? getBreakpointFromWidth(window.innerWidth) : "2xl"
+  );
 
-  // Determine active Tailwind breakpoint (sm, md, lg, xl, 2xl)
-  const getActiveBreakpoint = (): { name: BreakpointName; width: number; active: true } => {
-    if (screenWidth >= 1536) return { name: '2xl', width: 1536, active: true };
-    if (screenWidth >= 1280) return { name: 'xl', width: 1280, active: true };
-    if (screenWidth >= 1024) return { name: 'lg', width: 1024, active: true };
-    if (screenWidth >= 768) return { name: 'md', width: 768, active: true };
-    if (screenWidth >= 640) return { name: 'sm', width: 640, active: true };
-    return { name: 'sm', width: 640, active: true };
-  };
+  const activeBreakpointName: BreakpointName = editorBreakpoint;
 
-  const activeBreakpoint = getActiveBreakpoint();
-  const activeBreakpointName: BreakpointName = activeBreakpoint.name;
-  const breakpoints = [
-    { name: 'sm', width: 640 },
-    { name: 'md', width: 768 },
-    { name: 'lg', width: 1024 },
-    { name: 'xl', width: 1280 },
-    { name: '2xl', width: 1536 },
+  const breakpoints: { name: BreakpointName; width: number }[] = [
+    { name: "sm", width: TAILWIND_MIN_WIDTH_PX.sm },
+    { name: "md", width: TAILWIND_MIN_WIDTH_PX.md },
+    { name: "lg", width: TAILWIND_MIN_WIDTH_PX.lg },
+    { name: "xl", width: TAILWIND_MIN_WIDTH_PX.xl },
+    { name: "2xl", width: TAILWIND_MIN_WIDTH_PX["2xl"] },
   ];
 
   // Fetch webpage data
@@ -372,33 +362,34 @@ export const WebpageEditor = (props: WebpageEditorProps = {}) => {
             </div>
           </div>
 
-          {/* Screen Size Indicator */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-background/50 rounded-lg border border-[var(--glass-border)]">
-              <Monitor className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm font-mono text-foreground min-w-[60px]">
-                {screenWidth}px
-              </span>
-              <div className="h-4 w-px bg-border mx-1" />
-              <div className="flex items-center gap-1.5">
-                {breakpoints.map((bp) => {
-                  const isActive = activeBreakpoint.name === bp.name;
-                  return (
-                    <Badge
-                      key={bp.name}
-                      variant={isActive ? 'default' : 'outline'}
-                      className={`text-xs font-mono px-2 py-0.5 ${
-                        isActive
-                          ? 'bg-[var(--accent-primary)] text-[var(--accent-button-text)] border-[var(--accent-primary)]'
-                          : 'bg-transparent text-muted-foreground border-border'
-                      }`}
-                    >
-                      {bp.name}
-                    </Badge>
-                  );
-                })}
-              </div>
+          <div className="flex items-center gap-3 flex-wrap justify-end">
+            <div
+              className="flex items-center gap-1 px-2 py-1.5 bg-background/50 rounded-lg border border-[var(--glass-border)]"
+              role="tablist"
+              aria-label="Editor breakpoint"
+            >
+              {breakpoints.map((bp) => {
+                const isEditing = editorBreakpoint === bp.name;
+                return (
+                  <Button
+                    key={bp.name}
+                    type="button"
+                    variant={isEditing ? "default" : "ghost"}
+                    size="sm"
+                    className={`h-7 px-2 text-xs font-mono ${
+                      isEditing
+                        ? "bg-[var(--accent-primary)] text-[var(--accent-button-text)]"
+                        : "text-muted-foreground"
+                    }`}
+                    onClick={() => setEditorBreakpoint(bp.name)}
+                    title={`Edit ${bp.name} (${bp.width}px wide canvas)`}
+                  >
+                    {bp.name}
+                  </Button>
+                );
+              })}
             </div>
+          </div>
 
             {fullWidth && (
               <Button
@@ -411,7 +402,6 @@ export const WebpageEditor = (props: WebpageEditorProps = {}) => {
                 Close
               </Button>
             )}
-          </div>
         </div>
         <EditorToolbar
           onSave={handleSave}
@@ -430,6 +420,7 @@ export const WebpageEditor = (props: WebpageEditorProps = {}) => {
           viewMode={viewMode}
           contentBlocks={contentBlocks}
           activeBreakpointName={activeBreakpointName}
+          canvasPreviewWidthPx={TAILWIND_MIN_WIDTH_PX[editorBreakpoint]}
           companyId={currentWebPage?.companyId}
           themeTextSettings={themeTextSettings}
           themeButtonSettings={themeButtonSettings}

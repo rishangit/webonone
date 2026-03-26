@@ -40,6 +40,15 @@ export interface LegacyBreakpointLayout {
 /** Breakpoint names matching Tailwind (sm, md, lg, xl, 2xl) */
 export type BreakpointName = 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 
+/** Tailwind default `min-width` breakpoints (px) — sizes the editor canvas when previewing a breakpoint. */
+export const TAILWIND_MIN_WIDTH_PX: Record<BreakpointName, number> = {
+  sm: 640,
+  md: 768,
+  lg: 1024,
+  xl: 1280,
+  '2xl': 1536,
+};
+
 /** Layout overrides per screen size - store grid values so saved data matches rendered grid-area */
 export type LayoutByBreakpoint = Partial<Record<BreakpointName, LegacyBreakpointLayout | BreakpointLayout>>;
 
