@@ -393,7 +393,7 @@ export const ResizableContentBlock = ({
         >
           {isSelected && (
           <div
-            className="edit-button delete-button move-button absolute left-2 right-2 top-2 z-50 flex min-h-9 items-center justify-end gap-1.5 px-1.5 py-1"
+            className="edit-button delete-button move-button absolute left-2 right-2 top-2 z-50 flex min-h-8 items-center justify-end gap-1.5 px-1 py-0.5"
             style={{
               borderWidth: 1,
               borderStyle: 'solid',
@@ -409,7 +409,7 @@ export const ResizableContentBlock = ({
               type="button"
               variant="ghost"
               size="icon"
-              className="h-8 w-8 shrink-0 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-[var(--accent-text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)]"
+              className="h-6 w-6 shrink-0 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-[var(--accent-text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)]"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -417,25 +417,25 @@ export const ResizableContentBlock = ({
               }}
               aria-label="Add addon"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-3 h-3" />
             </Button>
 
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              className="h-8 w-8 shrink-0 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-[var(--accent-text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)] move-button cursor-grab active:cursor-grabbing"
+              className="h-6 w-6 shrink-0 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-[var(--accent-text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)] move-button cursor-grab active:cursor-grabbing"
               onMouseDown={startDrag}
               aria-label="Move content element"
             >
-              <Move className="w-4 h-4" strokeWidth={2.25} aria-hidden />
+              <Move className="w-3 h-3" strokeWidth={2} aria-hidden />
             </Button>
 
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              className="h-8 w-8 shrink-0 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-[var(--accent-text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)]"
+              className="h-6 w-6 shrink-0 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-[var(--accent-text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)]"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -444,13 +444,13 @@ export const ResizableContentBlock = ({
               aria-label="Bring content element forward (increase z-index)"
               title="Layer up"
             >
-              <ChevronUp className="w-4 h-4" />
+              <ChevronUp className="w-3 h-3" />
             </Button>
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              className="h-8 w-8 shrink-0 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-[var(--accent-text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)]"
+              className="h-6 w-6 shrink-0 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-[var(--accent-text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)]"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -459,14 +459,14 @@ export const ResizableContentBlock = ({
               aria-label="Send content element backward (decrease z-index)"
               title="Layer down"
             >
-              <ChevronDown className="w-4 h-4" />
+              <ChevronDown className="w-3 h-3" />
             </Button>
 
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              className="h-8 w-8 shrink-0 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-[var(--accent-text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)]"
+              className="h-6 w-6 shrink-0 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-[var(--accent-text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)]"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -474,24 +474,24 @@ export const ResizableContentBlock = ({
               }}
               aria-label="Edit content block settings"
             >
-              <Pencil className="w-4 h-4" />
+              <Pencil className="w-3 h-3" />
             </Button>
             {onDelete && (
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 shrink-0 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-muted-foreground hover:bg-destructive hover:text-white hover:border-destructive/50"
+                className="h-6 w-6 shrink-0 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-muted-foreground hover:bg-destructive hover:text-white hover:border-destructive/50"
                 onClick={handleDelete}
                 aria-label="Delete content block"
               >
-                <X className="w-4 h-4" />
+                <X className="w-3 h-3" />
               </Button>
             )}
           </div>
           )}
 
-          <div className={`h-full ${isSelected ? 'pt-10' : ''}`}>
+          <div className={`h-full ${isSelected ? 'pt-8' : ''}`}>
           {block.content && block.content !== 'New Content Block' ? (
             <div>{block.content}</div>
           ) : null}

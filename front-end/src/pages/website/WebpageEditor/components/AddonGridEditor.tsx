@@ -513,7 +513,7 @@ export const AddonGridEditor = ({
             >
               {isAddonSelected && (
               <div
-                className="absolute top-1 right-1 flex items-center gap-1 pointer-events-auto"
+                className="absolute top-0.5 right-0.5 flex items-center gap-1 pointer-events-auto"
                 style={{ zIndex: 200 }}
                 onMouseDown={(e) => e.stopPropagation()}
               >
@@ -521,17 +521,17 @@ export const AddonGridEditor = ({
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 shrink-0 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-[var(--accent-text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)] cursor-grab active:cursor-grabbing"
+                  className="h-6 w-6 shrink-0 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-[var(--accent-text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)] cursor-grab active:cursor-grabbing"
                   onMouseDown={(e) => startAddonDrag(addon.id, e)}
                   aria-label="Move addon"
                 >
-                  <Move className="h-4 w-4" strokeWidth={2.25} aria-hidden />
+                  <Move className="h-3 w-3" strokeWidth={2} aria-hidden />
                 </Button>
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 shrink-0 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-[var(--accent-text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)]"
+                  className="h-6 w-6 shrink-0 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-[var(--accent-text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)]"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -540,13 +540,13 @@ export const AddonGridEditor = ({
                   aria-label="Bring addon forward (increase z-index)"
                   title="Layer up"
                 >
-                  <ChevronUp className="h-4 w-4" />
+                  <ChevronUp className="h-3 w-3" />
                 </Button>
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 shrink-0 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-[var(--accent-text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)]"
+                  className="h-6 w-6 shrink-0 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-[var(--accent-text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)]"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -555,13 +555,13 @@ export const AddonGridEditor = ({
                   aria-label="Send addon backward (decrease z-index)"
                   title="Layer down"
                 >
-                  <ChevronDown className="h-4 w-4" />
+                  <ChevronDown className="h-3 w-3" />
                 </Button>
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 shrink-0 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-[var(--accent-text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)]"
+                  className="h-6 w-6 shrink-0 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-[var(--accent-text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)]/40 hover:text-[var(--accent-text)]"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -569,13 +569,13 @@ export const AddonGridEditor = ({
                   }}
                   aria-label="Edit addon"
                 >
-                  <Pencil className="h-4 w-4" />
+                  <Pencil className="h-3 w-3" />
                 </Button>
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 shrink-0 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-muted-foreground hover:bg-destructive hover:text-white hover:border-destructive/50"
+                  className="h-6 w-6 shrink-0 rounded-md border border-[var(--glass-border)] bg-[var(--glass-bg)]/90 backdrop-blur-sm text-muted-foreground hover:bg-destructive hover:text-white hover:border-destructive/50"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -583,14 +583,14 @@ export const AddonGridEditor = ({
                   }}
                   aria-label="Delete addon"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-3 w-3" />
                 </Button>
               </div>
               )}
 
               <div
                 className={`relative h-full min-h-0 w-full overflow-hidden ${
-                  isAddonSelected ? "pt-10" : ""
+                  isAddonSelected ? "pt-8" : ""
                 }`}
                 style={{ zIndex: 0 }}
               >
