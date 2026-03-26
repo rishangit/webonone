@@ -5,14 +5,16 @@ import { getAddonModuleByType } from "../addons/registry";
 import type { ThemeButtonSetting, ThemeTextSetting } from "../../../../services/companyWebThemes";
 import type { CompanyWebPage } from "../../../../services/companyWebPages";
 import type { AddonRenderContext } from "../addons/types";
-import type { AddonGridLayout, ContentAddon, ContentBlock } from "../types";
+import type { AddonGridLayout, BreakpointName, ContentAddon, ContentBlock } from "../types";
 import {
   clampAddonLayout,
   clampStackZIndex,
   computeAddonDisplayZIndex,
   ensureAddonLayouts,
+  ensureAddonLayoutsForBreakpoint,
   layoutToGridStyle,
   maxLayoutRowEnd,
+  withAddonLayoutForBreakpoint,
 } from "../addons/addonGridUtils";
 
 type ResizeHandle = "n" | "s" | "e" | "w" | "ne" | "nw" | "se" | "sw";
@@ -22,6 +24,8 @@ let activeAddonDragKey: string | null = null;
 interface AddonGridEditorProps {
   block: ContentBlock;
   addons: ContentAddon[];
+  activeBreakpointName?: BreakpointName;
+  showGuides?: boolean;
   /** Only this addon may be dragged/resized; must match global editor selection. */
   selectedAddonId?: string | null;
   onSelectAddon?: (addonId: string) => void;
@@ -40,6 +44,8 @@ interface AddonGridEditorProps {
 export const AddonGridEditor = ({
   block,
   addons,
+  activeBreakpointName = "2xl",
+  showGuides = true,
   selectedAddonId = null,
   onSelectAddon,
   gridColumnWidth,
@@ -110,8 +116,8 @@ export const AddonGridEditor = ({
 
   useEffect(() => {
     // Keep ref normalized so interaction math doesn't depend on legacy/missing layouts.
-    addonsRef.current = ensureAddonLayouts(addons);
-  }, [addons]);
+    addonsRef.current = ensureAddonLayoutsForBreakpoint(addons, activeBreakpointName);
+  }, [addons, activeBreakpointName]);
 
   useEffect(() => {
     onUpdateAddonsRef.current = onUpdateAddons;
@@ -130,7 +136,10 @@ export const AddonGridEditor = ({
     };
   }, []);
 
-  const normalized = useMemo(() => ensureAddonLayouts(addons), [addons]);
+  const normalized = useMemo(
+    () => ensureAddonLayoutsForBreakpoint(addons, activeBreakpointName),
+    [addons, activeBreakpointName]
+  );
   const isInteracting = Boolean(draggingAddonId || resizeState);
   const renderBaseAddons =
     isInteracting && interactionBaseAddonsRef.current
@@ -154,24 +163,24 @@ export const AddonGridEditor = ({
 
   useEffect(() => {
     if (draggingAddonId || resizeState) return;
-    // If any addon arrives without a concrete layout, persist normalized layouts once.
-    // `normalized` is memoized so this does not run every render (only when `addons` changes).
-    const hasLayoutMismatch =
-      addons.length !== normalized.length ||
-      addons.some((addon, idx) => {
-        const next = normalized[idx];
-        if (!addon.layout || !next.layout) return addon.layout !== next.layout;
-        return (
-          addon.layout.gridRowStart !== next.layout.gridRowStart ||
-          addon.layout.gridColumnStart !== next.layout.gridColumnStart ||
-          addon.layout.rowSpan !== next.layout.rowSpan ||
-          addon.layout.colSpan !== next.layout.colSpan
-        );
-      });
-    if (hasLayoutMismatch) {
-      onUpdateAddonsRef.current(normalized, false, false);
+    // Persist only legacy/missing base layouts once; do not rewrite projected
+    // breakpoint layouts during normal interaction.
+    const baseNormalized = ensureAddonLayouts(addons);
+    const hasMissingOrInvalidBaseLayout = addons.some((addon, idx) => {
+      const curr = addon.layout;
+      const next = baseNormalized[idx]?.layout;
+      if (!curr || !next) return curr !== next;
+      return (
+        curr.gridRowStart !== next.gridRowStart ||
+        curr.gridColumnStart !== next.gridColumnStart ||
+        curr.rowSpan !== next.rowSpan ||
+        curr.colSpan !== next.colSpan
+      );
+    });
+    if (hasMissingOrInvalidBaseLayout) {
+      onUpdateAddonsRef.current(baseNormalized, false, false);
     }
-  }, [addons, normalized, draggingAddonId, resizeState]);
+  }, [addons, draggingAddonId, resizeState]);
 
   const blockAddonKey = `${block.id}`;
 
@@ -188,7 +197,10 @@ export const AddonGridEditor = ({
     const startPos = { x: e.clientX, y: e.clientY };
     const startLayout = { ...addon.layout };
     dragLastRef.current = startLayout;
-    interactionBaseAddonsRef.current = ensureAddonLayouts(addonsRef.current);
+    interactionBaseAddonsRef.current = ensureAddonLayoutsForBreakpoint(
+      addonsRef.current,
+      activeBreakpointName
+    );
     setDraggingAddonId(addonId);
     measureAddonColumnWidth();
 
@@ -247,7 +259,9 @@ export const AddonGridEditor = ({
 
       // Overlap allowed: final position only; mark dirty once (same as content block drag).
       if (final) {
-        const merged = addonsRef.current.map((a) => (a.id === addonId ? { ...a, layout: final } : a));
+        const merged = addonsRef.current.map((a) =>
+          a.id === addonId ? withAddonLayoutForBreakpoint(a, activeBreakpointName, final) : a
+        );
         addonsRef.current = merged;
         onUpdateAddonsRef.current(merged, false, true);
       }
@@ -276,7 +290,10 @@ export const AddonGridEditor = ({
     if (!addon?.layout) return;
     measureAddonColumnWidth();
     resizeLastRef.current = { ...addon.layout };
-    interactionBaseAddonsRef.current = ensureAddonLayouts(addonsRef.current);
+    interactionBaseAddonsRef.current = ensureAddonLayoutsForBreakpoint(
+      addonsRef.current,
+      activeBreakpointName
+    );
     setResizeState({
       addonId,
       handle,
@@ -370,7 +387,9 @@ export const AddonGridEditor = ({
       const final = resizeLastRef.current;
       resizeLastRef.current = null;
       if (final) {
-        const merged = addonsRef.current.map((a) => (a.id === addonId ? { ...a, layout: final } : a));
+        const merged = addonsRef.current.map((a) =>
+          a.id === addonId ? withAddonLayoutForBreakpoint(a, activeBreakpointName, final) : a
+        );
         addonsRef.current = merged;
         onUpdateAddonsRef.current(merged, false, true);
       }
@@ -389,7 +408,7 @@ export const AddonGridEditor = ({
         resizeRafRef.current = null;
       }
     };
-  }, [resizeState, gridColumnWidth, gridRowHeight]);
+  }, [resizeState, gridColumnWidth, gridRowHeight, activeBreakpointName]);
 
   return (
     <div
@@ -410,31 +429,32 @@ export const AddonGridEditor = ({
           minHeight: `${gridMinHeight}px`,
         }}
       >
-        {/* 12-column guide lines (same style as page editor) */}
-        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }}>
-          <div className="relative w-full h-full">
-            {Array.from({ length: 13 }).map((_, i) => {
-              const leftPosition = (i * 100) / 12;
-              return (
-                <div
-                  key={`addon-col-line-${i}`}
-                  className="absolute top-0 bottom-0 w-px"
-                  style={{
-                    left: `${leftPosition}%`,
-                    borderLeft: "1px dashed rgba(96, 165, 250, 0.45)",
-                  }}
-                />
-              );
-            })}
+        {showGuides && (
+          <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }}>
+            <div className="relative w-full h-full">
+              {Array.from({ length: 13 }).map((_, i) => {
+                const leftPosition = (i * 100) / 12;
+                return (
+                  <div
+                    key={`addon-col-line-${i}`}
+                    className="absolute top-0 bottom-0 w-px"
+                    style={{
+                      left: `${leftPosition}%`,
+                      borderLeft: "1px dashed rgba(96, 165, 250, 0.45)",
+                    }}
+                  />
+                );
+              })}
+            </div>
+            {Array.from({ length: Math.max(maxRow + 1, 2) }).map((_, i) => (
+              <div
+                key={`addon-row-line-${i}`}
+                className="absolute left-0 right-0 h-px border-t border-dashed border-blue-300/20"
+                style={{ top: `${i * gridRowHeight}px` }}
+              />
+            ))}
           </div>
-          {Array.from({ length: Math.max(maxRow + 1, 2) }).map((_, i) => (
-            <div
-              key={`addon-row-line-${i}`}
-              className="absolute left-0 right-0 h-px border-t border-dashed border-blue-300/20"
-              style={{ top: `${i * gridRowHeight}px` }}
-            />
-          ))}
-        </div>
+        )}
 
         {displayAddons.length === 0 && (
           <div

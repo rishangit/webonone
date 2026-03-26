@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { ContentAddon, ContentBlock } from "../types";
+import { BreakpointName, ContentAddon, ContentBlock } from "../types";
 import { X, Pencil, Plus, Move, ChevronUp, ChevronDown } from "lucide-react";
 import { Button } from "../../../../components/ui/button";
 import { ContentBlockSettingsDialog } from "./ContentBlockSettingsDialog";
@@ -17,6 +17,7 @@ let activeDragBlockId: string | null = null;
 
 interface ResizableContentBlockProps {
   block: ContentBlock;
+  activeBreakpointName?: BreakpointName;
   /** True when this content block is the sole selected item (not when an addon is selected). */
   isSelected?: boolean;
   /** Set when selection is an addon in this block; only that addon gets drag/resize/edit chrome. */
@@ -38,6 +39,7 @@ type ResizeHandle = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw' | null;
 
 export const ResizableContentBlock = ({
   block,
+  activeBreakpointName = "2xl",
   isSelected = false,
   selectedAddonId = null,
   onSelectBlock,
@@ -221,7 +223,11 @@ export const ResizableContentBlock = ({
     const layout = defaultLayoutForNewAddon(addons);
     const withLayout: ContentAddon = {
       ...addon,
-      layout,
+      layout: activeBreakpointName === "2xl" ? layout : addon.layout ?? layout,
+      layoutByBreakpoint: {
+        ...(addon.layoutByBreakpoint ?? {}),
+        [activeBreakpointName]: layout,
+      },
       zIndex: nextAddonStackZIndex(addons),
     };
     onUpdate(
@@ -368,7 +374,7 @@ export const ResizableContentBlock = ({
         }}
       >
         <div
-          className="relative h-full min-h-0 p-2 flex flex-col"
+          className="relative h-full min-h-0 p-0 flex flex-col"
           style={
             isSelected
               ? {
@@ -487,13 +493,15 @@ export const ResizableContentBlock = ({
 
           <div className={`h-full ${isSelected ? 'pt-10' : ''}`}>
           {block.content && block.content !== 'New Content Block' ? (
-            <div className="p-3">{block.content}</div>
+            <div>{block.content}</div>
           ) : null}
 
           <div className="flex-1 min-h-0 h-full overflow-auto">
             <AddonGridEditor
               block={block}
               addons={addons}
+              activeBreakpointName={activeBreakpointName}
+              showGuides={isSelected}
               selectedAddonId={selectedAddonId}
               onSelectAddon={(id) => onSelectAddon?.(id)}
               gridColumnWidth={gridColumnWidth}

@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import type { AddonGridLayout, ContentAddon } from "../types";
+import type { AddonGridLayout, BreakpointName, ContentAddon } from "../types";
 
 const DEFAULT_ROW_SPAN = 2;
 const DEFAULT_COL_SPAN = 12;
@@ -74,6 +74,50 @@ export function ensureAddonLayouts(addons: ContentAddon[]): ContentAddon[] {
     });
     rowCursor = layoutRowEnd(layout);
     return { ...addon, layout };
+  });
+}
+
+export function resolveAddonLayout(
+  addon: ContentAddon,
+  breakpoint: BreakpointName = "2xl"
+): AddonGridLayout | undefined {
+  const fromMap = addon.layoutByBreakpoint?.[breakpoint];
+  if (isValidLayout(fromMap)) return clampAddonLayout(fromMap);
+  if (isValidLayout(addon.layout)) return clampAddonLayout(addon.layout);
+  return undefined;
+}
+
+export function withAddonLayoutForBreakpoint(
+  addon: ContentAddon,
+  breakpoint: BreakpointName,
+  layout: AddonGridLayout
+): ContentAddon {
+  const clamped = clampAddonLayout(layout);
+  return {
+    ...addon,
+    layout: breakpoint === "2xl" ? clamped : addon.layout ?? clamped,
+    layoutByBreakpoint: {
+      ...(addon.layoutByBreakpoint ?? {}),
+      [breakpoint]: clamped,
+    },
+  };
+}
+
+/** Normalize `layout` to the active breakpoint value and backfill missing map entries. */
+export function ensureAddonLayoutsForBreakpoint(
+  addons: ContentAddon[],
+  breakpoint: BreakpointName = "2xl"
+): ContentAddon[] {
+  const seeded = ensureAddonLayouts(addons);
+  return seeded.map((addon) => {
+    const resolved = resolveAddonLayout(addon, breakpoint) ?? addon.layout;
+    if (!resolved) return addon;
+    // Runtime projection: render/edit against the active breakpoint layout.
+    // Do not mutate layoutByBreakpoint here; persistence happens on explicit updates.
+    return {
+      ...addon,
+      layout: resolved,
+    };
   });
 }
 

@@ -111,11 +111,15 @@ export interface AddonGridLayout {
   colSpan: number;
 }
 
+export type AddonLayoutByBreakpoint = Partial<Record<BreakpointName, AddonGridLayout>>;
+
 export interface ContentAddon {
   id: string;
   type: ContentAddonType;
   data: ContentAddonData;
   layout?: AddonGridLayout;
+  /** Optional position/size per breakpoint (same behavior as content blocks). */
+  layoutByBreakpoint?: AddonLayoutByBreakpoint;
   /** Stacking order inside the content block (higher = more in front). */
   zIndex?: number;
 }

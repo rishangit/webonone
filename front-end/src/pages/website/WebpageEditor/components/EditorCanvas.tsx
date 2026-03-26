@@ -119,7 +119,10 @@ export const EditorCanvas = ({
             </div>
 
             {/* Guidelines Layer - absolute, behind content */}
-            <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }}>
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{ zIndex: 0 }}
+            >
               {/* Vertical Column Lines */}
               {Array.from({ length: 13 }).map((_, i) => {
                 const leftPosition = (i * 100) / 12;
@@ -162,6 +165,12 @@ export const EditorCanvas = ({
             {/* Content Edit Layer - relative positioning, content flows in grid */}
             <div 
               className="relative grid grid-cols-12 gap-0 w-full min-h-screen"
+              onMouseDown={(e) => {
+                // Clicked empty page area (not a block/addon) -> clear selection.
+                if (e.target === e.currentTarget) {
+                  setSelection(null);
+                }
+              }}
               style={{ 
                 zIndex: 10,
                 display: 'grid', 
@@ -195,6 +204,7 @@ export const EditorCanvas = ({
                   >
                     <ResizableContentBlock
                       block={blockToShow}
+                      activeBreakpointName={activeBreakpointName}
                       isSelected={
                         selection?.type === "block" && selection.id === block.id
                       }

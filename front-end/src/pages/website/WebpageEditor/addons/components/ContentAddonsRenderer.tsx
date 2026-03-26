@@ -3,9 +3,10 @@ import { getAddonModuleByType } from "../registry";
 import type { ThemeButtonSetting, ThemeTextSetting } from "../../../../../services/companyWebThemes";
 import type { CompanyWebPage } from "../../../../../services/companyWebPages";
 import type { AddonRenderContext } from "../types";
+import type { BreakpointName } from "../../types";
 import {
   computeAddonDisplayZIndex,
-  ensureAddonLayouts,
+  ensureAddonLayoutsForBreakpoint,
   layoutToGridStyle,
   maxLayoutRowEnd,
 } from "../addonGridUtils";
@@ -17,6 +18,7 @@ interface ContentAddonsRendererProps {
   themeButtonSettings?: ThemeButtonSetting[];
   companyWebPages?: CompanyWebPage[];
   addonRenderContext?: AddonRenderContext;
+  breakpoint?: BreakpointName;
   /** Match content block row height (default 60). */
   rowHeight?: number;
 }
@@ -31,11 +33,12 @@ export const ContentAddonsRenderer = ({
   themeButtonSettings,
   companyWebPages,
   addonRenderContext = "published",
+  breakpoint = "2xl",
   rowHeight = 60,
 }: ContentAddonsRendererProps) => {
   if (!addons.length) return null;
 
-  const list = ensureAddonLayouts(addons);
+  const list = ensureAddonLayoutsForBreakpoint(addons, breakpoint);
   const maxRow = maxLayoutRowEnd(list);
   const minH = Math.max(maxRow, 1) * rowHeight;
 

@@ -107,7 +107,8 @@ export const WebpageContentRenderer = ({
                     height: `${rSpan * rowHeight}px`,
                     minHeight: `${rSpan * rowHeight}px`,
                     boxSizing: 'border-box',
-                    overflow: 'auto',
+                    // Visual/public mode should not show block scrollbars when content fits.
+                    overflow: 'hidden',
                     wordWrap: 'break-word',
                     ...(block.settings?.backgroundColor ? { backgroundColor: block.settings.backgroundColor } : {}),
                   }}
@@ -123,6 +124,7 @@ export const WebpageContentRenderer = ({
                           themeButtonSettings={themeButtonSettings}
                           companyWebPages={companyWebPages}
                           addonRenderContext={addonRenderContext}
+                          breakpoint={breakpoint}
                           rowHeight={rowHeight}
                         />
                       </div>
@@ -135,6 +137,7 @@ export const WebpageContentRenderer = ({
                       themeButtonSettings={themeButtonSettings}
                       companyWebPages={companyWebPages}
                       addonRenderContext={addonRenderContext}
+                      breakpoint={breakpoint}
                       rowHeight={rowHeight}
                     />
                   )}
