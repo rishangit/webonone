@@ -1100,7 +1100,9 @@ export function AppointmentWizard({ currentUser: currentUserProp, selectedDate, 
         open={open}
         onOpenChange={setOpen}
         customHeader={<WizardHeader currentStep={currentStep} steps={steps} />}
-        className="w-full max-w-none sm:max-w-[98vw] sm:w-[98vw] lg:max-w-[95vw] lg:w-[95vw] xl:max-w-[90vw] xl:w-[90vw] h-[100vh] sm:h-[92vh] max-h-[100vh] sm:max-h-[92vh] overflow-hidden backdrop-blur-sm bg-background dark:bg-[var(--glass-bg)] border-0 sm:border border-[var(--glass-border)] custom-scrollbar p-0 sm:rounded-lg flex flex-col"
+        sizeWidth="large"
+        sizeHeight="xlarge"
+        className="overflow-hidden backdrop-blur-sm bg-background dark:bg-[var(--glass-bg)] border-[var(--glass-border)] custom-scrollbar p-0 flex flex-col"
         disableContentScroll={true}
         hideCloseButton={false}
         noContentPadding={true}
@@ -1118,7 +1120,7 @@ export function AppointmentWizard({ currentUser: currentUserProp, selectedDate, 
         
         <div className="flex flex-col h-full overflow-hidden">
           {/* Progress Bar - Fixed */}
-          <div className="shrink-0">
+          <div className="shrink-0 w-1/2 mx-auto">
             <WizardProgress currentStep={currentStep} steps={steps} />
           </div>
 

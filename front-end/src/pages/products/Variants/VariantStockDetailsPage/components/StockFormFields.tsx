@@ -214,7 +214,6 @@ export const StockFormFields = ({
                   title="Select Supplier"
                   description="Choose a supplier from the list"
                   placeholder="Select a supplier (optional)"
-                  allowClear={true}
                   error={!!errors.supplierId}
                 />
               </div>

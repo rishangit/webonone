@@ -4,3 +4,4 @@ export { WebpageListView } from "./WebpageListView";
 export { WebpageActions } from "./WebpageActions";
 export { WebpagesFilters } from "./WebpagesFilters";
 export { WebpageDeleteDialog } from "./WebpageDeleteDialog";
+export { WebpageAddDialog } from "./WebpageAddDialog";

@@ -70,7 +70,7 @@ import { SearchPage } from "./pages/search";
 import { AnalyticsPage } from "./pages/analytics";
 
 // Website
-import { WebsitePage, ThemeFormPage, ThemePage, WebpageFormPage, WebpageEditor, PublicWebPage } from "./pages/website";
+import { WebsitePage, ThemePage, WebpageFormPage, WebpageEditor, PublicWebPage } from "./pages/website";
 
 // Showcase
 import { ShowcasePage } from "./pages/showcase";
@@ -1262,30 +1262,6 @@ function App() {
             }
           />
 
-          <Route 
-            path="/system/web/themes/new" 
-            element={
-              isAuthenticated ? (
-                <ProtectedRouteWrapper>
-                  <ThemeFormPage />
-                </ProtectedRouteWrapper>
-              ) : (
-                <Navigate to="/system/login" replace />
-              )
-            }
-          />
-          <Route 
-            path="/system/web/themes/:themeId" 
-            element={
-              isAuthenticated ? (
-                <ProtectedRouteWrapper>
-                  <ThemeFormPage />
-                </ProtectedRouteWrapper>
-              ) : (
-                <Navigate to="/system/login" replace />
-              )
-            }
-          />
           <Route 
             path="/system/web/webpages/new" 
             element={

@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   fetchWebPagesRequest,
+  createWebPageRequest,
   updateWebPageRequest,
   deleteWebPageRequest,
   clearError,
@@ -13,7 +13,6 @@ import { CompanyWebPage } from "@/services/companyWebPages";
 const ITEMS_PER_PAGE_OPTIONS = [12, 24, 48, 96];
 
 export const useWebpagesPage = () => {
-  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { webPages, loading, error } = useAppSelector((state) => state.companyWebPages);
   const { userCompany, currentCompany } = useAppSelector((state) => state.companies);
@@ -30,6 +29,7 @@ export const useWebpagesPage = () => {
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
   const [webPageToDelete, setWebPageToDelete] = useState<CompanyWebPage | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   useEffect(() => {
     if (companyId) {
@@ -142,7 +142,25 @@ export const useWebpagesPage = () => {
   };
 
   const handleAdd = () => {
-    navigate("/system/web/webpages/new");
+    setIsAddDialogOpen(true);
+  };
+
+  const handleCreate = (data: { name: string; url: string; isActive?: boolean }) => {
+    if (!companyId) {
+      toast.error("Please select a company");
+      return;
+    }
+
+    dispatch(
+      createWebPageRequest({
+        companyId,
+        name: data.name,
+        url: data.url,
+        isActive: data.isActive || false,
+      })
+    );
+    setIsAddDialogOpen(false);
+    setTimeout(() => dispatch(fetchWebPagesRequest({ companyId })), 500);
   };
 
   return {
@@ -172,6 +190,8 @@ export const useWebpagesPage = () => {
     webPageToDelete,
     isDeleteDialogOpen,
     setIsDeleteDialogOpen,
+    isAddDialogOpen,
+    setIsAddDialogOpen,
     handleEdit,
     handleBrowse,
     handleDeleteClick,
@@ -179,5 +199,6 @@ export const useWebpagesPage = () => {
     handleToggleActive,
     handleClearFilters,
     handleAdd,
+    handleCreate,
   };
 };

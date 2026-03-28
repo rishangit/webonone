@@ -265,7 +265,6 @@ export const UsersPage = (props: UsersPageProps) => {
             title="Add User to Company"
             description="Select an existing user from the platform to add as a client of your company"
             placeholder={loadingAllUsers ? "Loading users..." : "Select a user to add as client"}
-            allowClear={true}
             error={false}
           />
         )}

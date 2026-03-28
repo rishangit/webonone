@@ -1,4 +1,4 @@
-import { Edit, Eye, MoreVertical, Star, Trash2 } from "lucide-react";
+import { Edit, MoreVertical, Star, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,7 +11,6 @@ import type { CompanyWebTheme } from "@/services/companyWebThemes";
 
 export interface ThemeActionsProps {
   theme: CompanyWebTheme;
-  onView: (theme: CompanyWebTheme) => void;
   onEdit: (theme: CompanyWebTheme) => void;
   onSetDefault: (theme: CompanyWebTheme) => void;
   onDelete: (theme: CompanyWebTheme) => void;
@@ -19,7 +18,6 @@ export interface ThemeActionsProps {
 
 export const ThemeActions = ({
   theme,
-  onView,
   onEdit,
   onSetDefault,
   onDelete,
@@ -41,10 +39,6 @@ export const ThemeActions = ({
         align="end"
         onClick={(e) => e.stopPropagation()}
       >
-        <DropdownMenuItem onClick={() => onView(theme)}>
-          <Eye className="w-4 h-4 mr-2" />
-          View
-        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onEdit(theme)}>
           <Edit className="w-4 h-4 mr-2" />
           Edit

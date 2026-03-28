@@ -164,7 +164,7 @@ export const PublicWebPage = () => {
     <div className="min-h-screen bg-gray-100">
       {/* Full width canvas - treated as the page */}
       <div 
-        className="w-full bg-white relative min-h-screen p-5"
+        className="w-full bg-white relative min-h-screen"
         style={{ 
           minHeight: containerHeight,
         }}

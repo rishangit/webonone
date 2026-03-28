@@ -1,0 +1,46 @@
+---
+description: Dialog window standards with CustomDialog and wizard progress bar
+globs: front-end/src/**/*.tsx
+alwaysApply: true
+---
+
+# Dialog Window Standards
+
+- Always build dialog windows with `@front-end/src/components/ui/custom-dialog.tsx` (`CustomDialog`).
+- Do not use raw Radix/HTML dialog containers directly in feature pages when `CustomDialog` can be used.
+- Every dialog must render a visible header and a visible footer.
+- All action/control buttons (for example: Cancel, Save, Next, Previous, Submit, Delete, Confirm) must be rendered in the dialog footer.
+- Do not place primary or secondary action buttons inside the dialog body/content area.
+- Footer action buttons must use auto width based on their content text.
+- Do not force footer action buttons to full width (for example, avoid `w-full` or `flex-1` on footer buttons unless explicitly required by the feature).
+
+## Theme and accents
+
+- Use project theme tokens and accent styles for dialog UI (for example: `bg-background`, `text-foreground`, `text-muted-foreground`, `border-[var(--glass-border)]`, and accent-aware variants).
+- Keep dialog visuals consistent with existing theme behavior in light/dark modes.
+
+## Reusability
+
+- Prefer reusable UI components from `front-end/src/components/ui` for inputs, buttons, labels, and related controls.
+- Extract repeated dialog sections into reusable local/shared components instead of duplicating markup and logic.
+- Store each dialog in its own dedicated folder with a meaningful, descriptive name.
+- Avoid placing multiple unrelated dialog implementations in one large file when they can be split into focused dialog folders/components.
+
+## Wizard dialogs
+
+- If the dialog is a wizard (multi-step flow), show a visible step progress bar.
+- If a dialog is a wizard, implement each step as a separate component (one component per step) instead of one large inline render block.
+- Progress bar width must be half of the dialog content area (`w-1/2`).
+- Progress bar must be horizontally centered (for example: container with `mx-auto` and centered alignment).
+- Render only one primary step progress indicator in wizard dialogs.
+- Do not render both a progress bar and a numeric/circle stepper at the same time.
+- Keep step progress visually aligned with the active step and theme accents.
+
+## Tabbed dialogs
+
+- If a dialog has tabs, implement each tab as a separate component (one component per tab) instead of one large inline tab render block.
+- Organize tab components in dedicated folders when tab logic/UI is complex; keep simpler tabs as focused sibling components when appropriate.
+- In tabbed dialogs, tab-level action/control buttons are allowed inside the tab body when they are scoped to tab content (for example: Add item, Edit selected item, Delete selected item).
+- Keep global dialog actions (for example: Cancel, Save, Submit, Confirm) in the dialog footer; tab-level actions must not replace required footer actions.
+- For tab list rows/items, provide a 3-dot menu (`MoreVertical`/kebab menu) for item-specific functions.
+- 3-dot item menus should include context actions such as Edit/Delete (and other item-scoped functions when needed), styled with project theme/accent tokens.

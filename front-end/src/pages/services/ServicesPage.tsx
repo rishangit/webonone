@@ -809,8 +809,25 @@ export function ServicesPage() {
         onOpenChange={setIsAddDialogOpen}
         title="Add New Service"
         description="Create a new service for your company"
-        maxWidth="max-w-4xl"
-        className="h-[90vh]"
+        sizeWidth="medium"
+        sizeHeight="large"
+        footer={
+          <>
+            <Button
+              variant="outline"
+              onClick={() => setIsAddDialogOpen(false)}
+              className="bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground hover:bg-accent"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSave}
+              variant="accent"
+            >
+              Add Service
+            </Button>
+          </>
+        }
       >
         <div className="space-y-6">
           {/* Image Upload */}
@@ -903,21 +920,6 @@ export function ServicesPage() {
             />
           </div>
 
-          <div className="flex justify-end gap-3 pt-4">
-            <Button 
-              variant="outline" 
-              onClick={() => setIsAddDialogOpen(false)}
-              className="bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground hover:bg-accent"
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleSave}
-              variant="accent"
-            >
-              Add Service
-            </Button>
-          </div>
         </div>
       </CustomDialog>
 

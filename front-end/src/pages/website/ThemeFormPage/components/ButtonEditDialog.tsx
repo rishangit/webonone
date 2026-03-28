@@ -50,6 +50,14 @@ export const ButtonEditDialog = ({
   const colorDefault = useMemo(() => colorOptions[0]?.color || "#000000", [colorOptions]);
   const fontDefault = useMemo(() => colorOptions[1]?.color || "#ffffff", [colorOptions]);
   const borderDefault = useMemo(() => colorOptions[0]?.color || "#000000", [colorOptions]);
+  const validColorOptions = useMemo(
+    () => colorOptions.filter((c) => !!c.color),
+    [colorOptions]
+  );
+  const validTextStyleOptions = useMemo(
+    () => textStyleOptions.filter((ts) => !!ts.styleName),
+    [textStyleOptions]
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -66,7 +74,7 @@ export const ButtonEditDialog = ({
       setBackgroundColor(colorDefault);
       setFontColor(fontDefault);
       setBorderColor(borderDefault);
-      setTextStyleName(textStyleOptions[0]?.styleName || "");
+      setTextStyleName(validTextStyleOptions[0]?.styleName || "");
       setBorderRadius("8px");
     }
   }, [
@@ -76,7 +84,7 @@ export const ButtonEditDialog = ({
     colorDefault,
     fontDefault,
     borderDefault,
-    textStyleOptions,
+    validTextStyleOptions,
   ]);
 
   const canSave =
@@ -153,19 +161,16 @@ export const ButtonEditDialog = ({
               <SelectValue placeholder="Select a text style" />
             </SelectTrigger>
             <SelectContent className="bg-popover border-border">
-              {textStyleOptions.length === 0 ? (
-                <SelectItem value="" disabled>
-                  No text styles yet
+              {validTextStyleOptions.map((ts) => (
+                <SelectItem key={ts.styleName} value={ts.styleName}>
+                  {ts.styleName}
                 </SelectItem>
-              ) : (
-                textStyleOptions.map((ts) => (
-                  <SelectItem key={ts.styleName} value={ts.styleName}>
-                    {ts.styleName}
-                  </SelectItem>
-                ))
-              )}
+              ))}
             </SelectContent>
           </Select>
+          {validTextStyleOptions.length === 0 && (
+            <p className="text-xs text-muted-foreground">No text styles yet</p>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -180,19 +185,16 @@ export const ButtonEditDialog = ({
                 <SelectValue placeholder="Pick a color" />
               </SelectTrigger>
               <SelectContent className="bg-popover border-border">
-                {colorOptions.length === 0 ? (
-                  <SelectItem value="" disabled>
-                    No colors yet
+                {validColorOptions.map((c) => (
+                  <SelectItem key={c.name} value={c.color}>
+                    {c.name} ({c.color})
                   </SelectItem>
-                ) : (
-                  colorOptions.map((c) => (
-                    <SelectItem key={c.name} value={c.color}>
-                      {c.name} ({c.color})
-                    </SelectItem>
-                  ))
-                )}
+                ))}
               </SelectContent>
             </Select>
+            {validColorOptions.length === 0 && (
+              <p className="text-xs text-muted-foreground">No colors yet</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -206,19 +208,16 @@ export const ButtonEditDialog = ({
                 <SelectValue placeholder="Pick a color" />
               </SelectTrigger>
               <SelectContent className="bg-popover border-border">
-                {colorOptions.length === 0 ? (
-                  <SelectItem value="" disabled>
-                    No colors yet
+                {validColorOptions.map((c) => (
+                  <SelectItem key={c.name} value={c.color}>
+                    {c.name} ({c.color})
                   </SelectItem>
-                ) : (
-                  colorOptions.map((c) => (
-                    <SelectItem key={c.name} value={c.color}>
-                      {c.name} ({c.color})
-                    </SelectItem>
-                  ))
-                )}
+                ))}
               </SelectContent>
             </Select>
+            {validColorOptions.length === 0 && (
+              <p className="text-xs text-muted-foreground">No colors yet</p>
+            )}
           </div>
         </div>
 
@@ -233,19 +232,16 @@ export const ButtonEditDialog = ({
               <SelectValue placeholder="Pick a color" />
             </SelectTrigger>
             <SelectContent className="bg-popover border-border">
-              {colorOptions.length === 0 ? (
-                <SelectItem value="" disabled>
-                  No colors yet
+              {validColorOptions.map((c) => (
+                <SelectItem key={c.name} value={c.color}>
+                  {c.name} ({c.color})
                 </SelectItem>
-              ) : (
-                colorOptions.map((c) => (
-                  <SelectItem key={c.name} value={c.color}>
-                    {c.name} ({c.color})
-                  </SelectItem>
-                ))
-              )}
+              ))}
             </SelectContent>
           </Select>
+          {validColorOptions.length === 0 && (
+            <p className="text-xs text-muted-foreground">No colors yet</p>
+          )}
         </div>
 
         <div className="space-y-2">

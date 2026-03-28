@@ -1164,10 +1164,47 @@ router.post('/create-user-without-password',
   asyncHandler(async (req, res) => {
     const { firstName, lastName, email, mobileNumber } = req.body;
     
-    // Check if email already exists
+    // Check if email already exists.
+    // Instead of failing the wizard, continue by sending recovery/setup emails.
     const existingUser = await User.findByEmail(email);
     if (existingUser) {
-      throw validationError('Email already exists');
+      const updateData = {};
+      if (firstName) updateData.firstName = firstName;
+      if (lastName) updateData.lastName = lastName;
+      if (mobileNumber) updateData.phone = mobileNumber;
+
+      if (Object.keys(updateData).length > 0) {
+        await existingUser.update(updateData);
+      }
+
+      try {
+        // Always send password reset for existing users so they can recover access.
+        const PasswordResetToken = require('../models/PasswordResetToken');
+        const resetToken = await PasswordResetToken.create(existingUser.id, 24); // 24 hours expiry
+
+        const { sendPasswordResetEmail, sendVerificationEmail } = require('../utils/emailService');
+        const userName = existingUser.getFullName() || existingUser.email;
+        await sendPasswordResetEmail(existingUser.email, resetToken, userName);
+
+        // If account is not verified yet, also send verification email.
+        if (!existingUser.isVerified) {
+          const verificationToken = await PasswordResetToken.create(existingUser.id, 24); // 24 hours expiry
+          await sendVerificationEmail(existingUser.email, verificationToken, userName);
+        }
+
+        return res.json({
+          success: true,
+          message: 'Email already exists. We sent password reset instructions to continue.',
+          data: {
+            userId: existingUser.id,
+            email: existingUser.email,
+            existingUser: true
+          }
+        });
+      } catch (error) {
+        console.error('Error sending setup emails for existing user:', error);
+        throw new Error(`Failed to send recovery email: ${error.message}`);
+      }
     }
     
     // Get default user data

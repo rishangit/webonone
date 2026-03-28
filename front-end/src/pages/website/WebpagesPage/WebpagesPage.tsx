@@ -8,6 +8,7 @@ import {
   WebpageCard,
   WebpagesFilters,
   WebpageDeleteDialog,
+  WebpageAddDialog,
 } from "./components";
 
 export const WebpagesPage = () => {
@@ -34,10 +35,13 @@ export const WebpagesPage = () => {
     webPageToDelete,
     isDeleteDialogOpen,
     setIsDeleteDialogOpen,
+    isAddDialogOpen,
+    setIsAddDialogOpen,
     handleEdit,
     handleBrowse,
     handleDeleteClick,
     handleDeleteConfirm,
+    handleCreate,
     handleClearFilters,
     handleAdd,
   } = useWebpagesPage();
@@ -196,6 +200,13 @@ export const WebpagesPage = () => {
         onOpenChange={setIsDeleteDialogOpen}
         webPage={webPageToDelete}
         onDelete={handleDeleteConfirm}
+      />
+
+      <WebpageAddDialog
+        open={isAddDialogOpen}
+        onOpenChange={setIsAddDialogOpen}
+        onSubmit={handleCreate}
+        loading={loading}
       />
     </div>
   );

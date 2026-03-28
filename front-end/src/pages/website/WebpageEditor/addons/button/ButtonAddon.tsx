@@ -35,6 +35,8 @@ type ButtonAddonFormValues = {
   linkWebPageId: string;
 };
 
+const NO_LINK_VALUE = "__no_link__";
+
 function hashUrl(url: string): string {
   let h = 0;
   for (let i = 0; i < url.length; i++) h = (Math.imul(31, h) + url.charCodeAt(i)) | 0;
@@ -197,6 +199,10 @@ const ButtonAddonEditDialog = ({
     () => [...companyWebPages].sort((a, b) => a.name.localeCompare(b.name)),
     [companyWebPages]
   );
+  const validThemeButtons = useMemo(
+    () => themeButtonSettings.filter((b) => !!b.buttonName),
+    [themeButtonSettings]
+  );
 
   const {
     register,
@@ -228,20 +234,20 @@ const ButtonAddonEditDialog = ({
   }, [open, data.label, data.buttonName, data.linkWebPageId, reset]);
 
   useEffect(() => {
-    if (!open || themeButtonSettings.length === 0) return;
+    if (!open || validThemeButtons.length === 0) return;
     const current = getValues("buttonName");
-    if (!current && themeButtonSettings[0]) {
-      setValue("buttonName", themeButtonSettings[0].buttonName);
+    if (!current && validThemeButtons[0]) {
+      setValue("buttonName", validThemeButtons[0].buttonName);
     }
-  }, [open, themeButtonSettings, setValue, getValues]);
+  }, [open, validThemeButtons, setValue, getValues]);
 
   const onSubmit = (values: ButtonAddonFormValues) => {
-    if (themeButtonSettings.length > 0 && !values.buttonName?.trim()) {
+    if (validThemeButtons.length > 0 && !values.buttonName?.trim()) {
       toast.error("Select a button type from the theme.");
       return;
     }
 
-    const selectedBtn = themeButtonSettings.find((b) => b.buttonName === values.buttonName);
+    const selectedBtn = validThemeButtons.find((b) => b.buttonName === values.buttonName);
     const textStyle = selectedBtn?.textStyleName
       ? themeTextSettings.find((t) => t.styleName === selectedBtn.textStyleName)
       : undefined;
@@ -327,7 +333,7 @@ const ButtonAddonEditDialog = ({
             onValueChange={(v) =>
               setValue("buttonName", v, { shouldDirty: true, shouldValidate: true })
             }
-            disabled={themeButtonSettings.length === 0}
+            disabled={validThemeButtons.length === 0}
           >
             <SelectTrigger
               id="button-addon-type"
@@ -336,20 +342,14 @@ const ButtonAddonEditDialog = ({
               <SelectValue placeholder="Select a theme button" />
             </SelectTrigger>
             <SelectContent className="bg-popover border-border">
-              {themeButtonSettings.length === 0 ? (
-                <SelectItem value="" disabled>
-                  No theme buttons — add them in Website → Themes
+              {validThemeButtons.map((b) => (
+                <SelectItem key={b.buttonName} value={b.buttonName}>
+                  {b.buttonName}
                 </SelectItem>
-              ) : (
-                themeButtonSettings.map((b) => (
-                  <SelectItem key={b.buttonName} value={b.buttonName}>
-                    {b.buttonName}
-                  </SelectItem>
-                ))
-              )}
+              ))}
             </SelectContent>
           </Select>
-          {themeButtonSettings.length === 0 && (
+          {validThemeButtons.length === 0 && (
             <p className="text-xs text-muted-foreground">
               Configure buttons under your company web theme; they appear here for selection.
             </p>
@@ -359,9 +359,12 @@ const ButtonAddonEditDialog = ({
         <div className="space-y-2">
           <Label htmlFor="button-addon-link">Link (company web page)</Label>
           <Select
-            value={currentLinkWebPageId || ""}
+            value={currentLinkWebPageId || NO_LINK_VALUE}
             onValueChange={(v) =>
-              setValue("linkWebPageId", v, { shouldDirty: true, shouldValidate: true })
+              setValue("linkWebPageId", v === NO_LINK_VALUE ? "" : v, {
+                shouldDirty: true,
+                shouldValidate: true,
+              })
             }
           >
             <SelectTrigger
@@ -371,7 +374,7 @@ const ButtonAddonEditDialog = ({
               <SelectValue placeholder="No link" />
             </SelectTrigger>
             <SelectContent className="bg-popover border-border">
-              <SelectItem value="">No link</SelectItem>
+              <SelectItem value={NO_LINK_VALUE}>No link</SelectItem>
               {sortedPages.map((p) => (
                 <SelectItem key={p.id} value={p.id}>
                   {p.name}

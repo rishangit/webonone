@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { CustomDialog } from "@/components/ui/custom-dialog";
 import { Button } from "@/components/ui/button";
+import { ProgressBar } from "@/components/ui/progress-bar";
 import { UserPlus, Users, Settings, CheckCircle, ChevronLeft, ChevronRight, Clock, Shield } from "lucide-react";
 import { toast } from "sonner";
 import { useAppSelector } from "@/store/hooks";
@@ -11,7 +12,7 @@ import { SelectedUserSummary } from "./SelectedUserSummary";
 import { WorkScheduleSection } from "./WorkScheduleSection";
 import { PermissionsSection } from "./PermissionsSection";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { formatAvatarUrl } from "../../../utils";
+import { formatAvatarUrl } from "@/utils";
 
 export const AddStaffDialog = ({
   open,
@@ -19,7 +20,7 @@ export const AddStaffDialog = ({
   onAddStaff,
   editingStaff,
   onEditStaff,
-  companyId
+  companyId: _companyId
 }: AddStaffDialogProps) => {
   const { users: reduxUsers } = useAppSelector((state) => state.users);
   const [currentStep, setCurrentStep] = useState(0);
@@ -35,6 +36,7 @@ export const AddStaffDialog = ({
 
   const totalSteps = steps.length;
   const isLastStep = currentStep === totalSteps - 1;
+  const progress = ((currentStep + 1) / totalSteps) * 100;
 
   // Work schedule state
   const [workSchedule, setWorkSchedule] = useState<Record<string, { startTime: string; endTime: string; enabled: boolean }>>({
@@ -280,44 +282,6 @@ export const AddStaffDialog = ({
     }
   };
 
-  // Step Indicator Component
-  const StepIndicator = () => (
-    <div className="flex items-center justify-center mb-6">
-      {steps.map((step, index) => {
-        const StepIcon = step.icon;
-        const isCompleted = index < currentStep;
-        const isCurrent = index === currentStep;
-
-        return (
-          <div key={step.id} className="flex items-center">
-            <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 ${isCompleted
-                  ? "bg-[var(--accent-primary)] text-white"
-                  : isCurrent
-                    ? "bg-[var(--accent-bg)] border-2 border-[var(--accent-primary)] text-[var(--accent-text)]"
-                    : "bg-[var(--glass-bg)] border border-[var(--glass-border)] text-muted-foreground"
-                }`}
-            >
-              {isCompleted ? (
-                <CheckCircle className="w-4 h-4" />
-              ) : (
-                <StepIcon className="w-4 h-4" />
-              )}
-            </div>
-            {index < steps.length - 1 && (
-              <div
-                className={`w-12 h-0.5 mx-2 transition-all duration-200 ${isCompleted
-                    ? "bg-[var(--accent-primary)]"
-                    : "bg-[var(--glass-border)]"
-                  }`}
-              />
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-
   // Render step content
   const renderStepContent = () => {
     switch (currentStep) {
@@ -445,8 +409,8 @@ export const AddStaffDialog = ({
       onOpenChange={onOpenChange}
       title={editingStaff ? "Edit Staff Member" : "Add Staff Member"}
       description={editingStaff ? "Update staff member details and permissions" : "Complete the wizard to add a new staff member"}
-      maxWidth="max-w-[95vw]"
-      className="w-[98vw] sm:w-[95vw] md:w-[1800px] lg:w-[2000px] xl:w-[95vw] h-[90vh] sm:h-[85vh] md:h-[800px] lg:h-[850px] min-h-[700px] max-h-[90vh] sm:max-h-[85vh] md:max-h-[800px] lg:max-h-[850px]"
+      sizeWidth="medium"
+      sizeHeight="large"
       disableContentScroll={true}
       footer={
         <div className="flex items-center justify-between w-full">
@@ -494,7 +458,14 @@ export const AddStaffDialog = ({
       }
     >
       <div className="h-full overflow-hidden flex flex-col">
-        <StepIndicator />
+        <div className="mb-4">
+          <div className="w-1/2 mx-auto">
+            <p className="text-sm text-muted-foreground mb-2 text-center">
+              Step {currentStep + 1} of {totalSteps}
+            </p>
+            <ProgressBar value={progress} />
+          </div>
+        </div>
 
         <div className="flex-1 min-h-0 overflow-hidden">
           {/* All steps use the same structure - no Card wrapper */}

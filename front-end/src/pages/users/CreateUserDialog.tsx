@@ -63,8 +63,25 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, companyId }: C
       title="Create New User"
       description="Create a new user and add them as a client to your company. They can claim this account later by registering with this email."
       icon={<UserPlus className="w-5 h-5" />}
+      sizeWidth="small"
+      sizeHeight="medium"
+      footer={
+        <>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isSubmitting}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" form="create-user-form" variant="accent" disabled={isSubmitting}>
+            {isSubmitting ? "Creating..." : "Create User"}
+          </Button>
+        </>
+      }
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4">
+      <form id="create-user-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4">
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="firstName">First Name</Label>
@@ -106,19 +123,6 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, companyId }: C
           )}
         </div>
 
-        <div className="flex justify-end gap-3 pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isSubmitting}
-          >
-            Cancel
-          </Button>
-          <Button type="submit" variant="accent" disabled={isSubmitting}>
-            {isSubmitting ? "Creating..." : "Create User"}
-          </Button>
-        </div>
       </form>
     </CustomDialog>
   );

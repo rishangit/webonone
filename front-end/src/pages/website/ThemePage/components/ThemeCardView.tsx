@@ -6,7 +6,6 @@ import { ThemeActions } from "./ThemeActions";
 
 export interface ThemeCardViewProps {
   theme: CompanyWebTheme;
-  onView: (theme: CompanyWebTheme) => void;
   onEdit: (theme: CompanyWebTheme) => void;
   onSetDefault: (theme: CompanyWebTheme) => void;
   onDelete: (theme: CompanyWebTheme) => void;
@@ -14,7 +13,6 @@ export interface ThemeCardViewProps {
 
 export const ThemeCardView = ({
   theme,
-  onView,
   onEdit,
   onSetDefault,
   onDelete,
@@ -28,7 +26,7 @@ export const ThemeCardView = ({
     ) {
       return;
     }
-    onView(theme);
+    onEdit(theme);
   };
 
   const basicSetting = theme.themeData?.basicSetting;
@@ -75,7 +73,6 @@ export const ThemeCardView = ({
           </div>
           <ThemeActions
             theme={theme}
-            onView={onView}
             onEdit={onEdit}
             onSetDefault={onSetDefault}
             onDelete={onDelete}

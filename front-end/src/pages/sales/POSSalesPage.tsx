@@ -17,7 +17,7 @@ import { companyProductVariantsService } from "@/services/companyProductVariants
 import { CustomDialog } from "@/components/ui/custom-dialog";
 import { salesService, CreateSaleData } from "@/services/sales";
 import { formatAvatarUrl } from "../../utils";
-import { UserSelector } from "@/components/common/UserSelector";
+import { UserSelectionDialog } from "@/components/common/UserSelectionDialog";
 import { fetchUsersRequest } from "@/store/slices/usersSlice";
 import { currenciesService, Currency } from "@/services/currencies";
 
@@ -931,30 +931,17 @@ export const POSSalesPage = ({ onBack, currentUser }: POSSalesPageProps) => {
       </div>
 
       {/* User Selection Dialog */}
-      <CustomDialog
+      <UserSelectionDialog
         open={showUserSelection}
         onOpenChange={setShowUserSelection}
+        value={selectedCustomerId}
+        onChange={setSelectedCustomerId}
+        users={users}
         title="Select Customer"
         description="Choose the customer for this sale"
-        icon={<User className="w-5 h-5" />}
-        maxWidth="max-w-2xl"
-      >
-        <div className="space-y-4 pb-6">
-          <UserSelector
-            value={selectedCustomerId}
-            onChange={(userId) => {
-              setSelectedCustomerId(userId);
-              if (userId) {
-                setShowUserSelection(false);
-              }
-            }}
-            users={users}
-            placeholder="Select a customer"
-            allowClear={true}
-            error={false}
-          />
-        </div>
-      </CustomDialog>
+        placeholder="Search customer by name or email"
+        error={false}
+      />
 
       {/* Variant Selection Dialog */}
       {showVariantSelection && selectedProduct && (

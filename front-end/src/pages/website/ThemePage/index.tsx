@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
 import { Plus, Palette } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   fetchThemesRequest,
+  createThemeRequest,
   updateThemeRequest,
   deleteThemeRequest,
   clearError,
@@ -14,10 +14,9 @@ import type { CompanyWebTheme } from "@/services/companyWebThemes";
 import { EmptyState } from "@/components/common/EmptyState";
 import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
 import { Pagination } from "@/components/common/Pagination";
-import { ThemeFilters, ThemeCard } from "./components";
+import { ThemeFilters, ThemeCard, ThemeAddDialog } from "./components";
 
 export const ThemePage = () => {
-  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { themes, loading, error } = useAppSelector(
     (state) => state.companyWebThemes
@@ -41,6 +40,8 @@ export const ThemePage = () => {
   const [selectedTheme, setSelectedTheme] = useState<CompanyWebTheme | null>(
     null
   );
+  const [isThemeDialogOpen, setIsThemeDialogOpen] = useState(false);
+  const [editingTheme, setEditingTheme] = useState<CompanyWebTheme | null>(null);
 
   useEffect(() => {
     if (companyId) {
@@ -94,15 +95,23 @@ export const ThemePage = () => {
   }, [currentPage, pagination.totalPages]);
 
   const handleAdd = () => {
-    navigate(`/system/web/themes/new`);
+    setEditingTheme(null);
+    setIsThemeDialogOpen(true);
+  };
+
+  const handleCreateTheme = (data: any) => {
+    dispatch(createThemeRequest(data));
+    setIsThemeDialogOpen(false);
+    if (companyId) {
+      setTimeout(() => {
+        dispatch(fetchThemesRequest({ companyId }));
+      }, 500);
+    }
   };
 
   const handleEdit = (theme: CompanyWebTheme) => {
-    navigate(`/system/web/themes/${theme.id}`);
-  };
-
-  const handleView = (theme: CompanyWebTheme) => {
-    navigate(`/system/web/themes/${theme.id}?view=true`);
+    setEditingTheme(theme);
+    setIsThemeDialogOpen(true);
   };
 
   const handleDelete = (theme: CompanyWebTheme) => {
@@ -219,7 +228,6 @@ export const ThemePage = () => {
                         key={theme.id}
                         theme={theme}
                         viewMode="grid"
-                        onView={handleView}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
                         onSetDefault={handleSetDefault}
@@ -233,7 +241,6 @@ export const ThemePage = () => {
                         key={theme.id}
                         theme={theme}
                         viewMode="list"
-                        onView={handleView}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
                         onSetDefault={handleSetDefault}
@@ -291,6 +298,30 @@ export const ThemePage = () => {
         onConfirm={handleDeleteConfirm}
         itemName={selectedTheme?.name}
         itemType="theme"
+      />
+
+      <ThemeAddDialog
+        open={isThemeDialogOpen}
+        onOpenChange={(open) => {
+          setIsThemeDialogOpen(open);
+          if (!open) {
+            setEditingTheme(null);
+          }
+        }}
+        companyId={companyId}
+        loading={loading}
+        selectedTheme={editingTheme}
+        onCreate={handleCreateTheme}
+        onUpdate={(themeId, data) => {
+          dispatch(updateThemeRequest({ id: themeId, data }));
+          setIsThemeDialogOpen(false);
+          setEditingTheme(null);
+          if (companyId) {
+            setTimeout(() => {
+              dispatch(fetchThemesRequest({ companyId }));
+            }, 500);
+          }
+        }}
       />
     </div>
   );

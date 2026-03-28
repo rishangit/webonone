@@ -277,7 +277,7 @@ export const EditorCanvas = ({
     const containerHeight = Math.max(maxY + 200, 1000);
 
     return previewShell(
-      <div className="w-full relative min-h-screen p-5" style={{ minHeight: containerHeight }}>
+      <div className="w-full relative min-h-screen" style={{ minHeight: containerHeight }}>
         <WebpageContentRenderer
           contentBlocks={contentBlocks}
           css={localContent.css}

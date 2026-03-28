@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { CustomDialog } from "@/components/ui/custom-dialog";
+import { ProgressBar } from "@/components/ui/progress-bar";
 // DropdownMenu imports removed - no longer needed without variant step
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -154,6 +155,7 @@ export function AddProductToCompanyDialog({
   const [isCreatingSystemProduct, setIsCreatingSystemProduct] = useState(false);
   
   const totalSteps = 2; // Removed variant step
+  const progress = (currentStep / totalSteps) * 100;
 
   // Load system products and tags when dialog opens
   useEffect(() => {
@@ -469,39 +471,6 @@ export function AddProductToCompanyDialog({
     }
   };
 
-  const StepIndicator = () => (
-    <div className="flex items-center justify-center mb-6">
-      {Array.from({ length: totalSteps }, (_, i) => i + 1).map((step) => (
-        <div key={step} className="flex items-center">
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-            step <= currentStep 
-              ? 'bg-[var(--accent-primary)] text-[var(--accent-button-text)]' 
-              : 'bg-muted text-muted-foreground'
-          }`}>
-            {step < currentStep ? (
-              <Check className="w-4 h-4" />
-            ) : (
-              step
-            )}
-          </div>
-          {step < totalSteps && (
-            <div className={`w-12 h-0.5 mx-2 ${
-              step < currentStep ? 'bg-[var(--accent-primary)]' : 'bg-muted'
-            }`} />
-          )}
-        </div>
-      ))}
-    </div>
-  );
-
-  const getStepTitle = () => {
-    switch (currentStep) {
-      case 1: return "Product Selection";
-      case 2: return "Product Configuration";
-      default: return "";
-    }
-  };
-
   const handleNext = () => {
     if (currentStep === 1) {
       if (!selectedProduct && !isCustomProduct) {
@@ -527,8 +496,14 @@ export function AddProductToCompanyDialog({
         <>
           <Button
             variant="outline"
+            onClick={() => setShowAddSystemProductDialog(true)}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add New System Product
+          </Button>
+          <Button
+            variant="outline"
             onClick={() => onOpenChange(false)}
-            className="flex-1"
           >
             Cancel
           </Button>
@@ -536,7 +511,6 @@ export function AddProductToCompanyDialog({
             onClick={handleNext}
             disabled={!selectedProduct && !isCustomProduct}
             variant="accent"
-            className="flex-1"
           >
             Next: Configuration
             <ChevronRight className="w-4 h-4 ml-2" />
@@ -549,7 +523,6 @@ export function AddProductToCompanyDialog({
           <Button
             variant="outline"
             onClick={handlePrevious}
-            className="flex-1"
           >
             <ChevronLeft className="w-4 h-4 mr-2" />
             Back
@@ -558,7 +531,6 @@ export function AddProductToCompanyDialog({
             onClick={handleSubmit}
             disabled={companyProductsLoading || !formData.name || (isCustomProduct && !formData.sku)}
             variant="accent"
-            className="flex-1"
           >
             {companyProductsLoading ? "Adding..." : "Add Product"}
           </Button>
@@ -576,16 +548,22 @@ export function AddProductToCompanyDialog({
       title="Add Product to Company"
       description="Choose from system products or create a custom product for your company"
       icon={<Package className="w-5 h-5" />}
-      maxWidth="max-w-4xl"
+      sizeWidth="medium"
+      sizeHeight="xlarge"
       disableContentScroll={true}
       footer={
-        <div className="flex items-center gap-3 w-full sm:flex-row sm:justify-start">
+        <div className="flex items-center gap-3 w-full sm:flex-row sm:justify-end">
           {renderFooter()}
         </div>
       }
     >
       <div className="space-y-6 flex flex-col h-full overflow-hidden">
-        <StepIndicator />
+        <div className="w-1/2 mx-auto space-y-2">
+          <p className="text-sm text-muted-foreground text-center">
+            Step {currentStep} of {totalSteps}
+          </p>
+          <ProgressBar value={progress} />
+        </div>
         
           {/* Step 1: Product Selection */}
           {currentStep === 1 && (
@@ -648,15 +626,6 @@ export function AddProductToCompanyDialog({
                 <div className="space-y-4 flex flex-col flex-1 min-h-0">
                   <div className="flex items-center justify-between flex-shrink-0">
                     <h3 className="text-lg font-medium text-foreground">Available Products ({filteredProducts.length})</h3>
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowAddSystemProductDialog(true)}
-                      className="border-dashed"
-                      size="sm"
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add New System Product
-                    </Button>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto custom-scrollbar pr-2 flex-1 min-h-0" style={{ maxHeight: 'calc(100vh - 450px)' }}>
                     {filteredProducts.map((product) => (
@@ -705,14 +674,9 @@ export function AddProductToCompanyDialog({
                   <p className="text-muted-foreground mb-4">
                     {searchTerm ? "Try adjusting your search terms" : "No products available to add"}
                   </p>
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowAddSystemProductDialog(true)}
-                    className="mt-4"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add New System Product
-                  </Button>
+                  <p className="text-sm text-muted-foreground mt-4">
+                    Use the footer action to add a new system product.
+                  </p>
                 </Card>
               )}
             </div>
@@ -760,7 +724,9 @@ export function AddProductToCompanyDialog({
         onOpenChange={setShowAddSystemProductDialog}
         title="Add New System Product"
         description="This product will be saved as unverified and will need to be verified by a system admin."
-        className="max-w-2xl max-h-[90vh] overflow-y-auto bg-[var(--glass-bg)] border-[var(--glass-border)]"
+        sizeWidth="small"
+        sizeHeight="large"
+        className="overflow-y-auto bg-[var(--glass-bg)] border-[var(--glass-border)]"
         footer={
           <>
             <Button
@@ -776,7 +742,7 @@ export function AddProductToCompanyDialog({
                 });
               }}
               disabled={isCreatingSystemProduct}
-              className="flex-1 border-[var(--glass-border)] hover:border-[var(--accent-border)] hover:bg-[var(--accent-bg)] text-foreground"
+              className="border-[var(--glass-border)] hover:border-[var(--accent-border)] hover:bg-[var(--accent-bg)] text-foreground"
             >
               Cancel
             </Button>
@@ -832,7 +798,7 @@ export function AddProductToCompanyDialog({
                 }
               }}
               disabled={isCreatingSystemProduct || !newSystemProductData.name.trim()}
-              className="flex-1 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-lg shadow-[var(--accent-primary)]/25 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-lg shadow-[var(--accent-primary)]/25 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isCreatingSystemProduct ? "Adding..." : "Add Product"}
             </Button>

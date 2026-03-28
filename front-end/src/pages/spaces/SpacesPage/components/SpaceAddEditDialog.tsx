@@ -30,7 +30,8 @@ export const SpaceAddEditDialog = ({
       onOpenChange={onOpenChange}
       title={isEdit ? "Edit Space" : "Add New Space"}
       description={isEdit ? "Update space information and settings." : "Create a new space for your organization."}
-      maxWidth="max-w-4xl"
+      sizeWidth="medium"
+      sizeHeight="large"
       footer={
         <div className="flex items-center justify-end gap-2">
           <Button 

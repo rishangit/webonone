@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { SearchInput } from "./SearchInput";
 import { cn } from "../ui/utils";
 
 // Country data with flags (using emoji flags)
@@ -271,10 +272,34 @@ interface PhoneInputProps {
   name?: string;
 }
 
+const getDefaultCountryCode = (): string => {
+  if (typeof window === "undefined") {
+    return "US";
+  }
+
+  const locale =
+    Intl.DateTimeFormat().resolvedOptions().locale ||
+    window.navigator.language ||
+    "en-US";
+  const localeRegion = locale.split("-")[1]?.toUpperCase();
+
+  if (localeRegion && COUNTRIES.some((country) => country.code === localeRegion)) {
+    return localeRegion;
+  }
+
+  return "US";
+};
+
 // Parse the current value to extract country code and number
-const parsePhoneValue = (phoneValue: string): { country: Country; number: string } => {
+const parsePhoneValue = (
+  phoneValue: string,
+  fallbackCountryCode: string
+): { country: Country; number: string } => {
+  const fallbackCountry =
+    COUNTRIES.find((country) => country.code === fallbackCountryCode) || COUNTRIES[0];
+
   if (!phoneValue) {
-    return { country: COUNTRIES[0], number: "" };
+    return { country: fallbackCountry, number: "" };
   }
 
   // Try to find matching country by dial code (longest match first)
@@ -288,7 +313,7 @@ const parsePhoneValue = (phoneValue: string): { country: Country; number: string
   }
 
   // If no country code found, default to first country
-  return { country: COUNTRIES[0], number: phoneValue };
+  return { country: fallbackCountry, number: phoneValue };
 };
 
 export const PhoneInput = ({
@@ -302,14 +327,17 @@ export const PhoneInput = ({
   id,
   name,
 }: PhoneInputProps) => {
+  const defaultCountryCode = useMemo(() => getDefaultCountryCode(), []);
+
   const parsed = useMemo(
-    () => parsePhoneValue(value),
-    [value]
+    () => parsePhoneValue(value, defaultCountryCode),
+    [value, defaultCountryCode]
   );
 
   const [selectedCountryCode, setSelectedCountryCode] = useState<string>(
     parsed.country.code
   );
+  const [countrySearchTerm, setCountrySearchTerm] = useState("");
 
   // Update selected country when value changes externally
   useEffect(() => {
@@ -319,6 +347,26 @@ export const PhoneInput = ({
   }, [parsed.country.code, selectedCountryCode]);
 
   const phoneNumber = parsed.number;
+  const filteredCountries = useMemo(() => {
+    const query = countrySearchTerm.trim().toLowerCase();
+    if (!query) {
+      return COUNTRIES;
+    }
+
+    return COUNTRIES.filter((country) => {
+      return (
+        country.name.toLowerCase().includes(query) ||
+        country.code.toLowerCase().includes(query) ||
+        country.dialCode.includes(query)
+      );
+    });
+  }, [countrySearchTerm]);
+
+  const handleCountryDropdownOpenChange = (open: boolean) => {
+    if (!open) {
+      setCountrySearchTerm("");
+    }
+  };
 
   const handleCountryChange = (countryCode: string) => {
     const country = COUNTRIES.find((c) => c.code === countryCode) || COUNTRIES[0];
@@ -342,6 +390,7 @@ export const PhoneInput = ({
       <Select
         value={selectedCountryCode}
         onValueChange={handleCountryChange}
+        onOpenChange={handleCountryDropdownOpenChange}
         disabled={disabled}
       >
         <SelectTrigger
@@ -358,7 +407,21 @@ export const PhoneInput = ({
           </SelectValue>
         </SelectTrigger>
         <SelectContent className="max-h-[300px]">
-          {COUNTRIES.map((country) => (
+          <div className="sticky top-0 z-10 bg-popover p-2 border-b border-border">
+            <SearchInput
+              value={countrySearchTerm}
+              onChange={setCountrySearchTerm}
+              placeholder="Search country or code..."
+              className="h-9"
+              debounceDelay={0}
+            />
+          </div>
+          {filteredCountries.length === 0 ? (
+            <div className="px-2 py-3 text-sm text-muted-foreground">
+              No country found
+            </div>
+          ) : (
+            filteredCountries.map((country) => (
             <SelectItem key={country.code} value={country.code}>
               <div className="flex items-center gap-2">
                 <span className="text-lg md:text-base">{country.flag}</span>
@@ -366,7 +429,8 @@ export const PhoneInput = ({
                 <span className="text-base md:text-sm text-muted-foreground ml-1">{country.name}</span>
               </div>
             </SelectItem>
-          ))}
+            ))
+          )}
         </SelectContent>
       </Select>
 

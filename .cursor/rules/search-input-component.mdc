@@ -1,0 +1,17 @@
+---
+description: Use shared SearchInput component for search features
+globs: front-end/src/**/*.tsx
+alwaysApply: true
+---
+
+# Search Input Standards
+
+- When implementing any search feature in frontend pages/components, use `@front-end/src/components/common/SearchInput.tsx`.
+- Do not create ad-hoc search UI using raw `Input` + icon wrappers when `SearchInput` can satisfy the use case.
+- Prefer `SearchInput` props (for example `value`, `onChange`, `onDebouncedChange`, `debounceDelay`, and placeholder text) instead of custom debounce/search wiring duplicated in page components.
+- Keep search behavior reusable and consistent across pages by standardizing on `SearchInput`.
+
+## Exceptions
+
+- Use a custom search control only when the feature has requirements not supported by `SearchInput` (for example: specialized tokenized search UX).
+- If an exception is required, add a short code comment explaining why `SearchInput` is not being used.

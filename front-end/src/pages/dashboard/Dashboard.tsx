@@ -6,7 +6,7 @@ import { AppointmentCard } from "../appointments/AppointmentCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchAppointmentsRequest } from "@/store/slices/appointmentsSlice";
-import { fetchUsersRequest } from "@/store/slices/usersSlice";
+import { fetchUsersRequest, fetchUserRequest } from "@/store/slices/usersSlice";
 import { fetchServicesRequest } from "@/store/slices/servicesSlice";
 import { fetchStaffRequest } from "@/store/slices/staffSlice";
 import { fetchSpacesRequest } from "@/store/slices/spacesSlice";
@@ -84,6 +84,28 @@ export const Dashboard = ({ onNavigate }: DashboardProps = {}) => {
       toast.error(error);
     }
   }, [error]);
+
+  // Fetch missing client details when appointments change
+  useEffect(() => {
+    if (!reduxAppointments.length) return;
+
+    const clientIds = new Set<string>();
+    reduxAppointments.forEach((appointment: Appointment) => {
+      if (appointment.clientId) {
+        clientIds.add(String(appointment.clientId));
+      }
+    });
+
+    const missingClientIds = Array.from(clientIds).filter(
+      (clientId) => !users.find((u) => String(u.id) === clientId)
+    );
+
+    if (missingClientIds.length > 0) {
+      missingClientIds.forEach((clientId) => {
+        dispatch(fetchUserRequest(clientId));
+      });
+    }
+  }, [reduxAppointments, users, dispatch]);
 
   // Transform appointments to match AppointmentCard format and filter for today
   const todaysAppointments = useMemo(() => {
@@ -177,8 +199,14 @@ export const Dashboard = ({ onNavigate }: DashboardProps = {}) => {
     return filtered
       .map((appointment: Appointment) => {
         // Find client/user data
-        const client = users.find(u => u.id === appointment.clientId);
-        const clientName = client ? `${client.firstName} ${client.lastName}` : 'Unknown Client';
+        const client = users.find((u) => String(u.id) === String(appointment.clientId));
+        const appointmentClient = (appointment as any).client;
+        const clientName = client
+          ? `${client.firstName || ""} ${client.lastName || ""}`.trim() || client.email || "Unknown Client"
+          : `${appointmentClient?.firstName || ""} ${appointmentClient?.lastName || ""}`.trim() ||
+            appointmentClient?.name ||
+            appointmentClient?.email ||
+            "Unknown Client";
         const clientImage = client?.avatar ? formatAvatarUrl(client.avatar) : undefined;
         const clientPhone = client?.phone || 'N/A';
 

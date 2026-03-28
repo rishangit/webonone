@@ -52,12 +52,22 @@ export const TextSettingEditDialog = ({
   const [fontColor, setFontColor] = useState("#000000");
 
   const defaultFont = useMemo(
-    () => fontTypeOptions[0]?.styleName || "",
+    () => fontTypeOptions.find((f) => !!f.styleName)?.styleName || "",
     [fontTypeOptions]
   );
 
   const defaultColor = useMemo(
-    () => colorOptions[0]?.color || "#000000",
+    () => colorOptions.find((c) => !!c.color)?.color || "#000000",
+    [colorOptions]
+  );
+
+  const validFontTypeOptions = useMemo(
+    () => fontTypeOptions.filter((f) => !!f.styleName),
+    [fontTypeOptions]
+  );
+
+  const validColorOptions = useMemo(
+    () => colorOptions.filter((c) => !!c.color),
     [colorOptions]
   );
 
@@ -150,19 +160,16 @@ export const TextSettingEditDialog = ({
               <SelectValue placeholder="Select font type" />
             </SelectTrigger>
             <SelectContent className="bg-popover border-border">
-              {fontTypeOptions.length === 0 ? (
-                <SelectItem value="" disabled>
-                  No font types yet
+              {validFontTypeOptions.map((f) => (
+                <SelectItem key={f.styleName} value={f.styleName}>
+                  {f.styleName}
                 </SelectItem>
-              ) : (
-                fontTypeOptions.map((f) => (
-                  <SelectItem key={f.styleName} value={f.styleName}>
-                    {f.styleName}
-                  </SelectItem>
-                ))
-              )}
+              ))}
             </SelectContent>
           </Select>
+          {validFontTypeOptions.length === 0 && (
+            <p className="text-xs text-muted-foreground">No font types yet</p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -188,19 +195,16 @@ export const TextSettingEditDialog = ({
               <SelectValue placeholder="Select color" />
             </SelectTrigger>
             <SelectContent className="bg-popover border-border">
-              {colorOptions.length === 0 ? (
-                <SelectItem value="" disabled>
-                  No colors yet
+              {validColorOptions.map((c) => (
+                <SelectItem key={c.name} value={c.color}>
+                  {c.name} ({c.color})
                 </SelectItem>
-              ) : (
-                colorOptions.map((c) => (
-                  <SelectItem key={c.name} value={c.color}>
-                    {c.name} ({c.color})
-                  </SelectItem>
-                ))
-              )}
+              ))}
             </SelectContent>
           </Select>
+          {validColorOptions.length === 0 && (
+            <p className="text-xs text-muted-foreground">No colors yet</p>
+          )}
         </div>
 
         <div className="rounded-lg border border-[var(--glass-border)] p-4">

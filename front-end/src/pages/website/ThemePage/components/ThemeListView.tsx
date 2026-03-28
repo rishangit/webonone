@@ -6,7 +6,6 @@ import { ThemeActions } from "./ThemeActions";
 
 export interface ThemeListViewProps {
   theme: CompanyWebTheme;
-  onView: (theme: CompanyWebTheme) => void;
   onEdit: (theme: CompanyWebTheme) => void;
   onSetDefault: (theme: CompanyWebTheme) => void;
   onDelete: (theme: CompanyWebTheme) => void;
@@ -14,7 +13,6 @@ export interface ThemeListViewProps {
 
 export const ThemeListView = ({
   theme,
-  onView,
   onEdit,
   onSetDefault,
   onDelete,
@@ -28,7 +26,7 @@ export const ThemeListView = ({
     ) {
       return;
     }
-    onView(theme);
+    onEdit(theme);
   };
 
   const textStylesCount = theme.themeData?.textSettings?.length ?? 0;
@@ -70,7 +68,6 @@ export const ThemeListView = ({
               )}
               <ThemeActions
                 theme={theme}
-                onView={onView}
                 onEdit={onEdit}
                 onSetDefault={onSetDefault}
                 onDelete={onDelete}
