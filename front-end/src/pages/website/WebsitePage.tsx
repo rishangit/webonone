@@ -5,6 +5,8 @@ import { Palette, Layout, FolderOpen } from "lucide-react";
 import { useAppSelector } from "@/store/hooks";
 import { ThemePage } from "./ThemePage/index";
 import { WebpagesPage } from "./WebpagesPage/index";
+import { HeadersPage } from "./HeadersPage";
+import { FootersPage } from "./FootersPage";
 import { MediaPage } from "./MediaPage";
 
 export const WebsitePage = () => {
@@ -23,14 +25,17 @@ export const WebsitePage = () => {
     }
   }, [location.pathname, navigate]);
 
-  // Get active section from URL path
-  const getActiveSection = () => {
+  type WebSection = "webpages" | "headers" | "footers" | "themes" | "presets" | "media";
+
+  const getActiveSection = (): WebSection => {
     const path = location.pathname;
-    if (path.includes('/webpages')) return 'webpages';
-    if (path.includes('/themes')) return 'themes';
-    if (path.includes('/presets')) return 'presets';
-    if (path.includes('/media')) return 'media';
-    return 'webpages'; // default
+    if (path.includes("/webpages")) return "webpages";
+    if (path.includes("/headers")) return "headers";
+    if (path.includes("/footers")) return "footers";
+    if (path.includes("/themes")) return "themes";
+    if (path.includes("/presets")) return "presets";
+    if (path.includes("/media")) return "media";
+    return "webpages";
   };
 
   const activeSection = getActiveSection();
@@ -39,6 +44,10 @@ export const WebsitePage = () => {
     switch (activeSection) {
       case "webpages":
         return <WebpagesPage />;
+      case "headers":
+        return <HeadersPage />;
+      case "footers":
+        return <FootersPage />;
       case "themes":
         return companyId ? (
           <ThemePage />

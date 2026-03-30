@@ -70,7 +70,15 @@ import { SearchPage } from "./pages/search";
 import { AnalyticsPage } from "./pages/analytics";
 
 // Website
-import { WebsitePage, ThemePage, WebpageFormPage, WebpageEditor, PublicWebPage } from "./pages/website";
+import {
+  WebsitePage,
+  WebpageFormPage,
+  WebpageEditor,
+  HeaderWebEditor,
+  FooterWebEditor,
+  PublicWebPage,
+  PublicWebsiteLayout,
+} from "./pages/website";
 
 // Showcase
 import { ShowcasePage } from "./pages/showcase";
@@ -118,6 +126,8 @@ function ProtectedRouteWrapper({ children }: { children: React.ReactNode }) {
     if (path.includes('/settings')) return 'settings';
     if (path.includes('/showcase')) return 'showcase';
     if (path.includes('/web/webpages')) return 'web-webpages';
+    if (path.includes('/web/headers')) return 'web-headers';
+    if (path.includes('/web/footers')) return 'web-footers';
     if (path.includes('/web/themes')) return 'web-themes';
     if (path.includes('/web/presets')) return 'web-presets';
     if (path.includes('/web/media')) return 'web-media';
@@ -201,6 +211,12 @@ function ProtectedRouteWrapper({ children }: { children: React.ReactNode }) {
         break;
       case 'web-webpages':
         navigate('/system/web/webpages');
+        break;
+      case 'web-headers':
+        navigate('/system/web/headers');
+        break;
+      case 'web-footers':
+        navigate('/system/web/footers');
         break;
       case 'web-themes':
         navigate('/system/web/themes');
@@ -1310,6 +1326,54 @@ function App() {
               )
             }
           />
+          <Route
+            path="/system/web/headers/:headerId/edit"
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <HeaderWebEditor />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/system/web/headers"
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <WebsitePage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/system/web/footers/:footerId/edit"
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <FooterWebEditor />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/system/web/footers"
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <WebsitePage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
           <Route 
             path="/system/web/themes" 
             element={
@@ -1377,17 +1441,36 @@ function App() {
             }
           />
 
-          {/* Public Webpage Route - No authentication required */}
-          <Route 
-            path="/web/:companyId/*" 
-            element={<PublicWebPage />}
-          />
+          {/* Public site: layout keeps default header mounted; child route swaps page body */}
+          <Route path="/web/:companyId" element={<PublicWebsiteLayout />}>
+            <Route path="*" element={<PublicWebPage />} />
+          </Route>
           {/* Full-width editor route - opens in new tab without sidebar */}
           <Route 
             path="/editor/:pageId" 
             element={
               isAuthenticated ? (
                 <WebpageEditor fullWidth={true} />
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/editor/header/:headerId"
+            element={
+              isAuthenticated ? (
+                <HeaderWebEditor fullWidth={true} />
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/editor/footer/:footerId"
+            element={
+              isAuthenticated ? (
+                <FooterWebEditor fullWidth={true} />
               ) : (
                 <Navigate to="/system/login" replace />
               )

@@ -56,7 +56,7 @@ export const EditorToolbar = ({
               className="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)]"
             >
               <Plus className="w-4 h-4 mr-2" />
-              Add Content
+              Add content element
             </Button>
           </>
         )}

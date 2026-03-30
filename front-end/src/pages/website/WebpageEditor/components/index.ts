@@ -4,3 +4,4 @@ export { ResizableContentBlock } from "./ResizableContentBlock";
 export { WebpageContentRenderer } from "./WebpageContentRenderer";
 export { AddonGridEditor } from "./AddonGridEditor";
 export { ContentBlockSettingsDialog } from "./ContentBlockSettingsDialog";
+export { ContentContainerSettingsDialog } from "./ContentContainerSettingsDialog";

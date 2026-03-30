@@ -569,6 +569,45 @@ const createTables = async () => {
       console.warn('⚠️  Warning: Could not add foreign key constraint for company_web_pages:', fkError.message);
     }
 
+    // Company Web Layout Components — headers, footers, future kinds (visual editor content)
+    await pool.execute(`
+      CREATE TABLE IF NOT EXISTS company_web_layout_components (
+        id VARCHAR(10) PRIMARY KEY,
+        companyId VARCHAR(10) NOT NULL,
+        kind ENUM('header', 'footer') NOT NULL,
+        name VARCHAR(255) NOT NULL,
+        isDefault BOOLEAN DEFAULT FALSE,
+        content JSON NULL,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_company_kind (companyId, kind),
+        INDEX idx_default_kind (companyId, kind, isDefault)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+
+    try {
+      const [fkCheckLc] = await pool.execute(`
+        SELECT CONSTRAINT_NAME
+        FROM information_schema.TABLE_CONSTRAINTS
+        WHERE TABLE_SCHEMA = DATABASE()
+        AND TABLE_NAME = 'company_web_layout_components'
+        AND CONSTRAINT_TYPE = 'FOREIGN KEY'
+        AND CONSTRAINT_NAME LIKE '%companyId%'
+      `);
+      if (fkCheckLc.length === 0) {
+        await pool.execute(`
+          ALTER TABLE company_web_layout_components
+          ADD CONSTRAINT fk_company_web_layout_components_companyId
+          FOREIGN KEY (companyId) REFERENCES companies(id) ON DELETE CASCADE
+        `);
+      }
+    } catch (fkError) {
+      console.warn(
+        '⚠️  Warning: Could not add foreign key constraint for company_web_layout_components:',
+        fkError.message
+      );
+    }
+
     // Company Web Themes table - stores theme config as JSON
     await pool.execute(`
       CREATE TABLE IF NOT EXISTS company_web_themes (
@@ -603,6 +642,9 @@ const createTables = async () => {
         INDEX idx_company_content (companyId, contentElementId)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     `);
+
+    const { migrateCompanyWebLayoutComponentsLegacy } = require('./1.12.0/migrateToCompanyWebLayoutComponents');
+    await migrateCompanyWebLayoutComponentsLegacy(pool);
 
     console.log('✅ Database tables created successfully');
   } catch (error) {

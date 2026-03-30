@@ -1,5 +1,11 @@
 import { useRef, useLayoutEffect, useState } from "react";
-import { ContentBlock, resolveBlockLayout, getBreakpointFromWidth, type BreakpointName } from "../types";
+import {
+  ContentBlock,
+  ContentContainerSettings,
+  resolveBlockLayout,
+  getBreakpointFromWidth,
+  type BreakpointName,
+} from "../types";
 import { ContentAddonsRenderer } from "../addons";
 import type { ThemeButtonSetting, ThemeTextSetting } from "@/services/companyWebThemes";
 import type { CompanyWebPage } from "@/services/companyWebPages";
@@ -7,6 +13,7 @@ import type { AddonRenderContext } from "../addons/types";
 
 interface WebpageContentRendererProps {
   contentBlocks: ContentBlock[];
+  contentContainer?: ContentContainerSettings;
   css?: string;
   js?: string;
   html?: string;
@@ -29,6 +36,7 @@ interface WebpageContentRendererProps {
  */
 export const WebpageContentRenderer = ({
   contentBlocks,
+  contentContainer,
   css = '',
   js = '',
   html = '',
@@ -64,10 +72,20 @@ export const WebpageContentRenderer = ({
   const maxY = resolvedBlocks.length > 0
     ? Math.max(...resolvedBlocks.map((b) => ((b.gridRowStart ?? 1) + (b.rowSpan ?? 1) - 1) * rowHeight), 0)
     : 0;
-  const containerHeight = Math.max(maxY + 200, 1000);
+  /** Bottom edge of laid-out blocks (px). No extra padding — page height comes from content + content container. */
+  const contentExtentPx = maxY;
+  const pageMin = contentContainer?.minHeightPx ?? 0;
+  const containerHeight = Math.max(contentExtentPx, pageMin);
 
   return (
-    <div ref={containerRef} className="w-full">
+    <div
+      ref={containerRef}
+      className={`w-full ${!contentContainer?.backgroundColor ? "bg-white" : ""}`}
+      style={{
+        minHeight: containerHeight,
+        ...(contentContainer?.backgroundColor ? { backgroundColor: contentContainer.backgroundColor } : {}),
+      }}
+    >
       {css && <style dangerouslySetInnerHTML={{ __html: css }} />}
 
       {resolvedBlocks.length > 0 ? (

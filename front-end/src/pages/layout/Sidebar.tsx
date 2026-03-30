@@ -37,6 +37,8 @@ const getNavigationItems = (role: UserRole, selectedEntities?: string[] | null) 
         hasSubmenu: true,
         submenu: [
           { label: "Webpages", id: "web-webpages" },
+          { label: "Headers", id: "web-headers" },
+          { label: "Footers", id: "web-footers" },
           { label: "Themes", id: "web-themes" },
           { label: "Presets", id: "web-presets" },
           { label: "Media", id: "web-media" }
@@ -66,6 +68,8 @@ const getNavigationItems = (role: UserRole, selectedEntities?: string[] | null) 
         hasSubmenu: true,
         submenu: [
           { label: "Webpages", id: "web-webpages" },
+          { label: "Headers", id: "web-headers" },
+          { label: "Footers", id: "web-footers" },
           { label: "Themes", id: "web-themes" },
           { label: "Presets", id: "web-presets" },
           { label: "Media", id: "web-media" }
@@ -106,6 +110,8 @@ const getNavigationItems = (role: UserRole, selectedEntities?: string[] | null) 
         hasSubmenu: true,
         submenu: [
           { label: "Webpages", id: "web-webpages" },
+          { label: "Headers", id: "web-headers" },
+          { label: "Footers", id: "web-footers" },
           { label: "Themes", id: "web-themes" },
           { label: "Presets", id: "web-presets" },
           { label: "Media", id: "web-media" }

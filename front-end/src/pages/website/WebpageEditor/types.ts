@@ -52,6 +52,15 @@ export const TAILWIND_MIN_WIDTH_PX: Record<BreakpointName, number> = {
 /** Layout overrides per screen size - store grid values so saved data matches rendered grid-area */
 export type LayoutByBreakpoint = Partial<Record<BreakpointName, LegacyBreakpointLayout | BreakpointLayout>>;
 
+/**
+ * Single design surface per webpage or header — persisted as `content.contentContainer`.
+ * Controls overall height (and optional background) for the editor canvas and published layout.
+ */
+export interface ContentContainerSettings {
+  minHeightPx?: number;
+  backgroundColor?: string;
+}
+
 /** Per-block display settings (e.g. background color) */
 export interface ContentBlockSettings {
   backgroundColor?: string;

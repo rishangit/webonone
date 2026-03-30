@@ -9,6 +9,10 @@ export interface CompanyWebPage {
   url: string;
   isActive?: boolean;
   content?: {
+    contentContainer?: {
+      minHeightPx?: number;
+      backgroundColor?: string;
+    };
     blocks?: Array<{
       id: string;
       x?: number;
@@ -54,6 +58,10 @@ export interface CreateWebPageData {
 export interface UpdateWebPageData extends Partial<CreateWebPageData> {
   companyId?: string;
   content?: {
+    contentContainer?: {
+      minHeightPx?: number;
+      backgroundColor?: string;
+    };
     blocks?: Array<{
       id: string;
       x?: number;
