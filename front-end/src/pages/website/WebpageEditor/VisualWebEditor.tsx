@@ -101,6 +101,7 @@ export const VisualWebEditor = ({
   const contentBlocksRef = useRef(contentBlocks);
   const editorStateRef = useRef(editorState);
   const contentContainerRef = useRef(contentContainer);
+  const hydratedEntityKeyRef = useRef<string | null>(null);
   contentBlocksRef.current = contentBlocks;
   editorStateRef.current = editorState;
   contentContainerRef.current = contentContainer;
@@ -132,6 +133,7 @@ export const VisualWebEditor = ({
 
   useEffect(() => {
     if (!loadedSnapshot || !isEntityReady) return;
+    if (hydratedEntityKeyRef.current === resetKey) return;
     setContentBlocks(loadedSnapshot.contentBlocks);
     setEditorState({
       content: loadedSnapshot.editorContent,
@@ -146,6 +148,7 @@ export const VisualWebEditor = ({
     if (cc?.minHeightPx) {
       persistCanvasHeightToStorage(cc.minHeightPx);
     }
+    hydratedEntityKeyRef.current = resetKey;
   }, [resetKey, loadedSnapshot, isEntityReady]);
 
   useEffect(() => {
@@ -212,22 +215,24 @@ export const VisualWebEditor = ({
 
   const persistBlocksToDatabase = (blocksToPersist: ContentBlock[]) => {
     const blocks = blocksToPersist.length ? blocksToPersist : contentBlocksRef.current;
-    setEditorState((prev) => {
-      const snapshot = buildSnapshot(blocks, prev.content, contentContainerRef.current);
-      void Promise.resolve(onSave(snapshot)).then(
-        () => {
-          setEditorState((p) => ({ ...p, isDirty: false, isSaving: false }));
-          if (!suppressSuccessToast) {
-            toast.success(saveSuccessMessage);
-          }
-        },
-        () => {
-          toast.error("Failed to save");
-          setEditorState((p) => ({ ...p, isSaving: false }));
+    const snapshot = buildSnapshot(
+      blocks,
+      editorStateRef.current.content,
+      contentContainerRef.current
+    );
+    setEditorState((prev) => ({ ...prev, isSaving: true }));
+    void Promise.resolve(onSave(snapshot)).then(
+      () => {
+        setEditorState((p) => ({ ...p, isDirty: false, isSaving: false }));
+        if (!suppressSuccessToast) {
+          toast.success(saveSuccessMessage);
         }
-      );
-      return { ...prev, isSaving: true };
-    });
+      },
+      () => {
+        toast.error("Failed to save");
+        setEditorState((p) => ({ ...p, isSaving: false }));
+      }
+    );
   };
 
   const handleUpdateBlock = (
@@ -242,27 +247,24 @@ export const VisualWebEditor = ({
       colSpan: Math.max(1, Math.min(12, updatedBlock.colSpan ?? 4)),
     };
 
-    let nextBlocks: ContentBlock[] = [];
-    setContentBlocks((prev) => {
-      nextBlocks = prev.map((block) => {
-        if (block.id !== updatedBlock.id) return block;
-        const layoutByBreakpoint = {
-          ...block.layoutByBreakpoint,
-          [activeBreakpointName]: gridUpdate,
-        };
-        return {
-          ...block,
-          content: updatedBlock.content ?? block.content,
-          type: updatedBlock.type ?? block.type,
-          addons: updatedBlock.addons ?? block.addons,
-          layoutByBreakpoint,
-          ...(activeBreakpointName === "2xl" ? gridUpdate : {}),
-          settings: "settings" in updatedBlock ? updatedBlock.settings : block.settings,
-          ...("zIndex" in updatedBlock ? { zIndex: updatedBlock.zIndex } : {}),
-        };
-      });
-      return nextBlocks;
+    const nextBlocks = contentBlocksRef.current.map((block) => {
+      if (block.id !== updatedBlock.id) return block;
+      const layoutByBreakpoint = {
+        ...block.layoutByBreakpoint,
+        [activeBreakpointName]: gridUpdate,
+      };
+      return {
+        ...block,
+        content: updatedBlock.content ?? block.content,
+        type: updatedBlock.type ?? block.type,
+        addons: updatedBlock.addons ?? block.addons,
+        layoutByBreakpoint,
+        ...(activeBreakpointName === "2xl" ? gridUpdate : {}),
+        settings: "settings" in updatedBlock ? updatedBlock.settings : block.settings,
+        ...("zIndex" in updatedBlock ? { zIndex: updatedBlock.zIndex } : {}),
+      };
     });
+    setContentBlocks(nextBlocks);
 
     if (shouldPersist) {
       persistBlocksToDatabase(nextBlocks);
