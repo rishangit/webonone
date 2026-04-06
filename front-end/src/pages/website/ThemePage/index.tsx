@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Plus, Palette } from "lucide-react";
+import { Plus, Palette, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -12,8 +12,8 @@ import {
 } from "@/store/slices/companyWebThemesSlice";
 import type { CompanyWebTheme } from "@/services/companyWebThemes";
 import { EmptyState } from "@/components/common/EmptyState";
-import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
 import { Pagination } from "@/components/common/Pagination";
+import { CustomDialog } from "@/components/ui/custom-dialog";
 import { ThemeFilters, ThemeCard, ThemeAddDialog } from "./components";
 
 export const ThemePage = () => {
@@ -287,7 +287,7 @@ export const ThemePage = () => {
         </div>
       </div>
 
-      <DeleteConfirmationDialog
+      <CustomDialog
         open={isDeleteDialogOpen}
         onOpenChange={(open) => {
           setIsDeleteDialogOpen(open);
@@ -295,10 +295,37 @@ export const ThemePage = () => {
             setSelectedTheme(null);
           }
         }}
-        onConfirm={handleDeleteConfirm}
-        itemName={selectedTheme?.name}
-        itemType="theme"
-      />
+        title="Delete theme?"
+        description={
+          selectedTheme
+            ? `Are you sure you want to delete "${selectedTheme.name}"? This action cannot be undone.`
+            : ""
+        }
+        icon={<Palette className="w-5 h-5" />}
+        sizeWidth="small"
+        sizeHeight="small"
+        footer={
+          <div className="flex items-center justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent"
+              onClick={() => {
+                setIsDeleteDialogOpen(false);
+                setSelectedTheme(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button type="button" variant="destructive" onClick={handleDeleteConfirm}>
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete
+            </Button>
+          </div>
+        }
+      >
+        <div className="sr-only">Confirm deletion of this theme.</div>
+      </CustomDialog>
 
       <ThemeAddDialog
         open={isThemeDialogOpen}

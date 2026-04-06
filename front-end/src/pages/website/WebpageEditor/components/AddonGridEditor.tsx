@@ -595,6 +595,7 @@ export const AddonGridEditor = ({
                 <RenderComponent
                   addon={addon}
                   companyId={companyId}
+                  breakpoint={activeBreakpointName}
                   themeTextSettings={themeTextSettings}
                   themeButtonSettings={themeButtonSettings}
                   companyWebPages={companyWebPages}

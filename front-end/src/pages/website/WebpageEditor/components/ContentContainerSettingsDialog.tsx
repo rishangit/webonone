@@ -4,7 +4,7 @@ import { CustomDialog } from "@/components/ui/custom-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { LayoutTemplate } from "lucide-react";
+import { LayoutTemplate, Save } from "lucide-react";
 
 const DEFAULT_BG = "#ffffff";
 
@@ -57,15 +57,23 @@ export function ContentContainerSettingsDialog({
       icon={<LayoutTemplate className="w-5 h-5" />}
       maxWidth="max-w-md"
       footer={
-        <>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+        <div className="flex items-center justify-end gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            className="h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent"
+            onClick={() => onOpenChange(false)}
+          >
             Cancel
           </Button>
-          <Button onClick={handleApply}>Apply</Button>
-        </>
+          <Button type="button" variant="accent" onClick={handleApply}>
+            <Save className="w-4 h-4 mr-2" />
+            Apply
+          </Button>
+        </div>
       }
     >
-      <div className="space-y-4 pt-1">
+      <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="cc-min-h">Design area height (px)</Label>
           <Input

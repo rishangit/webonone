@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Sparkles } from "lucide-react";
+import { Save, Sparkles } from "lucide-react";
 import type {
   ThemeButtonSetting,
   ThemeColorSetting,
@@ -123,15 +123,18 @@ export const ButtonEditDialog = ({
       icon={<Sparkles className="w-5 h-5" />}
       maxWidth="max-w-lg"
       footer={
-        <div className="flex items-center justify-end gap-2 w-full">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={disabled}>
+        <div className="flex items-center justify-end gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            className="h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent"
+            onClick={() => onOpenChange(false)}
+            disabled={disabled}
+          >
             Cancel
           </Button>
-          <Button
-            onClick={handleApply}
-            disabled={!canSave}
-            className="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)]"
-          >
+          <Button type="button" variant="accent" onClick={handleApply} disabled={!canSave}>
+            <Save className="w-4 h-4 mr-2" />
             Apply
           </Button>
         </div>

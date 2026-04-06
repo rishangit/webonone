@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { LayoutPanelTop } from "lucide-react";
+import { LayoutPanelTop, Save } from "lucide-react";
 
 const schema = yup.object({
   name: yup.string().min(1, "Name is required").max(255).required(),
@@ -57,14 +57,21 @@ export const AddHeaderDialog = ({
   };
 
   const footer = (
-    <>
-      <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+    <div className="flex items-center justify-end gap-2">
+      <Button
+        type="button"
+        variant="outline"
+        className="h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent"
+        onClick={() => onOpenChange(false)}
+        disabled={isSubmitting}
+      >
         Cancel
       </Button>
       <Button type="submit" form="add-header-form" variant="accent" disabled={isSubmitting}>
+        <Save className="w-4 h-4 mr-2" />
         {isSubmitting ? "Saving…" : "Create"}
       </Button>
-    </>
+    </div>
   );
 
   return (

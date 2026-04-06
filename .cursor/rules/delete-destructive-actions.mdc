@@ -1,0 +1,28 @@
+---
+description: System-wide delete/destructive button and icon colors (OKLCH red, white label)
+alwaysApply: true
+---
+
+# Delete and destructive actions (system-wide)
+
+Use these colors consistently for **delete** and other **destructive** affordances (buttons, icon buttons, menu items that delete).
+
+## Red (accent / icon / outline)
+
+- **Primary destructive red:** `oklch(0.637 0.237 25.331)`
+- Use for: delete **icons**, icon-only delete controls, destructive text/links, borders/outlines on destructive controls when not using a filled button.
+
+**Tailwind (arbitrary value):** e.g. `text-[oklch(0.637_0.237_25.331)]`, `border-[oklch(0.637_0.237_25.331)]` (underscores replace spaces in arbitrary values).
+
+## Filled delete button
+
+- **Background:** same red — `oklch(0.637 0.237 25.331)`
+- **Label / icon on the button:** **white** — `oklch(1 0 0)` (or project `text-white` if it matches pure white on this background).
+
+**Tailwind example:** `bg-[oklch(0.637_0.237_25.331)] text-white` (and hover/focus states that keep contrast, e.g. slightly darker red on hover if needed).
+
+## Implementation notes
+
+- Prefer wiring these into **theme/CSS variables** (e.g. next to `--destructive` in the design system) once, then reference the variable in components—avoid scattering raw `oklch(...)` in many files when a token exists or is added.
+- **`Button variant="destructive"`** (shadcn): when adjusting destructive styling, align **background** and **foreground** with the values above so delete actions match the rest of the system.
+- **Contrast:** keep focus rings and disabled states readable; do not use the red only as a faint hint for primary delete actions.

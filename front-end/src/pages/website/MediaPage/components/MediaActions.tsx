@@ -4,6 +4,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -35,7 +36,7 @@ export const MediaActions = ({
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 hover:bg-[var(--accent-bg)] text-muted-foreground hover:text-[var(--accent-text)] flex-shrink-0"
+          className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground hover:bg-accent"
           onClick={(e) => e.stopPropagation()}
         >
           <MoreVertical className="w-4 h-4" />
@@ -52,9 +53,10 @@ export const MediaActions = ({
             Open
           </DropdownMenuItem>
         )}
+        {item.type === "folder" && onOpen && <DropdownMenuSeparator />}
         <DropdownMenuItem
           onClick={() => onDelete(item.path, item.name, item.type)}
-          className="text-red-500 hover:bg-red-500/10"
+          variant="destructive"
         >
           <Trash2 className="w-4 h-4 mr-2" />
           Delete

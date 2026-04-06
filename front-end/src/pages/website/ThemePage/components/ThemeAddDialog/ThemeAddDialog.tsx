@@ -26,6 +26,7 @@ import { ColorsTab } from "./tabs/ColorsTab";
 import { TextSettingsTab } from "./tabs/TextSettingsTab";
 import { ButtonsTab } from "./tabs/ButtonsTab";
 import type { BasicTabState, ThemeTab } from "./types";
+import { ColorSettingEditDialog } from "./ColorSettingEditDialog";
 
 interface ThemeAddDialogProps {
   open: boolean;
@@ -64,9 +65,8 @@ export const ThemeAddDialog = ({
     {}
   );
 
-  const [selectedColorKey, setSelectedColorKey] = useState<string | null>(null);
-
   const [editStyleKey, setEditStyleKey] = useState<string | null>(null);
+  const [editColorKey, setEditColorKey] = useState<string | null>(null);
   const [editTextSettingKey, setEditTextSettingKey] = useState<string | null>(null);
   const [editButtonKey, setEditButtonKey] = useState<string | null>(null);
 
@@ -76,7 +76,7 @@ export const ThemeAddDialog = ({
         styleName: style.styleName,
         googleFontUrl: style.googleFontUrl,
         fontFamily: style.fontFamily,
-        fontSize: style.fontSize,
+        fontSize: "",
       })),
     [textStyles]
   );
@@ -92,8 +92,8 @@ export const ThemeAddDialog = ({
   useEffect(() => {
     if (!open) return;
     setActiveTab("basic");
-    setSelectedColorKey(null);
     setEditStyleKey(null);
+    setEditColorKey(null);
     setEditTextSettingKey(null);
     setEditButtonKey(null);
 
@@ -138,6 +138,7 @@ export const ThemeAddDialog = ({
         styleName: text.styleName,
         fontTypeStyleName: text.styleName,
         fontSize: text.fontSize,
+        fontSizeByBreakpoint: text.fontSizeByBreakpoint,
         fontColor: text.fontColor || "",
       };
     });
@@ -161,7 +162,8 @@ export const ThemeAddDialog = ({
           styleName: item.styleName,
           googleFontUrl: font?.googleFontUrl || "",
           fontFamily: font?.fontFamily || "",
-          fontSize: item.fontSize,
+          fontSize: item.fontSizeByBreakpoint?.["2xl"] || item.fontSize,
+          fontSizeByBreakpoint: item.fontSizeByBreakpoint,
           fontColor: item.fontColor,
         };
       }
@@ -209,13 +211,7 @@ export const ThemeAddDialog = ({
       return;
     }
     if (type === "color") {
-      const idx = Object.keys(colorItems).length + 1;
-      const key = `color-${idx}`;
-      setColorItems((prev) => ({
-        ...prev,
-        [key]: { name: `Color ${idx}`, color: "" },
-      }));
-      setSelectedColorKey(key);
+      setEditColorKey("new");
       return;
     }
     if (type === "textSetting") {
@@ -226,7 +222,14 @@ export const ThemeAddDialog = ({
         [key]: {
           styleName: `Text ${idx}`,
           fontTypeStyleName: fontTypeOptions[0]?.styleName || "",
-          fontSize: "",
+          fontSize: "1rem",
+          fontSizeByBreakpoint: {
+            sm: "1rem",
+            md: "1rem",
+            lg: "1rem",
+            xl: "1rem",
+            "2xl": "1rem",
+          },
           fontColor: colorOptions[0]?.color || "",
         },
       }));
@@ -262,9 +265,7 @@ export const ThemeAddDialog = ({
         delete next[key];
         return next;
       });
-      if (selectedColorKey === key) {
-        setSelectedColorKey(null);
-      }
+      if (editColorKey === key) setEditColorKey(null);
     } else if (activeTab === "textSetting") {
       setTextSettingItems((prev) => {
         const next = { ...prev };
@@ -291,8 +292,13 @@ export const ThemeAddDialog = ({
         sizeWidth="large"
         sizeHeight="large"
         footer={
-          <>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          <div className="flex items-center justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent"
+              onClick={() => onOpenChange(false)}
+            >
               Cancel
             </Button>
             <Button
@@ -304,7 +310,7 @@ export const ThemeAddDialog = ({
               <Save className="w-4 h-4 mr-2" />
               {loading ? "Saving..." : isEditMode ? "Save Changes" : "Create Theme"}
             </Button>
-          </>
+          </div>
         }
       >
         <div className="space-y-4">
@@ -312,7 +318,7 @@ export const ThemeAddDialog = ({
             tabs={[
               { value: "basic", label: "Basic Setting" },
               { value: "text", label: "Font Setting" },
-              { value: "colors", label: "Colors" },
+              { value: "colors", label: "Color Setting" },
               { value: "textSetting", label: "Text Setting" },
               { value: "buttons", label: "Buttons" },
             ]}
@@ -332,12 +338,8 @@ export const ThemeAddDialog = ({
           {activeTab === "colors" && (
             <ColorsTab
               items={colorItems}
-              selectedKey={selectedColorKey}
-              onSelect={setSelectedColorKey}
-              onChangeItem={(key, value) =>
-                setColorItems((prev) => ({ ...prev, [key]: value }))
-              }
               onAdd={() => addListItem("color")}
+              onEdit={setEditColorKey}
               onDelete={(key) => {
                 setActiveTab("colors");
                 deleteItemByTab(key);
@@ -372,6 +374,25 @@ export const ThemeAddDialog = ({
         onSave={(styleKey, style) =>
           setTextStyles((prev) => ({ ...prev, [styleKey]: style }))
         }
+      />
+      <ColorSettingEditDialog
+        open={!!editColorKey}
+        onOpenChange={(dialogOpen) => !dialogOpen && setEditColorKey(null)}
+        title={editColorKey === "new" ? "Add color setting" : "Edit color setting"}
+        value={editColorKey && editColorKey !== "new" ? colorItems[editColorKey] : null}
+        onSave={(value) => {
+          if (editColorKey === "new") {
+            let idx = Object.keys(colorItems).length + 1;
+            let key = `color-${idx}`;
+            while (colorItems[key]) {
+              idx += 1;
+              key = `color-${idx}`;
+            }
+            setColorItems((prev) => ({ ...prev, [key]: value }));
+          } else if (editColorKey) {
+            setColorItems((prev) => ({ ...prev, [editColorKey]: value }));
+          }
+        }}
       />
       <TextSettingEditDialog
         open={!!editTextSettingKey}

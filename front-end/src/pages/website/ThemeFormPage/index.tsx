@@ -166,6 +166,7 @@ export const ThemeFormPage = () => {
           styleName: ts.styleName,
           fontTypeStyleName: matchedFont?.styleName || "",
           fontSize: ts.fontSize,
+          fontSizeByBreakpoint: ts.fontSizeByBreakpoint,
           fontColor: ts.fontColor || "",
         };
       });
@@ -233,7 +234,7 @@ export const ThemeFormPage = () => {
       styleName: style.styleName,
       googleFontUrl: style.googleFontUrl,
       fontFamily: style.fontFamily,
-      fontSize: style.fontSize,
+      fontSize: "",
     })) as ThemeFontSetting[];
 
     // Text settings come from the "Text Setting" tab.
@@ -249,7 +250,8 @@ export const ThemeFormPage = () => {
         styleName: t.styleName,
         googleFontUrl: fontType?.googleFontUrl || "",
         fontFamily: fontType?.fontFamily || "",
-        fontSize: t.fontSize,
+        fontSize: t.fontSizeByBreakpoint?.["2xl"] || t.fontSize,
+        fontSizeByBreakpoint: t.fontSizeByBreakpoint,
         fontColor: t.fontColor,
       };
     });
@@ -419,6 +421,13 @@ export const ThemeFormPage = () => {
         styleName: `Text style ${index}`,
         fontTypeStyleName: defaultFontType,
         fontSize: "1rem",
+        fontSizeByBreakpoint: {
+          sm: "1rem",
+          md: "1rem",
+          lg: "1rem",
+          xl: "1rem",
+          "2xl": "1rem",
+        },
         fontColor: defaultColor,
       },
     }));
@@ -617,13 +626,13 @@ export const ThemeFormPage = () => {
                                 fontFamily: style.fontFamily
                                   ? `${style.fontFamily}, sans-serif`
                                   : undefined,
-                                fontSize: style.fontSize || "1rem",
+                                fontSize: "1rem",
                               }}
-                              title={`${style.fontFamily || "Default"}${style.fontSize ? ` · ${style.fontSize}` : ""}`}
+                              title={style.fontFamily || "Default"}
                             >
                               The quick brown fox jumps over the lazy dog
                             </span>
-                            {!style.fontFamily && !style.fontSize && (
+                            {!style.fontFamily && (
                               <span className="text-xs text-muted-foreground">
                                 Default font · Configure in Edit
                               </span>
@@ -643,7 +652,7 @@ export const ThemeFormPage = () => {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="text-red-600 hover:text-red-700"
+                                className="text-destructive hover:text-destructive/90"
                                 onClick={() =>
                                   setTextStyles((prev) => {
                                     const next = { ...prev };
@@ -744,7 +753,7 @@ export const ThemeFormPage = () => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-red-600 hover:text-red-700"
+                              className="text-destructive hover:text-destructive/90"
                               onClick={() => {
                                 setColorItems((prev) => {
                                   const next = { ...prev };
@@ -818,10 +827,10 @@ export const ThemeFormPage = () => {
                                   fontFamily: font?.fontFamily
                                     ? `${font.fontFamily}, sans-serif`
                                     : undefined,
-                                  fontSize: t.fontSize || "1rem",
+                                  fontSize: t.fontSizeByBreakpoint?.["2xl"] || t.fontSize || "1rem",
                                   color: t.fontColor || undefined,
                                 }}
-                                title={`${font?.styleName || "Font"} · ${t.fontSize || ""}`}
+                                title={`${font?.styleName || "Font"} · ${t.fontSizeByBreakpoint?.["2xl"] || t.fontSize || ""}`}
                               >
                                 The quick brown fox jumps over the lazy dog
                               </span>
@@ -840,7 +849,7 @@ export const ThemeFormPage = () => {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="text-red-600 hover:text-red-700"
+                                  className="text-destructive hover:text-destructive/90"
                                   onClick={() =>
                                     setTextSettingItems((prev) => {
                                       const next = { ...prev };
@@ -930,7 +939,9 @@ export const ThemeFormPage = () => {
                                     ? `${linkedFont.fontFamily}, sans-serif`
                                     : undefined,
                                   fontSize:
-                                    linkedTextSetting?.fontSize || "1rem",
+                                    linkedTextSetting?.fontSizeByBreakpoint?.["2xl"] ||
+                                    linkedTextSetting?.fontSize ||
+                                    "1rem",
                                 }}
                               >
                                 {linkedTextSetting?.styleName ||
@@ -964,7 +975,7 @@ export const ThemeFormPage = () => {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="text-red-600 hover:text-red-700"
+                                  className="text-destructive hover:text-destructive/90"
                                   onClick={() => {
                                     setButtonItems((prev) => {
                                       const next = { ...prev };

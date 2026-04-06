@@ -66,6 +66,7 @@ export const ContentAddonsRenderer = ({
             <RenderComponent
               addon={addon}
               companyId={companyId}
+              breakpoint={breakpoint}
               themeTextSettings={themeTextSettings}
               themeButtonSettings={themeButtonSettings}
               companyWebPages={companyWebPages}

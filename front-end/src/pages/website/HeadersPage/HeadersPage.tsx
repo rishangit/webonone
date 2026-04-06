@@ -1,22 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { CustomDialog } from "@/components/ui/custom-dialog";
 import { useAppSelector } from "@/store/hooks";
 import { companyWebHeadersService, type CompanyWebHeader } from "@/services/companyWebHeaders";
 import { AddHeaderDialog, HeaderCard, type AddHeaderFormValues } from "./components";
 import { toast } from "sonner";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 export const HeadersPage = () => {
   const navigate = useNavigate();
@@ -161,23 +152,36 @@ export const HeadersPage = () => {
         isSubmitting={creating}
       />
 
-      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
-        <AlertDialogContent className="border-[var(--glass-border)] bg-[var(--glass-bg)]">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete header?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This removes “{deleteTarget?.name}”. Pages will no longer show this header unless you assign another
-              default.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground">
+      <CustomDialog
+        open={!!deleteTarget}
+        onOpenChange={(o) => !o && setDeleteTarget(null)}
+        title="Delete header?"
+        description={
+          deleteTarget
+            ? `This removes "${deleteTarget.name}". Pages will no longer show this header unless you assign another default.`
+            : ""
+        }
+        sizeWidth="small"
+        sizeHeight="small"
+        footer={
+          <div className="flex items-center justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent"
+              onClick={() => setDeleteTarget(null)}
+            >
+              Cancel
+            </Button>
+            <Button type="button" variant="destructive" onClick={handleDeleteConfirm}>
+              <Trash2 className="w-4 h-4 mr-2" />
               Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            </Button>
+          </div>
+        }
+      >
+        <div className="sr-only">Confirm deletion of this header.</div>
+      </CustomDialog>
     </div>
   );
 };

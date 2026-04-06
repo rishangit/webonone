@@ -22,6 +22,12 @@ export type EditorSelection =
   | { type: "block"; id: string }
   | { type: "addon"; blockId: string; addonId: string };
 
+export interface AddonEditRequest {
+  blockId: string;
+  addonId: string;
+  requestId: string;
+}
+
 interface EditorCanvasProps {
   content: EditorContent;
   viewMode?: ViewMode;
@@ -41,6 +47,8 @@ interface EditorCanvasProps {
   addonRenderContext?: AddonRenderContext;
   onUpdateBlock?: (block: ContentBlock, shouldPersist?: boolean, markDirty?: boolean) => void;
   onDeleteBlock?: (id: string) => void;
+  requestedAddonEdit?: AddonEditRequest | null;
+  onAddonEditRequestHandled?: (requestId: string) => void;
 }
 
 export const EditorCanvas = ({
@@ -62,6 +70,8 @@ export const EditorCanvas = ({
   addonRenderContext = "editor",
   onUpdateBlock,
   onDeleteBlock,
+  requestedAddonEdit,
+  onAddonEditRequestHandled,
 }: EditorCanvasProps) => {
   const [localContent, setLocalContent] = useState(content);
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -344,6 +354,13 @@ export const EditorCanvas = ({
                     themeButtonSettings={themeButtonSettings}
                     companyWebPages={companyWebPages}
                     addonRenderContext={addonRenderContext}
+                    requestedEditAddonId={
+                      requestedAddonEdit?.blockId === block.id ? requestedAddonEdit.addonId : null
+                    }
+                    requestedEditNonce={
+                      requestedAddonEdit?.blockId === block.id ? requestedAddonEdit.requestId : null
+                    }
+                    onRequestedEditHandled={onAddonEditRequestHandled}
                   />
                 </div>
               );

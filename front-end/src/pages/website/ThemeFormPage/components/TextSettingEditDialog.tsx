@@ -3,6 +3,7 @@ import { CustomDialog } from "@/components/ui/custom-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ResponsiveBreakpointTabs } from "@/components/website/ResponsiveBreakpointTabs";
 import {
   Select,
   SelectContent,
@@ -10,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Type } from "lucide-react";
+import { Save, Type } from "lucide-react";
 import type {
   ThemeColorSetting,
   ThemeFontSetting,
@@ -20,8 +21,21 @@ export interface ThemeTextSettingItem {
   styleName: string; // display name for the text style
   fontTypeStyleName: string; // references a font styleName from Font Setting tab
   fontSize: string; // px/rem/etc
+  fontSizeByBreakpoint?: Partial<Record<ThemeTextSizeBreakpoint, string>>;
   fontColor: string; // hex from Colors tab
 }
+
+type ThemeTextSizeBreakpoint = "sm" | "md" | "lg" | "xl" | "2xl";
+
+const BREAKPOINT_TABS: ThemeTextSizeBreakpoint[] = ["sm", "md", "lg", "xl", "2xl"];
+
+const buildDefaultFontSizes = (base: string = "1rem"): Record<ThemeTextSizeBreakpoint, string> => ({
+  sm: base,
+  md: base,
+  lg: base,
+  xl: base,
+  "2xl": base,
+});
 
 interface TextSettingEditDialogProps {
   open: boolean;
@@ -48,7 +62,10 @@ export const TextSettingEditDialog = ({
 }: TextSettingEditDialogProps) => {
   const [styleName, setStyleName] = useState("");
   const [fontTypeStyleName, setFontTypeStyleName] = useState("");
-  const [fontSize, setFontSize] = useState("1rem");
+  const [fontSizes, setFontSizes] = useState<Record<ThemeTextSizeBreakpoint, string>>(
+    buildDefaultFontSizes("1rem")
+  );
+  const [activeSizeTab, setActiveSizeTab] = useState<ThemeTextSizeBreakpoint>("2xl");
   const [fontColor, setFontColor] = useState("#000000");
 
   const defaultFont = useMemo(
@@ -77,12 +94,18 @@ export const TextSettingEditDialog = ({
     if (value) {
       setStyleName(value.styleName || textLabel);
       setFontTypeStyleName(value.fontTypeStyleName || defaultFont);
-      setFontSize(value.fontSize || "1rem");
+      const fallback = value.fontSize || "1rem";
+      setFontSizes({
+        ...buildDefaultFontSizes(fallback),
+        ...(value.fontSizeByBreakpoint ?? {}),
+      });
+      setActiveSizeTab("2xl");
       setFontColor(value.fontColor || defaultColor);
     } else {
       setStyleName(textLabel);
       setFontTypeStyleName(defaultFont);
-      setFontSize("1rem");
+      setFontSizes(buildDefaultFontSizes("1rem"));
+      setActiveSizeTab("2xl");
       setFontColor(defaultColor);
     }
   }, [open, value, textLabel, defaultFont, defaultColor]);
@@ -92,7 +115,7 @@ export const TextSettingEditDialog = ({
     !!textKey &&
     styleName.trim().length > 0 &&
     !!fontTypeStyleName &&
-    !!fontSize.trim() &&
+    BREAKPOINT_TABS.every((bp) => !!fontSizes[bp]?.trim()) &&
     !!fontColor.trim();
 
   const handleApply = () => {
@@ -101,7 +124,10 @@ export const TextSettingEditDialog = ({
     onSave(textKey, {
       styleName: styleName.trim(),
       fontTypeStyleName,
-      fontSize: fontSize.trim(),
+      fontSize: fontSizes["2xl"].trim(),
+      fontSizeByBreakpoint: Object.fromEntries(
+        BREAKPOINT_TABS.map((bp) => [bp, fontSizes[bp].trim()])
+      ) as Record<ThemeTextSizeBreakpoint, string>,
       fontColor,
     });
     onOpenChange(false);
@@ -116,21 +142,21 @@ export const TextSettingEditDialog = ({
       title="Edit text style"
       description="Choose a font type, set size and color."
       icon={<Type className="w-5 h-5" />}
-      maxWidth="max-w-lg"
+      sizeWidth="medium"
+      sizeHeight="large"
       footer={
-        <div className="flex items-center justify-end gap-2 w-full">
+        <div className="flex items-center justify-end gap-2">
           <Button
+            type="button"
             variant="outline"
+            className="h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent"
             onClick={() => onOpenChange(false)}
             disabled={disabled}
           >
             Cancel
           </Button>
-          <Button
-            onClick={handleApply}
-            disabled={!canSave}
-            className="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)]"
-          >
+          <Button type="button" variant="accent" onClick={handleApply} disabled={!canSave}>
+            <Save className="w-4 h-4 mr-2" />
             Apply
           </Button>
         </div>
@@ -173,15 +199,27 @@ export const TextSettingEditDialog = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="text-font-size">Font size</Label>
+          <Label>Font size by screen size</Label>
+          <ResponsiveBreakpointTabs
+            activeTab={activeSizeTab}
+            onTabChange={(v) => setActiveSizeTab(v as ThemeTextSizeBreakpoint)}
+          />
           <Input
             id="text-font-size"
-            value={fontSize}
-            onChange={(e) => setFontSize(e.target.value)}
-            placeholder="e.g. 18px, 1rem, 2rem"
+            value={fontSizes[activeSizeTab]}
+            onChange={(e) =>
+              setFontSizes((prev) => ({
+                ...prev,
+                [activeSizeTab]: e.target.value,
+              }))
+            }
+            placeholder={`e.g. 18px, 1rem, 2rem for ${activeSizeTab}`}
             className="bg-[var(--input-background)] border-[var(--glass-border)]"
             disabled={disabled}
           />
+          <p className="text-xs text-muted-foreground">
+            Set font size for each breakpoint. Page editor uses these values on matching screen size.
+          </p>
         </div>
 
         <div className="space-y-2">
@@ -218,7 +256,7 @@ export const TextSettingEditDialog = ({
                 );
                 return font?.fontFamily ? `${font.fontFamily}, sans-serif` : undefined;
               })(),
-              fontSize: fontSize || "1rem",
+              fontSize: fontSizes[activeSizeTab] || "1rem",
               color: fontColor || "#000000",
             }}
           >

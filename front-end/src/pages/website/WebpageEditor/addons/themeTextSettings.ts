@@ -22,6 +22,13 @@ export function getThemeTextSettingsList(theme: CompanyWebTheme | null): ThemeTe
     googleFontUrl: f.googleFontUrl,
     fontFamily: f.fontFamily,
     fontSize: f.fontSize,
+    fontSizeByBreakpoint: {
+      sm: f.fontSize,
+      md: f.fontSize,
+      lg: f.fontSize,
+      xl: f.fontSize,
+      "2xl": f.fontSize,
+    },
     fontColor: undefined,
   }));
 }

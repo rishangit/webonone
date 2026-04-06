@@ -28,7 +28,7 @@ export const MediaUploadDialog = ({
 
   const folderPath = `companies/${companyId}/web/media${currentPath ? `/${currentPath}` : ""}`;
 
-  const handleFileUploaded = (filePath: string, fileUrl: string) => {
+  const handleFileUploaded = (_filePath: string, _fileUrl: string) => {
     onUploadComplete();
     onOpenChange(false);
   };
@@ -71,9 +71,20 @@ export const MediaUploadDialog = ({
       description="Upload an image (with crop) or multiple files. Image upload shows progress."
       icon={<Upload className="w-5 h-5" />}
       maxWidth="max-w-lg"
-      noContentPadding
+      footer={
+        <div className="flex items-center justify-end gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            className="h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent"
+            onClick={() => onOpenChange(false)}
+          >
+            Close
+          </Button>
+        </div>
+      }
     >
-      <div className="p-6 pt-0 space-y-6">
+      <div className="space-y-6">
         <div>
           <FileUpload
             onFileUploaded={handleFileUploaded}

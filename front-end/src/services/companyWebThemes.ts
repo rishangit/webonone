@@ -12,6 +12,8 @@ export interface ThemeTextSetting {
   googleFontUrl: string;
   fontFamily: string;
   fontSize: string;
+  /** Optional responsive font size values by breakpoint. */
+  fontSizeByBreakpoint?: Partial<Record<'sm' | 'md' | 'lg' | 'xl' | '2xl', string>>;
   fontColor?: string;
 }
 
@@ -173,4 +175,3 @@ class CompanyWebThemesService {
 }
 
 export const companyWebThemesService = new CompanyWebThemesService();
-export type { CreateThemeData, UpdateThemeData };

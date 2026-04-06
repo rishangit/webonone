@@ -1,6 +1,6 @@
 {
   "name": "appointment-app-backend",
-  "version": "1.12.1",
+  "version": "1.13.0",
   "description": "Backend API for appointment booking application",
   "main": "server.js",
   "scripts": {

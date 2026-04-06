@@ -5,6 +5,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LayoutPanelTop, MoreVertical, Pencil, Star, Trash2 } from "lucide-react";
@@ -46,27 +47,35 @@ export const HeaderCard = ({
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="shrink-0 h-9 w-9" aria-label="Header actions">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground hover:bg-accent"
+              aria-label="Header actions"
+              onClick={(e) => e.stopPropagation()}
+            >
               <MoreVertical className="w-4 h-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-52 border-[var(--glass-border)] bg-[var(--glass-bg)]">
-            <DropdownMenuItem
-              className="cursor-pointer"
-              onClick={() => onEditDesigner(header)}
-            >
+          <DropdownMenuContent
+            align="end"
+            className="w-52 bg-popover border-border"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <DropdownMenuItem onClick={() => onEditDesigner(header)}>
               <Pencil className="w-4 h-4 mr-2" />
               Edit with designer
             </DropdownMenuItem>
             {!header.isDefault && (
-              <DropdownMenuItem className="cursor-pointer" onClick={() => onSetDefault(header)}>
+              <DropdownMenuItem onClick={() => onSetDefault(header)}>
                 <Star className="w-4 h-4 mr-2" />
                 Set as default
               </DropdownMenuItem>
             )}
+            <DropdownMenuSeparator />
             <DropdownMenuItem
-              className="cursor-pointer text-destructive focus:text-destructive"
               onClick={() => onDelete(header)}
+              variant="destructive"
             >
               <Trash2 className="w-4 h-4 mr-2" />
               Delete

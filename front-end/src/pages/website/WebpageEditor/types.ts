@@ -74,7 +74,10 @@ export interface ContentAddonBaseData {
 }
 
 export interface ImageContentAddonData extends ContentAddonBaseData {
+  /** Legacy / default path; also used when a breakpoint has no asset (see `resolvePathForBreakpoint`). */
   imagePath: string;
+  /** Optional image per Tailwind breakpoint (same model as theme text `fontSizeByBreakpoint`). */
+  imagePathByBreakpoint?: Partial<Record<BreakpointName, string>>;
   view: 'best-fit' | 'full-width';
   /** Optional fixed height in px. If missing/empty => auto height. */
   height?: number;

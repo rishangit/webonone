@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Type } from "lucide-react";
+import { Save, Type } from "lucide-react";
 import { CustomDialog } from "@/components/ui/custom-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,8 @@ export interface ThemeTextStyle {
   styleName: string;
   googleFontUrl: string;
   fontFamily: string;
-  fontSize: string;
+  /** @deprecated Font Setting tab no longer edits size; use Text Setting. Persisted as empty. */
+  fontSize?: string;
 }
 
 interface TextStyleEditDialogProps {
@@ -34,7 +35,6 @@ export function TextStyleEditDialog({
   const [styleName, setStyleName] = useState("");
   const [googleFontUrl, setGoogleFontUrl] = useState("");
   const [fontFamily, setFontFamily] = useState("");
-  const [fontSize, setFontSize] = useState("");
   const [isFontFamilyTouched, setIsFontFamilyTouched] = useState(false);
 
   useEffect(() => {
@@ -42,13 +42,11 @@ export function TextStyleEditDialog({
       setStyleName(value.styleName || styleLabel);
       setGoogleFontUrl(value.googleFontUrl || "");
       setFontFamily(value.fontFamily || "");
-      setFontSize(value.fontSize || "");
       setIsFontFamilyTouched(!!value.fontFamily);
     } else if (open) {
       setStyleName(styleLabel);
       setGoogleFontUrl("");
       setFontFamily("");
-      setFontSize("");
       setIsFontFamilyTouched(false);
     }
   }, [open, value, styleLabel]);
@@ -81,7 +79,7 @@ export function TextStyleEditDialog({
       styleName: styleName || styleLabel,
       googleFontUrl,
       fontFamily,
-      fontSize,
+      fontSize: "",
     });
     onOpenChange(false);
   };
@@ -93,18 +91,25 @@ export function TextStyleEditDialog({
       open={open}
       onOpenChange={onOpenChange}
       title="Edit font style"
-      description={`Configure font for ${styleLabel}.`}
+      description={`Configure font family for ${styleLabel}. Font size is set per text style in the Text Setting tab.`}
       icon={<Type className="w-5 h-5" />}
-      maxWidth="max-w-md"
+      sizeWidth="small"
+      sizeHeight="large"
       footer={
-        <>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+        <div className="flex items-center justify-end gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            className="h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent"
+            onClick={() => onOpenChange(false)}
+          >
             Cancel
           </Button>
-          <Button onClick={handleApply} disabled={disabled}>
+          <Button type="button" variant="accent" onClick={handleApply} disabled={disabled}>
+            <Save className="w-4 h-4 mr-2" />
             Apply
           </Button>
-        </>
+        </div>
       }
     >
       <div className="space-y-4">
@@ -151,17 +156,6 @@ export function TextStyleEditDialog({
             This will auto-fill from the Google font link. You can override it manually if needed.
           </p>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="font-size">Font size</Label>
-          <Input
-            id="font-size"
-            value={fontSize}
-            onChange={(e) => setFontSize(e.target.value)}
-            placeholder="e.g. 2rem, 24px, 1.5em"
-            className="bg-[var(--input-background)] border-[var(--glass-border)]"
-            disabled={disabled}
-          />
-        </div>
         {googleFontUrl && (
           <div className="rounded-lg border border-[var(--glass-border)] p-4">
             <p className="text-xs text-muted-foreground mb-2">Preview</p>
@@ -169,7 +163,7 @@ export function TextStyleEditDialog({
             <p
               style={{
                 fontFamily: fontFamily || "inherit",
-                fontSize: fontSize || "1rem",
+                fontSize: "1rem",
               }}
             >
               Sample text in {styleLabel}

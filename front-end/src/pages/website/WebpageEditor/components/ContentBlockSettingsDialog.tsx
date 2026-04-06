@@ -5,7 +5,7 @@ import { TabSwitcher } from "@/components/ui/tab-switcher";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Settings2 } from "lucide-react";
+import { Save, Settings2 } from "lucide-react";
 
 export type ContentBlockSettingsTab = "basic" | "advanced";
 
@@ -57,12 +57,20 @@ export function ContentBlockSettingsDialog({
       icon={<Settings2 className="w-5 h-5" />}
       maxWidth="max-w-md"
       footer={
-        <>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+        <div className="flex items-center justify-end gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            className="h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent"
+            onClick={() => onOpenChange(false)}
+          >
             Cancel
           </Button>
-          <Button onClick={handleApply}>Apply</Button>
-        </>
+          <Button type="button" variant="accent" onClick={handleApply}>
+            <Save className="w-4 h-4 mr-2" />
+            Apply
+          </Button>
+        </div>
       }
     >
       <div className="space-y-4">

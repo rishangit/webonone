@@ -1,14 +1,10 @@
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { Trash2 } from "lucide-react";
+import { CustomDialog } from "@/components/ui/custom-dialog";
+import { Button } from "@/components/ui/button";
 import { WebpageDeleteDialogProps } from "../types";
+
+const cancelFooterClass =
+  "h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent";
 
 export const WebpageDeleteDialog = ({
   open,
@@ -17,32 +13,32 @@ export const WebpageDeleteDialog = ({
   onDelete,
 }: WebpageDeleteDialogProps) => {
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="bg-[var(--glass-bg)] border-[var(--glass-border)] backdrop-blur-sm">
-        <AlertDialogHeader>
-          <AlertDialogTitle className="text-foreground">
-            Delete Webpage
-          </AlertDialogTitle>
-          <AlertDialogDescription className="text-muted-foreground">
-            Are you sure you want to delete &quot;{webPage?.name}&quot;? This
-            action cannot be undone.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel
-            className="border-[var(--glass-border)] text-foreground hover:bg-accent"
+    <CustomDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Delete Webpage"
+      sizeWidth="auto"
+      maxWidth="max-w-md"
+      footer={
+        <div className="flex items-center justify-end gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            className={cancelFooterClass}
             onClick={() => onOpenChange(false)}
           >
             Cancel
-          </AlertDialogCancel>
-          <AlertDialogAction
-            onClick={onDelete}
-            className="bg-red-500 hover:bg-red-600 text-white"
-          >
+          </Button>
+          <Button type="button" variant="destructive" onClick={onDelete}>
+            <Trash2 className="w-4 h-4 mr-2" />
             Delete
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+          </Button>
+        </div>
+      }
+    >
+      <p className="text-sm text-foreground">
+        Are you sure you want to delete &quot;{webPage?.name ?? ""}&quot;? This action cannot be undone.
+      </p>
+    </CustomDialog>
   );
 };

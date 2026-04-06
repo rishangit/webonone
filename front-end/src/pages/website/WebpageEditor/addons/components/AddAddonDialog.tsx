@@ -30,6 +30,18 @@ export const AddAddonDialog = ({
       icon={<Plus className="w-5 h-5" />}
       sizeWidth="medium"
       sizeHeight="medium"
+      footer={
+        <div className="flex items-center justify-end gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            className="h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent"
+            onClick={() => onOpenChange(false)}
+          >
+            Close
+          </Button>
+        </div>
+      }
     >
       <div className="space-y-3">
         {modules.map((module) => (
@@ -47,11 +59,6 @@ export const AddAddonDialog = ({
             <p className="text-xs text-muted-foreground mt-1">{module.description}</p>
           </button>
         ))}
-        <div className="flex justify-end pt-1">
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-            Close
-          </Button>
-        </div>
       </div>
     </CustomDialog>
   );

@@ -5,7 +5,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { nanoid } from "nanoid";
 import { Link } from "react-router-dom";
-import { MousePointerClick } from "lucide-react";
+import { MousePointerClick, Save } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -65,6 +65,7 @@ function resolveThemeButton(
 function resolveLabelTypography(
   textStyleName: string | undefined,
   themeTextSettings?: ThemeTextSetting[],
+  breakpoint: "sm" | "md" | "lg" | "xl" | "2xl" = "2xl",
   snapshot?: Pick<
     ButtonContentAddonData,
     "labelFontFamily" | "labelFontSize" | "labelFontColor" | "labelGoogleFontUrl"
@@ -76,7 +77,7 @@ function resolveLabelTypography(
   if (fromTheme) {
     return {
       fontFamily: fromTheme.fontFamily || undefined,
-      fontSize: fromTheme.fontSize || undefined,
+      fontSize: fromTheme.fontSizeByBreakpoint?.[breakpoint] || fromTheme.fontSize || undefined,
       color: fromTheme.fontColor || undefined,
     };
   }
@@ -90,6 +91,7 @@ function resolveLabelTypography(
 const ButtonAddonRenderer = ({
   addon,
   companyId,
+  breakpoint = "2xl",
   themeTextSettings,
   themeButtonSettings,
   companyWebPages,
@@ -105,8 +107,8 @@ const ButtonAddonRenderer = ({
 
   const labelStyle = useMemo(() => {
     const ts = themeBtn?.textStyleName ?? data.textStyleName;
-    return resolveLabelTypography(ts, themeTextSettings, data);
-  }, [themeBtn, data, themeTextSettings]);
+    return resolveLabelTypography(ts, themeTextSettings, breakpoint, data);
+  }, [themeBtn, data, themeTextSettings, breakpoint]);
 
   const linkHref = useMemo(
     () => resolveButtonLinkHref(data, effectiveCompanyId, companyWebPages),
@@ -281,7 +283,7 @@ const ButtonAddonEditDialog = ({
         ...(textStyle
           ? {
               labelFontFamily: textStyle.fontFamily,
-              labelFontSize: textStyle.fontSize,
+              labelFontSize: textStyle.fontSizeByBreakpoint?.["2xl"] || textStyle.fontSize,
               labelFontColor: textStyle.fontColor ?? selectedBtn?.fontColor,
               labelGoogleFontUrl: textStyle.googleFontUrl,
             }
@@ -305,14 +307,20 @@ const ButtonAddonEditDialog = ({
       icon={<MousePointerClick className="w-5 h-5" />}
       maxWidth="max-w-lg"
       footer={
-        <>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+        <div className="flex items-center justify-end gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            className="h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent"
+            onClick={() => onOpenChange(false)}
+          >
             Cancel
           </Button>
           <Button type="button" variant="accent" onClick={handleSubmit(onSubmit)}>
-            OK
+            <Save className="w-4 h-4 mr-2" />
+            Save
           </Button>
-        </>
+        </div>
       }
     >
       <div className="space-y-4">

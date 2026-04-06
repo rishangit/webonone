@@ -33,6 +33,9 @@ interface ResizableContentBlockProps {
   themeButtonSettings?: ThemeButtonSetting[];
   companyWebPages?: CompanyWebPage[];
   addonRenderContext?: AddonRenderContext;
+  requestedEditAddonId?: string | null;
+  requestedEditNonce?: string | null;
+  onRequestedEditHandled?: (requestId: string) => void;
 }
 
 type ResizeHandle = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw' | null;
@@ -53,6 +56,9 @@ export const ResizableContentBlock = ({
   themeButtonSettings,
   companyWebPages,
   addonRenderContext,
+  requestedEditAddonId = null,
+  requestedEditNonce = null,
+  onRequestedEditHandled,
 }: ResizableContentBlockProps) => {
   const [isResizing, setIsResizing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -72,6 +78,7 @@ export const ResizableContentBlock = ({
   const blockRef = useRef<HTMLDivElement>(null);
   const onUpdateRef = useRef(onUpdate);
   const blockSnapshotRef = useRef(block);
+  const lastHandledEditRequestNonceRef = useRef<string | null>(null);
   const dragRafRef = useRef<number | null>(null);
   const dragLastAppliedGridRef = useRef<{ gridRowStart: number; gridColumnStart: number } | null>(null);
 
@@ -82,6 +89,16 @@ export const ResizableContentBlock = ({
   useEffect(() => {
     blockSnapshotRef.current = block;
   }, [block]);
+
+  useEffect(() => {
+    if (!requestedEditAddonId || !requestedEditNonce) return;
+    if (lastHandledEditRequestNonceRef.current === requestedEditNonce) return;
+    if (!(block.addons || []).some((addon) => addon.id === requestedEditAddonId)) return;
+    lastHandledEditRequestNonceRef.current = requestedEditNonce;
+    onSelectAddon?.(requestedEditAddonId);
+    setEditingAddonId(requestedEditAddonId);
+    onRequestedEditHandled?.(requestedEditNonce);
+  }, [requestedEditAddonId, requestedEditNonce, block.addons, onSelectAddon]);
 
   const gridRowStart = block.gridRowStart ?? 1;
   const gridColumnStart = block.gridColumnStart ?? 1;
@@ -245,6 +262,7 @@ export const ResizableContentBlock = ({
       ...block,
       addons: addons.map((addon) => (addon.id === updatedAddon.id ? updatedAddon : addon)),
     }, true);
+    setEditingAddonId(null);
   };
 
   const handleDeleteAddon = (addonId: string) => {

@@ -159,8 +159,13 @@ export const WebpageFormPage = () => {
         sizeWidth="small"
         sizeHeight="medium"
         footer={
-          <>
-            <Button type="button" variant="outline" onClick={handleBack}>
+          <div className="flex items-center justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent"
+              onClick={handleBack}
+            >
               Cancel
             </Button>
             <Button
@@ -172,7 +177,7 @@ export const WebpageFormPage = () => {
               <Save className="w-4 h-4 mr-2" />
               {isSaving ? "Saving..." : "Create Webpage"}
             </Button>
-          </>
+          </div>
         }
       >
         <form id="webpage-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -188,7 +193,7 @@ export const WebpageFormPage = () => {
               className="h-12 text-base bg-[var(--input-background)] border-[var(--glass-border)] text-foreground"
             />
             {errors.name && (
-              <p className="text-sm text-red-600 flex items-center gap-1">
+              <p className="text-sm text-destructive flex items-center gap-1">
                 <span>•</span>
                 {errors.name.message}
               </p>
@@ -208,7 +213,7 @@ export const WebpageFormPage = () => {
               className="h-12 text-base bg-[var(--input-background)] border-[var(--glass-border)] text-foreground"
             />
             {errors.url && (
-              <p className="text-sm text-red-600 flex items-center gap-1">
+              <p className="text-sm text-destructive flex items-center gap-1">
                 <span>•</span>
                 {errors.url.message}
               </p>
@@ -290,7 +295,7 @@ export const WebpageFormPage = () => {
               className="h-12 text-base bg-background/50 border-2 border-border focus:border-[var(--accent-primary)] focus:ring-2 focus:ring-[var(--accent-primary)]/20 transition-all"
             />
             {errors.name && (
-              <p className="text-sm text-red-600 flex items-center gap-1">
+              <p className="text-sm text-destructive flex items-center gap-1">
                 <span>•</span>
                 {errors.name.message}
               </p>
@@ -311,7 +316,7 @@ export const WebpageFormPage = () => {
               className="h-12 text-base bg-background/50 border-2 border-border focus:border-[var(--accent-primary)] focus:ring-2 focus:ring-[var(--accent-primary)]/20 transition-all"
             />
             {errors.url && (
-              <p className="text-sm text-red-600 flex items-center gap-1">
+              <p className="text-sm text-destructive flex items-center gap-1">
                 <span>•</span>
                 {errors.url.message}
               </p>

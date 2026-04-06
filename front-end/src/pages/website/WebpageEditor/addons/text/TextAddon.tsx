@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { nanoid } from "nanoid";
-import { Type } from "lucide-react";
+import { Save, Type } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -19,6 +19,14 @@ import {
 import type { ThemeTextSetting } from "@/services/companyWebThemes";
 import { AddonEditProps, AddonModule, AddonRenderProps } from "../types";
 import { ContentAddon, TextContentAddonData } from "../../types";
+
+function resolveThemeFontSize(
+  style: ThemeTextSetting | null | undefined,
+  breakpoint: "sm" | "md" | "lg" | "xl" | "2xl" = "2xl"
+): string | undefined {
+  if (!style) return undefined;
+  return style.fontSizeByBreakpoint?.[breakpoint] || style.fontSize || undefined;
+}
 
 const textAddonSchema = yup.object({
   text: yup.string().required("Text is required"),
@@ -54,7 +62,7 @@ function hashUrl(url: string): string {
   return `gf-${Math.abs(h)}`;
 }
 
-const TextAddonRenderer = ({ addon, themeTextSettings }: AddonRenderProps) => {
+const TextAddonRenderer = ({ addon, themeTextSettings, breakpoint = "2xl" }: AddonRenderProps) => {
   const data = addon.data as TextContentAddonData;
   const style = useMemo(
     () => resolveStyleForAddon(data, themeTextSettings),
@@ -87,7 +95,7 @@ const TextAddonRenderer = ({ addon, themeTextSettings }: AddonRenderProps) => {
 
   const inline: CSSProperties = {
     fontFamily: style?.fontFamily || undefined,
-    fontSize: style?.fontSize || undefined,
+    fontSize: resolveThemeFontSize(style, breakpoint) || undefined,
     color: style?.fontColor || undefined,
     margin: 0,
     whiteSpace: "pre-wrap",
@@ -167,7 +175,7 @@ const TextAddonEditDialog = ({
           ? {
               googleFontUrl: selected.googleFontUrl,
               fontFamily: selected.fontFamily,
-              fontSize: selected.fontSize,
+              fontSize: selected.fontSizeByBreakpoint?.["2xl"] || selected.fontSize,
               fontColor: selected.fontColor,
             }
           : {}),
@@ -186,14 +194,20 @@ const TextAddonEditDialog = ({
       icon={<Type className="w-5 h-5" />}
       maxWidth="max-w-lg"
       footer={
-        <>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+        <div className="flex items-center justify-end gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            className="h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent"
+            onClick={() => onOpenChange(false)}
+          >
             Cancel
           </Button>
           <Button type="button" variant="accent" onClick={handleSubmit(onSubmit)}>
-            OK
+            <Save className="w-4 h-4 mr-2" />
+            Save
           </Button>
-        </>
+        </div>
       }
     >
       <div className="space-y-4">

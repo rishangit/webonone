@@ -9,7 +9,8 @@ When asked to "update version" or prepare a release on the current branch, follo
 
 1. Confirm current branch with `git branch --show-current`.
 2. Inspect branch change scope before bumping version:
-   - review commits and diff from base branch (usually `main`/`master`)
+   - review commits and diff from the default base branch (this repo: **`master`**; use `main` when that is the default)
+   - useful commands: `git log master..HEAD --oneline`, `git diff master --stat`
    - classify impact as patch, minor, or major
    - if unclear, ask user to confirm bump level before applying
 3. Update application version consistently in:

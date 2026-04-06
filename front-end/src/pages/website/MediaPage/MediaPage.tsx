@@ -1,15 +1,19 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { FolderOpen, FolderPlus, Upload } from "lucide-react";
+import { FolderOpen, FolderPlus, Save, Trash2, Upload } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { CustomDialog } from "@/components/ui/custom-dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useAppSelector } from "@/store/hooks";
-import { companyWebMediaService } from "@/services/companyWebMedia";
-import type { MediaFolder, MediaFile } from "@/services/companyWebMedia";
-import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
+import {
+  companyWebMediaService,
+  type MediaFolder,
+  type MediaFile,
+} from "@/services/companyWebMedia";
 import { EmptyState } from "@/components/common/EmptyState";
 import { toast } from "sonner";
-import type { MediaItem } from "./components";
-import { MediaFilters, MediaCard, MediaUploadDialog } from "./components";
+import { MediaFilters, MediaCard, MediaUploadDialog, type MediaItem } from "./components";
 
 export const MediaPage = () => {
   const { userCompany, currentCompany } = useAppSelector((state) => state.companies);
@@ -322,45 +326,59 @@ export const MediaPage = () => {
         </div>
       </div>
 
-      {/* New folder modal */}
-      {isNewFolderOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <Card className="p-6 w-full max-w-md mx-4 bg-background border border-[var(--glass-border)]">
-            <h3 className="text-lg font-semibold text-foreground mb-2">
-              New folder
-            </h3>
-            <input
-              type="text"
-              value={newFolderName}
-              onChange={(e) => setNewFolderName(e.target.value)}
-              placeholder="Folder name"
-              className="w-full px-3 py-2 rounded-md border border-[var(--glass-border)] bg-[var(--input-background)] text-foreground mb-4"
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleCreateFolder();
-                if (e.key === "Escape") setIsNewFolderOpen(false);
+      <CustomDialog
+        open={isNewFolderOpen}
+        onOpenChange={(open) => {
+          setIsNewFolderOpen(open);
+          if (!open) setNewFolderName("");
+        }}
+        title="New folder"
+        description="Enter a name for the new folder in the current location."
+        icon={<FolderPlus className="w-5 h-5" />}
+        sizeWidth="small"
+        sizeHeight="small"
+        footer={
+          <div className="flex items-center justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent"
+              onClick={() => {
+                setIsNewFolderOpen(false);
+                setNewFolderName("");
               }}
-            />
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setIsNewFolderOpen(false);
-                  setNewFolderName("");
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="accent"
-                onClick={handleCreateFolder}
-                disabled={!newFolderName.trim()}
-              >
-                Create
-              </Button>
-            </div>
-          </Card>
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="accent"
+              onClick={() => void handleCreateFolder()}
+              disabled={!newFolderName.trim()}
+            >
+              <Save className="w-4 h-4 mr-2" />
+              Create
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-3">
+          <Label htmlFor="media-new-folder-name">Folder name</Label>
+          <Input
+            id="media-new-folder-name"
+            value={newFolderName}
+            onChange={(e) => setNewFolderName(e.target.value)}
+            placeholder="Folder name"
+            className="bg-[var(--input-background)] border-[var(--glass-border)] text-foreground"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                void handleCreateFolder();
+              }
+            }}
+          />
         </div>
-      )}
+      </CustomDialog>
 
       <MediaUploadDialog
         open={isUploadDialogOpen}
@@ -370,16 +388,44 @@ export const MediaPage = () => {
         onUploadComplete={handleUploadComplete}
       />
 
-      <DeleteConfirmationDialog
+      <CustomDialog
         open={isDeleteOpen}
         onOpenChange={(open) => {
           setIsDeleteOpen(open);
           if (!open) setDeleteTarget(null);
         }}
-        onConfirm={handleDeleteConfirm}
-        itemName={deleteTarget?.name}
-        itemType={deleteTarget?.type === "folder" ? "folder" : "file"}
-      />
+        title={
+          deleteTarget?.type === "folder" ? "Delete folder?" : "Delete file?"
+        }
+        description={
+          deleteTarget
+            ? `Are you sure you want to delete "${deleteTarget.name}"? This action cannot be undone.`
+            : ""
+        }
+        sizeWidth="small"
+        sizeHeight="small"
+        footer={
+          <div className="flex items-center justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent"
+              onClick={() => {
+                setIsDeleteOpen(false);
+                setDeleteTarget(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button type="button" variant="destructive" onClick={() => void handleDeleteConfirm()}>
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete
+            </Button>
+          </div>
+        }
+      >
+        <div className="sr-only">Confirm deletion of this media item.</div>
+      </CustomDialog>
     </div>
   );
 };

@@ -1,6 +1,23 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { ArrowLeft, ChevronDown, ChevronRight, Layers, LayoutTemplate, Pencil } from "lucide-react";
+import {
+  ArrowLeft,
+  ChevronDown,
+  ChevronRight,
+  ChevronUp,
+  Layers,
+  LayoutTemplate,
+  MoreVertical,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   EditorContent,
   EditorState,
@@ -31,11 +48,18 @@ function readStoredCanvasHeight(): number {
 }
 import type { ThemeButtonSetting, ThemeTextSetting } from "@/services/companyWebThemes";
 import type { CompanyWebPage } from "@/services/companyWebPages";
+import { clampStackZIndex } from "./addons/addonGridUtils";
 
 export interface VisualWebEditorSnapshot {
   contentBlocks: ContentBlock[];
   editorContent: EditorContent;
   contentContainer?: ContentContainerSettings;
+}
+
+interface AddonEditRequest {
+  blockId: string;
+  addonId: string;
+  requestId: string;
 }
 
 export interface VisualWebEditorProps {
@@ -89,6 +113,8 @@ export const VisualWebEditor = ({
     minHeightPx: readStoredCanvasHeight(),
   }));
   const [contentContainerDialogOpen, setContentContainerDialogOpen] = useState(false);
+  const [addonEditRequest, setAddonEditRequest] = useState<AddonEditRequest | null>(null);
+  const [draggingTreeAddon, setDraggingTreeAddon] = useState<{ blockId: string; addonId: string } | null>(null);
   /** Content tree: expand/collapse content elements under the container parent */
   const [contentContainerTreeExpanded, setContentContainerTreeExpanded] = useState(true);
 
@@ -278,6 +304,94 @@ export const VisualWebEditor = ({
     setEditorState((prev) => ({ ...prev, isDirty: true }));
   };
 
+  const handleEditAddonFromTree = (blockId: string, addonId: string) => {
+    setEditorSelection({
+      type: "addon",
+      blockId,
+      addonId,
+    });
+    setAddonEditRequest({
+      blockId,
+      addonId,
+      requestId: nanoid(10),
+    });
+  };
+
+  const handleDeleteAddonFromTree = (blockId: string, addonId: string) => {
+    const targetBlock = contentBlocksRef.current.find((block) => block.id === blockId);
+    if (!targetBlock) return;
+    handleUpdateBlock(
+      {
+        ...targetBlock,
+        addons: (targetBlock.addons || []).filter((addon) => addon.id !== addonId),
+      },
+      true,
+      true
+    );
+    if (
+      editorSelection?.type === "addon" &&
+      editorSelection.blockId === blockId &&
+      editorSelection.addonId === addonId
+    ) {
+      setEditorSelection(null);
+    }
+  };
+
+  const handleBumpAddonLayerFromTree = (blockId: string, addonId: string, delta: number) => {
+    const targetBlock = contentBlocksRef.current.find((block) => block.id === blockId);
+    if (!targetBlock) return;
+    const addons = targetBlock.addons || [];
+    const ordered = [...addons].sort((a, b) => (b.zIndex ?? 0) - (a.zIndex ?? 0) || a.id.localeCompare(b.id));
+    const currIndex = ordered.findIndex((addon) => addon.id === addonId);
+    if (currIndex < 0) return;
+    const nextIndex = Math.max(0, Math.min(ordered.length - 1, currIndex - delta));
+    if (nextIndex === currIndex) return;
+    const [moved] = ordered.splice(currIndex, 1);
+    ordered.splice(nextIndex, 0, moved);
+    const zById = new Map(
+      ordered.map((addon, index) => [addon.id, clampStackZIndex(ordered.length - 1 - index)])
+    );
+    handleUpdateBlock(
+      {
+        ...targetBlock,
+        addons: addons.map((addon) => ({
+          ...addon,
+          zIndex: zById.get(addon.id) ?? addon.zIndex ?? 0,
+        })),
+      },
+      true,
+      true
+    );
+  };
+
+  const handleReorderAddonsFromTree = (blockId: string, draggedAddonId: string, targetAddonId: string) => {
+    if (draggedAddonId === targetAddonId) return;
+    const targetBlock = contentBlocksRef.current.find((block) => block.id === blockId);
+    if (!targetBlock) return;
+    const addons = targetBlock.addons || [];
+    const ordered = [...addons].sort((a, b) => (b.zIndex ?? 0) - (a.zIndex ?? 0) || a.id.localeCompare(b.id));
+    const fromIndex = ordered.findIndex((addon) => addon.id === draggedAddonId);
+    const toIndex = ordered.findIndex((addon) => addon.id === targetAddonId);
+    if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) return;
+    const [moved] = ordered.splice(fromIndex, 1);
+    ordered.splice(toIndex, 0, moved);
+    // Navigation order defines layers: first = highest z-index, last = lowest.
+    const zById = new Map(
+      ordered.map((addon, index) => [addon.id, clampStackZIndex(ordered.length - 1 - index)])
+    );
+    handleUpdateBlock(
+      {
+        ...targetBlock,
+        addons: addons.map((addon) => ({
+          ...addon,
+          zIndex: zById.get(addon.id) ?? addon.zIndex ?? 0,
+        })),
+      },
+      true,
+      true
+    );
+  };
+
   const handleSave = () => {
     const snapshot = buildSnapshot(
       contentBlocksRef.current,
@@ -431,20 +545,35 @@ export const VisualWebEditor = ({
                       <span className="text-xs font-medium text-foreground truncate">Page / header surface</span>
                     </div>
                   </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 shrink-0 gap-1 px-2 text-xs"
-                    title="Edit content container (height, background)"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setContentContainerDialogOpen(true);
-                    }}
-                  >
-                    <Pencil className="w-3.5 h-3.5" />
-                    Edit
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground hover:bg-accent"
+                        title="Content container actions"
+                        aria-label="Open content container menu"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <MoreVertical className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="end"
+                      className="w-44 bg-popover border-border"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setContentContainerDialogOpen(true);
+                        }}
+                      >
+                        <Pencil className="w-4 h-4 mr-2" />
+                        Edit
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
                 {contentContainerTreeExpanded && (
                   <div className="border-t border-[var(--glass-border)]/70 px-1 pb-2 pt-1 space-y-1">
@@ -490,30 +619,109 @@ export const VisualWebEditor = ({
                             </button>
                             {isExpanded && (
                               <div className="ml-6 mr-1 mb-1.5 mt-0 space-y-0.5 border-t border-[var(--glass-border)]/40 pt-1">
-                                {(block.addons || []).map((addon) => {
+                                {[...(block.addons || [])]
+                                  .sort((a, b) => (b.zIndex ?? 0) - (a.zIndex ?? 0) || a.id.localeCompare(b.id))
+                                  .map((addon) => {
                                   const isAddonSelected =
                                     editorSelection?.type === "addon" &&
                                     editorSelection.blockId === block.id &&
                                     editorSelection.addonId === addon.id;
+                                  const isDraggingThisAddon =
+                                    draggingTreeAddon?.blockId === block.id &&
+                                    draggingTreeAddon?.addonId === addon.id;
                                   return (
-                                    <button
+                                    <div
                                       key={addon.id}
-                                      type="button"
-                                      className={`w-full flex items-center gap-2 text-left px-2 py-1 rounded text-xs transition-colors ${
+                                      className={`w-full flex items-center gap-1 rounded text-xs transition-colors ${
                                         isAddonSelected
                                           ? "bg-[var(--accent-bg)] text-[var(--accent-text)]"
                                           : "text-muted-foreground hover:bg-[var(--accent-bg)] hover:text-[var(--accent-text)]"
-                                      }`}
-                                      onClick={() =>
-                                        setEditorSelection({
-                                          type: "addon",
-                                          blockId: block.id,
-                                          addonId: addon.id,
-                                        })
-                                      }
+                                      } ${isDraggingThisAddon ? "opacity-50" : ""}`}
+                                      draggable
+                                      onDragStart={(e) => {
+                                        setDraggingTreeAddon({ blockId: block.id, addonId: addon.id });
+                                        e.dataTransfer.effectAllowed = "move";
+                                        e.dataTransfer.setData("text/plain", `${block.id}:${addon.id}`);
+                                      }}
+                                      onDragOver={(e) => {
+                                        const active = draggingTreeAddon;
+                                        if (!active || active.blockId !== block.id) return;
+                                        e.preventDefault();
+                                        e.dataTransfer.dropEffect = "move";
+                                      }}
+                                      onDrop={(e) => {
+                                        e.preventDefault();
+                                        const active = draggingTreeAddon;
+                                        if (!active || active.blockId !== block.id) return;
+                                        handleReorderAddonsFromTree(block.id, active.addonId, addon.id);
+                                        setDraggingTreeAddon(null);
+                                      }}
+                                      onDragEnd={() => setDraggingTreeAddon(null)}
                                     >
-                                      <span className="truncate capitalize">{addon.type} addon</span>
-                                    </button>
+                                      <button
+                                        type="button"
+                                        className="min-w-0 flex-1 text-left px-2 py-1 rounded"
+                                        onClick={() =>
+                                          setEditorSelection({
+                                            type: "addon",
+                                            blockId: block.id,
+                                            addonId: addon.id,
+                                          })
+                                        }
+                                      >
+                                        <span className="truncate capitalize">{addon.type} addon</span>
+                                      </button>
+                                      <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                          <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8 mr-1 shrink-0 text-muted-foreground hover:text-foreground hover:bg-accent"
+                                            onClick={(e) => e.stopPropagation()}
+                                            aria-label={`Open ${addon.type} addon menu`}
+                                          >
+                                            <MoreVertical className="w-4 h-4" />
+                                          </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent
+                                          align="end"
+                                          className="w-44 bg-popover border-border"
+                                          onClick={(e) => e.stopPropagation()}
+                                        >
+                                          <DropdownMenuItem
+                                            onClick={() => handleEditAddonFromTree(block.id, addon.id)}
+                                          >
+                                            <Pencil className="w-4 h-4 mr-2" />
+                                            Edit
+                                          </DropdownMenuItem>
+                                          <DropdownMenuItem
+                                            onClick={() =>
+                                              handleBumpAddonLayerFromTree(block.id, addon.id, 1)
+                                            }
+                                          >
+                                            <ChevronUp className="w-4 h-4 mr-2" />
+                                            Layer up
+                                          </DropdownMenuItem>
+                                          <DropdownMenuItem
+                                            onClick={() =>
+                                              handleBumpAddonLayerFromTree(block.id, addon.id, -1)
+                                            }
+                                          >
+                                            <ChevronDown className="w-4 h-4 mr-2" />
+                                            Layer down
+                                          </DropdownMenuItem>
+                                          <DropdownMenuSeparator />
+                                          <DropdownMenuItem
+                                            variant="destructive"
+                                            onClick={() => handleDeleteAddonFromTree(block.id, addon.id)}
+                                          >
+                                            <Trash2 className="w-4 h-4 mr-2" />
+                                            Delete
+                                          </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                      </DropdownMenu>
+                                    </div>
                                   );
                                 })}
                                 {!block.addons?.length && (
@@ -556,6 +764,10 @@ export const VisualWebEditor = ({
             addonRenderContext="editor"
             onUpdateBlock={handleUpdateBlock}
             onDeleteBlock={handleDeleteBlock}
+            requestedAddonEdit={addonEditRequest}
+            onAddonEditRequestHandled={(requestId) => {
+              setAddonEditRequest((prev) => (prev?.requestId === requestId ? null : prev));
+            }}
           />
         </div>
       </div>

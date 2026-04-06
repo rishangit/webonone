@@ -1,46 +1,54 @@
 ---
-description: Dialog window standards with CustomDialog and wizard progress bar
+description: Dialog window standards with CustomDialog and wizard/tab patterns
 globs: front-end/src/**/*.tsx
 alwaysApply: true
 ---
 
 # Dialog Window Standards
 
-- Always build dialog windows with `@front-end/src/components/ui/custom-dialog.tsx` (`CustomDialog`).
-- Do not use raw Radix/HTML dialog containers directly in feature pages when `CustomDialog` can be used.
-- Every dialog must render a visible header and a visible footer.
-- All action/control buttons (for example: Cancel, Save, Next, Previous, Submit, Delete, Confirm) must be rendered in the dialog footer.
-- Do not place primary or secondary action buttons inside the dialog body/content area.
-- Footer action buttons must use auto width based on their content text.
-- Do not force footer action buttons to full width (for example, avoid `w-full` or `flex-1` on footer buttons unless explicitly required by the feature).
+## Core
 
-## Theme and accents
+- Build dialogs with `CustomDialog` from `@/components/ui/custom-dialog`.
+- Do not use raw Radix or HTML dialog primitives in feature code when `CustomDialog` can be used.
+- Every dialog must show a visible header and a visible footer.
+- All global actions (Cancel, Save, Submit, Delete, Confirm, Next, Previous, etc.) belong in the **footer** only.
+- Do not put primary or secondary global actions in the dialog body.
+- Footer buttons use natural width from their label; do not use `w-full` or `flex-1` on footer buttons unless the feature explicitly requires it.
 
-- Use project theme tokens and accent styles for dialog UI (for example: `bg-background`, `text-foreground`, `text-muted-foreground`, `border-[var(--glass-border)]`, and accent-aware variants).
-- Keep dialog visuals consistent with existing theme behavior in light/dark modes.
+## Footer layout
 
-## Reusability
+- Place Cancel and the primary action on one row, **right-aligned**, using `flex items-center justify-end gap-2` (inner row; `CustomDialog` already outer-aligns the footer on larger breakpoints).
+- **Cancel:** `Button` with `variant="outline"`, `size="default"`, and `className` including `h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent`.
+- **Primary:** `Button` with `variant="accent"` and `size="default"`; label matches the action (Save, Create, Submit, etc.).
+- **Primary icon:** For create/save/submit actions that persist data, put the Lucide `Save` icon before the label: `className="w-4 h-4 mr-2"`. For destructive confirm, use an icon that matches the action (e.g. `Trash2`) with the same size and `mr-2`. Other actions may use icons only when they clarify the action.
 
-- Prefer reusable UI components from `front-end/src/components/ui` for inputs, buttons, labels, and related controls.
-- Extract repeated dialog sections into reusable local/shared components instead of duplicating markup and logic.
-- Store each dialog in its own dedicated folder with a meaningful, descriptive name.
-- Avoid placing multiple unrelated dialog implementations in one large file when they can be split into focused dialog folders/components.
+## Padding (match `CustomDialog`)
+
+- Do not add extra outer padding that fights the shell; use `noContentPadding` only when the body intentionally controls its own full-bleed layout.
+- Default shell: header uses `p-6 pb-4` and a bottom border; body uses `p-6` when the standard header is shown; footer uses `px-6 py-3` and `border-t border-[var(--glass-border)]`.
+- Inside the body, use vertical spacing utilities (`space-y-*`) instead of stacking conflicting `p-*` on nested wrappers.
+
+## Theme
+
+- Use shared tokens: `bg-background`, `text-foreground`, `text-muted-foreground`, `border-[var(--glass-border)]`, and accent-aware variants where applicable.
+- Keep light/dark behavior consistent with the rest of the app.
+
+## Reuse and structure
+
+- Use shared controls from `@/components/ui` for inputs, buttons, and labels.
+- Factor repeated dialog sections into small shared components when the same pattern repeats.
+- Prefer one dialog per folder with a clear name; avoid one huge file with unrelated dialogs.
 
 ## Wizard dialogs
 
-- If the dialog is a wizard (multi-step flow), show a visible step progress bar.
-- If a dialog is a wizard, implement each step as a separate component (one component per step) instead of one large inline render block.
-- Progress bar width must be half of the dialog content area (`w-1/2`).
-- Progress bar must be horizontally centered (for example: container with `mx-auto` and centered alignment).
-- Render only one primary step progress indicator in wizard dialogs.
-- Do not render both a progress bar and a numeric/circle stepper at the same time.
-- Keep step progress visually aligned with the active step and theme accents.
+- Multi-step flows must show a visible **step progress bar** only (no second progress UI such as a numeric stepper alongside it).
+- Implement each step as its own component (not one long inline block).
+- Progress bar width is `w-1/2` of the dialog content area (`w-1/2`), centered (`mx-auto` or equivalent).
+- Align the bar with the active step and theme accents.
 
 ## Tabbed dialogs
 
-- If a dialog has tabs, implement each tab as a separate component (one component per tab) instead of one large inline tab render block.
-- Organize tab components in dedicated folders when tab logic/UI is complex; keep simpler tabs as focused sibling components when appropriate.
-- In tabbed dialogs, tab-level action/control buttons are allowed inside the tab body when they are scoped to tab content (for example: Add item, Edit selected item, Delete selected item).
-- Keep global dialog actions (for example: Cancel, Save, Submit, Confirm) in the dialog footer; tab-level actions must not replace required footer actions.
-- For tab list rows/items, provide a 3-dot menu (`MoreVertical`/kebab menu) for item-specific functions.
-- 3-dot item menus should include context actions such as Edit/Delete (and other item-scoped functions when needed), styled with project theme/accent tokens.
+- Implement each tab as its own component (not one long inline tab block).
+- Put tab-scoped controls (Add, Edit selected, Delete selected) in the tab body when they only affect that tab’s content.
+- Global actions stay in the footer; tab actions must not replace required footer actions.
+- For tab list rows, use a kebab menu (`MoreVertical`) for row actions; include Edit/Delete (and other row actions as needed) with theme/accent styling.

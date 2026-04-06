@@ -15,11 +15,21 @@ const textStyleSchema = Joi.object({
 
 const fontSettingsSchema = textStyleSchema;
 
+/** Optional per-breakpoint font sizes (matches editor sm/md/lg/xl/2xl). */
+const fontSizeByBreakpointSchema = Joi.object({
+  sm: Joi.string().max(50).optional().allow('', null),
+  md: Joi.string().max(50).optional().allow('', null),
+  lg: Joi.string().max(50).optional().allow('', null),
+  xl: Joi.string().max(50).optional().allow('', null),
+  '2xl': Joi.string().max(50).optional().allow('', null),
+}).optional();
+
 const textSettingsSchema = Joi.object({
   styleName: Joi.string().min(1).max(255).required(),
   googleFontUrl: Joi.string().uri().optional().allow('', null),
   fontFamily: Joi.string().max(255).optional().allow('', null),
   fontSize: Joi.string().max(50).optional().allow('', null),
+  fontSizeByBreakpoint: fontSizeByBreakpointSchema,
   fontColor: Joi.string().max(50).optional().allow('', null),
 });
 
@@ -62,6 +72,8 @@ const themeSchema = {
     isDefault: optionalLooseBoolean,
   }),
   update: Joi.object({
+    /** Client often sends companyId with updates; model ignores it (theme row already scoped by id). */
+    companyId: Joi.string().length(10).optional(),
     name: Joi.string().min(1).max(255).optional(),
     themeData: Joi.object({
       themeName: Joi.string().min(1).max(255).required(),

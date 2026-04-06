@@ -4,6 +4,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { ThemeTextSettingItem } from "@/pages/website/ThemeFormPage/components";
@@ -43,19 +44,25 @@ export const TextSettingsTab = ({ items, onAdd, onEdit, onDelete }: TextSettings
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 hover:bg-[var(--accent-bg)] text-muted-foreground hover:text-[var(--accent-text)]"
+                    className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground hover:bg-accent"
+                    onClick={(e) => e.stopPropagation()}
                   >
                     <MoreVertical className="w-4 h-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-popover border-border" align="end">
+                <DropdownMenuContent
+                  className="bg-popover border-border"
+                  align="end"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <DropdownMenuItem onClick={() => onEdit(key)}>
                     <Pencil className="w-4 h-4 mr-2" />
                     Edit
                   </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => onDelete(key)}
-                    className="text-red-500 hover:bg-red-500/10"
+                    variant="destructive"
                   >
                     <Trash2 className="w-4 h-4 mr-2" />
                     Delete

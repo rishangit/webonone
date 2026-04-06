@@ -1,34 +1,27 @@
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { MoreVertical, Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { ThemeColorSetting } from "@/services/companyWebThemes";
 
 interface ColorsTabProps {
   items: Record<string, ThemeColorSetting>;
-  selectedKey: string | null;
-  onSelect: (key: string) => void;
-  onChangeItem: (key: string, value: ThemeColorSetting) => void;
   onAdd: () => void;
+  onEdit: (key: string) => void;
   onDelete: (key: string) => void;
 }
 
 export const ColorsTab = ({
   items,
-  selectedKey,
-  onSelect,
-  onChangeItem,
   onAdd,
+  onEdit,
   onDelete,
 }: ColorsTabProps) => {
-  const selectedItem = selectedKey ? items[selectedKey] : null;
-
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
@@ -39,17 +32,10 @@ export const ColorsTab = ({
       </div>
       <div className="space-y-2">
         {Object.entries(items).map(([key, color]) => {
-          const isSelected = selectedKey === key;
           return (
-            <button
+            <div
               key={key}
-              type="button"
-              onClick={() => onSelect(key)}
-              className={`w-full text-left rounded-lg border p-3 transition ${
-                isSelected
-                  ? "border-[var(--accent-border)] bg-[var(--accent-bg)]"
-                  : "border-[var(--glass-border)] hover:border-[var(--accent-border)]"
-              }`}
+              className="w-full text-left rounded-lg border p-3 transition border-[var(--glass-border)] hover:border-[var(--accent-border)]"
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
@@ -65,7 +51,7 @@ export const ColorsTab = ({
                       type="button"
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 hover:bg-[var(--accent-bg)] text-muted-foreground hover:text-[var(--accent-text)]"
+                      className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground hover:bg-accent"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <MoreVertical className="w-4 h-4" />
@@ -76,13 +62,14 @@ export const ColorsTab = ({
                     align="end"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <DropdownMenuItem onClick={() => onSelect(key)}>
+                    <DropdownMenuItem onClick={() => onEdit(key)}>
                       <Pencil className="w-4 h-4 mr-2" />
                       Edit
                     </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={() => onDelete(key)}
-                      className="text-red-500 hover:bg-red-500/10"
+                      variant="destructive"
                     >
                       <Trash2 className="w-4 h-4 mr-2" />
                       Delete
@@ -91,36 +78,10 @@ export const ColorsTab = ({
                 </DropdownMenu>
               </div>
               <p className="text-xs text-muted-foreground">{color.color}</p>
-            </button>
+            </div>
           );
         })}
       </div>
-
-      {selectedItem && selectedKey && (
-        <div className="rounded-lg border border-[var(--glass-border)] p-4 space-y-3">
-          <div className="space-y-2">
-            <Label>Color name</Label>
-            <Input
-              value={selectedItem.name}
-              onChange={(e) =>
-                onChangeItem(selectedKey, { ...selectedItem, name: e.target.value })
-              }
-              className="bg-[var(--input-background)] border-[var(--glass-border)]"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Color value</Label>
-            <Input
-              type="color"
-              value={selectedItem.color}
-              onChange={(e) =>
-                onChangeItem(selectedKey, { ...selectedItem, color: e.target.value })
-              }
-              className="w-14 h-10 p-1 bg-[var(--input-background)] border-[var(--glass-border)]"
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 };

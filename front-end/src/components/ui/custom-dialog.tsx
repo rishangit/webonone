@@ -4,7 +4,26 @@ import { X } from "lucide-react";
 import { cn } from "./utils";
 import { Icon } from "../common/Icon";
 
-type CustomDialogSize = "small" | "medium" | "large" | "xlarge";
+type CustomDialogSize = "small" | "medium" | "large" | "xlarge" | "auto";
+
+// Dialog width presets (percent of overlay) or intrinsic width for `auto` (handled in width memo).
+const sizeWidthClasses: Record<CustomDialogSize, string> = {
+  small: "w-1/2",
+  medium: "w-2/3",
+  large: "w-3/4",
+  xlarge: "w-5/6",
+  auto: "",
+};
+
+// Dialog height presets (percent of overlay) or intrinsic height for `auto`.
+const sizeHeightClasses: Record<CustomDialogSize, string> = {
+  small: "h-1/3",
+  medium: "h-1/2",
+  large: "h-3/4",
+  xlarge: "h-9/10",
+  /** Grows with content; overall shell still capped by max-h below. */
+  auto: "h-auto",
+};
 
 interface CustomDialogProps {
   open: boolean;
@@ -15,11 +34,20 @@ interface CustomDialogProps {
   customHeader?: ReactNode; // For completely custom header layout
   children: ReactNode;
   footer?: ReactNode;
-  /** Dialog width preset. */
+  /**
+   * Dialog width preset. Use `"auto"` to size to content (capped by viewport and `maxWidth`).
+   * Percent widths (`small`–`xlarge`) fill that fraction of the overlay.
+   */
   sizeWidth?: CustomDialogSize;
-  /** Dialog height preset. */
+  /**
+   * Dialog height preset. Use `"auto"` for height from content (e.g. short confirmations).
+   * If omitted and `sizeWidth` is `"auto"`, height defaults to `"auto"`.
+   */
   sizeHeight?: CustomDialogSize;
-  /** Legacy/custom width override. Prefer `sizeWidth`; keep for edge cases. */
+  /**
+   * When `sizeWidth` is `"auto"`: Tailwind max-width class for the content-sized panel (default `max-w-lg`).
+   * When `sizeWidth` is a percent preset (legacy): if set and not the default `max-w-lg`, applies as `sm:{maxWidth}` instead of the percent width class.
+   */
   maxWidth?: string;
   className?: string;
   disableContentScroll?: boolean;
@@ -53,28 +81,21 @@ export function CustomDialog({
     return `dialog-description-${id}`;
   }, [dialogId]);
 
-  // Dialog width presets (percent of available container width).
-  // Note: `xlarge` is the "extra large" option.
-  const sizeWidthClasses: Record<CustomDialogSize, string> = {
-    small: "w-1/2",
-    medium: "w-2/3",
-    large: "w-3/4",
-    xlarge: "w-5/6",
-  };
+  /** When width is auto and height omitted, default height to auto (compact dialogs). */
+  const effectiveSizeHeight: CustomDialogSize =
+    sizeHeight !== undefined ? sizeHeight : sizeWidth === "auto" ? "auto" : sizeWidth;
 
-  // Dialog height presets (percent of available container height).
-  const sizeHeightClasses: Record<CustomDialogSize, string> = {
-    small: "h-1/3",
-    medium: "h-1/2",
-    large: "h-3/4",
-    xlarge: "h-9/10",
-  };
+  const isAutoHeight = effectiveSizeHeight === "auto";
 
-  const effectiveSizeHeight = sizeHeight ?? sizeWidth;
-
-  // Custom width override classes for edge cases.
-  const effectiveWidthClass =
-    maxWidth && maxWidth !== "max-w-lg" ? `sm:${maxWidth}` : sizeWidthClasses[sizeWidth];
+  const effectiveWidthClass = useMemo(() => {
+    if (sizeWidth === "auto") {
+      return cn("w-fit", maxWidth);
+    }
+    if (maxWidth && maxWidth !== "max-w-lg") {
+      return `sm:${maxWidth}`;
+    }
+    return sizeWidthClasses[sizeWidth];
+  }, [sizeWidth, maxWidth]);
 
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
@@ -85,13 +106,13 @@ export function CustomDialog({
             className={cn(
               "bg-background dark:bg-[var(--glass-bg)] border-[var(--glass-border)] backdrop-blur-sm rounded-lg shadow-lg",
               "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 border duration-200",
-              "max-h-[calc(100vh-1rem)] flex flex-col pointer-events-auto",
+              "flex flex-col pointer-events-auto max-h-[calc(100vh-1rem)]",
               effectiveWidthClass,
               sizeHeightClasses[effectiveSizeHeight],
               className
             )}
             style={{ maxHeight: "calc(100vh - 1rem)" }}
-            aria-describedby={describedBy}
+            aria-describedby={description ? describedBy : undefined}
           >
           {/* Header */}
           {!hideHeader && (title || description || icon || customHeader) && (
@@ -107,12 +128,14 @@ export function CustomDialog({
                         {title}
                       </DialogPrimitive.Title>
                     )}
-                    <DialogPrimitive.Description 
-                      id={describedBy} 
-                      className={description ? "text-muted-foreground text-sm mt-1" : "sr-only"}
-                    >
-                      {description || "Dialog content"}
-                    </DialogPrimitive.Description>
+                    {description && (
+                      <DialogPrimitive.Description
+                        id={describedBy}
+                        className="text-muted-foreground text-sm mt-1"
+                      >
+                        {description}
+                      </DialogPrimitive.Description>
+                    )}
                   </div>
                 </div>
               )}
@@ -127,9 +150,13 @@ export function CustomDialog({
 
           {/* Content */}
           <div className={cn(
-            "flex-1 min-h-0",
-            noContentPadding ? "" : ((title || description || icon || customHeader) ? "p-6" : "p-6 pt-6"),
-            disableContentScroll ? "overflow-hidden" : "overflow-y-auto custom-scrollbar"
+            disableContentScroll
+              ? "overflow-hidden"
+              : isAutoHeight
+                ? "min-h-0 shrink overflow-y-auto max-h-[calc(100vh-10rem)]"
+                : "flex-1 min-h-0 overflow-y-auto",
+            !disableContentScroll && "custom-scrollbar",
+            noContentPadding ? "" : ((title || description || icon || customHeader) ? "p-6" : "p-6 pt-6")
           )}>
             {children}
           </div>

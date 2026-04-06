@@ -2,6 +2,7 @@ import { ComponentType } from "react";
 import { ContentAddon, ContentAddonType } from "../types";
 import type { ThemeButtonSetting, ThemeTextSetting } from "@/services/companyWebThemes";
 import type { CompanyWebPage } from "@/services/companyWebPages";
+import type { BreakpointName } from "../types";
 
 /** `published` = real navigation (public site). `editor` = same look, links disabled in the editor. */
 export type AddonRenderContext = "editor" | "published";
@@ -9,6 +10,7 @@ export type AddonRenderContext = "editor" | "published";
 export interface AddonRenderProps {
   addon: ContentAddon;
   companyId?: string;
+  breakpoint?: BreakpointName;
   /** Theme text styles for the company's selected theme (editor / visual preview). */
   themeTextSettings?: ThemeTextSetting[];
   /** Theme buttons from `themeData.buttons`. */

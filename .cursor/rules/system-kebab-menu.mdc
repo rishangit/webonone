@@ -1,0 +1,48 @@
+---
+description: Standard 3-dot (MoreVertical) dropdown menus — match Appointments card pattern across the system
+globs: front-end/**/*.tsx
+alwaysApply: true
+---
+
+# System 3-dot menu (kebab) UI
+
+Use the same dropdown menu pattern as **`front-end/src/pages/appointments/AppointmentCard/components/AppointmentCardHeader.tsx`** for item/card/list row actions anywhere in the app (e.g. website editor tree, theme lists, settings rows).
+
+## Stack
+
+- **`@/components/ui/dropdown-menu`**: `DropdownMenu`, `DropdownMenuTrigger`, `DropdownMenuContent`, `DropdownMenuItem`, `DropdownMenuSeparator` (and submenus only if an existing screen already uses them the same way).
+- **Icon**: `MoreVertical` from `lucide-react` inside the trigger.
+- **Trigger**: `Button` from `@/components/ui/button` with `variant="ghost"` and `size="icon"`.
+
+## Trigger button (default — cards, list rows, headers on light surfaces)
+
+- Classes: `h-8 w-8` and **`text-muted-foreground hover:text-foreground hover:bg-accent`** (see full-mode header in `AppointmentCardHeader`).
+- **`onClick={(e) => e.stopPropagation()`** on the trigger when the menu sits on a clickable row/card/parent so opening the menu does not activate the parent.
+
+## Trigger button (compact — overlay on dark media / thumbnails)
+
+- When the trigger sits on a photo or dark overlay, use the compact pattern: **`h-8 w-8`**, **`bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm border border-white/20`**, still with **`onClick={(e) => e.stopPropagation()`** (see `isCompact` branch in `AppointmentCardHeader`).
+
+## Menu panel
+
+- **`DropdownMenuContent`**:
+  - `className="bg-popover border-border"`
+  - **`align="end"`** so the panel aligns to the trigger’s trailing edge (consistent with appointments).
+  - **`onClick={(e) => e.stopPropagation()`** on the content so choosing an item does not bubble to the card row.
+
+## Menu items
+
+- Each row: **leading icon** + label. Icon size **`w-4 h-4`**, spacing **`mr-2`** before the label (same as appointments).
+- **Destructive** actions (cancel, delete, remove): use **`className="text-red-600 dark:text-red-400"`** on the item (or `variant="destructive"` on `DropdownMenuItem` if the shared component supports it and matches visuals).
+- **Positive / success** highlights when needed: e.g. **`text-green-600 dark:text-green-400`** (see “Complete” style in appointments).
+- Use **`DropdownMenuSeparator`** between logical groups (e.g. normal actions vs destructive block; optional final separator before delete).
+
+## Do not
+
+- Do not use raw HTML `<select>` or ad-hoc popovers for the same “row actions” pattern when this dropdown pattern fits.
+- Do not omit **`stopPropagation`** on trigger/content when the parent is interactive.
+- Do not use different icon sizes or inconsistent `align` unless the design explicitly requires left-aligned menus in a documented exception.
+
+## Reference
+
+- Primary reference: **`AppointmentCardHeader`** (`MoreVertical` + `DropdownMenu` + item icons + separators + destructive styling).

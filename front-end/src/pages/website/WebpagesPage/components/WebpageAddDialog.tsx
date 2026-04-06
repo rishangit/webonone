@@ -79,15 +79,20 @@ export const WebpageAddDialog = ({
       sizeWidth="small"
       sizeHeight="medium"
       footer={
-        <>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+        <div className="flex items-center justify-end gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            className="h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent"
+            onClick={() => onOpenChange(false)}
+          >
             Cancel
           </Button>
           <Button type="submit" form="add-webpage-form" variant="accent" disabled={loading}>
             <Save className="w-4 h-4 mr-2" />
             {loading ? "Saving..." : "Create Webpage"}
           </Button>
-        </>
+        </div>
       }
     >
       <form id="add-webpage-form" onSubmit={handleSubmit((data) => onSubmit(data))} className="space-y-6">
@@ -102,7 +107,7 @@ export const WebpageAddDialog = ({
             placeholder="e.g., Home Page, About Us, Contact"
             className="h-12 text-base bg-[var(--input-background)] border-[var(--glass-border)] text-foreground"
           />
-          {errors.name && <p className="text-sm text-red-600">{errors.name.message}</p>}
+          {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
         </div>
 
         <div className="space-y-3">
@@ -117,7 +122,7 @@ export const WebpageAddDialog = ({
             placeholder="/about or https://example.com/page"
             className="h-12 text-base bg-[var(--input-background)] border-[var(--glass-border)] text-foreground"
           />
-          {errors.url && <p className="text-sm text-red-600">{errors.url.message}</p>}
+          {errors.url && <p className="text-sm text-destructive">{errors.url.message}</p>}
           <p className="text-sm text-muted-foreground">
             Enter a relative path (e.g., /about, /contact) or a full URL.
           </p>
