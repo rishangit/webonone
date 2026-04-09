@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useIsMobile } from "@/components/ui/use-mobile";
 import { 
   Check, FileText, Clock, Search, Plus, X, Trash2, Calculator, 
-  Package, DollarSign, Percent, ShoppingCart, Receipt, User, Calendar
+  Package, DollarSign, Percent, ShoppingCart, Receipt, User, Calendar, Save
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -572,31 +572,28 @@ export function AppointmentBillingDialog({
         title="Complete Appointment & Billing"
         description={`Complete the appointment session and manage billing for ${appointment?.clientName || "the client"}`}
         icon={<Receipt className="w-5 h-5" />}
-        maxWidth={isMobile ? "w-full max-w-full" : "w-[95vw] max-w-[95vw]"}
-        className={isMobile ? "h-[100vh] max-h-[100vh] m-0 rounded-none" : "h-[90vh] max-h-[90vh]"}
+        sizeWidth="medium"
+        sizeHeight="large"
         footer={
-          <div className={`${isMobile ? 'flex flex-col gap-3' : 'flex items-center'}`}>
-            <div className={`flex items-center gap-2 text-sm text-muted-foreground ${isMobile ? 'justify-center mb-2' : 'mr-auto'}`}>
-              <DollarSign className="w-4 h-4" />
-              Final Amount: <span className="font-semibold text-[var(--accent-text)]">{formatCurrency(calculations.finalAmount)}</span>
-            </div>
-            <div className={`flex gap-3 ${isMobile ? 'w-full' : ''}`}>
-              <Button
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                className={`border-[var(--accent-border)] text-foreground hover:bg-[var(--accent-bg)] hover:text-[var(--accent-text)] transition-all duration-200 ${isMobile ? 'flex-1' : ''}`}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                className={`bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-lg shadow-[var(--accent-primary)]/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ${isMobile ? 'flex-1' : ''}`}
-              >
-                {isSubmitting ? "Processing..." : "Complete & Bill"}
-              </Button>
-            </div>
-          </div>
+          <>
+            <Button
+              variant="outline"
+              size="default"
+              onClick={() => onOpenChange(false)}
+              className="h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="accent"
+              size="default"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+            >
+              <Save className="w-4 h-4 mr-2" />
+              {isSubmitting ? "Processing..." : "Complete & Bill"}
+            </Button>
+          </>
         }
       >
         <div className={`${isMobile ? 'flex flex-col gap-4' : 'flex gap-6 overflow-hidden h-full'}`}>

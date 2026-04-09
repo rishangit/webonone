@@ -16,6 +16,8 @@ class Sale {
     this.totalAmount = data.totalAmount;
     this.subtotal = data.subtotal;
     this.discountAmount = data.discountAmount;
+    this.paymentMethod = data.paymentMethod || null;
+    this.paymentStatus = data.paymentStatus || null;
     this.createdAt = data.createdAt;
     this.updatedAt = data.updatedAt;
   }
@@ -34,6 +36,8 @@ class Sale {
       totalAmount: this.totalAmount,
       subtotal: this.subtotal,
       discountAmount: this.discountAmount,
+      paymentMethod: this.paymentMethod,
+      paymentStatus: this.paymentStatus,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
       // Include joined user data if available
@@ -59,6 +63,8 @@ class Sale {
         userId,
         companyId,
         staffId,
+        paymentMethod,
+        paymentStatus,
         servicesUsed,
         productsUsed,
         totalAmount,
@@ -69,9 +75,9 @@ class Sale {
       const query = `
         INSERT INTO company_sales (
           id, userId, companyId,
-          staffId,
+          staffId, paymentMethod, paymentStatus,
           totalAmount, subtotal, discountAmount, createdAt
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
       `;
 
       // Ensure all values are explicitly set (not undefined)
@@ -80,6 +86,8 @@ class Sale {
         userId ?? null,
         companyId ?? null,
         staffId ?? null,
+        paymentMethod ?? 'Cash',
+        paymentStatus ?? 'Paid',
         totalAmount ?? 0,
         subtotal ?? 0,
         discountAmount ?? 0

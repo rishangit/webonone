@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { CheckCircle, Users, Star, X } from "lucide-react";
+import { CheckCircle, Users, Star, Save } from "lucide-react";
 
 interface StaffMember {
   id: string;
@@ -48,12 +48,40 @@ export function StaffAssignmentDialog({
     setSelectedStaff(null);
   };
 
+  const handleCancel = () => {
+    onOpenChange(false);
+    setSelectedStaff(null);
+  };
+
   return (
     <CustomDialog 
       open={open} 
       onOpenChange={onOpenChange}
       title="Assign Staff Member"
       description={`Assign a staff member for ${patientName}'s appointment on ${appointmentDate} at ${appointmentTime}`}
+      sizeWidth="small"
+      sizeHeight="large"
+      footer={
+        <>
+          <Button
+            variant="outline"
+            size="default"
+            onClick={handleCancel}
+            className="h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent"
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="accent"
+            size="default"
+            onClick={handleConfirmAssignment}
+            disabled={!selectedStaff}
+          >
+            <Save className="w-4 h-4 mr-2" />
+            Assign Staff
+          </Button>
+        </>
+      }
     >
       <div className="space-y-6">
         {/* Appointment Details */}
@@ -166,27 +194,6 @@ export function StaffAssignmentDialog({
           )}
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-3 pt-4 border-t border-[var(--glass-border)]">
-          <Button
-            variant="outline"
-            onClick={() => {
-              onOpenChange(false);
-              setSelectedStaff(null);
-            }}
-            className="flex-1"
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleConfirmAssignment}
-            disabled={!selectedStaff}
-            className="flex-1 bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] text-[var(--accent-button-text)]"
-          >
-            <CheckCircle className="w-4 h-4 mr-2" />
-            Assign Staff
-          </Button>
-        </div>
       </div>
     </CustomDialog>
   );

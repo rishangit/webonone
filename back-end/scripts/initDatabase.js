@@ -1,5 +1,33 @@
 const { pool } = require('../config/database');
 
+const ensureCompanySalesPaymentColumns = async () => {
+  const [columns] = await pool.execute(`
+    SELECT COLUMN_NAME
+    FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'company_sales'
+      AND COLUMN_NAME IN ('paymentMethod', 'paymentStatus')
+  `);
+
+  const existing = new Set(columns.map((col) => col.COLUMN_NAME));
+
+  if (!existing.has('paymentMethod')) {
+    await pool.execute(`
+      ALTER TABLE company_sales
+      ADD COLUMN paymentMethod VARCHAR(50) DEFAULT 'Cash'
+    `);
+    console.log('✅ Added company_sales.paymentMethod column');
+  }
+
+  if (!existing.has('paymentStatus')) {
+    await pool.execute(`
+      ALTER TABLE company_sales
+      ADD COLUMN paymentStatus ENUM('Pending', 'Paid', 'Refunded') DEFAULT 'Paid'
+    `);
+    console.log('✅ Added company_sales.paymentStatus column');
+  }
+};
+
 const createTables = async () => {
   try {
     console.log('Creating database tables...');
@@ -645,6 +673,10 @@ const createTables = async () => {
 
     const { migrateCompanyWebLayoutComponentsLegacy } = require('./1.12.0/migrateToCompanyWebLayoutComponents');
     await migrateCompanyWebLayoutComponentsLegacy(pool);
+
+    // Backward-compatible migration for existing databases where company_sales
+    // was created without payment columns used by POS sales.
+    await ensureCompanySalesPaymentColumns();
 
     console.log('✅ Database tables created successfully');
   } catch (error) {

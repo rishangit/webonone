@@ -32,6 +32,20 @@ const getDateRange = (range: string) => {
   return { dateFrom, dateTo };
 };
 
+const normalizePaymentMethod = (value: unknown): "Cash" | "Card" => {
+  const normalized = String(value ?? "").trim().toLowerCase();
+
+  if (normalized.includes("cash")) {
+    return "Cash";
+  }
+
+  if (normalized.includes("card") || normalized.includes("credit") || normalized.includes("debit")) {
+    return "Card";
+  }
+
+  return "Card";
+};
+
 export const useSalesData = (
   companyId: string | undefined,
   dateRange: string,
@@ -257,7 +271,7 @@ export const useSalesData = (
           return isNaN(amount) ? 0 : amount;
         })(),
         status,
-        paymentMethod: 'Credit Card',
+        paymentMethod: normalizePaymentMethod(fullSale?.paymentMethod ?? item.paymentMethod),
         staffMember: item.staffId ? (staff.find(s => s.id === item.staffId)?.name || `${staff.find(s => s.id === item.staffId)?.firstName || ''} ${staff.find(s => s.id === item.staffId)?.lastName || ''}`.trim() || undefined) : undefined,
         notes: undefined
       } as SaleData;

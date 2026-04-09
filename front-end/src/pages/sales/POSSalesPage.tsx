@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Search, Package, ShoppingCart, X, Trash2, Calculator, Check, User } from "lucide-react";
+import { Search, Package, ShoppingCart, X, Trash2, Calculator, Check, User, CreditCard, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +20,7 @@ import { formatAvatarUrl } from "../../utils";
 import { UserSelectionDialog } from "@/components/common/UserSelectionDialog";
 import { fetchUsersRequest } from "@/store/slices/usersSlice";
 import { currenciesService, Currency } from "@/services/currencies";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface ProductVariant {
   id: string;
@@ -70,6 +71,16 @@ interface POSSalesPageProps {
   currentUser?: any;
 }
 
+const getStockAvailabilityBadgeClass = (stock: number) => {
+  if (stock <= 0) {
+    return "bg-red-500/20 text-red-600 dark:text-red-400 border-red-500/30";
+  }
+  if (stock < 10) {
+    return "bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border-yellow-500/30";
+  }
+  return "bg-green-500/20 text-green-600 dark:text-green-400 border-green-500/30";
+};
+
 export const POSSalesPage = ({ onBack, currentUser }: POSSalesPageProps) => {
   const dispatch = useAppDispatch();
   const { companyProducts: reduxCompanyProducts, loading: productsLoading, error: productsError } = useAppSelector((state) => state.companyProducts);
@@ -83,10 +94,12 @@ export const POSSalesPage = ({ onBack, currentUser }: POSSalesPageProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [showVariantSelection, setShowVariantSelection] = useState(false);
   const [productVariantsMap, setProductVariantsMap] = useState<Record<string, CompanyProductVariant[]>>({});
   const [isCompleting, setIsCompleting] = useState(false);
+  const [showCompleteSaleDialog, setShowCompleteSaleDialog] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "cash">("card");
+  const [cashReceived, setCashReceived] = useState("");
 
   // User selection for direct sales
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
@@ -206,12 +219,11 @@ export const POSSalesPage = ({ onBack, currentUser }: POSSalesPageProps) => {
 
   // Map company products to Product interface
   // For POS, show ALL products that have variants with sell prices
-  const companyProducts: Product[] = useMemo(() => {
+  const companyProducts = useMemo<Product[]>(() => {
     console.log('[POSSalesPage] Mapping products. Total redux products:', reduxCompanyProducts.length);
     console.log('[POSSalesPage] Product variants map keys:', Object.keys(productVariantsMap));
 
-    const mapped = reduxCompanyProducts
-      .map((product: CompanyProduct) => {
+    const mapped = reduxCompanyProducts.flatMap((product: CompanyProduct) => {
         const variants = productVariantsMap[product.id] || [];
         const activeVariants = variants.filter(v => v.isActive);
 
@@ -274,7 +286,7 @@ export const POSSalesPage = ({ onBack, currentUser }: POSSalesPageProps) => {
         if (!isVariantsStillLoading && !hasValidPricing && mappedVariants.length === 0) {
           // Variants have been loaded but product has no variants with pricing
           console.log(`[POSSalesPage] Skipping product ${product.name} - no variants with valid pricing`);
-          return null;
+          return [];
         }
 
         // Format image URL the same way as other product components
@@ -288,20 +300,21 @@ export const POSSalesPage = ({ onBack, currentUser }: POSSalesPageProps) => {
           return url.startsWith('http') ? url : formatAvatarUrl(url);
         };
 
-        return {
+        const imageUrl = getImageUrl();
+
+        return [{
           id: product.id,
           name: product.name || 'Unnamed Product',
           description: product.description || '',
-          image: getImageUrl(),
+          ...(imageUrl ? { image: imageUrl } : {}),
           price: defaultPrice,
           inStock: mappedVariants
             .filter(v => v.inStock > 0)
             .reduce((sum, v) => sum + v.inStock, 0),
           hasVariants: mappedVariants.length > 0,
           variants: mappedVariants.length > 0 ? mappedVariants : undefined
-        };
-      })
-      .filter((product): product is Product => product !== null);
+        }];
+      });
 
     console.log('[POSSalesPage] Final mapped products count:', mapped.length);
     return mapped;
@@ -391,7 +404,6 @@ export const POSSalesPage = ({ onBack, currentUser }: POSSalesPageProps) => {
       } else {
         // Multiple variants with stock - show variant selection
         setSelectedProduct(product);
-        setSelectedVariant(null);
         setShowVariantSelection(true);
       }
     } else if (product.price > 0) {
@@ -408,7 +420,6 @@ export const POSSalesPage = ({ onBack, currentUser }: POSSalesPageProps) => {
       addProductToCart(selectedProduct, variant);
       setShowVariantSelection(false);
       setSelectedProduct(null);
-      setSelectedVariant(null);
     }
   };
 
@@ -468,8 +479,18 @@ export const POSSalesPage = ({ onBack, currentUser }: POSSalesPageProps) => {
     ));
   };
 
-  // Complete sale
-  const handleCompleteSale = async () => {
+  const cashReceivedAmount = useMemo(() => {
+    const amount = Number(cashReceived);
+    return Number.isFinite(amount) ? amount : 0;
+  }, [cashReceived]);
+
+  const cashChangeAmount = useMemo(() => {
+    return Math.max(0, cashReceivedAmount - calculations.finalAmount);
+  }, [cashReceivedAmount, calculations.finalAmount]);
+
+  const isCashInsufficient = paymentMethod === "cash" && cashReceivedAmount < calculations.finalAmount;
+
+  const handleOpenCompleteSaleDialog = () => {
     if (cartItems.length === 0) {
       toast.error("Please add at least one item to the cart");
       return;
@@ -485,6 +506,22 @@ export const POSSalesPage = ({ onBack, currentUser }: POSSalesPageProps) => {
       toast.error("Please select a customer before completing the sale");
       return;
     }
+    setPaymentMethod("card");
+    setCashReceived("");
+    setShowCompleteSaleDialog(true);
+  };
+
+  // Complete sale
+  const handleCompleteSale = async () => {
+    if (paymentMethod === "cash" && cashReceivedAmount < calculations.finalAmount) {
+      toast.error("Cash received must be greater than or equal to the total amount");
+      return;
+    }
+    if (!companyId || !user?.id || !selectedCustomerId) {
+      toast.error("Company, user, or customer information is missing");
+      return;
+    }
+    const customerId = selectedCustomerId;
 
     setIsCompleting(true);
     try {
@@ -498,9 +535,9 @@ export const POSSalesPage = ({ onBack, currentUser }: POSSalesPageProps) => {
 
       const saleData: CreateSaleData = {
         companyId,
-        clientId: selectedCustomerId, // Selected customer (userId)
+        clientId: customerId, // Selected customer (userId)
         amount: calculations.finalAmount,
-        paymentMethod: 'Cash', // Default payment method
+        paymentMethod: paymentMethod === "cash" ? "Cash" : "Card",
         paymentStatus: 'Paid',
         saleDate: new Date().toISOString().split('T')[0],
         items: cartItems.map(item => ({
@@ -536,6 +573,7 @@ export const POSSalesPage = ({ onBack, currentUser }: POSSalesPageProps) => {
       console.log('[POSSalesPage] Sale created successfully:', createdSale);
 
       toast.success("Sale completed successfully!");
+      setShowCompleteSaleDialog(false);
 
       // Clear cart and selected customer
       setCartItems([]);
@@ -575,7 +613,7 @@ export const POSSalesPage = ({ onBack, currentUser }: POSSalesPageProps) => {
   };
 
   return (
-    <div className="flex-1 space-y-6 p-4 lg:p-6">
+    <div className="flex-1 h-full min-h-0 space-y-6 p-4 lg:p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -595,9 +633,9 @@ export const POSSalesPage = ({ onBack, currentUser }: POSSalesPageProps) => {
       </div>
 
       {/* Main Content */}
-      <div className={`flex gap-6 ${isMobile ? 'flex-col' : 'flex-row'}`}>
+      <div className={`flex gap-6 ${isMobile ? 'flex-col' : 'flex-row'} ${isMobile ? '' : 'flex-1 min-h-0'}`}>
         {/* Left Panel - Product Selection */}
-        <Card className={`${isMobile ? 'w-full' : 'flex-1 min-w-0'} flex flex-col backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]`}>
+        <Card className={`${isMobile ? 'w-full' : 'flex-1 min-w-0 h-full min-h-0'} flex flex-col backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]`}>
           {/* Header with Search Bar */}
           <div className="flex-shrink-0 p-4 lg:p-6">
             <div className="flex items-center gap-3 mb-4">
@@ -695,7 +733,7 @@ export const POSSalesPage = ({ onBack, currentUser }: POSSalesPageProps) => {
                         <span className="font-semibold text-[var(--accent-text)] text-base">
                           {formatCurrency(product.price)}
                         </span>
-                        <Badge variant="outline" className="text-xs w-fit">
+                        <Badge className={`text-xs w-fit ${getStockAvailabilityBadgeClass(product.inStock)}`}>
                           {product.inStock} in stock
                         </Badge>
                       </div>
@@ -709,8 +747,8 @@ export const POSSalesPage = ({ onBack, currentUser }: POSSalesPageProps) => {
 
         {/* Right Panel - Cart */}
         <Card
-          className={`${isMobile ? 'w-full' : 'flex-shrink-0'} flex flex-col backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]`}
-          style={!isMobile ? { width: '650px', minWidth: '650px', maxWidth: '650px' } : undefined}
+          className={`${isMobile ? 'w-full' : 'flex-shrink-0 h-full min-h-0'} flex flex-col backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]`}
+          style={!isMobile ? { width: '30%', } : undefined}
         >
           {/* Cart Header */}
           <div className="flex-shrink-0 p-4 lg:p-6">
@@ -772,7 +810,7 @@ export const POSSalesPage = ({ onBack, currentUser }: POSSalesPageProps) => {
           </div>
 
           {/* Cart Items */}
-          <div className="flex-1 overflow-y-auto custom-scrollbar p-3">
+          <div className="flex-1 overflow-y-auto custom-scrollbar px-4 lg:px-6 pb-3">
             {cartItems.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center">
                 <ShoppingCart className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
@@ -842,9 +880,9 @@ export const POSSalesPage = ({ onBack, currentUser }: POSSalesPageProps) => {
                           <Label className="text-xs font-medium text-muted-foreground">Quantity</Label>
                           <Input
                             type="number"
-                            min="1"
+                            min="0"
                             value={item.quantity}
-                            onChange={(e) => updateCartItem(item.id, 'quantity', parseFloat(e.target.value) || 1)}
+                            onChange={(e) => updateCartItem(item.id, 'quantity', parseFloat(e.target.value) || 0)}
                             className="text-xs h-8 w-full bg-[var(--input-background)] border-[var(--glass-border)] hover:border-[var(--accent-border)] focus:border-[var(--accent-primary)] transition-colors"
                           />
                         </div>
@@ -910,7 +948,7 @@ export const POSSalesPage = ({ onBack, currentUser }: POSSalesPageProps) => {
             </Card>
 
             <Button
-              onClick={handleCompleteSale}
+              onClick={handleOpenCompleteSaleDialog}
               disabled={cartItems.length === 0 || isCompleting || !selectedCustomerId}
               className="w-full mt-4 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-lg shadow-[var(--accent-primary)]/25 disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -929,6 +967,106 @@ export const POSSalesPage = ({ onBack, currentUser }: POSSalesPageProps) => {
           </div>
         </Card>
       </div>
+
+      <CustomDialog
+        open={showCompleteSaleDialog}
+        onOpenChange={setShowCompleteSaleDialog}
+        title="Complete Sale"
+        description="Review totals and confirm the payment method before finalizing."
+        icon={<CreditCard className="w-5 h-5" />}
+        sizeWidth="small"
+        sizeHeight="large"
+        footer={
+          <>
+            <Button
+              variant="outline"
+              size="default"
+              onClick={() => setShowCompleteSaleDialog(false)}
+              disabled={isCompleting}
+              className="h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="accent"
+              size="default"
+              onClick={handleCompleteSale}
+              disabled={isCompleting || isCashInsufficient}
+            >
+              <Save className="w-4 h-4 mr-2" />
+              {isCompleting ? "Processing..." : "Complete Sale"}
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-5">
+          <Card className="p-4 bg-[var(--glass-bg)] border border-[var(--glass-border)]">
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Subtotal</span>
+                <span className="text-foreground">{formatCurrency(calculations.subtotal)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Discount</span>
+                <span className="text-red-600 dark:text-red-400">-{formatCurrency(calculations.discountAmount)}</span>
+              </div>
+              <Separator className="my-2" />
+              <div className="flex justify-between font-semibold">
+                <span className="text-foreground">Total</span>
+                <span className="text-[var(--accent-text)]">{formatCurrency(calculations.finalAmount)}</span>
+              </div>
+            </div>
+          </Card>
+
+          <div className="space-y-2">
+            <Label className="text-foreground">Payment Method</Label>
+            <Select value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as "card" | "cash")}>
+              <SelectTrigger className="bg-[var(--input-background)] border-[var(--glass-border)] text-foreground">
+                <SelectValue placeholder="Select payment method" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="card">Card Payment</SelectItem>
+                <SelectItem value="cash">Cash Payment</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {paymentMethod === "cash" && (
+            <Card className="p-4 bg-[var(--glass-bg)] border border-[var(--glass-border)]">
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <Label htmlFor="cash-received" className="text-foreground">
+                    Cash Received
+                  </Label>
+                  <Input
+                    id="cash-received"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={cashReceived}
+                    onChange={(e) => setCashReceived(e.target.value)}
+                    placeholder="Enter amount received"
+                    className="bg-[var(--input-background)] border-[var(--glass-border)] text-foreground"
+                  />
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Received</span>
+                  <span className="text-foreground">{formatCurrency(cashReceivedAmount)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Change to Return</span>
+                  <span className="font-semibold text-[var(--accent-text)]">{formatCurrency(cashChangeAmount)}</span>
+                </div>
+                {isCashInsufficient && (
+                  <p className="text-sm text-destructive">
+                    Cash received is less than the total amount.
+                  </p>
+                )}
+              </div>
+            </Card>
+          )}
+        </div>
+      </CustomDialog>
 
       {/* User Selection Dialog */}
       <UserSelectionDialog
@@ -951,7 +1089,8 @@ export const POSSalesPage = ({ onBack, currentUser }: POSSalesPageProps) => {
           title={`Select ${selectedProduct.name} Variant`}
           description="Choose the specific variant you want to add to the cart"
           icon={<Package className="w-5 h-5" />}
-          maxWidth="max-w-2xl"
+          sizeWidth="small"
+          sizeHeight="large"
         >
           <div className="space-y-4">
             {variantsWithStock.length === 0 ? (
@@ -970,9 +1109,9 @@ export const POSSalesPage = ({ onBack, currentUser }: POSSalesPageProps) => {
                     onClick={() => handleVariantSelect(variant)}
                   >
                     <div className="space-y-3">
-                      <div className="flex justify-between items-start">
+                      <div className="space-y-2">
                         <h4 className="font-medium text-foreground">{variant.name}</h4>
-                        <Badge variant={variant.isActive ? "default" : "secondary"} className="text-xs">
+                        <Badge className={`text-xs w-fit ${getStockAvailabilityBadgeClass(variant.inStock)}`}>
                           {variant.inStock} available
                         </Badge>
                       </div>

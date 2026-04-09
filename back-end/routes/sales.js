@@ -118,7 +118,7 @@ router.post('/',
     }
 
     // Transform request data to match Sale model expectations
-    const { clientId, amount, items, notes, saleDate } = req.body;
+    const { clientId, amount, items, notes, saleDate, paymentMethod, paymentStatus } = req.body;
     
     console.log('[Sales Route] Creating sale with data:', {
       clientId,
@@ -193,6 +193,8 @@ router.post('/',
       userId: clientId, // Customer who is buying (from request)
       companyId: req.body.companyId,
       staffId: staffId, // Staff member making the sale (null if not a staff member)
+      paymentMethod: paymentMethod || 'Cash',
+      paymentStatus: paymentStatus || 'Paid',
       // serviceId and spaceId are not stored in sales table - they come from appointments
       servicesUsed: servicesUsed.length > 0 ? servicesUsed : null,
       productsUsed: productsUsed.length > 0 ? productsUsed : null,
