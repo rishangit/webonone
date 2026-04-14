@@ -1,5 +1,4 @@
 import { ProductVariantList } from "./ProductVariantList";
-import { ProductVariantAddForm } from "./ProductVariantAddForm";
 import { VariantDialog } from "../../Variants/VariantDialog";
 import { ProductVariant as SystemProductVariant } from "@/services/productVariants";
 import { CompanyProductVariant } from "@/services/companyProductVariants";
@@ -27,8 +26,6 @@ interface ProductVariantsTabProps {
   variantsLoading: boolean;
   selectedVariantId: string | null;
   isSuperAdmin?: boolean;
-  isAddingVariant: boolean;
-  newVariant: VariantFormData;
   variantDialogOpen: boolean;
   variantDialogMode: 'add' | 'edit';
   variantDialogVariant: CompanyProductVariant | null;
@@ -41,12 +38,8 @@ interface ProductVariantsTabProps {
   onSetDefaultVariant?: (variant: SystemProductVariant) => void;
   onUpdateVariant?: (variantId: string, updates: Partial<LegacyProductVariant>) => void;
   onSaveVariant: (variantData: VariantFormData, attributeValues?: Record<string, string>) => Promise<void>;
-  onSetIsAddingVariant: (isAdding: boolean) => void;
-  onSetNewVariant: (variant: VariantFormData) => void;
   onSetVariantDialogOpen: (open: boolean) => void;
-  onSetVariantDialogMode: (mode: 'add' | 'edit') => void;
   onSetVariantDialogVariant: (variant: CompanyProductVariant | null) => void;
-  onAddCompanyVariant?: () => void;
 }
 
 export const ProductVariantsTab = ({
@@ -57,8 +50,6 @@ export const ProductVariantsTab = ({
   variantsLoading,
   selectedVariantId,
   isSuperAdmin = false,
-  isAddingVariant,
-  newVariant,
   variantDialogOpen,
   variantDialogMode,
   variantDialogVariant,
@@ -71,12 +62,8 @@ export const ProductVariantsTab = ({
   onSetDefaultVariant,
   onUpdateVariant,
   onSaveVariant,
-  onSetIsAddingVariant,
-  onSetNewVariant,
   onSetVariantDialogOpen,
-  onSetVariantDialogMode,
   onSetVariantDialogVariant,
-  onAddCompanyVariant,
 }: ProductVariantsTabProps) => {
   return (
     <div className="space-y-6">
@@ -97,42 +84,20 @@ export const ProductVariantsTab = ({
         onUpdateVariant={onUpdateVariant}
       />
 
-      {/* Variant Dialog for Add/Edit/View */}
-      {productType === "system" && (
-        <VariantDialog
-          open={variantDialogOpen}
-          onOpenChange={onSetVariantDialogOpen}
-          mode={variantDialogMode}
-          variant={variantDialogVariant}
-          systemProductId={null} // System products don't have a parent system product
-          productId={productId} // Pass productId to fetch attributes
-          variantMode="system"
-          onSave={onSaveVariant}
-          onCancel={() => {
-            onSetVariantDialogVariant(null);
-          }}
-        />
-      )}
-
-      {/* Add Variant Form - Only for company owners */}
-      {productType === "company" && isAddingVariant && (
-        <ProductVariantAddForm
-          formData={newVariant}
-          onFormDataChange={onSetNewVariant}
-          onSubmit={onAddCompanyVariant || onAddVariant}
-          onCancel={() => {
-            onSetIsAddingVariant(false);
-            onSetNewVariant({
-              name: '',
-              sku: '',
-              type: 'sell',
-              isDefault: false,
-              variantDefiningAttributes: [],
-              variantAttributeValues: {}
-            });
-          }}
-        />
-      )}
+      {/* Single Add/Edit dialog for both system and company variants */}
+      <VariantDialog
+        open={variantDialogOpen}
+        onOpenChange={onSetVariantDialogOpen}
+        mode={variantDialogMode}
+        variant={variantDialogVariant}
+        systemProductId={null}
+        productId={productType === "system" ? productId : null}
+        variantMode={productType}
+        onSave={onSaveVariant}
+        onCancel={() => {
+          onSetVariantDialogVariant(null);
+        }}
+      />
     </div>
   );
 };

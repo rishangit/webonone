@@ -8,5 +8,4 @@ export { ProductDetailNotes } from './overview/ProductDetailNotes';
 export { ProductVariantsTab } from './productVariants/ProductVariantsTab';
 export { ProductVariantList } from './productVariants/ProductVariantList';
 export { ProductVariantCard } from './productVariants/ProductVariantCard';
-export { ProductVariantAddForm } from './productVariants/ProductVariantAddForm';
 export { ProductAttributesTab } from './attributes/ProductAttributesTab';

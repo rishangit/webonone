@@ -1,7 +1,6 @@
 import { Package } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CardTitle } from "@/components/common/CardTitle";
 import { CompanyProduct } from "@/services/companyProducts";
@@ -14,12 +13,6 @@ interface CompanyProductDetailInfoProps {
   selectedVariantId: string | null;
   selectedVariant: CompanyProductVariant | null;
   onVariantSelect: (variant: CompanyProductVariant | null) => void;
-  isEditing: boolean;
-  formData: {
-    notes: string;
-    isAvailableForPurchase: boolean;
-  };
-  onFormChange: (field: string, value: any) => void;
 }
 
 export const CompanyProductDetailInfo = ({
@@ -29,9 +22,6 @@ export const CompanyProductDetailInfo = ({
   selectedVariantId,
   selectedVariant,
   onVariantSelect,
-  isEditing,
-  formData,
-  onFormChange,
 }: CompanyProductDetailInfoProps) => {
   return (
     <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
@@ -102,36 +92,6 @@ export const CompanyProductDetailInfo = ({
             </div>
         )}
 
-        {isEditing && (
-          <div className="space-y-4">
-              <div>
-                <Label htmlFor="isAvailableForPurchase">Availability</Label>
-                <Select 
-                  value={formData.isAvailableForPurchase ? 'true' : 'false'} 
-                  onValueChange={(value) => onFormChange('isAvailableForPurchase', value === 'true')}
-                >
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="true">Available for Purchase</SelectItem>
-                    <SelectItem value="false">Not Available</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="notes">Notes</Label>
-                <Textarea
-                  id="notes"
-                  value={formData.notes}
-                  onChange={(e) => onFormChange('notes', e.target.value)}
-                  placeholder="Add any additional notes about this product..."
-                  rows={4}
-                  className="mt-1"
-                />
-              </div>
-            </div>
-        )}
       </div>
     </Card>
   );

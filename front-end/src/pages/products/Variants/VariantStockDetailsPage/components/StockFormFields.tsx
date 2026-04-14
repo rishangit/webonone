@@ -1,4 +1,4 @@
-import { Calendar, User } from "lucide-react";
+import { User } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ interface StockFormFieldsProps {
   errors: any;
   users?: any[];
   isUserSelectionDialogOpen: boolean;
-  onUserSelectionDialogOpen: () => void;
+  onUserSelectionDialogOpen: (open: boolean) => void;
   formId?: string;
 }
 
@@ -199,7 +199,7 @@ export const StockFormFields = ({
                     type="button"
                     variant="outline"
                     className="w-full justify-start bg-[var(--input-background)] border-[var(--glass-border)] text-foreground hover:bg-[var(--accent-bg)] hover:border-[var(--accent-border)]"
-                    onClick={onUserSelectionDialogOpen}
+                    onClick={() => onUserSelectionDialogOpen(true)}
                   >
                     <User className="h-4 w-4 mr-2" />
                     Select Supplier

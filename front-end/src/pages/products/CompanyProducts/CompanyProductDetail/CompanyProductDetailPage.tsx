@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { 
   fetchCompanyProductRequest, 
-  updateCompanyProductRequest,
   clearError as clearCompanyProductsError 
 } from "@/store/slices/companyProductsSlice";
 import { fetchSystemProductRequest } from "@/store/slices/systemProductsSlice";
@@ -26,7 +25,6 @@ interface CompanyProductDetailPageProps {
 
 export const CompanyProductDetailPage = ({ productId, onBack }: CompanyProductDetailPageProps) => {
   const dispatch = useAppDispatch();
-  const [isEditing, setIsEditing] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState<CompanyProductVariant | null>(null);
   
   // Redux state
@@ -34,15 +32,12 @@ export const CompanyProductDetailPage = ({ productId, onBack }: CompanyProductDe
   const [variants, setVariants] = useState<CompanyProductVariant[]>([]);
   const [variantsLoading, setVariantsLoading] = useState(false);
 
-  // Form state
   const [activeTab, setActiveTab] = useState<string>("overview");
-  const [formData, setFormData] = useState({
-    isAvailableForPurchase: false,
-    notes: ''
-  });
 
   // Fetch company product and system product
   useEffect(() => {
+    // Reset selected variant when navigating between different products.
+    setSelectedVariant(null);
     dispatch(fetchCompanyProductRequest(productId));
   }, [dispatch, productId]);
 
@@ -71,51 +66,12 @@ export const CompanyProductDetailPage = ({ productId, onBack }: CompanyProductDe
     fetchVariants();
   }, [currentCompanyProduct?.id]);
 
-  // Update form data when product is loaded
-  useEffect(() => {
-    if (currentCompanyProduct) {
-      setFormData({
-        isAvailableForPurchase: currentCompanyProduct.isAvailableForPurchase ?? false,
-        notes: currentCompanyProduct.notes || ''
-      });
-    }
-  }, [currentCompanyProduct]);
-
   // Clear errors on unmount
   useEffect(() => {
     return () => {
       dispatch(clearCompanyProductsError());
     };
   }, [dispatch]);
-
-  // Handle form changes
-  const handleChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  // Handle save
-  const handleSave = () => {
-    if (!currentCompanyProduct) return;
-
-    const updateData = {
-      isAvailableForPurchase: formData.isAvailableForPurchase,
-      notes: formData.notes || undefined
-    };
-
-    dispatch(updateCompanyProductRequest({ id: currentCompanyProduct.id, data: updateData }));
-    setIsEditing(false);
-  };
-
-  // Handle cancel
-  const handleCancel = () => {
-    if (currentCompanyProduct) {
-      setFormData({
-        isAvailableForPurchase: currentCompanyProduct.isAvailableForPurchase ?? false,
-        notes: currentCompanyProduct.notes || ''
-      });
-    }
-    setIsEditing(false);
-  };
 
   // Handle remove variant
   const handleRemoveVariant = async (variantId: string) => {
@@ -255,13 +211,7 @@ export const CompanyProductDetailPage = ({ productId, onBack }: CompanyProductDe
     <div className="flex-1 space-y-6 p-4 lg:p-8 min-h-screen">
       <CompanyProductDetailHeader
         product={currentCompanyProduct}
-        isEditing={isEditing}
-        loading={loading}
-        isAvailableForPurchase={formData.isAvailableForPurchase}
         onBack={onBack}
-        onEdit={() => setIsEditing(true)}
-        onSave={handleSave}
-        onCancel={handleCancel}
       />
 
       <div className="w-full space-y-6">
@@ -283,12 +233,6 @@ export const CompanyProductDetailPage = ({ productId, onBack }: CompanyProductDe
               variantsLoading={variantsLoading}
               selectedVariantId={selectedVariant?.id || null}
               onVariantSelect={setSelectedVariant}
-              isEditing={isEditing}
-              formData={{
-                notes: formData.notes,
-                isAvailableForPurchase: formData.isAvailableForPurchase,
-              }}
-              onFormChange={handleChange}
             />
           </div>
         )}

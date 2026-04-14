@@ -149,26 +149,29 @@ export const ImageCropDialog: React.FC<ImageCropDialogProps> = ({
           : "Adjust the image to your desired crop area (1:1 ratio)"
       }
       icon={<Crop className="w-5 h-5" />}
-      maxWidth="max-w-2xl"
+      sizeWidth="small"
+      sizeHeight="large"
       footer={
-        <div className="flex items-center justify-end gap-2 w-full">
+        <>
           <Button
             variant="outline"
+            size="default"
             onClick={handleCancel}
             disabled={isProcessing}
-            className="border-[var(--accent-border)] text-foreground hover:bg-[var(--accent-bg)]"
+            className="h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent"
           >
-            <X className="w-4 h-4 mr-2" />
             Cancel
           </Button>
           <Button
             onClick={handleCrop}
             disabled={isProcessing}
-            className="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)]"
+            variant="accent"
+            size="default"
+            className="h-10 px-4"
           >
             {isProcessing ? 'Processing...' : 'Crop & Upload'}
           </Button>
-        </div>
+        </>
       }
     >
       <div className="space-y-4">

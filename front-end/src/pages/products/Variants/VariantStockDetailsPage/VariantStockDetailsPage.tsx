@@ -14,8 +14,7 @@ import {
   StockEntriesList,
   VariantInfoSidebar,
   StockAlert,
-  AddStockDialog,
-  EditStockDialog,
+  AddEditStockDialog,
 } from "./components";
 
 export const VariantStockDetailsPage = ({ productId, variantId, onBack }: VariantStockDetailsPageProps) => {
@@ -224,18 +223,19 @@ export const VariantStockDetailsPage = ({ productId, variantId, onBack }: Varian
         </div>
       </div>
 
-      <AddStockDialog
+      <AddEditStockDialog
         open={isAddStockDialogOpen}
         onOpenChange={setIsAddStockDialogOpen}
+        mode="add"
         variantName={variant.name}
         onSubmit={onSubmitAddStock}
         isSubmitting={isSubmitting}
         users={users}
-        onUserSelectionDialogOpen={() => setIsUserSelectionDialogOpen(true)}
+        onUserSelectionDialogOpen={setIsUserSelectionDialogOpen}
         isUserSelectionDialogOpen={isUserSelectionDialogOpen}
       />
 
-      <EditStockDialog
+      <AddEditStockDialog
         open={isEditStockDialogOpen}
         onOpenChange={(open) => {
           setIsEditStockDialogOpen(open);
@@ -243,12 +243,13 @@ export const VariantStockDetailsPage = ({ productId, variantId, onBack }: Varian
             setEditingStockEntry(null);
           }
         }}
+        mode="edit"
         variantName={variant.name}
         editingStockEntry={editingStockEntry}
         onSubmit={onSubmitEditStock}
         isSubmitting={isSubmitting}
         users={users}
-        onUserSelectionDialogOpen={() => setIsUserSelectionDialogOpen(true)}
+        onUserSelectionDialogOpen={setIsUserSelectionDialogOpen}
         isUserSelectionDialogOpen={isUserSelectionDialogOpen}
       />
     </div>

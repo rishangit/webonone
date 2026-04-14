@@ -46,31 +46,3 @@ export interface VariantInfoSidebarProps {
 export interface StockAlertProps {
   isOutOfStock: boolean;
 }
-
-export interface AddStockDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  variantName: string;
-  onSubmit: (data: any) => Promise<void>;
-  isSubmitting: boolean;
-  users?: any[];
-  errors?: any;
-  register: any;
-  control: any;
-  onUserSelectionDialogOpen: () => void;
-  isUserSelectionDialogOpen: boolean;
-}
-
-export interface EditStockDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  variantName: string;
-  onSubmit: (data: any) => Promise<void>;
-  isSubmitting: boolean;
-  users?: any[];
-  errors?: any;
-  register: any;
-  control: any;
-  onUserSelectionDialogOpen: () => void;
-  isUserSelectionDialogOpen: boolean;
-}

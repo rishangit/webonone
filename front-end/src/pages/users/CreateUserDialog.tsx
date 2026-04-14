@@ -6,10 +6,9 @@ import { CustomDialog } from "@/components/ui/custom-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UserPlus } from "lucide-react";
+import { Save, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { usersService } from "@/services/users";
-import { UserRole } from "@/types/user";
 
 interface CreateUserDialogProps {
   open: boolean;
@@ -70,56 +69,66 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, companyId }: C
           <Button
             type="button"
             variant="outline"
+            size="default"
             onClick={() => onOpenChange(false)}
             disabled={isSubmitting}
+            className="h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent"
           >
             Cancel
           </Button>
-          <Button type="submit" form="create-user-form" variant="accent" disabled={isSubmitting}>
+          <Button
+            type="submit"
+            form="create-user-form"
+            variant="accent"
+            size="default"
+            disabled={isSubmitting}
+            className="h-10 px-4"
+          >
+            <Save className="w-4 h-4 mr-2" />
             {isSubmitting ? "Creating..." : "Create User"}
           </Button>
         </>
       }
     >
-      <form id="create-user-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4">
+      <form id="create-user-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="firstName">First Name</Label>
+            <Label htmlFor="firstName" className="text-foreground">First Name</Label>
             <Input
               id="firstName"
               placeholder="John"
               {...register("firstName")}
-              className={errors.firstName ? "border-red-500" : ""}
+              className={`bg-[var(--input-background)] border-[var(--glass-border)] text-foreground placeholder:text-muted-foreground ${errors.firstName ? "border-red-500" : ""}`}
             />
             {errors.firstName && (
-              <p className="text-xs text-red-500">{errors.firstName.message}</p>
+              <p className="text-xs text-destructive">{errors.firstName.message}</p>
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="lastName">Last Name</Label>
+            <Label htmlFor="lastName" className="text-foreground">Last Name</Label>
             <Input
               id="lastName"
               placeholder="Doe"
               {...register("lastName")}
-              className={errors.lastName ? "border-red-500" : ""}
+              className={`bg-[var(--input-background)] border-[var(--glass-border)] text-foreground placeholder:text-muted-foreground ${errors.lastName ? "border-red-500" : ""}`}
             />
             {errors.lastName && (
-              <p className="text-xs text-red-500">{errors.lastName.message}</p>
+              <p className="text-xs text-destructive">{errors.lastName.message}</p>
             )}
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="email">Email Address</Label>
+          <Label htmlFor="email" className="text-foreground">Email Address</Label>
           <Input
             id="email"
             type="email"
             placeholder="john.doe@example.com"
             {...register("email")}
-            className={errors.email ? "border-red-500" : ""}
+            className={`bg-[var(--input-background)] border-[var(--glass-border)] text-foreground placeholder:text-muted-foreground ${errors.email ? "border-red-500" : ""}`}
           />
           {errors.email && (
-            <p className="text-xs text-red-500">{errors.email.message}</p>
+            <p className="text-xs text-destructive">{errors.email.message}</p>
           )}
         </div>
 

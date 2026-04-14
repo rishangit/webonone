@@ -5,7 +5,8 @@ import { CustomDialog } from "@/components/ui/custom-dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { AlertCircle, Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { AlertCircle, ChevronLeft, ChevronRight, Save } from "lucide-react";
 import { VariantForm } from "./VariantForm";
 import { SystemProductVariantSelector } from "./SystemProductVariantSelector";
 import { VariantAttributeValues } from "./VariantAttributeValues";
@@ -274,12 +275,7 @@ export const VariantDialog = ({
   };
 
   const onSubmit = async (data: VariantFormData) => {
-    console.log('onSubmit called', { mode, hasOnSave: !!onSave, data });
-    
-    if (mode === 'view' || !onSave) {
-      console.log('onSubmit: Returning early - mode is view or onSave is missing', { mode, hasOnSave: !!onSave });
-      return;
-    }
+    if (mode === 'view' || !onSave) return;
     
     try {
       // Pass variant defining attributes and their values to onSave handler
@@ -290,10 +286,7 @@ export const VariantDialog = ({
         variantAttributeValues: attributeValues,
       };
       const attributeValuesToSave = productId && variantMode === 'system' ? attributeValues : undefined;
-      
-      console.log('Calling onSave with:', { variantData, attributeValuesToSave });
       await onSave(variantData, attributeValuesToSave);
-      console.log('onSave completed successfully');
       onOpenChange(false);
     } catch (error) {
       console.error('Error saving variant:', error);
@@ -394,29 +387,16 @@ export const VariantDialog = ({
   // Step Indicator Component
   const StepIndicator = () => {
     if (!isWizardMode) return null;
+    const progress = Math.max(0, Math.min(100, (currentStep / totalSteps) * 100));
     
     return (
-      <div className="flex items-center justify-center mb-6">
-        {Array.from({ length: totalSteps }, (_, i) => i + 1).map((step) => (
-          <div key={step} className="flex items-center">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-              step <= currentStep 
-                ? 'bg-[var(--accent-primary)] text-[var(--accent-button-text)]' 
-                : 'bg-muted text-muted-foreground'
-            }`}>
-              {step < currentStep ? (
-                <Check className="w-4 h-4" />
-              ) : (
-                step
-              )}
-            </div>
-            {step < totalSteps && (
-              <div className={`w-12 h-0.5 mx-2 ${
-                step < currentStep ? 'bg-[var(--accent-primary)]' : 'bg-muted'
-              }`} />
-            )}
-          </div>
-        ))}
+      <div className="w-1/2 mx-auto mb-6">
+        <div className="h-2 rounded-full bg-muted overflow-hidden">
+          <div
+            className="h-2 rounded-full bg-[var(--accent-primary)] transition-all duration-200"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
       </div>
     );
   };
@@ -440,17 +420,17 @@ export const VariantDialog = ({
   const footerContent = (
     <>
       {isWizardMode ? (
-        // Wizard mode footer (for add mode)
-        <div className="flex items-center justify-between w-full">
+        <>
           <Button
             type="button"
             variant="outline"
             onClick={currentStep === 1 ? handleCancel : handlePrevious}
             disabled={isSubmitting}
-            className="border-[var(--glass-border)] bg-[var(--input-background)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-border)] hover:text-[var(--accent-text)] text-foreground transition-all duration-200"
+            size="default"
+            className="h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent"
           >
             {currentStep === 1 ? (
-              'Cancel'
+              "Cancel"
             ) : (
               <>
                 <ChevronLeft className="w-4 h-4 mr-2" />
@@ -461,66 +441,38 @@ export const VariantDialog = ({
           {currentStep === totalSteps ? (
             <Button
               type="button"
-              disabled={isSubmitting || (mode === 'add' && !canProceedToNextStep())}
+              disabled={isSubmitting || (mode === "add" && !canProceedToNextStep())}
               onClick={async (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                
-                // Debug: Log button click
                 const canProceed = canProceedToNextStep();
-                console.log('Add Variant button clicked', {
-                  isSubmitting,
-                  canProceed,
-                  isDisabled: isSubmitting || (mode === 'add' && !canProceed),
-                  mode,
-                  currentStep,
-                  totalSteps,
-                  name: watch('name'),
-                  sku: watch('sku'),
-                  variantDefiningAttributes,
-                  attributeValues,
-                  errors: Object.keys(errors).length > 0 ? errors : 'none',
-                  hasOnSave: !!onSave
-                });
-                
-                // If button is disabled, show error and return
-                if (isSubmitting || (mode === 'add' && !canProceed)) {
-                  console.log('Button is disabled, preventing submission');
-                  if (mode === 'add' && !canProceed) {
+                if (isSubmitting || (mode === "add" && !canProceed)) {
+                  if (mode === "add" && !canProceed) {
                     toast.error("Please complete all required fields before submitting");
                   }
                   return;
                 }
-                
-                // Manually trigger form submission with validation
                 try {
-                  const formData = watch();
-                  console.log('Calling handleSubmit with form data:', formData);
-                  
-                  // Use handleSubmit to trigger validation, then call onSubmit if valid
-                  // handleSubmit returns a function that needs to be called
                   const submitHandler = handleSubmit(
                     async (data: VariantFormData) => {
-                      console.log('Form validation passed, calling onSubmit with:', data);
                       await onSubmit(data);
                     },
-                    (errors) => {
-                      console.log('Form validation failed:', errors);
+                    () => {
                       toast.error("Please fix the form errors before submitting");
                     }
                   );
-                  
-                  // Call the submit handler (this will trigger validation)
                   submitHandler();
                 } catch (error) {
-                  console.error('Error in form submission:', error);
+                  console.error("Error in form submission:", error);
                   toast.error("Please fix the form errors before submitting");
                 }
               }}
               variant="accent"
-              className="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-lg shadow-[var(--accent-primary)]/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              size="default"
+              className="h-10 px-4"
             >
-              {isSubmitting ? 'Saving...' : mode === 'add' ? 'Add Variant' : 'Save Changes'}
+              <Save className="w-4 h-4 mr-2" />
+              {isSubmitting ? "Saving..." : mode === "add" ? "Add Variant" : "Save Changes"}
             </Button>
           ) : (
             <Button
@@ -530,49 +482,53 @@ export const VariantDialog = ({
                 e.stopPropagation();
                 handleNext(e);
               }}
-              disabled={isSubmitting || (mode === 'add' && !canProceedToNextStep())}
+              disabled={isSubmitting || (mode === "add" && !canProceedToNextStep())}
               variant="accent"
-              className="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-lg shadow-[var(--accent-primary)]/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              size="default"
+              className="h-10 px-4"
             >
               Next
               <ChevronRight className="w-4 h-4 ml-2" />
             </Button>
           )}
-        </div>
-      ) : (
-        // Regular mode footer (for edit/view mode)
-    <>
-      {mode !== 'view' && (
-        <>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleCancel}
-            disabled={isSubmitting}
-            className="border-[var(--glass-border)] bg-[var(--input-background)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-border)] hover:text-[var(--accent-text)] text-foreground transition-all duration-200"
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            form="variant-form"
-            disabled={isSubmitting}
-            variant="accent"
-            className="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-lg shadow-[var(--accent-primary)]/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-          >
-            {isSubmitting ? 'Saving...' : mode === 'add' ? 'Add Variant' : 'Save Changes'}
-          </Button>
         </>
-      )}
-      {mode === 'view' && (
-        <Button
-          type="button"
-          onClick={handleCancel}
-          variant="accent"
-          className="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-lg shadow-[var(--accent-primary)]/25 transition-all duration-200"
-        >
-          Close
-        </Button>
+      ) : (
+        <>
+          {mode !== "view" && (
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                size="default"
+                onClick={handleCancel}
+                disabled={isSubmitting}
+                className="h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                form="variant-form"
+                disabled={isSubmitting}
+                variant="accent"
+                size="default"
+                className="h-10 px-4"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {isSubmitting ? "Saving..." : mode === "add" ? "Add Variant" : "Save Changes"}
+              </Button>
+            </>
+          )}
+          {mode === "view" && (
+            <Button
+              type="button"
+              variant="outline"
+              size="default"
+              onClick={handleCancel}
+              className="h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent"
+            >
+              Close
+            </Button>
           )}
         </>
       )}
@@ -584,9 +540,9 @@ export const VariantDialog = ({
       open={open}
       onOpenChange={onOpenChange}
       title={isWizardMode ? getStepTitle() : dialogTitle}
-      description={isWizardMode ? `Step ${currentStep} of ${totalSteps}` : dialogDescription}
-      maxWidth="max-w-4xl"
-      className="max-h-[85vh] bg-[var(--glass-bg)] border-[var(--glass-border)] backdrop-blur-xl"
+      description={isWizardMode ? "Follow the steps to add a new variant." : dialogDescription}
+      sizeWidth="small"
+      sizeHeight="large"
       footer={footerContent}
       disableContentScroll={true}
     >
@@ -773,12 +729,10 @@ export const VariantDialog = ({
                     {/* Default Variant Checkbox */}
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           id="isDefault-wizard"
                           checked={watch('isDefault') || false}
-                          onChange={(e) => setValue('isDefault', e.target.checked)}
-                          className="w-4 h-4 rounded border-[var(--glass-border)] text-[var(--accent-primary)] focus:ring-[var(--accent-primary)]"
+                          onCheckedChange={(checked) => setValue('isDefault', Boolean(checked))}
                         />
                         <Label htmlFor="isDefault-wizard" className="text-sm text-foreground cursor-pointer">
                           Set as default variant
@@ -801,7 +755,7 @@ export const VariantDialog = ({
               skuLabel="SKU * (Auto-generated)"
               mode={variantMode}
               hideVariantDetails={mode === 'add' && !!systemProductId}
-              hideSku={variantMode === 'system' ? false : true}
+              hideSku={false}
               readOnly={isReadOnly}
               systemProductId={systemProductId}
               variant={variant || (mode === 'add' && watch('systemProductVariantId') ? { 

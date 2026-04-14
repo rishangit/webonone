@@ -1,12 +1,14 @@
-import { Plus } from "lucide-react";
+import { useEffect } from "react";
+import { Edit, Plus, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CustomDialog } from "@/components/ui/custom-dialog";
 import { StockFormFields } from "./StockFormFields";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { CompanyProductStock } from "@/services/companyProductStock";
 
-const addStockSchema = yup.object({
+const stockSchema = yup.object({
   quantity: yup
     .number()
     .typeError("Quantity must be a number")
@@ -76,37 +78,47 @@ const addStockSchema = yup.object({
   batchNumber: yup.string().optional().nullable().transform((value) => value || null),
 });
 
-type AddStockFormData = yup.InferType<typeof addStockSchema>;
+type StockFormData = yup.InferType<typeof stockSchema>;
 
-interface AddStockDialogProps {
+interface AddEditStockDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  mode: "add" | "edit";
   variantName: string;
-  onSubmit: (data: AddStockFormData) => Promise<void>;
+  editingStockEntry?: CompanyProductStock | null;
+  onSubmit: (data: StockFormData) => Promise<void>;
   isSubmitting: boolean;
   users?: any[];
-  onUserSelectionDialogOpen: () => void;
+  onUserSelectionDialogOpen: (open: boolean) => void;
   isUserSelectionDialogOpen: boolean;
+  title?: string;
+  description?: string;
+  submitLabel?: string;
 }
 
-export const AddStockDialog = ({
+export const AddEditStockDialog = ({
   open,
   onOpenChange,
+  mode,
   variantName,
+  editingStockEntry,
   onSubmit,
   isSubmitting,
   users,
   onUserSelectionDialogOpen,
   isUserSelectionDialogOpen,
-}: AddStockDialogProps) => {
+  title,
+  description,
+  submitLabel,
+}: AddEditStockDialogProps) => {
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
-    control
-  } = useForm<AddStockFormData>({
-    resolver: yupResolver(addStockSchema) as any,
+    control,
+  } = useForm<StockFormData>({
+    resolver: yupResolver(stockSchema) as any,
     defaultValues: {
       quantity: undefined,
       costPrice: undefined,
@@ -120,53 +132,92 @@ export const AddStockDialog = ({
     reValidateMode: "onChange",
   });
 
-  const handleFormSubmit = async (data: AddStockFormData) => {
+  useEffect(() => {
+    if (!open) return;
+
+    if (mode === "edit" && editingStockEntry) {
+      reset({
+        quantity: editingStockEntry.quantity,
+        costPrice: editingStockEntry.costPrice,
+        sellPrice: editingStockEntry.sellPrice || null,
+        purchaseDate: editingStockEntry.purchaseDate ? new Date(editingStockEntry.purchaseDate) : null,
+        expiryDate: editingStockEntry.expiryDate ? new Date(editingStockEntry.expiryDate) : null,
+        supplierId: editingStockEntry.supplierId || null,
+        batchNumber: editingStockEntry.batchNumber || null,
+      });
+      return;
+    }
+
+    reset({
+      quantity: undefined,
+      costPrice: undefined,
+      sellPrice: null,
+      purchaseDate: null,
+      expiryDate: null,
+      supplierId: null,
+      batchNumber: null,
+    });
+  }, [open, mode, editingStockEntry, reset]);
+
+  const handleFormSubmit = async (data: StockFormData) => {
     await onSubmit(data);
     reset();
   };
 
+  const dialogTitle = title || (mode === "add" ? "Add Stock Entry" : "Edit Stock Entry");
+  const dialogDescription =
+    description ||
+    (mode === "add"
+      ? `Add a new stock entry for ${variantName}. Each stock entry can have different pricing and supplier information.`
+      : `Update stock entry information for ${variantName}.`);
+  const dialogSubmitLabel = submitLabel || (mode === "add" ? "Add Stock" : "Update Stock");
+  const submittingLabel = mode === "add" ? "Adding..." : "Updating...";
+  const formId = mode === "add" ? "add-stock-form" : "edit-stock-form";
+
   return (
     <CustomDialog
       open={open}
-      onOpenChange={(open) => {
-        onOpenChange(open);
-        if (!open) {
+      onOpenChange={(nextOpen) => {
+        onOpenChange(nextOpen);
+        if (!nextOpen) {
           reset();
         }
       }}
-      customHeader={
-        <div className="flex items-center gap-2">
-          <Plus className="w-5 h-5 text-[var(--accent-primary)]" />
-          <span>Add Stock Entry</span>
-        </div>
-      }
-      description={`Add a new stock entry for ${variantName}. Each stock entry can have different pricing and supplier information.`}
-      className="bg-[var(--glass-bg)] border-[var(--accent-border)]/30 backdrop-blur-xl max-w-2xl max-h-[90vh] overflow-y-auto"
+      title={dialogTitle}
+      icon={mode === "add" ? <Plus className="w-5 h-5" /> : <Edit className="w-5 h-5" />}
+      description={dialogDescription}
+      sizeWidth="small"
+      sizeHeight="medium"
       footer={
         <>
           <Button
             type="button"
             variant="outline"
+            size="default"
             onClick={() => {
               onOpenChange(false);
               reset();
             }}
             disabled={isSubmitting}
+            className="h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent"
           >
             Cancel
           </Button>
           <Button
             type="submit"
-            form="add-stock-form"
+            form={formId}
             variant="accent"
+            size="default"
             disabled={isSubmitting}
+            className="h-10 px-4"
           >
-            {isSubmitting ? "Adding..." : "Add Stock"}
+            <Save className="w-4 h-4 mr-2" />
+            {isSubmitting ? submittingLabel : dialogSubmitLabel}
           </Button>
         </>
       }
     >
-      <form id="add-stock-form" onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+      <form id={formId} onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
         <StockFormFields
           register={register}
           control={control}
@@ -174,8 +225,10 @@ export const AddStockDialog = ({
           users={users}
           isUserSelectionDialogOpen={isUserSelectionDialogOpen}
           onUserSelectionDialogOpen={onUserSelectionDialogOpen}
+          formId={mode === "edit" ? "edit-" : ""}
         />
       </form>
     </CustomDialog>
   );
 };
+

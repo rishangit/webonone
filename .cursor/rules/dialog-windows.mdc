@@ -18,6 +18,7 @@ alwaysApply: true
 ## Footer layout
 
 - Place Cancel and the primary action on one row, **right-aligned**, using `flex items-center justify-end gap-2` (inner row; `CustomDialog` already outer-aligns the footer on larger breakpoints).
+- **Uniform footer button height:** all footer action buttons in the same dialog must use the **same height** (default standard: `h-10`) so actions align cleanly on one baseline.
 - **Cancel:** `Button` with `variant="outline"`, `size="default"`, and `className` including `h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent`.
 - **Primary:** `Button` with `variant="accent"` and `size="default"`; label matches the action (Save, Create, Submit, etc.).
 - **Primary icon:** For create/save/submit actions that persist data, put the Lucide `Save` icon before the label: `className="w-4 h-4 mr-2"`. For destructive confirm, use an icon that matches the action (e.g. `Trash2`) with the same size and `mr-2`. Other actions may use icons only when they clarify the action.
@@ -31,6 +32,10 @@ alwaysApply: true
 ## Theme
 
 - Use shared tokens: `bg-background`, `text-foreground`, `text-muted-foreground`, `border-[var(--glass-border)]`, and accent-aware variants where applicable.
+- **Dialog shell background:** keep `CustomDialog` shell on the standard theme surface (`bg-background` with dark-mode glass fallback handled by the component). Do not replace the dialog container with ad-hoc gradient/solid backgrounds.
+- **Dialog content surfaces:** for inner cards/sections inside dialog body, use `bg-[var(--glass-bg)]` + `border-[var(--glass-border)]` to match current system dialogs.
+- **Typography colors:** titles/primary values use `text-foreground`; descriptions/supporting copy use `text-muted-foreground`; highlighted totals/important accents use `text-[var(--accent-text)]`.
+- **Input colors:** dialog form controls should use `bg-[var(--input-background)]`, `border-[var(--glass-border)]`, and `text-foreground` (including placeholder readability via `placeholder:text-muted-foreground` when needed).
 - Keep light/dark behavior consistent with the rest of the app.
 
 ## Reuse and structure

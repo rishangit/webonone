@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { CustomDialog } from "@/components/ui/custom-dialog";
 import { Button } from "@/components/ui/button";
 import { ProgressBar } from "@/components/ui/progress-bar";
-import { UserPlus, Users, Settings, CheckCircle, ChevronLeft, ChevronRight, Clock, Shield } from "lucide-react";
+import { Users, Settings, CheckCircle, ChevronLeft, ChevronRight, Clock, Shield, Save } from "lucide-react";
 import { toast } from "sonner";
 import { useAppSelector } from "@/store/hooks";
 import { AddStaffDialogProps, UserForSelection } from "./types";
@@ -413,48 +413,53 @@ export const AddStaffDialog = ({
       sizeHeight="large"
       disableContentScroll={true}
       footer={
-        <div className="flex items-center justify-between w-full">
+        <>
           <Button
             variant="outline"
+            size="default"
             onClick={handleCancel}
-            className="bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent text-foreground"
+            className="h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent"
           >
             Cancel
           </Button>
 
-          <div className="flex items-center gap-2">
-            {currentStep > 0 && (
-              <Button
-                variant="outline"
-                onClick={handlePrevious}
-                disabled={currentStep === 0}
-                className="bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-[var(--accent-bg)] hover:text-[var(--accent-text)]"
-              >
-                <ChevronLeft className="w-4 h-4 mr-2" />
-                Previous
-              </Button>
-            )}
+          {currentStep > 0 && (
+            <Button
+              variant="outline"
+              size="default"
+              onClick={handlePrevious}
+              disabled={currentStep === 0}
+              className="h-10 px-4 border-[var(--glass-border)] text-foreground hover:bg-accent"
+            >
+              <ChevronLeft className="w-4 h-4 mr-2" />
+              Previous
+            </Button>
+          )}
 
+          {isLastStep ? (
             <Button
               variant="accent"
+              size="default"
               onClick={handleNext}
               disabled={!canProceed}
-              className="min-w-32"
+              className="h-10 px-4"
             >
-              {isLastStep ? (
-                <>
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  {editingStaff ? "Update Staff" : "Add Staff"}
-                </>
-              ) : (
-                <>
-                  Next
-                  <ChevronRight className="w-4 h-4 ml-2" />
-                </>
-              )}
+              <Save className="w-4 h-4 mr-2" />
+              {editingStaff ? "Update Staff" : "Add Staff"}
             </Button>
-          </div>
-        </div>
+          ) : (
+            <Button
+              variant="accent"
+              size="default"
+              onClick={handleNext}
+              disabled={!canProceed}
+              className="h-10 px-4"
+            >
+              Next
+              <ChevronRight className="w-4 h-4 ml-2" />
+            </Button>
+          )}
+        </>
       }
     >
       <div className="h-full overflow-hidden flex flex-col">

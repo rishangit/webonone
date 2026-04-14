@@ -150,6 +150,7 @@ export function CustomDialog({
 
           {/* Content */}
           <div className={cn(
+            "h-full",
             disableContentScroll
               ? "overflow-hidden"
               : isAutoHeight
@@ -163,8 +164,8 @@ export function CustomDialog({
 
           {/* Footer */}
           {footer && (
-            <div className="px-6 py-3 border-t border-[var(--glass-border)]">
-              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <div className="px-6 py-3 border-t border-[var(--glass-border)] shrink-0">
+              <div className="flex items-center justify-end gap-2">
                 {footer}
               </div>
             </div>

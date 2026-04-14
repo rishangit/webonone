@@ -198,6 +198,19 @@ export const ProductVariantCard = ({
             {/* Variant Management Buttons - Only for company owners */}
             {onUpdate && (
               <div className="flex items-center gap-2 mt-4 pt-3 border-t border-border">
+                {onEdit && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit(variant);
+                    }}
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit
+                  </Button>
+                )}
                 <Button
                   size="sm"
                   variant="outline"

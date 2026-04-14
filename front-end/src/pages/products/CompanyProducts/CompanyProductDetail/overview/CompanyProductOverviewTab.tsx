@@ -14,12 +14,6 @@ interface CompanyProductOverviewTabProps {
   variantsLoading: boolean;
   selectedVariantId: string | null;
   onVariantSelect: (variant: CompanyProductVariant | null) => void;
-  isEditing: boolean;
-  formData: {
-    notes: string;
-    isAvailableForPurchase: boolean;
-  };
-  onFormChange: (field: string, value: any) => void;
 }
 
 export const CompanyProductOverviewTab = ({
@@ -28,9 +22,6 @@ export const CompanyProductOverviewTab = ({
   variantsLoading,
   selectedVariantId,
   onVariantSelect,
-  isEditing,
-  formData,
-  onFormChange,
 }: CompanyProductOverviewTabProps) => {
   const imageUrl = product.imageUrl 
     ? (product.imageUrl.startsWith('http') ? product.imageUrl : formatAvatarUrl(product.imageUrl))
@@ -39,16 +30,23 @@ export const CompanyProductOverviewTab = ({
   // Get the currently selected variant
   const selectedVariant = variants.find(v => v.id === selectedVariantId) || null;
 
-  // Auto-select default variant or first variant if none selected
+  // Auto-select default variant (or first) when selection is missing/invalid.
   useEffect(() => {
-    if (!selectedVariantId && variants.length > 0 && !variantsLoading) {
-      const defaultVariant = variants.find(v => v.isDefault);
-      if (defaultVariant) {
-        onVariantSelect(defaultVariant);
-      } else if (variants.length > 0) {
-        onVariantSelect(variants[0]);
-      }
+    if (variantsLoading) return;
+
+    if (variants.length === 0) {
+      if (selectedVariantId) onVariantSelect(null);
+      return;
     }
+
+    const selectedVariantExists = selectedVariantId
+      ? variants.some((variant) => variant.id === selectedVariantId)
+      : false;
+
+    if (selectedVariantExists) return;
+
+    const defaultVariant = variants.find((variant) => variant.isDefault);
+    onVariantSelect(defaultVariant || variants[0]);
   }, [variants, selectedVariantId, variantsLoading, onVariantSelect]);
 
   return (
@@ -70,9 +68,6 @@ export const CompanyProductOverviewTab = ({
           selectedVariantId={selectedVariantId}
           selectedVariant={selectedVariant}
           onVariantSelect={onVariantSelect}
-          isEditing={isEditing}
-          formData={formData}
-          onFormChange={onFormChange}
         />
 
         {/* Product Attributes - Shows values for selected variant */}
@@ -85,8 +80,8 @@ export const CompanyProductOverviewTab = ({
           <CompanyProductDetailTags tags={product.tags} />
         )}
 
-        {formData.notes && !isEditing && (
-          <CompanyProductDetailNotes notes={formData.notes} />
+        {product.notes && (
+          <CompanyProductDetailNotes notes={product.notes} />
         )}
       </div>
     </div>

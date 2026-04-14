@@ -119,16 +119,7 @@ export function ProductDetailPage({ productId, onBack, productType = "system", c
   const [selectedVariant, setSelectedVariant] = useState<LegacyProductVariant | SystemProductVariant | null>(null);
   const [systemVariants, setSystemVariants] = useState<SystemProductVariant[]>([]);
   const [variantsLoading, setVariantsLoading] = useState(false);
-  const [isAddingVariant, setIsAddingVariant] = useState(false);
-  const [newVariant, setNewVariant] = useState<VariantFormData>({
-    name: '',
-    sku: '',
-    type: 'sell',
-    isDefault: false,
-    variantDefiningAttributes: [],
-    variantAttributeValues: {}
-  });
-  
+
   // Variant dialog state
   const [variantDialogOpen, setVariantDialogOpen] = useState(false);
   const [variantDialogMode, setVariantDialogMode] = useState<'add' | 'edit'>('add');
@@ -222,6 +213,19 @@ export function ProductDetailPage({ productId, onBack, productType = "system", c
     setVariantDialogOpen(true);
   };
 
+  const handleEditCompanyVariant = (variant: LegacyProductVariant) => {
+    setVariantDialogVariant({
+      id: variant.id,
+      name: variant.name,
+      sku: variant.sku,
+      isDefault: false,
+      isActive: variant.isActive,
+      systemProductVariantId: undefined,
+    } as CompanyProductVariant);
+    setVariantDialogMode("edit");
+    setVariantDialogOpen(true);
+  };
+
   const handleAddVariant = () => {
     setVariantDialogVariant(null);
     setVariantDialogMode('add');
@@ -232,6 +236,54 @@ export function ProductDetailPage({ productId, onBack, productType = "system", c
   const handleSaveVariant = async (variantData: VariantFormData, attributeValues?: Record<string, string>) => {
     if (!variantData.name || !variantData.sku) {
       toast.error("Variant name and SKU are required");
+      return;
+    }
+
+    if (productType === "company") {
+      if (!product) return;
+
+      try {
+        if (variantDialogMode === "add") {
+          const addedVariant = await database.products.addVariant(product.id, variantData, false);
+          if (addedVariant) {
+            setProduct((prev) => ({
+              ...prev!,
+              variants: [...(prev!.variants || []), addedVariant],
+            }));
+            setSelectedVariant(addedVariant as LegacyProductVariant);
+            toast.success("Variant created successfully");
+          }
+        } else if (variantDialogMode === "edit" && variantDialogVariant?.id) {
+          const updatedVariant = await database.products.updateVariant(
+            product.id,
+            variantDialogVariant.id,
+            {
+              name: variantData.name,
+              sku: variantData.sku,
+              isDefault: variantData.isDefault || false,
+              type: variantData.type,
+            },
+            false
+          );
+
+          if (updatedVariant) {
+            setProduct((prev) => ({
+              ...prev!,
+              variants: prev!.variants?.map((v) => (v.id === variantDialogVariant.id ? updatedVariant : v)) || [],
+            }));
+            if (selectedVariant?.id === variantDialogVariant.id) {
+              setSelectedVariant(updatedVariant);
+            }
+            toast.success("Variant updated successfully");
+          }
+        }
+
+        setVariantDialogOpen(false);
+        setVariantDialogVariant(null);
+      } catch (error: any) {
+        toast.error(error.message || `Failed to ${variantDialogMode === "add" ? "create" : "update"} variant`);
+      }
+
       return;
     }
 
@@ -400,41 +452,6 @@ export function ProductDetailPage({ productId, onBack, productType = "system", c
     }
   };
 
-  // Legacy variant management for company products
-  const handleAddCompanyVariant = async () => {
-    if (!product || !newVariant.name || !newVariant.sku) return;
-    
-    try {
-      const isSystemProduct = productType === "system";
-      const addedVariant = await database.products.addVariant(
-        product.id, 
-        newVariant, 
-        isSystemProduct
-      );
-      
-      if (addedVariant) {
-        // Update the local product state
-        setProduct(prev => ({
-          ...prev!,
-          variants: [...(prev!.variants || []), addedVariant]
-        }));
-        
-        // Reset form
-        setNewVariant({
-          name: '',
-          sku: '',
-          type: 'sell',
-          isDefault: false,
-          variantDefiningAttributes: [],
-          variantAttributeValues: {}
-        });
-        setIsAddingVariant(false);
-      }
-    } catch (error) {
-      console.error('Error adding variant:', error);
-    }
-  };
-
   const handleRemoveVariant = async (variantId: string) => {
     if (!product) return;
     
@@ -564,26 +581,24 @@ export function ProductDetailPage({ productId, onBack, productType = "system", c
               variantsLoading={variantsLoading}
               selectedVariantId={selectedVariant?.id || null}
               isSuperAdmin={isSuperAdmin}
-              isAddingVariant={isAddingVariant}
-              newVariant={newVariant}
               variantDialogOpen={variantDialogOpen}
               variantDialogMode={variantDialogMode}
               variantDialogVariant={variantDialogVariant}
               onVariantSelect={(variant) => setSelectedVariant(variant as LegacyProductVariant | SystemProductVariant | null)}
-              onAddVariant={productType === "system" ? handleAddVariant : () => setIsAddingVariant(true)}
-              onEditVariant={productType === "system" ? (variant) => handleEditVariant(variant as SystemProductVariant) : undefined}
+              onAddVariant={handleAddVariant}
+              onEditVariant={
+                productType === "system"
+                  ? (variant) => handleEditVariant(variant as SystemProductVariant)
+                  : (variant) => handleEditCompanyVariant(variant as LegacyProductVariant)
+              }
               onDeleteVariant={productType === "system" ? handleDeleteSystemVariant : handleRemoveVariant}
               onToggleVariantStatus={productType === "system" ? handleToggleVariantStatus : undefined}
               onToggleVariantVerification={productType === "system" ? handleToggleVariantVerification : undefined}
               onSetDefaultVariant={productType === "system" ? handleSetDefaultVariant : undefined}
               onUpdateVariant={productType === "company" ? handleUpdateVariant : undefined}
               onSaveVariant={handleSaveVariant}
-              onSetIsAddingVariant={setIsAddingVariant}
-              onSetNewVariant={setNewVariant}
               onSetVariantDialogOpen={setVariantDialogOpen}
-              onSetVariantDialogMode={setVariantDialogMode}
               onSetVariantDialogVariant={setVariantDialogVariant}
-              onAddCompanyVariant={productType === "company" ? handleAddCompanyVariant : undefined}
             />
           </div>
         )}

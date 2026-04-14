@@ -1,27 +1,25 @@
-import { useState, useEffect, useMemo, useRef } from "react";
-import { Search, Package, Plus, Check, ChevronLeft, ChevronRight, Loader2, Tag as TagIcon } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Package, Plus, Check, ChevronLeft, ChevronRight, Loader2, Tag as TagIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { CustomDialog } from "@/components/ui/custom-dialog";
 import { ProgressBar } from "@/components/ui/progress-bar";
 // DropdownMenu imports removed - no longer needed without variant step
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchSystemProductsRequest } from "@/store/slices/systemProductsSlice";
 import { createCompanyProductRequest, clearError as clearCompanyProductsError } from "@/store/slices/companyProductsSlice";
-import { createCompanyProductVariantsRequest, clearError as clearVariantsError } from "@/store/slices/companyProductVariantsSlice";
 import { fetchTagsRequest } from "@/store/slices/tagsSlice";
 import { Product } from "@/services/products";
 import { productsService } from "@/services/products";
 import { formatAvatarUrl } from "../../../utils";
 import { companiesService } from "@/services/companies";
-import { Tag } from "@/services/tags";
+import { Tag as CompanyTag } from "@/services/tags";
 import FileUpload from "@/components/ui/file-upload";
+import { SearchInput } from "@/components/common/SearchInput";
 import { TagSelector } from "@/components/tags/TagSelector";
 // Variant-related imports removed - variants can be added later in product detail page
 
@@ -59,7 +57,7 @@ interface SystemProduct {
   sku: string;
   type: "sell" | "service" | "both";
   image: string;
-  tags: string[] | Tag[];
+  tags: Product["tags"];
   supplier: {
     name: string;
     contact: string;
@@ -134,15 +132,21 @@ export function AddProductToCompanyDialog({
   currentUser
 }: AddProductToCompanyDialogProps) {
   const dispatch = useAppDispatch();
-  const { systemProducts: productsFromRedux, loading: productsLoading } = useAppSelector((state) => state.systemProducts);
   const { loading: companyProductsLoading, error: companyProductsError } = useAppSelector((state) => state.companyProducts);
-  const { tags } = useAppSelector((state) => state.tags);
+  const ITEMS_PER_PAGE = 20;
   
   const [currentStep, setCurrentStep] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [pagedSystemProducts, setPagedSystemProducts] = useState<SystemProduct[]>([]);
+  const [totalProductsCount, setTotalProductsCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<SystemProduct | null>(null);
   const [isCustomProduct, setIsCustomProduct] = useState(false);
-  const [companyTags, setCompanyTags] = useState<Tag[]>([]);
+  const [companyTags, setCompanyTags] = useState<CompanyTag[]>([]);
   const [loadingCompanyTags, setLoadingCompanyTags] = useState(false);
   const [showAddSystemProductDialog, setShowAddSystemProductDialog] = useState(false);
   const [newSystemProductData, setNewSystemProductData] = useState({
@@ -153,17 +157,37 @@ export function AddProductToCompanyDialog({
     tagIds: [] as string[]
   });
   const [isCreatingSystemProduct, setIsCreatingSystemProduct] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const isFetchingProductsRef = useRef(false);
   
   const totalSteps = 2; // Removed variant step
   const progress = (currentStep / totalSteps) * 100;
 
-  // Load system products and tags when dialog opens
+  // Load tags when dialog opens
   useEffect(() => {
     if (open) {
-      dispatch(fetchSystemProductsRequest({ isActive: true }));
       dispatch(fetchTagsRequest({ active: true }));
     }
   }, [open, dispatch]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    if (!open) return;
+    setPagedSystemProducts([]);
+    setTotalProductsCount(0);
+    setCurrentPage(1);
+    setHasMore(true);
+    setIsInitialLoading(false);
+    setLoadingMore(false);
+    isFetchingProductsRef.current = false;
+  }, [open]);
 
   // Load company tags when dialog opens
   useEffect(() => {
@@ -195,12 +219,63 @@ export function AddProductToCompanyDialog({
     }
   }, [companyProductsError, dispatch]);
 
-  // Map products from Redux to SystemProduct format
-  const systemProducts = useMemo(() => {
-    return productsFromRedux
-      .filter(product => product.isActive) // Only show active products
-      .map(product => mapProductToSystemProduct(product));
-  }, [productsFromRedux]);
+  const fetchProductsPage = useCallback(async (page: number, reset = false) => {
+    if (isFetchingProductsRef.current) return;
+
+    try {
+      isFetchingProductsRef.current = true;
+      if (page === 1) {
+        setIsInitialLoading(true);
+      } else {
+        setLoadingMore(true);
+      }
+
+      const response = await productsService.getProducts({
+        limit: ITEMS_PER_PAGE,
+        offset: (page - 1) * ITEMS_PER_PAGE,
+        page,
+        search: debouncedSearchTerm.trim() || undefined,
+        isActive: true,
+      });
+
+      const incomingProducts = (response.products || [])
+        .filter((product) => product.isActive)
+        .map((product) => mapProductToSystemProduct(product))
+        .filter((product) => !existingProductSKUs.includes(product.sku));
+
+      const apiTotal = response.pagination?.total ?? 0;
+      setTotalProductsCount(apiTotal);
+      setCurrentPage(page);
+      setPagedSystemProducts((prev) => {
+        if (reset || page === 1) return incomingProducts;
+        const existingIds = new Set(prev.map((p) => String(p.id)));
+        const deduped = incomingProducts.filter((p) => !existingIds.has(String(p.id)));
+        return [...prev, ...deduped];
+      });
+
+      const totalPages =
+        response.pagination?.totalPages ||
+        Math.ceil((response.pagination?.total || 0) / ITEMS_PER_PAGE) ||
+        1;
+      setHasMore(page < totalPages);
+    } catch (error) {
+      console.error("Error loading system products:", error);
+      if (page === 1) {
+        setPagedSystemProducts([]);
+        setTotalProductsCount(0);
+      }
+      setHasMore(false);
+    } finally {
+      setIsInitialLoading(false);
+      setLoadingMore(false);
+      isFetchingProductsRef.current = false;
+    }
+  }, [ITEMS_PER_PAGE, debouncedSearchTerm, existingProductSKUs]);
+
+  useEffect(() => {
+    if (!open) return;
+    fetchProductsPage(1, true);
+  }, [open, debouncedSearchTerm, fetchProductsPage]);
 
   const [formData, setFormData] = useState<CompanyProduct>({
     name: "",
@@ -261,11 +336,6 @@ export function AddProductToCompanyDialog({
       tags: tagStrings,
       notes: ""
     });
-  };
-
-  const handleCreateCustom = () => {
-    setIsCustomProduct(true);
-    setSelectedProduct(null);
   };
 
   const handleSubmit = () => {
@@ -430,7 +500,7 @@ export function AddProductToCompanyDialog({
 
   // Variant creation handling removed - variants can be added later in product detail page
 
-  const filteredProducts = systemProducts.filter(product => {
+  const filteredProducts = pagedSystemProducts.filter(product => {
     const searchLower = searchTerm.toLowerCase();
     const matchesName = product.name?.toLowerCase().includes(searchLower) || false;
     const matchesDescription = product.description?.toLowerCase().includes(searchLower) || false;
@@ -441,35 +511,30 @@ export function AddProductToCompanyDialog({
       if (typeof tag === 'string') {
         return tag.toLowerCase().includes(searchLower);
       } else if (tag && typeof tag === 'object') {
-        // Tag object with name property
+        const tagDescription = "description" in tag && typeof tag.description === "string"
+          ? tag.description.toLowerCase()
+          : "";
         return tag.name?.toLowerCase().includes(searchLower) || 
-               tag.description?.toLowerCase().includes(searchLower);
+               tagDescription.includes(searchLower);
       }
       return false;
     });
     
     const matchesSearch = matchesName || matchesDescription || matchesTags;
-    const notAlreadyAdded = !existingProductSKUs.includes(product.sku);
-    return matchesSearch && notAlreadyAdded;
+    return matchesSearch;
   });
 
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case "sell": return "bg-blue-500/20 text-blue-600 dark:text-blue-400";
-      case "service": return "bg-purple-500/20 text-purple-600 dark:text-purple-400";
-      case "both": return "bg-orange-500/20 text-orange-600 dark:text-orange-400";
-      default: return "bg-gray-500/20 text-gray-600 dark:text-gray-400";
-    }
-  };
+  const handleProductsScroll = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container || !hasMore || loadingMore || isFetchingProductsRef.current) return;
 
-  const getTypeLabel = (type: string) => {
-    switch (type) {
-      case "sell": return "For Sale";
-      case "service": return "Service Use";
-      case "both": return "Both";
-      default: return type;
+    const { scrollTop, scrollHeight, clientHeight } = container;
+    const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
+
+    if (distanceFromBottom < 120) {
+      fetchProductsPage(currentPage + 1);
     }
-  };
+  }, [hasMore, loadingMore, fetchProductsPage, currentPage]);
 
   const handleNext = () => {
     if (currentStep === 1) {
@@ -569,15 +634,11 @@ export function AddProductToCompanyDialog({
           {currentStep === 1 && (
             <div className="space-y-6 flex flex-col flex-1 min-h-0 overflow-hidden">
               {/* Search Bar */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                <Input 
-                  placeholder="Search products by name, category, or tags..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-[var(--input-background)] border-[var(--glass-border)] text-foreground placeholder:text-muted-foreground"
-                />
-              </div>
+              <SearchInput
+                placeholder="Search products by name, category, or tags..."
+                value={searchTerm}
+                onChange={setSearchTerm}
+              />
 
               {/* Company Tags */}
               {currentUser?.companyId && (
@@ -616,7 +677,7 @@ export function AddProductToCompanyDialog({
               )}
 
               {/* System Products */}
-              {productsLoading ? (
+              {isInitialLoading ? (
                 <Card className="p-8 text-center backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]">
                   <Loader2 className="w-12 h-12 text-muted-foreground mx-auto mb-4 animate-spin" />
                   <h3 className="text-lg font-medium text-foreground mb-2">Loading Products</h3>
@@ -625,9 +686,14 @@ export function AddProductToCompanyDialog({
               ) : filteredProducts.length > 0 ? (
                 <div className="space-y-4 flex flex-col flex-1 min-h-0">
                   <div className="flex items-center justify-between flex-shrink-0">
-                    <h3 className="text-lg font-medium text-foreground">Available Products ({filteredProducts.length})</h3>
+                    <h3 className="text-lg font-medium text-foreground">Available Products ({totalProductsCount})</h3>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto custom-scrollbar pr-2 flex-1 min-h-0" style={{ maxHeight: 'calc(100vh - 450px)' }}>
+                  <div
+                    ref={scrollContainerRef}
+                    onScroll={handleProductsScroll}
+                    className="grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto custom-scrollbar pr-2 flex-1 min-h-0"
+                    style={{ maxHeight: 'calc(100vh - 450px)' }}
+                  >
                     {filteredProducts.map((product) => (
                       <Card 
                         key={product.id} 
@@ -665,6 +731,16 @@ export function AddProductToCompanyDialog({
                         </div>
                       </Card>
                     ))}
+                    {loadingMore && (
+                      <div className="col-span-full py-2 text-center text-sm text-muted-foreground">
+                        Loading more products...
+                      </div>
+                    )}
+                    {!hasMore && filteredProducts.length >= ITEMS_PER_PAGE && !loadingMore && (
+                      <div className="col-span-full py-2 text-center text-xs text-muted-foreground">
+                        No more products to load
+                      </div>
+                    )}
                   </div>
                 </div>
               ) : (
@@ -779,8 +855,8 @@ export function AddProductToCompanyDialog({
                     tagIds: []
                   });
                   
-                  // Refresh the product list
-                  dispatch(fetchSystemProductsRequest({ isActive: true }));
+                  // Refresh the paginated list
+                  await fetchProductsPage(1, true);
                   
                   // Select the newly created product after a short delay to ensure list is updated
                   setTimeout(() => {
