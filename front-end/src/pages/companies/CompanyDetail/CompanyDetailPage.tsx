@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Building, CreditCard, Package, User } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { TabSwitcher } from "@/components/ui/tab-switcher";
@@ -11,20 +12,23 @@ import { CompanyProfileTab } from "./profile";
 import { CompanyServicesTab } from "./services";
 import { CompanyProductsTab } from "./products";
 import { CompanyStatusCard, CompanyAccountCard, CompanyAdminActionsCard } from "./components";
-import { Company } from "./types";
+import type { Company, CompanyDetailPageProps } from "./types";
 
-interface CompanyDetailPageProps {
-  companyId: string;
-  onBack: () => void;
-}
-
-export const CompanyDetailPage = ({ companyId, onBack }: CompanyDetailPageProps) => {
+export const CompanyDetailPage = ({
+  companyId,
+  onBack,
+  initialTab = "profile",
+  selectedServiceId,
+  selectedProductId,
+}: CompanyDetailPageProps) => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useAppDispatch();
   const { companies: reduxCompanies, currentCompany, loading, error } = useAppSelector((state) => state.companies);
   
   const [rejectionReason, setRejectionReason] = useState("");
   const [showRejectionForm, setShowRejectionForm] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>("profile");
+  const [activeTab, setActiveTab] = useState<string>(initialTab);
 
   // Find company from Redux store
   const reduxCompany = reduxCompanies.find(comp => comp.id === companyId) || 
@@ -44,6 +48,18 @@ export const CompanyDetailPage = ({ companyId, onBack }: CompanyDetailPageProps)
       dispatch(clearError());
     }
   }, [error, dispatch]);
+
+  useEffect(() => {
+    if ((initialTab === "services" || selectedServiceId) && activeTab !== "services") {
+      setActiveTab("services");
+    }
+  }, [initialTab, selectedServiceId, activeTab]);
+
+  useEffect(() => {
+    if ((initialTab === "products" || selectedProductId) && activeTab !== "products") {
+      setActiveTab("products");
+    }
+  }, [initialTab, selectedProductId, activeTab]);
 
   // Transform Redux company data to match the expected format
   const transformCompanyData = (companyData: any): Company | null => {
@@ -120,6 +136,27 @@ export const CompanyDetailPage = ({ companyId, onBack }: CompanyDetailPageProps)
     }, 500);
   };
 
+  const handleTabChange = (nextTab: string) => {
+    setActiveTab(nextTab);
+
+    if (nextTab === "services") {
+      navigate(`/system/companies/${companyId}/services`);
+      return;
+    }
+
+    if (nextTab === "products") {
+      navigate(`/system/companies/${companyId}/products`);
+      return;
+    }
+
+    if (
+      location.pathname.includes(`/system/companies/${companyId}/services`) ||
+      location.pathname.includes(`/system/companies/${companyId}/products`)
+    ) {
+      navigate(`/system/companies/${companyId}`);
+    }
+  };
+
   // Show loading state
   if (loading && !company) {
     return (
@@ -163,7 +200,7 @@ export const CompanyDetailPage = ({ companyId, onBack }: CompanyDetailPageProps)
             { value: "products", label: "Products", icon: Package },
           ]}
           activeTab={activeTab}
-          onTabChange={setActiveTab}
+          onTabChange={handleTabChange}
         />
 
         {activeTab === "profile" && (

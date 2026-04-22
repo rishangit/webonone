@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { AppointmentStatus } from "@/types/appointmentStatus";
 import { CustomDialog } from "@/components/ui/custom-dialog";
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
@@ -39,7 +39,7 @@ import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchServicesRequest } from "@/store/slices/servicesSlice";
 import { fetchStaffRequest } from "@/store/slices/staffSlice";
-import { fetchUsersRequest } from "@/store/slices/usersSlice";
+import { fetchUserRequest, fetchUsersRequest } from "@/store/slices/usersSlice";
 import { fetchSpacesRequest } from "@/store/slices/spacesSlice";
 import { createAppointmentRequest } from "@/store/slices/appointmentsSlice";
 import { formatAvatarUrl } from "../../../utils";
@@ -52,6 +52,9 @@ interface AppointmentWizardProps {
   currentUser: any;
   selectedDate?: Date;
   selectedTime?: string;
+  selectedServiceId?: string;
+  selectedUserId?: string;
+  companyIdOverride?: string;
   trigger?: React.ReactNode;
 }
 
@@ -348,7 +351,15 @@ const mockUsers = [
 
 // timeSlots is now imported from constants
 
-export function AppointmentWizard({ currentUser: currentUserProp, selectedDate, selectedTime, trigger }: AppointmentWizardProps) {
+export function AppointmentWizard({
+  currentUser: currentUserProp,
+  selectedDate,
+  selectedTime,
+  selectedServiceId,
+  selectedUserId,
+  companyIdOverride,
+  trigger,
+}: AppointmentWizardProps) {
   const dispatch = useAppDispatch();
   const { services, loading: servicesLoading, error: servicesError, lastFetch } = useAppSelector((state) => state.services);
   const { staff, loading: staffLoading, error: staffError } = useAppSelector((state) => state.staff);
@@ -360,9 +371,16 @@ export function AppointmentWizard({ currentUser: currentUserProp, selectedDate, 
   // Get currentUser from Redux auth state as fallback if prop is not provided
   const authUser = useAppSelector((state) => state.auth.user);
   const currentUser = currentUserProp || authUser;
+  const currentUserId = selectedUserId
+    ? String(selectedUserId)
+    : currentUser?.id
+      ? String(currentUser.id)
+      : (currentUser as any)?.userId
+        ? String((currentUser as any).userId)
+        : "";
   
   // Get companyId reliably
-  const companyId = currentUser?.companyId || currentUser?.company?.id;
+  const companyId = companyIdOverride || currentUser?.companyId || currentUser?.company?.id;
   
   // Get company's selected entities
   const company = (userCompany && String(userCompany.id) === String(companyId)) 
@@ -375,7 +393,6 @@ export function AppointmentWizard({ currentUser: currentUserProp, selectedDate, 
   const [open, setOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [clientSearchQuery, setClientSearchQuery] = useState("");
   const [serviceSearchQuery, setServiceSearchQuery] = useState("");
   const [serviceViewMode, setServiceViewMode] = useState<"grid" | "list">("grid");
   const [spaceSearchQuery, setSpaceSearchQuery] = useState("");
@@ -392,6 +409,7 @@ export function AppointmentWizard({ currentUser: currentUserProp, selectedDate, 
   const [selectedUser, setSelectedUser] = useState("");
   const [notes, setNotes] = useState("");
   const [isCreateUserDialogOpen, setIsCreateUserDialogOpen] = useState(false);
+  const missingSelectedUserFetchRef = useRef<string | null>(null);
 
   // convertTo24Hour is now imported from utils
 
@@ -595,13 +613,13 @@ export function AppointmentWizard({ currentUser: currentUserProp, selectedDate, 
     if (open) {
       // Reset form first
       setCurrentStep(0);
-      setSelectedService("");
+      setSelectedService(selectedServiceId || "");
       setSelectedStaff("");
       setPreferredStaff([]);
       setSelectedSpace("");
-      setSelectedUser("");
+      // Pre-fill client when known (e.g. regular user booking for themselves)
+      setSelectedUser(selectedUserId || (!isCompanyOwner && currentUserId ? currentUserId : ""));
       setNotes("");
-      setClientSearchQuery("");
       setServiceSearchQuery("");
       setServiceViewMode("grid");
       setIsSubmitting(false);
@@ -616,25 +634,21 @@ export function AppointmentWizard({ currentUser: currentUserProp, selectedDate, 
         setAppointmentTime(convertedTime);
       }
     }
-  }, [open, selectedDate, selectedTime]);
+  }, [open, selectedDate, selectedTime, selectedServiceId, selectedUserId, isCompanyOwner, currentUserId]);
 
-  // Filter clients based on search query - show all users from user table
-  const filteredUsers = useMemo(() => {
-    if (!reduxUsers || reduxUsers.length === 0) return [];
-    
-    if (!clientSearchQuery.trim()) {
-      // Show all users if no search query
-      return reduxUsers;
+  // For regular users, preselect the logged-in user as the default client.
+  // Do not overwrite if user changes client manually.
+  useEffect(() => {
+    if (!open || isCompanyOwner || !currentUserId || selectedUser) return;
+    if (String(selectedUser) !== String(currentUserId)) {
+      setSelectedUser(currentUserId);
     }
-    
-    const query = clientSearchQuery.toLowerCase().trim();
-    return reduxUsers.filter(user => {
-      const name = `${user.firstName || ''} ${user.lastName || ''}`.trim().toLowerCase();
-      const email = (user.email || '').toLowerCase();
-      const phone = (user.phone || '').toLowerCase();
-      return name.includes(query) || email.includes(query) || phone.includes(query);
-    });
-  }, [reduxUsers, clientSearchQuery]);
+  }, [open, isCompanyOwner, currentUserId, selectedUser]);
+
+  // All users for client selection (searching is handled in UserSelectionDialog)
+  const filteredUsers = useMemo(() => {
+    return reduxUsers || [];
+  }, [reduxUsers]);
 
   // Filter active services - show services with status 'Active' or no status, and for current company
   const activeServices = useMemo(() => {
@@ -729,7 +743,25 @@ export function AppointmentWizard({ currentUser: currentUserProp, selectedDate, 
   const selectedServiceData = activeServices.find(s => s.id === selectedService) || filteredActiveServices.find(s => s.id === selectedService);
   const selectedStaffData = staff.find(s => s.id === selectedStaff);
   const selectedSpaceData = activeSpaces.find(s => s.id === selectedSpace);
-  const selectedUserData = filteredUsers.find(u => u.id === selectedUser);
+  const selectedUserData =
+    filteredUsers.find((u) => String(u.id) === String(selectedUser)) ||
+    (reduxUsers || []).find((u) => String(u.id) === String(selectedUser));
+
+  // If a user is selected from paged dialog data but not yet in Redux list,
+  // fetch that user once so the wizard can resolve and display the selection.
+  useEffect(() => {
+    if (!selectedUser || selectedUserData || usersLoading) {
+      if (selectedUserData) {
+        missingSelectedUserFetchRef.current = null;
+      }
+      return;
+    }
+
+    if (missingSelectedUserFetchRef.current === selectedUser) return;
+
+    missingSelectedUserFetchRef.current = selectedUser;
+    dispatch(fetchUserRequest(selectedUser));
+  }, [dispatch, selectedUser, selectedUserData, usersLoading]);
 
   // Step validation
   const isStepValid = (stepIndex: number) => {
@@ -888,14 +920,13 @@ export function AppointmentWizard({ currentUser: currentUserProp, selectedDate, 
     setPreferredStaff([]);
     setSelectedSpace("");
     setSelectedUser("");
-      setNotes("");
-      setClientSearchQuery("");
-      setServiceSearchQuery("");
-      setServiceViewMode("grid");
-      setSpaceSearchQuery("");
-      setSpaceViewMode("grid");
-      setIsSubmitting(false);
-      setOpen(false);
+    setNotes("");
+    setServiceSearchQuery("");
+    setServiceViewMode("grid");
+    setSpaceSearchQuery("");
+    setSpaceViewMode("grid");
+    setIsSubmitting(false);
+    setOpen(false);
   };
 
   // Render footer buttons
@@ -1053,8 +1084,6 @@ export function AppointmentWizard({ currentUser: currentUserProp, selectedDate, 
             filteredUsers={filteredUsers}
             selectedUser={selectedUser}
             setSelectedUser={setSelectedUser}
-            clientSearchQuery={clientSearchQuery}
-            setClientSearchQuery={setClientSearchQuery}
             isCompanyOwner={isCompanyOwner}
             onRetry={() => {
               dispatch(fetchUsersRequest({}));
@@ -1392,7 +1421,6 @@ export function AppointmentWizard({ currentUser: currentUserProp, selectedDate, 
               // Wait a moment for the Redux state to update
               setTimeout(() => {
                 setSelectedUser(createdUser.id);
-                setClientSearchQuery(""); // Clear search to show the selected user
               }, 500);
             }
           }}

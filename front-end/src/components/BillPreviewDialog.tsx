@@ -1,5 +1,5 @@
-import { Download, Printer, Mail, Calendar, User, Clock, Receipt, Package, FileText, Check } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Download, Printer, Mail, Calendar, Receipt, Package, FileText, Check } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "./ui/button";
 import { CustomDialog } from "./ui/custom-dialog";
 import { Separator } from "./ui/separator";
@@ -8,6 +8,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Card } from "./ui/card";
 import { toast } from "sonner";
 import { appointmentHistoryService } from "@/services/appointmentHistory";
+import { companiesService, Company } from "@/services/companies";
+import { useAppSelector } from "@/store/hooks";
 import { formatAvatarUrl } from "../utils";
 
 interface BillingItem {
@@ -19,10 +21,13 @@ interface BillingItem {
   unitPrice: number;
   discount: number;
   unit?: string;
+  total?: number;
 }
 
 interface BillData {
   appointmentId: string;
+  companyId?: string;
+  companyName?: string;
   patientName: string;
   patientImage?: string;
   patientEmail?: string;
@@ -53,6 +58,9 @@ interface BillPreviewDialogProps {
 export function BillPreviewDialog({ open, onOpenChange, appointmentId, billData }: BillPreviewDialogProps) {
   const [historyData, setHistoryData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [resolvedCompany, setResolvedCompany] = useState<Company | null>(null);
+  const { user } = useAppSelector((state) => state.auth);
+  const { companies, currentCompany, userCompany } = useAppSelector((state) => state.companies);
 
   // Fetch appointment history from database when dialog opens
   useEffect(() => {
@@ -80,6 +88,51 @@ export function BillPreviewDialog({ open, onOpenChange, appointmentId, billData 
         });
     }
   }, [open, appointmentId]);
+
+  const fallbackCompanyId = useMemo(() => {
+    return (
+      historyData?.companyId ||
+      billData?.companyId ||
+      user?.companyId ||
+      undefined
+    );
+  }, [historyData?.companyId, billData?.companyId, user?.companyId]);
+
+  useEffect(() => {
+    if (!open) {
+      setResolvedCompany(null);
+      return;
+    }
+
+    if (!fallbackCompanyId) return;
+
+    const cachedCompany =
+      (userCompany && String(userCompany.id) === String(fallbackCompanyId) ? userCompany : null) ||
+      (currentCompany && String(currentCompany.id) === String(fallbackCompanyId) ? currentCompany : null) ||
+      companies.find((company) => String(company.id) === String(fallbackCompanyId)) ||
+      null;
+
+    if (cachedCompany) {
+      setResolvedCompany(cachedCompany);
+      return;
+    }
+
+    let isCancelled = false;
+    companiesService
+      .getCompanyById(String(fallbackCompanyId))
+      .then((company) => {
+        if (!isCancelled) {
+          setResolvedCompany(company);
+        }
+      })
+      .catch((error) => {
+        console.error("Error loading company for bill preview:", error);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [open, fallbackCompanyId, userCompany, currentCompany, companies]);
 
   // Map history data to bill data format
   const displayBillData: BillData | undefined = historyData ? (() => {
@@ -119,6 +172,8 @@ export function BillPreviewDialog({ open, onOpenChange, appointmentId, billData 
 
     return {
       appointmentId: historyData.appointmentId,
+      companyId: historyData.companyId,
+      companyName: historyData.companyName,
       patientName: userName,
       patientImage: userAvatar ? formatAvatarUrl(userAvatar, userFirstName, userLastName) : undefined,
       patientEmail: userEmail,
@@ -172,6 +227,24 @@ export function BillPreviewDialog({ open, onOpenChange, appointmentId, billData 
     // Here you would implement email sending
   };
 
+  const companyDisplayName =
+    resolvedCompany?.name ||
+    displayBillData?.companyName ||
+    historyData?.companyName ||
+    "Company";
+  const companyLogoUrl = resolvedCompany?.logo ? formatAvatarUrl(resolvedCompany.logo) : undefined;
+  const companyAddress = [
+    resolvedCompany?.address,
+    resolvedCompany?.city,
+    resolvedCompany?.state,
+    resolvedCompany?.postalCode,
+    resolvedCompany?.country,
+  ]
+    .filter((part) => Boolean(part && String(part).trim()))
+    .join(", ");
+  const companyEmail = resolvedCompany?.email || undefined;
+  const companyPhone = resolvedCompany?.phone || undefined;
+
   if (!displayBillData) {
     return null;
   }
@@ -180,9 +253,8 @@ export function BillPreviewDialog({ open, onOpenChange, appointmentId, billData 
     <CustomDialog
       open={open}
       onOpenChange={onOpenChange}
-      maxWidth="max-w-4xl"
-      className="bg-popover border-border max-h-[90vh] overflow-hidden"
-      disableContentScroll={false}
+      sizeWidth="small"
+      sizeHeight="large"
       customHeader={
         <div className="pb-4">
           <div className="flex items-center gap-2 text-foreground text-lg font-semibold leading-none">
@@ -223,21 +295,32 @@ export function BillPreviewDialog({ open, onOpenChange, appointmentId, billData 
         </>
       }
     >
-      <div className="overflow-y-auto custom-scrollbar max-h-[calc(90vh-200px)]">
+      <div>
           {/* Company Header */}
           <div className="text-center mb-8 p-6 bg-gradient-to-br from-[var(--accent-bg)] to-[var(--accent-bg)]/50 border border-[var(--accent-border)] rounded-lg shadow-lg">
             <div className="flex items-center justify-center gap-3 mb-3">
-              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[var(--accent-primary)] to-[var(--accent-secondary)] flex items-center justify-center shadow-lg">
-                <span className="text-[var(--accent-button-text)] font-bold text-xl">W</span>
-              </div>
+              <Avatar className="w-14 h-14 rounded-xl border border-[var(--accent-border)] shadow-lg">
+                <AvatarImage src={companyLogoUrl} alt={companyDisplayName} className="object-cover" />
+                <AvatarFallback className="rounded-xl bg-gradient-to-br from-[var(--accent-primary)] to-[var(--accent-secondary)] text-[var(--accent-button-text)] font-bold text-xl">
+                  {companyDisplayName.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
               <div>
-                <h1 className="text-2xl font-bold text-foreground">WebOnOne</h1>
-                <p className="text-sm text-muted-foreground font-medium">All Your Web Solutions in One</p>
+                <h1 className="text-2xl font-bold text-foreground">{companyDisplayName}</h1>
+                {companyEmail ? (
+                  <p className="text-sm text-muted-foreground font-medium">{companyEmail}</p>
+                ) : null}
               </div>
             </div>
             <div className="text-sm text-muted-foreground space-y-1">
-              <p>123 Healthcare Ave, Medical District</p>
-              <p>Phone: <span className="font-medium">(555) 123-4567</span> | Email: <span className="font-medium">billing@webonone.com</span></p>
+              {companyAddress ? <p>{companyAddress}</p> : null}
+              {(companyPhone || companyEmail) ? (
+                <p>
+                  {companyPhone ? <>Phone: <span className="font-medium">{companyPhone}</span></> : null}
+                  {companyPhone && companyEmail ? " | " : ""}
+                  {companyEmail ? <>Email: <span className="font-medium">{companyEmail}</span></> : null}
+                </p>
+              ) : null}
             </div>
           </div>
 
@@ -339,7 +422,7 @@ export function BillPreviewDialog({ open, onOpenChange, appointmentId, billData 
             
             <div className="space-y-2">
               {displayBillData.billingItems && displayBillData.billingItems.length > 0 ? (
-                displayBillData.billingItems.map((item, index) => {
+                displayBillData.billingItems.map((item) => {
                 const itemSubtotal = item.quantity * item.unitPrice;
                 const discountAmount = itemSubtotal * (item.discount / 100);
                 const finalItemTotal = item.total !== undefined ? item.total : (itemSubtotal - discountAmount);
@@ -440,11 +523,15 @@ export function BillPreviewDialog({ open, onOpenChange, appointmentId, billData 
               </p>
               <Separator className="my-2" />
               <p className="text-xs text-muted-foreground">
-                Questions about this bill? Contact us at <span className="font-medium text-[var(--accent-text)]">billing@webonone.com</span> or <span className="font-medium text-[var(--accent-text)]">(555) 123-4567</span>
+                Questions about this bill?
+                {(companyEmail || companyPhone) ? " Contact us at " : ""}
+                {companyEmail ? <span className="font-medium text-[var(--accent-text)]">{companyEmail}</span> : null}
+                {companyEmail && companyPhone ? " or " : ""}
+                {companyPhone ? <span className="font-medium text-[var(--accent-text)]">{companyPhone}</span> : null}
               </p>
             </div>
           </div>
-        </div>
+      </div>
     </CustomDialog>
   );
 }

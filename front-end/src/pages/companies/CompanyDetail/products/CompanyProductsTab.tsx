@@ -44,7 +44,7 @@ export const CompanyProductsTab = ({ companyId }: CompanyProductsTabProps) => {
   }, [companyProducts, companyId]);
 
   const handleViewProduct = (productId: string) => {
-    navigate(`/system/products/${productId}`);
+    navigate(`/system/companies/${companyId}/products/${productId}`);
   };
 
   const handleDeleteProduct = (productId: string) => {

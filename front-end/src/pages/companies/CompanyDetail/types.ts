@@ -29,4 +29,7 @@ export interface Company {
 export interface CompanyDetailPageProps {
   companyId: string;
   onBack: () => void;
+  initialTab?: "profile" | "services" | "products";
+  selectedServiceId?: string;
+  selectedProductId?: string;
 }

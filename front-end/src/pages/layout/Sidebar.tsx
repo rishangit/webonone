@@ -141,8 +141,8 @@ const getNavigationItems = (role: UserRole, selectedEntities?: string[] | null) 
   return [
     { icon: Calendar, label: "Dashboard", id: "dashboard" },
     { icon: Building, label: "Companies", id: "companies" },
-    { icon: Clock, label: "My Appointments", id: "my-appointments" },
-    { icon: Package, label: "Products", id: "products" },
+    { icon: Clock, label: "Appointments", id: "appointments" },
+    { icon: DollarSign, label: "Sales", id: "sales" },
     { icon: BarChart3, label: "Analytics", id: "analytics" },
     { icon: FileText, label: "Reports", id: "reports" },
     { icon: MessageSquare, label: "Messages", id: "messages" },

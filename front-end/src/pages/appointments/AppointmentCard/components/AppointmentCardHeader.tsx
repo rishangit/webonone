@@ -20,7 +20,9 @@ interface AppointmentCardHeaderProps {
   handleCancelAppointment: () => void;
   handleStartSession: () => void;
   handleReschedule: () => void;
+  canConfirmAppointment: boolean;
   onViewBill?: () => void;
+  onViewDetails?: () => void;
   onDelete?: () => void;
   onCardClick: (e: React.MouseEvent) => void;
   isCompact?: boolean;
@@ -41,7 +43,9 @@ export const AppointmentCardHeader = ({
   handleCancelAppointment,
   handleStartSession,
   handleReschedule,
+  canConfirmAppointment,
   onViewBill,
+  onViewDetails,
   onDelete,
   onCardClick,
   isCompact = false
@@ -63,10 +67,12 @@ export const AppointmentCardHeader = ({
         <DropdownMenuContent className="bg-popover border-border" align="end" onClick={(e) => e.stopPropagation()}>
           {isStatus(status, AppointmentStatus.PENDING) && (
             <>
-              <DropdownMenuItem onClick={handleConfirmAppointment}>
-                <CheckCircle className="w-4 h-4 mr-2" />
-                Confirm Appointment
-              </DropdownMenuItem>
+              {canConfirmAppointment && (
+                <DropdownMenuItem onClick={handleConfirmAppointment}>
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Confirm Appointment
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onClick={handleReschedule}>
                 <RotateCcw className="w-4 h-4 mr-2" />
                 Reschedule
@@ -105,7 +111,7 @@ export const AppointmentCardHeader = ({
                 <FileText className="w-4 h-4 mr-2" />
                 Add Notes
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={onViewDetails}>
                 <Eye className="w-4 h-4 mr-2" />
                 View Details
               </DropdownMenuItem>
@@ -122,7 +128,7 @@ export const AppointmentCardHeader = ({
                 <Receipt className="w-4 h-4 mr-2" />
                 View Bill
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={onViewDetails}>
                 <Eye className="w-4 h-4 mr-2" />
                 View Details
               </DropdownMenuItem>
@@ -179,10 +185,12 @@ export const AppointmentCardHeader = ({
           <DropdownMenuContent className="bg-popover border-border" align="end" onClick={(e) => e.stopPropagation()}>
             {isStatus(status, AppointmentStatus.PENDING) && (
               <>
-                <DropdownMenuItem onClick={handleConfirmAppointment}>
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  Confirm Appointment
-                </DropdownMenuItem>
+                {canConfirmAppointment && (
+                  <DropdownMenuItem onClick={handleConfirmAppointment}>
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Confirm Appointment
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onClick={handleReschedule}>
                   <RotateCcw className="w-4 h-4 mr-2" />
                   Reschedule
@@ -221,7 +229,7 @@ export const AppointmentCardHeader = ({
                   <FileText className="w-4 h-4 mr-2" />
                   Add Notes
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={onViewDetails}>
                   <Eye className="w-4 h-4 mr-2" />
                   View Details
                 </DropdownMenuItem>
@@ -238,7 +246,7 @@ export const AppointmentCardHeader = ({
                   <Receipt className="w-4 h-4 mr-2" />
                   View Bill
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={onViewDetails}>
                   <Eye className="w-4 h-4 mr-2" />
                   View Details
                 </DropdownMenuItem>

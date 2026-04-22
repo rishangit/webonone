@@ -216,15 +216,35 @@ export const Dashboard = ({ onNavigate }: DashboardProps = {}) => {
 
         // Find staff/provider data
         let staffData = null;
+        let preferredStaffData = null;
         if (appointment.staffId) {
           const provider = staff.find(s => s.id === appointment.staffId);
           if (provider) {
             staffData = {
+              id: provider.id,
               name: provider.name || `${provider.firstName} ${provider.lastName}`,
               image: provider.avatar ? formatAvatarUrl(provider.avatar) : undefined,
               specialization: provider.specialization || provider.role || 'Staff'
             };
           }
+        }
+
+        // Handle preferred staff
+        if (appointment.preferredStaffIds && appointment.preferredStaffIds.length > 0) {
+          preferredStaffData = appointment.preferredStaffIds
+            .map(staffId => {
+              const staffMember = staff.find(s => s.id === staffId);
+              if (staffMember) {
+                return {
+                  id: staffId,
+                  name: staffMember.name || `${staffMember.firstName} ${staffMember.lastName}`,
+                  image: staffMember.avatar ? formatAvatarUrl(staffMember.avatar) : undefined,
+                  specialization: staffMember.specialization || staffMember.role || 'Staff'
+                };
+              }
+              return null;
+            })
+            .filter(Boolean) as Array<{ id: string; name: string; image?: string; specialization: string }>;
         }
 
         // Find space data
@@ -264,6 +284,7 @@ export const Dashboard = ({ onNavigate }: DashboardProps = {}) => {
           phone: clientPhone,
           location,
           staff: staffData,
+          preferredStaff: preferredStaffData && preferredStaffData.length > 0 ? preferredStaffData : undefined,
           _originalAppointment: appointment
         };
       })
@@ -353,7 +374,7 @@ export const Dashboard = ({ onNavigate }: DashboardProps = {}) => {
                 </div>
               ) : todaysAppointments.length > 0 ? (
                 todaysAppointments.map((appointment) => (
-                  <AppointmentCard key={appointment.id} {...appointment} viewMode="list" />
+                  <AppointmentCard key={appointment.id} {...appointment} viewMode="list" selectedEntities={selectedEntities} />
                 ))
               ) : (
                 <div className="text-center py-8">

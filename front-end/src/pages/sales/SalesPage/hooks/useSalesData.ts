@@ -4,6 +4,7 @@ import { fetchAppointmentHistoryRequest } from "@/store/slices/appointmentHistor
 import { fetchStaffRequest } from "@/store/slices/staffSlice";
 import { companySalesService } from "@/services/companySales";
 import { currenciesService, Currency } from "@/services/currencies";
+import { isRole, UserRole } from "@/types/user";
 import { formatAvatarUrl } from "../../../../utils";
 import { SaleData, SaleItem } from "../types";
 
@@ -59,6 +60,8 @@ export const useSalesData = (
   const { staff } = useAppSelector((state) => state.staff);
   const { companies, currentCompany } = useAppSelector((state) => state.companies);
   const { user } = useAppSelector((state) => state.auth);
+  const isCompanyOwner = isRole(user?.role, UserRole.COMPANY_OWNER);
+  const currentUserId = user?.id ? String(user.id) : "";
   const [companyCurrency, setCompanyCurrency] = useState<Currency | null>(null);
   const [salesWithItems, setSalesWithItems] = useState<Record<string, any>>({});
 
@@ -133,12 +136,14 @@ export const useSalesData = (
 
   // Fetch sales with search and pagination
   useEffect(() => {
-    if (!companyId) return;
+    if (!companyId && !currentUserId) return;
     
     const { dateFrom, dateTo } = getDateRange(dateRange);
+    const shouldFilterByUser = !isCompanyOwner && !!currentUserId;
     
     dispatch(fetchAppointmentHistoryRequest({
       companyId,
+      userId: shouldFilterByUser ? currentUserId : undefined,
       limit: itemsPerPage,
       offset: (currentPage - 1) * itemsPerPage,
       page: currentPage,
@@ -147,7 +152,7 @@ export const useSalesData = (
       search: debouncedSearchTerm || undefined,
       enrich: true
     }));
-  }, [dispatch, companyId, currentPage, itemsPerPage, debouncedSearchTerm, dateRange]);
+  }, [dispatch, companyId, currentUserId, isCompanyOwner, currentPage, itemsPerPage, debouncedSearchTerm, dateRange]);
 
   // Fetch full sale data with item IDs
   useEffect(() => {
@@ -304,11 +309,14 @@ export const useSalesData = (
   };
 
   const refreshSales = async () => {
-    if (!companyId) return;
+    if (!companyId && !currentUserId) return;
     
     const { dateFrom, dateTo } = getDateRange(dateRange);
+    const shouldFilterByUser = !isCompanyOwner && !!currentUserId;
+
     await dispatch(fetchAppointmentHistoryRequest({
       companyId,
+      userId: shouldFilterByUser ? currentUserId : undefined,
       limit: itemsPerPage,
       offset: (currentPage - 1) * itemsPerPage,
       page: currentPage,

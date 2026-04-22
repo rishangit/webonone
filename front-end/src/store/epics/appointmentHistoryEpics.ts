@@ -70,7 +70,12 @@ export const fetchUserAppointmentHistoryEpic = (action$: Observable<any>) =>
   action$.pipe(
     ofType(fetchUserAppointmentHistoryRequest.type),
     switchMap((action) =>
-      from(appointmentHistoryService.getAppointmentHistoryByUserId(action.payload.userId, { companyId: action.payload.companyId })).pipe(
+      from(
+        appointmentHistoryService.getAppointmentHistoryByUserId(action.payload.userId, {
+          companyId: action.payload.companyId,
+          enrich: true,
+        })
+      ).pipe(
         map((history) => {
           return fetchUserAppointmentHistorySuccess(history);
         }),

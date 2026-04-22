@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const Joi = require('joi');
+const { pool } = require('../config/database');
 const Appointment = require('../models/Appointment');
 const Sale = require('../models/Sale');
+const CompanyStaff = require('../models/CompanyStaff');
 const { authenticateToken, requireRole, requirePermission, requireSameCompany } = require('../middleware/auth');
 const { validate, appointmentSchemas, querySchemas } = require('../middleware/validation');
 const { asyncHandler, notFoundError, validationError } = require('../middleware/errorHandler');
@@ -15,12 +17,52 @@ router.get('/',
   asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, clientId, companyId, staffId, status, date, dateFrom, dateTo, search } = req.query;
     
-    // If user is not super admin, filter by their company
+    // Role-based appointment visibility:
+    // - COMPANY_OWNER: all company appointments
+    // - STAFF_MEMBER: only appointments assigned to this staff member
+    // - USER: only their own appointments
     if (req.user.roleLevel > 0 && req.user.companyId) {
       req.query.companyId = req.user.companyId;
     }
+
+    if (req.user.roleLevel === 3) {
+      req.query.clientId = req.user.id;
+    }
+
+    if (req.user.roleLevel === 2) {
+      const [staffRows] = await pool.execute(
+        `SELECT id FROM company_staff WHERE userId = ? AND companyId = ? ORDER BY createdAt DESC LIMIT 1`,
+        [req.user.id, req.user.companyId]
+      );
+
+      if (!staffRows.length) {
+        return res.json({
+          success: true,
+          data: [],
+          pagination: {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            total: 0
+          },
+          stats: {
+            totalAppointments: 0,
+            confirmedAppointments: 0,
+            pendingAppointments: 0,
+            cancelledAppointments: 0,
+            completedAppointments: 0,
+            inProgressAppointments: 0,
+            noShowAppointments: 0
+          }
+        });
+      }
+
+      req.query.staffId = staffRows[0].id;
+    }
     
     const options = { page, limit, clientId, companyId, staffId, status, date, dateFrom, dateTo, search };
+    options.companyId = req.query.companyId || options.companyId;
+    options.clientId = req.query.clientId || options.clientId;
+    options.staffId = req.query.staffId || options.staffId;
     const result = await Appointment.findAll(options);
     
     // Get appointment statistics (filter by company if not super admin)
@@ -70,9 +112,16 @@ router.get('/:id',
 // Create new appointment
 router.post('/',
   authenticateToken,
-  requirePermission('manage_appointments'),
+  requirePermission('book_appointments'),
   validate(appointmentSchemas.create),
   asyncHandler(async (req, res) => {
+    // Regular users can book appointments, but only for themselves.
+    if (req.user.roleLevel === 3) {
+      req.body.clientId = req.user.id;
+      req.body.status = AppointmentStatus.PENDING;
+      req.body.paymentStatus = 'Pending';
+    }
+
     // If user is not super admin, set companyId to their company
     if (req.user.roleLevel > 0 && req.user.companyId) {
       req.body.companyId = req.user.companyId;
@@ -253,9 +302,9 @@ router.patch('/:id/status',
       }
     }
     
-    await appointment.update({ status: normalizedStatus });
-    
-    // If completing appointment, save to history
+    let saleIdForCompletion = appointment.saleId || null;
+
+    // If completing appointment, save billing as a sale
     if (normalizedStatus === AppointmentStatus.COMPLETED) {
       console.log('[Appointments] Status updated to Completed, checking for completionData');
       console.log('[Appointments] req.body.completionData:', req.body.completionData);
@@ -294,38 +343,65 @@ router.patch('/:id/status',
       // Get space details
       const spaceName = appointmentData.spaceName || null;
       
-        try {
-          // staffId is always the logged-in user (person making the sale/completing appointment)
-          // userId is the customer (from appointment.clientId)
-          const sale = await Sale.create({
-            userId: appointment.clientId, // Customer from appointment
-            companyId: appointment.companyId,
-            staffId: req.user.id, // Always the logged-in user making the sale
-            // serviceId and spaceId are not stored in sales - they're in the appointment table
-            servicesUsed: servicesUsed,
-            productsUsed: productsUsed,
-            totalAmount: completionData.totalAmount || 0,
-            subtotal: completionData.totalAmount || 0,
-            discountAmount: 0
-          });
-          
-          // Update appointment with saleId
-          await appointment.update({ saleId: sale.id });
-          
-          console.log('[Appointments] Sale saved successfully and appointment updated with saleId');
-        } catch (saleError) {
-          console.error('[Appointments] Error saving sale:', saleError);
-          // Don't fail the status update if sale save fails
+        // Avoid creating duplicate sales if this appointment already has a linked sale.
+        if (!saleIdForCompletion) {
+          try {
+            let saleStaffId = null;
+
+            // company_sales.staffId references company_staff.id (not users.id)
+            const [staffRows] = await pool.execute(
+              'SELECT id FROM company_staff WHERE userId = ? AND companyId = ? ORDER BY createdAt DESC LIMIT 1',
+              [req.user.id, appointment.companyId]
+            );
+
+            if (staffRows.length > 0) {
+              saleStaffId = staffRows[0].id;
+            } else if (appointment.companyId) {
+              const createdStaff = await CompanyStaff.create({
+                companyId: appointment.companyId,
+                userId: req.user.id,
+                status: 'Active'
+              });
+              saleStaffId = createdStaff.id;
+            }
+
+            // staffId is the person completing the appointment; userId is the appointment client.
+            const sale = await Sale.create({
+              userId: appointment.clientId,
+              companyId: appointment.companyId,
+              staffId: saleStaffId,
+              servicesUsed: servicesUsed,
+              productsUsed: productsUsed,
+              totalAmount: completionData.totalAmount || 0,
+              subtotal: completionData.totalAmount || 0,
+              discountAmount: 0
+            });
+
+            saleIdForCompletion = sale.id;
+            console.log('[Appointments] Sale saved successfully:', sale.id);
+          } catch (saleError) {
+            console.error('[Appointments] Error saving sale:', saleError);
+            throw validationError(`Failed to save billing sale: ${saleError.message}`);
+          }
+        } else {
+          console.log('[Appointments] Appointment already linked to sale, skipping new sale creation:', saleIdForCompletion);
         }
       } else {
         console.log('[Appointments] No completionData provided, skipping history save');
       }
     }
+
+    await appointment.update({
+      status: normalizedStatus,
+      ...(saleIdForCompletion ? { saleId: saleIdForCompletion } : {})
+    });
+
+    const updatedAppointment = await Appointment.findById(req.params.id);
     
     res.json({
       success: true,
       message: 'Appointment status updated successfully',
-      data: appointment
+      data: updatedAppointment
     });
   })
 );

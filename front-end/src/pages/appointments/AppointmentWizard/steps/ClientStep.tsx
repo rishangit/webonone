@@ -1,10 +1,11 @@
-import { User, Search, Check, UserPlus } from "lucide-react";
+import { User, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DateDisplay } from "@/components/common/DateDisplay";
 import { formatAvatarUrl } from "../../../../utils";
+import { UserSelectionDialog } from "@/components/common/UserSelectionDialog";
+import { useMemo, useState } from "react";
 
 interface ClientStepProps {
   users: any[];
@@ -13,8 +14,6 @@ interface ClientStepProps {
   filteredUsers: any[];
   selectedUser: string;
   setSelectedUser: (user: string) => void;
-  clientSearchQuery: string;
-  setClientSearchQuery: (query: string) => void;
   isCompanyOwner: boolean;
   onRetry: () => void;
   onCreateUser: () => void;
@@ -27,35 +26,24 @@ export const ClientStep = ({
   filteredUsers,
   selectedUser,
   setSelectedUser,
-  clientSearchQuery,
-  setClientSearchQuery,
   isCompanyOwner,
   onRetry,
   onCreateUser
 }: ClientStepProps) => {
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const selectedUserData = useMemo(
+    () => filteredUsers.find((user) => String(user.id) === String(selectedUser)) || null,
+    [filteredUsers, selectedUser]
+  );
+
+  const selectedName = selectedUserData
+    ? `${selectedUserData.firstName || ""} ${selectedUserData.lastName || ""}`.trim() || selectedUserData.email
+    : "No client selected";
+
   return (
     <div className="flex flex-col h-full space-y-3">
-      {/* Search Input */}
-      <div className="relative shrink-0">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input
-          placeholder="Search users by name, email, or phone..."
-          value={clientSearchQuery}
-          onChange={(e) => setClientSearchQuery(e.target.value)}
-          className="pl-10 bg-[var(--glass-bg)] border-[var(--glass-border)] focus:border-[var(--accent-border)]"
-        />
-      </div>
-
-      {/* Users Count */}
-      <div className="text-xs text-muted-foreground">
-        {clientSearchQuery ? (
-          <>Found {filteredUsers.length} of {users?.length || 0} user{users?.length !== 1 ? 's' : ''}</>
-        ) : (
-          <>{users?.length || 0} user{(users?.length || 0) !== 1 ? 's' : ''} available</>
-        )}
-      </div>
-      
-      <div className="flex-1 min-h-0 sm:h-80 overflow-y-auto overflow-x-hidden custom-scrollbar space-y-2 border border-[var(--glass-border)] rounded-lg p-2 bg-[var(--glass-bg)]/50">
+      <div className="flex-1 min-h-0 sm:h-80 overflow-y-auto overflow-x-hidden custom-scrollbar space-y-2 border border-[var(--glass-border)] rounded-lg p-3 bg-[var(--glass-bg)]/50">
         {usersLoading ? (
           <div className="text-center py-8 text-muted-foreground">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--accent-primary)] mx-auto mb-2"></div>
@@ -75,24 +63,14 @@ export const ClientStep = ({
               Retry
             </Button>
           </div>
-        ) : filteredUsers.length === 0 ? (
+        ) : users.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <User className="w-8 h-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">
-              {users?.length === 0 
-                ? "No users available." 
-                : "No users found matching your search."}
-            </p>
+            <p className="text-sm">No users available.</p>
             <div className="flex flex-col sm:flex-row gap-2 justify-center mt-4">
-              {clientSearchQuery && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setClientSearchQuery("")}
-                >
-                  Clear search
-                </Button>
-              )}
+              <Button variant="outline" size="sm" onClick={onRetry}>
+                Retry
+              </Button>
               {isCompanyOwner && (
                 <Button
                   variant="accent"
@@ -107,54 +85,70 @@ export const ClientStep = ({
             </div>
           </div>
         ) : (
-          filteredUsers.map((user) => (
-            <Card
-              key={user.id}
-              className={`cursor-pointer transition-all duration-200 w-full touch-manipulation ${
-                selectedUser === user.id 
-                  ? 'border-[var(--accent-border)] bg-[var(--accent-bg)] ring-2 ring-[var(--accent-border)]' 
-                  : 'border-[var(--glass-border)] bg-[var(--glass-bg)] hover:border-[var(--accent-border)] active:bg-[var(--accent-bg)]'
-              }`}
-              onClick={() => setSelectedUser(user.id)}
-            >
-              <div className="p-3 flex items-center gap-3 w-full min-w-0">
-                <div className="relative flex-shrink-0">
+          <div className="space-y-3">
+            <Card className="border-[var(--glass-border)] bg-[var(--glass-bg)]">
+              <div className="p-3 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
                   <Avatar className="w-10 h-10 border border-[var(--glass-border)]">
-                    <AvatarImage src={formatAvatarUrl(user.avatar, user.firstName, user.lastName)} alt={`${user.firstName || ''} ${user.lastName || ''}`} />
+                    <AvatarImage
+                      src={
+                        selectedUserData
+                          ? formatAvatarUrl(selectedUserData.avatar, selectedUserData.firstName, selectedUserData.lastName)
+                          : undefined
+                      }
+                      alt={selectedName}
+                    />
                     <AvatarFallback className="text-xs">
-                      {(user.firstName?.[0] || '')}{(user.lastName?.[0] || '')}
+                      {selectedUserData
+                        ? `${selectedUserData.firstName?.[0] || ""}${selectedUserData.lastName?.[0] || ""}`
+                        : "U"}
                     </AvatarFallback>
                   </Avatar>
-                  {selectedUser === user.id && (
-                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-[var(--accent-primary)] text-white rounded-full flex items-center justify-center">
-                      <Check className="w-3 h-3" />
-                    </div>
-                  )}
+                  <div className="min-w-0">
+                    <h4 className="font-medium text-foreground truncate text-sm">{selectedName}</h4>
+                    {selectedUserData?.email ? (
+                      <p className="text-xs text-muted-foreground truncate">{selectedUserData.email}</p>
+                    ) : null}
+                  </div>
                 </div>
-                
-                <div className="flex-1 min-w-0 overflow-hidden">
-                  <h4 className="font-medium text-foreground truncate text-sm">
-                    {`${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email}
-                  </h4>
-                  <p className="text-xs text-muted-foreground truncate">{user.email}</p>
-                  {user.phone && (
-                    <p className="text-xs text-muted-foreground truncate sm:hidden">{user.phone}</p>
-                  )}
-                </div>
-                
-                <div className="flex-shrink-0 text-right hidden sm:block">
-                  {user.createdAt && (
-                    <>
-                      <p className="text-xs text-muted-foreground whitespace-nowrap">Joined</p>
-                      <p className="text-xs text-[var(--accent-text)] whitespace-nowrap"><DateDisplay date={user.createdAt} /></p>
-                    </>
-                  )}
-                </div>
+                <Button variant="outline" size="sm" onClick={() => setDialogOpen(true)} className="shrink-0">
+                  Select Client
+                </Button>
               </div>
             </Card>
-          ))
+
+            {selectedUserData?.createdAt && (
+              <p className="text-xs text-muted-foreground px-1">
+                Client since <DateDisplay date={selectedUserData.createdAt} />
+              </p>
+            )}
+
+            {isCompanyOwner && (
+              <Button
+                variant="accent"
+                size="sm"
+                onClick={onCreateUser}
+                className="flex items-center gap-2"
+              >
+                <UserPlus className="w-4 h-4" />
+                Create New User
+              </Button>
+            )}
+          </div>
         )}
       </div>
+
+      <UserSelectionDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        value={selectedUser || null}
+        onChange={(userId) => setSelectedUser(userId ? String(userId) : "")}
+        users={users || []}
+        title="Select Client"
+        description="Choose the client for this appointment"
+        placeholder="Search users by name or email..."
+        error={!selectedUser}
+      />
     </div>
   );
 };

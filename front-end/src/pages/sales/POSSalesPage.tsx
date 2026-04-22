@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Search, Package, ShoppingCart, X, Trash2, Calculator, Check, User, CreditCard, Save } from "lucide-react";
+import { Search, Package, ShoppingCart, X, Calculator, Check, User, CreditCard, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +21,7 @@ import { UserSelectionDialog } from "@/components/common/UserSelectionDialog";
 import { fetchUsersRequest } from "@/store/slices/usersSlice";
 import { currenciesService, Currency } from "@/services/currencies";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CartItemEditorCard } from "@/components/common/CartItemEditorCard";
 
 interface ProductVariant {
   id: string;
@@ -820,106 +821,25 @@ export const POSSalesPage = ({ onBack, currentUser }: POSSalesPageProps) => {
             ) : (
               <div className="space-y-3">
                 {cartItems.map((item) => (
-                  <Card key={item.id} className="p-4 bg-[var(--glass-bg)] border border-[var(--accent-border)] backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-200 hover:border-[var(--accent-primary)]">
-                    <div className="space-y-3">
-                      {/* Header Section */}
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-start gap-3 flex-1 min-w-0">
-                          {/* Product Image */}
-                          <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-                            {item.image ? (
-                              <img
-                                src={item.image}
-                                alt={item.name}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  const img = e.target as HTMLImageElement;
-                                  img.style.display = 'none';
-                                  const fallback = img.nextElementSibling as HTMLElement;
-                                  if (fallback) {
-                                    fallback.style.display = 'flex';
-                                  }
-                                }}
-                              />
-                            ) : null}
-                            <div
-                              className="w-full h-full flex items-center justify-center"
-                              style={{ display: item.image ? 'none' : 'flex' }}
-                            >
-                              <Package className="w-6 h-6 text-muted-foreground" />
-                            </div>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-foreground text-sm truncate mb-1">{item.name}</h4>
-                            {item.description && (
-                              <p className="text-xs text-muted-foreground line-clamp-2">{item.description}</p>
-                            )}
-                            {item.variantVolume && (
-                              <Badge variant="outline" className="text-xs bg-[var(--accent-bg)] border-[var(--accent-border)] text-[var(--accent-text)] mt-1">
-                                Size: {item.variantVolume}
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex flex-col items-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removeCartItem(item.id)}
-                            className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950 h-7 w-7"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </Button>
-
-                        </div>
-                      </div>
-
-                      {/* Input Fields Section */}
-                      <div className="flex flex-row gap-2 items-end">
-                        <div className="flex-1 space-y-1 min-w-0">
-                          <Label className="text-xs font-medium text-muted-foreground">Quantity</Label>
-                          <Input
-                            type="number"
-                            min="0"
-                            value={item.quantity}
-                            onChange={(e) => updateCartItem(item.id, 'quantity', parseFloat(e.target.value) || 0)}
-                            className="text-xs h-8 w-full bg-[var(--input-background)] border-[var(--glass-border)] hover:border-[var(--accent-border)] focus:border-[var(--accent-primary)] transition-colors"
-                          />
-                        </div>
-                        <div className="flex-1 space-y-1 min-w-0">
-                          <Label className="text-xs font-medium text-muted-foreground">
-                            {item.variantVolume && item.displayPrice
-                              ? `Price/${item.variantVolume}`
-                              : `Price${item.unit ? `/${item.unit}` : ''}`
-                            }
-                          </Label>
-                          <div className="text-xs font-semibold text-[var(--accent-text)] h-8 flex items-center w-full">
-                            {item.variantVolume && item.displayPrice
-                              ? formatCurrency(item.displayPrice)
-                              : formatCurrency(item.unitPrice)
-                            }
-                          </div>
-                        </div>
-                        <div className="flex-1 space-y-1 min-w-0">
-                          <Label className="text-xs font-medium text-muted-foreground">Discount %</Label>
-                          <Input
-                            type="number"
-                            min="0"
-                            max="100"
-                            value={item.discount}
-                            onChange={(e) => updateCartItem(item.id, 'discount', parseFloat(e.target.value) || 0)}
-                            className="text-xs h-8 w-full bg-[var(--input-background)] border-[var(--glass-border)] hover:border-[var(--accent-border)] focus:border-[var(--accent-primary)] transition-colors"
-                          />
-                        </div>
-                        <div className="flex-1 space-y-1 min-w-0">
-                          <Label className="text-xs font-medium text-muted-foreground">Total</Label>
-                          <div className="text-sm font-bold text-[var(--accent-text)] h-8 flex items-center justify-end w-full">
-                            {formatCurrency((item.quantity * item.unitPrice) * (1 - item.discount / 100))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
+                  <CartItemEditorCard
+                    key={item.id}
+                    id={item.id}
+                    type="product"
+                    name={item.name}
+                    description={item.description}
+                    image={item.image}
+                    quantity={item.quantity}
+                    unitPrice={item.unitPrice}
+                    discount={item.discount}
+                    unit={item.unit}
+                    variantVolume={item.variantVolume}
+                    displayPrice={item.displayPrice}
+                    formatCurrency={formatCurrency}
+                    onRemove={removeCartItem}
+                    onQuantityChange={(itemId, quantity) => updateCartItem(itemId, "quantity", quantity)}
+                    onDiscountChange={(itemId, discount) => updateCartItem(itemId, "discount", discount)}
+                    quantityMin={0}
+                  />
                 ))}
               </div>
             )}

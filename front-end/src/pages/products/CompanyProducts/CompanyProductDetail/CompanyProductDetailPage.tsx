@@ -13,6 +13,7 @@ import { companyProductVariantsService } from "@/services/companyProductVariants
 import { toast } from "sonner";
 import { VariantFormData } from "@/schemas/variantValidation";
 import { TabSwitcher } from "@/components/ui/tab-switcher";
+import { isRole, UserRole } from "@/types/user";
 import { CompanyProductDetailHeader } from "./CompanyProductDetailHeader";
 import { CompanyProductOverviewTab } from "./overview/CompanyProductOverviewTab";
 import { CompanyProductAttributesTab } from "./attributes/CompanyProductAttributesTab";
@@ -28,11 +29,19 @@ export const CompanyProductDetailPage = ({ productId, onBack }: CompanyProductDe
   const [selectedVariant, setSelectedVariant] = useState<CompanyProductVariant | null>(null);
   
   // Redux state
+  const { user } = useAppSelector((state) => state.auth);
   const { currentCompanyProduct, loading, error } = useAppSelector((state) => state.companyProducts);
   const [variants, setVariants] = useState<CompanyProductVariant[]>([]);
   const [variantsLoading, setVariantsLoading] = useState(false);
 
   const [activeTab, setActiveTab] = useState<string>("overview");
+  const isRegularUser = isRole(user?.role, UserRole.USER);
+
+  useEffect(() => {
+    if (isRegularUser && (activeTab === "variants" || activeTab === "attributes")) {
+      setActiveTab("overview");
+    }
+  }, [isRegularUser, activeTab]);
 
   // Fetch company product and system product
   useEffect(() => {
@@ -169,7 +178,7 @@ export const CompanyProductDetailPage = ({ productId, onBack }: CompanyProductDe
 
   if (loading && !currentCompanyProduct) {
     return (
-      <div className="flex-1 p-4 lg:p-8 min-h-screen flex items-center justify-center">
+      <div className="flex-1 p-4 lg:p-6 flex items-center justify-center">
         <div className="text-center">
           <p className="text-foreground">Loading product details...</p>
         </div>
@@ -179,7 +188,7 @@ export const CompanyProductDetailPage = ({ productId, onBack }: CompanyProductDe
 
   if (error && !currentCompanyProduct) {
     return (
-      <div className="flex-1 p-4 lg:p-8 min-h-screen flex items-center justify-center">
+      <div className="flex-1 p-4 lg:p-6 flex items-center justify-center">
         <Card className="p-12 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] text-center">
           <h3 className="text-lg font-semibold text-foreground mb-2">Error Loading Product</h3>
           <p className="text-muted-foreground mb-4">{error}</p>
@@ -194,7 +203,7 @@ export const CompanyProductDetailPage = ({ productId, onBack }: CompanyProductDe
 
   if (!currentCompanyProduct) {
     return (
-      <div className="flex-1 p-4 lg:p-8 min-h-screen flex items-center justify-center">
+      <div className="flex-1 p-4 lg:p-6 flex items-center justify-center">
         <Card className="p-12 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] text-center">
           <h3 className="text-lg font-semibold text-foreground mb-2">Product Not Found</h3>
           <p className="text-muted-foreground mb-4">The product you're looking for doesn't exist.</p>
@@ -208,22 +217,24 @@ export const CompanyProductDetailPage = ({ productId, onBack }: CompanyProductDe
   }
 
   return (
-    <div className="flex-1 space-y-6 p-4 lg:p-8 min-h-screen">
+    <div className="flex-1 p-4 lg:p-6 space-y-6 w-full">
       <CompanyProductDetailHeader
         product={currentCompanyProduct}
         onBack={onBack}
       />
 
       <div className="w-full space-y-6">
-        <TabSwitcher
-          tabs={[
-            { value: "overview", label: "Overview" },
-            { value: "variants", label: "Product Variants" },
-            { value: "attributes", label: "Product Attributes" }
-          ]}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-        />
+        {!isRegularUser && (
+          <TabSwitcher
+            tabs={[
+              { value: "overview", label: "Overview" },
+              { value: "variants", label: "Product Variants" },
+              { value: "attributes", label: "Product Attributes" },
+            ]}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+          />
+        )}
 
         {activeTab === "overview" && (
           <div className="mt-6">
@@ -237,7 +248,7 @@ export const CompanyProductDetailPage = ({ productId, onBack }: CompanyProductDe
           </div>
         )}
 
-        {activeTab === "variants" && (
+        {!isRegularUser && activeTab === "variants" && (
           <div className="mt-6">
             <CompanyProductVariantsTab
               product={currentCompanyProduct}
@@ -253,7 +264,7 @@ export const CompanyProductDetailPage = ({ productId, onBack }: CompanyProductDe
           </div>
         )}
 
-        {activeTab === "attributes" && (
+        {!isRegularUser && activeTab === "attributes" && (
           <div className="mt-6">
             <CompanyProductAttributesTab />
           </div>

@@ -8,6 +8,8 @@ import { formatDate } from "../../../utils";
 import { toast } from "sonner";
 import { AppointmentStatus, normalizeAppointmentStatus, getAppointmentStatusLabel } from "@/types/appointmentStatus";
 import { useAppDispatch } from "@/store/hooks";
+import { useAppSelector } from "@/store/hooks";
+import { isRole, UserRole } from "@/types/user";
 import { updateAppointmentRequest } from "@/store/slices/appointmentsSlice";
 import { AppointmentCardProps } from "./types";
 import { AppointmentCardHeader } from "./components/AppointmentCardHeader";
@@ -41,6 +43,10 @@ export const AppointmentCard = ({
   const hasStaffEntity = !selectedEntities || selectedEntities.includes('staff');
   const hasSpaceEntity = !selectedEntities || selectedEntities.includes('space');
   const dispatch = useAppDispatch();
+  const { user } = useAppSelector((state) => state.auth);
+  const canConfirmAppointment =
+    isRole(user?.role, UserRole.COMPANY_OWNER) ||
+    isRole(user?.role, UserRole.STAFF_MEMBER);
   const [showStaffDialog, setShowStaffDialog] = useState(false);
   const [showBillingDialog, setShowBillingDialog] = useState(false);
   const [showBillPreview, setShowBillPreview] = useState(false);
@@ -227,6 +233,10 @@ export const AppointmentCard = ({
     toast.info("Reschedule functionality would open here");
   };
 
+  const handleViewDetails = () => {
+    navigate(`/system/appointments/${id}`);
+  };
+
   const handleCardClick = (e: React.MouseEvent) => {
     // Don't navigate if clicking on dropdown menu, buttons, or interactive elements
     const target = e.target as HTMLElement;
@@ -356,7 +366,9 @@ export const AppointmentCard = ({
                   handleCancelAppointment={handleCancelAppointment}
                   handleStartSession={handleStartSession}
                   handleReschedule={handleReschedule}
+                  canConfirmAppointment={canConfirmAppointment}
                   onViewBill={() => setShowBillPreview(true)}
+                  onViewDetails={handleViewDetails}
                   onDelete={onDelete}
                   onCardClick={handleCardClick}
                   isCompact={true}
@@ -409,7 +421,9 @@ export const AppointmentCard = ({
               handleCancelAppointment={handleCancelAppointment}
               handleStartSession={handleStartSession}
               handleReschedule={handleReschedule}
+              canConfirmAppointment={canConfirmAppointment}
               onViewBill={() => setShowBillPreview(true)}
+              onViewDetails={handleViewDetails}
               onDelete={onDelete}
               onCardClick={handleCardClick}
               isCompact={false}

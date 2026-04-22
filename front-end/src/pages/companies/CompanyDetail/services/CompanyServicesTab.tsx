@@ -104,12 +104,12 @@ export const CompanyServicesTab = ({ companyId }: CompanyServicesTabProps) => {
   }, [reduxServices, companyId]);
 
   const handleViewService = (service: ServiceType) => {
-    navigate(`/system/services/${service.id}`);
+    navigate(`/system/companies/${companyId}/services/${service.id}`);
   };
 
   const handleEditService = (service: ServiceType) => {
     // Navigate to services page with edit mode
-    navigate(`/system/services`);
+    navigate(`/system/companies/${companyId}/services/${service.id}`);
   };
 
   const handleDeleteService = (service: ServiceType) => {

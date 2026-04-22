@@ -14,6 +14,7 @@ interface CompanyProductOverviewTabProps {
   variantsLoading: boolean;
   selectedVariantId: string | null;
   onVariantSelect: (variant: CompanyProductVariant | null) => void;
+  showVariantAndAttributeSections?: boolean;
 }
 
 export const CompanyProductOverviewTab = ({
@@ -22,6 +23,7 @@ export const CompanyProductOverviewTab = ({
   variantsLoading,
   selectedVariantId,
   onVariantSelect,
+  showVariantAndAttributeSections = true,
 }: CompanyProductOverviewTabProps) => {
   const imageUrl = product.imageUrl 
     ? (product.imageUrl.startsWith('http') ? product.imageUrl : formatAvatarUrl(product.imageUrl))
@@ -68,13 +70,15 @@ export const CompanyProductOverviewTab = ({
           selectedVariantId={selectedVariantId}
           selectedVariant={selectedVariant}
           onVariantSelect={onVariantSelect}
+          showVariantSelector={showVariantAndAttributeSections}
         />
 
-        {/* Product Attributes - Shows values for selected variant */}
-        <CompanyProductAttributesDisplay
-          systemProductId={product.systemProductId || null}
-          selectedVariant={selectedVariant}
-        />
+        {showVariantAndAttributeSections && (
+          <CompanyProductAttributesDisplay
+            systemProductId={product.systemProductId || null}
+            selectedVariant={selectedVariant}
+          />
+        )}
 
         {product.tags && product.tags.length > 0 && (
           <CompanyProductDetailTags tags={product.tags} />

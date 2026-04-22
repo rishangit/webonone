@@ -282,8 +282,11 @@ function UsersPageWrapper() {
 
 // CompanyProfilePage Wrapper Component
 function CompanyProfilePageWrapper() {
-  const { id } = useParams<{ id: string }>();
+  const { id, serviceId, productId } = useParams<{ id: string; serviceId?: string; productId?: string }>();
+  const location = useLocation();
   const navigate = useNavigate();
+  const isServicesRoute = location.pathname.includes('/services');
+  const isProductsRoute = location.pathname.includes('/products');
 
   const handleBack = () => {
     navigate('/system/companies');
@@ -294,9 +297,12 @@ function CompanyProfilePageWrapper() {
   }
 
   return (
-    <CompanyProfilePage 
-      companyId={id} 
-      onBack={handleBack} 
+    <CompanyProfilePage
+      companyId={id}
+      onBack={handleBack}
+      initialTab={isServicesRoute ? 'services' : isProductsRoute ? 'products' : 'profile'}
+      selectedServiceId={serviceId}
+      selectedProductId={productId}
     />
   );
 }
@@ -598,6 +604,66 @@ function ServiceDetailPageWrapper() {
     <ServiceDetailPage 
       serviceId={id}
       onBack={() => navigate('/system/services')}
+    />
+  );
+}
+
+// Company ServiceDetailPage Wrapper Component
+function CompanyServiceDetailPageWrapper() {
+  const { id: companyId, serviceId } = useParams<{ id: string; serviceId: string }>();
+  const navigate = useNavigate();
+
+  if (!companyId || !serviceId) {
+    return (
+      <div className="flex-1 p-4 lg:p-8 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-foreground mb-2">Service Not Found</h3>
+          <p className="text-muted-foreground mb-4">Invalid company or service ID</p>
+          <button
+            onClick={() => navigate('/system/companies')}
+            className="px-4 py-2 bg-[var(--accent-primary)] text-[var(--accent-button-text)] rounded-lg hover:bg-[var(--accent-primary-hover)]"
+          >
+            Back to Companies
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <ServiceDetailPage
+      serviceId={serviceId}
+      onBack={() => navigate(`/system/companies/${companyId}/services`)}
+    />
+  );
+}
+
+// Company ProductDetailPage Wrapper Component
+function CompanyScopedProductDetailPageWrapper() {
+  const { id: companyId, productId } = useParams<{ id: string; productId: string }>();
+  const navigate = useNavigate();
+
+  if (!companyId || !productId) {
+    return (
+      <div className="flex-1 p-4 lg:p-8 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-foreground mb-2">Product Not Found</h3>
+          <p className="text-muted-foreground mb-4">Invalid company or product ID</p>
+          <button
+            onClick={() => navigate('/system/companies')}
+            className="px-4 py-2 bg-[var(--accent-primary)] text-[var(--accent-button-text)] rounded-lg hover:bg-[var(--accent-primary-hover)]"
+          >
+            Back to Companies
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <CompanyProductDetailPage
+      productId={productId}
+      onBack={() => navigate(`/system/companies/${companyId}/products`)}
     />
   );
 }
@@ -916,6 +982,58 @@ function App() {
               isAuthenticated ? (
                 <ProtectedRouteWrapper>
                   <CompanyProfilePageWrapper />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+
+          <Route
+            path="/system/companies/:id/services"
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <CompanyProfilePageWrapper />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+
+          <Route
+            path="/system/companies/:id/services/:serviceId"
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <CompanyServiceDetailPageWrapper />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+
+          <Route
+            path="/system/companies/:id/products"
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <CompanyProfilePageWrapper />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+
+          <Route
+            path="/system/companies/:id/products/:productId"
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <CompanyScopedProductDetailPageWrapper />
                 </ProtectedRouteWrapper>
               ) : (
                 <Navigate to="/system/login" replace />

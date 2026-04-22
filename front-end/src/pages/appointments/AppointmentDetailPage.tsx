@@ -3,23 +3,26 @@ import { Calendar, Clock, User, MapPin, Phone, Mail, Stethoscope, Edit, Trash2 }
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useNavigate } from "react-router-dom";
-import { fetchAppointmentRequest, deleteAppointmentRequest, clearError } from "@/store/slices/appointmentsSlice";
+import { fetchAppointmentRequest, deleteAppointmentRequest, clearError, updateAppointmentStatusRequest } from "@/store/slices/appointmentsSlice";
 import { fetchUserRequest } from "@/store/slices/usersSlice";
 import { fetchServiceRequest } from "@/store/slices/servicesSlice";
 import { fetchStaffMemberRequest } from "@/store/slices/staffSlice";
 import { fetchSpaceRequest } from "@/store/slices/spacesSlice";
 import { Appointment } from "@/services/appointments";
-import { AppointmentStatus, normalizeAppointmentStatus, getAppointmentStatusLabel } from "@/types/appointmentStatus";
+import { AppointmentStatus, AppointmentStatusValues, normalizeAppointmentStatus, getAppointmentStatusLabel } from "@/types/appointmentStatus";
 import { formatAvatarUrl } from "../../utils";
 import { DateDisplay } from "@/components/common/DateDisplay";
 import { DeleteConfirmationDialog } from "@/components/common/DeleteConfirmationDialog";
 import { AppointmentBillingDialog } from "./AppointmentBillingDialog";
+import { BillPreviewDialog } from "@/components/BillPreviewDialog";
 import { BackButton } from "@/components/common/BackButton";
 import { CardTitle } from "@/components/common/CardTitle";
+import { isRole, UserRole } from "@/types/user";
 
 interface AppointmentDetailPageProps {
   appointmentId: string;
@@ -34,12 +37,15 @@ export const AppointmentDetailPage = ({ appointmentId, onBack }: AppointmentDeta
   const { currentService } = useAppSelector((state) => state.services);
   const { currentStaff } = useAppSelector((state) => state.staff);
   const { currentSpace } = useAppSelector((state) => state.spaces);
+  const { user } = useAppSelector((state) => state.auth);
 
   const [appointment, setAppointment] = useState<Appointment | null>(null);
   const [localLoading, setLocalLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showBillingDialog, setShowBillingDialog] = useState(false);
+  const [showBillPreview, setShowBillPreview] = useState(false);
+  const [lastGeneratedBill, setLastGeneratedBill] = useState<any>(null);
 
   useEffect(() => {
     const fetchAppointment = async () => {
@@ -122,6 +128,62 @@ export const AppointmentDetailPage = ({ appointmentId, onBack }: AppointmentDeta
     return normalizedStatus !== null ? getAppointmentStatusLabel(normalizedStatus) : String(status);
   };
 
+  const handleAppointmentCompletion = (completionData: any) => {
+    if (!appointment) return;
+
+    const subtotal = completionData.billingItems.reduce((sum: number, item: any) => {
+      return sum + (item.quantity * item.unitPrice);
+    }, 0);
+
+    const discountAmount = completionData.billingItems.reduce((sum: number, item: any) => {
+      const itemSubtotal = item.quantity * item.unitPrice;
+      return sum + (itemSubtotal * ((item.discount || 0) / 100));
+    }, 0);
+
+    const billData = {
+      appointmentId: appointment.id,
+      companyId: appointment.companyId,
+      patientName: clientName,
+      patientImage: clientAvatar,
+      service: currentService?.name || appointment.type || "Service",
+      date: appointment.date,
+      time: appointment.time,
+      billingItems: completionData.billingItems.map((item: any) => ({
+        id: item.id,
+        type: item.type,
+        serviceId: item.serviceId,
+        productId: item.productId,
+        variantId: item.variantId,
+        name: item.name,
+        description: item.description,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        discount: item.discount || 0,
+        unit: item.unit,
+        total: (item.quantity * item.unitPrice) * (1 - ((item.discount || 0) / 100)),
+      })),
+      subtotal,
+      discountAmount,
+      finalAmount: completionData.totalAmount,
+      generatedAt: new Date().toISOString(),
+      billNumber: `BILL-${Date.now()}`,
+    };
+
+    setLastGeneratedBill(billData);
+
+    dispatch(
+      updateAppointmentStatusRequest({
+        id: appointment.id,
+        status: AppointmentStatus.COMPLETED,
+        completionData,
+      })
+    );
+
+    setShowBillingDialog(false);
+    toast.success("Appointment completed and bill saved to sales.");
+    setTimeout(() => setShowBillPreview(true), 350);
+  };
+
   if (localLoading || loading) {
     return (
       <div className="flex-1 p-4 lg:p-6 flex items-center justify-center">
@@ -152,6 +214,36 @@ export const AppointmentDetailPage = ({ appointmentId, onBack }: AppointmentDeta
   const clientEmail = clientUser?.email || 'N/A';
   const clientPhone = clientUser?.phone || 'N/A';
   const clientAvatar = clientUser?.avatar;
+  const currentUserId = user?.id
+    ? String(user.id)
+    : (user as any)?.userId
+      ? String((user as any).userId)
+      : "";
+  const isCompanyOwner = isRole(user?.role, UserRole.COMPANY_OWNER);
+  const isAssignedStaffMember = Boolean(
+    appointment.staffId &&
+      ((currentStaff?.userId && String(currentStaff.userId) === currentUserId) ||
+        ((user as any)?.staffId && String((user as any).staffId) === String(appointment.staffId)))
+  );
+  const canChangeAppointmentStatus = isCompanyOwner || isAssignedStaffMember;
+
+  const handleStatusChange = (nextStatusValue: string) => {
+    const normalizedStatus = normalizeAppointmentStatus(nextStatusValue);
+    const currentStatus = normalizeAppointmentStatus(appointment.status);
+
+    if (normalizedStatus === null || currentStatus === normalizedStatus) return;
+
+    dispatch(
+      updateAppointmentStatusRequest({
+        id: appointment.id,
+        status: normalizedStatus,
+      })
+    );
+  };
+
+  const selectedStatusValue = String(
+    normalizeAppointmentStatus(appointment.status) ?? AppointmentStatus.PENDING
+  );
 
   return (
     <div className="flex-1 p-4 lg:p-6 space-y-6">
@@ -168,9 +260,28 @@ export const AppointmentDetailPage = ({ appointmentId, onBack }: AppointmentDeta
           </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <Badge className={`${getStatusColor(appointment.status)} border font-medium`}>
-            {getStatusDisplay(appointment.status)}
-          </Badge>
+          {canChangeAppointmentStatus ? (
+            <Select
+              value={selectedStatusValue}
+              onValueChange={handleStatusChange}
+              disabled={loading}
+            >
+              <SelectTrigger className="w-[180px] bg-[var(--input-background)] border-[var(--glass-border)] text-foreground">
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border-border">
+                {AppointmentStatusValues.map((status) => (
+                  <SelectItem key={status} value={String(status)}>
+                    {getAppointmentStatusLabel(status)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <Badge className={`${getStatusColor(appointment.status)} border font-medium`}>
+              {getStatusDisplay(appointment.status)}
+            </Badge>
+          )}
           <Button
             variant="outline"
             size="sm"
@@ -347,13 +458,22 @@ export const AppointmentDetailPage = ({ appointmentId, onBack }: AppointmentDeta
           <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
             <CardTitle title="Quick Actions" />
             <div className="space-y-2">
-              {normalizeAppointmentStatus(appointment.status) === AppointmentStatus.COMPLETED && (
+              {normalizeAppointmentStatus(appointment.status) === AppointmentStatus.IN_PROGRESS && (
                 <Button
                   variant="outline"
                   className="w-full border-[var(--accent-border)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)] hover:text-[var(--accent-text)] transition-colors"
                   onClick={() => setShowBillingDialog(true)}
                 >
-                  View Billing
+                  Complete & Generate Bill
+                </Button>
+              )}
+              {normalizeAppointmentStatus(appointment.status) === AppointmentStatus.COMPLETED && (
+                <Button
+                  variant="outline"
+                  className="w-full border-[var(--accent-border)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-primary)] hover:text-[var(--accent-text)] transition-colors"
+                  onClick={() => setShowBillPreview(true)}
+                >
+                  View Bill
                 </Button>
               )}
               <Button
@@ -430,10 +550,16 @@ export const AppointmentDetailPage = ({ appointmentId, onBack }: AppointmentDeta
             status: appointment.status as any,
             location: currentSpace?.name || 'Location'
           }}
-          onComplete={() => {
-            setShowBillingDialog(false);
-            toast.success("Appointment billing updated");
-          }}
+          onComplete={handleAppointmentCompletion}
+        />
+      )}
+
+      {appointment && (
+        <BillPreviewDialog
+          open={showBillPreview}
+          onOpenChange={setShowBillPreview}
+          appointmentId={appointment.id}
+          billData={lastGeneratedBill || undefined}
         />
       )}
     </div>

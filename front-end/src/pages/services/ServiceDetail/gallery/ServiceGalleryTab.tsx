@@ -14,10 +14,16 @@ import { CardTitle } from "@/components/common/CardTitle";
 interface ServiceGalleryTabProps {
   service: Service;
   companyId?: string;
+  canEditGallery?: boolean;
   onServiceUpdate?: (updatedService: Service) => void;
 }
 
-export const ServiceGalleryTab = ({ service, companyId, onServiceUpdate }: ServiceGalleryTabProps) => {
+export const ServiceGalleryTab = ({
+  service,
+  companyId,
+  canEditGallery = false,
+  onServiceUpdate,
+}: ServiceGalleryTabProps) => {
   const dispatch = useAppDispatch();
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -104,24 +110,25 @@ export const ServiceGalleryTab = ({ service, companyId, onServiceUpdate }: Servi
 
   return (
     <div className="space-y-6">
-      {/* Upload New Image */}
-      <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
-        <CardTitle title="Upload Gallery Images" icon={Upload}  />
-        <FileUpload
-          onFileUploaded={(filePath, fileUrl) => handleImageUpload(filePath)}
-          onFileDeleted={() => {}}
-          currentImagePath={undefined}
-          currentImageUrl={undefined}
-          folderPath={folderPath}
-          label="Upload Gallery Image"
-          maxSize={10}
-          className="w-full"
-          disabled={uploading}
-        />
-        <p className="text-sm text-muted-foreground mt-2">
-          Upload multiple images to showcase your service. Images will be displayed in the gallery.
-        </p>
-      </Card>
+      {canEditGallery && (
+        <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
+          <CardTitle title="Upload Gallery Images" icon={Upload}  />
+          <FileUpload
+            onFileUploaded={(filePath) => handleImageUpload(filePath)}
+            onFileDeleted={() => {}}
+            currentImagePath={undefined}
+            currentImageUrl={undefined}
+            folderPath={folderPath}
+            label="Upload Gallery Image"
+            maxSize={10}
+            className="w-full"
+            disabled={uploading}
+          />
+          <p className="text-sm text-muted-foreground mt-2">
+            Upload multiple images to showcase your service. Images will be displayed in the gallery.
+          </p>
+        </Card>
+      )}
 
       {/* Gallery Grid */}
       {galleryImages.length > 0 ? (
@@ -137,15 +144,17 @@ export const ServiceGalleryTab = ({ service, companyId, onServiceUpdate }: Servi
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => handleImageDelete(index)}
-                  disabled={uploading}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
+                {canEditGallery && (
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => handleImageDelete(index)}
+                    disabled={uploading}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
             ))}
           </div>
@@ -153,7 +162,11 @@ export const ServiceGalleryTab = ({ service, companyId, onServiceUpdate }: Servi
       ) : (
         <Card className="p-12 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] text-center">
           <ImageIcon className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-          <p className="text-muted-foreground">No gallery images yet. Upload images to get started.</p>
+          <p className="text-muted-foreground">
+            {canEditGallery
+              ? "No gallery images yet. Upload images to get started."
+              : "No gallery images available yet."}
+          </p>
         </Card>
       )}
     </div>

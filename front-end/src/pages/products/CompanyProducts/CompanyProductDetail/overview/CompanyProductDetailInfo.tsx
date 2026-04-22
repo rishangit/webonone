@@ -13,6 +13,7 @@ interface CompanyProductDetailInfoProps {
   selectedVariantId: string | null;
   selectedVariant: CompanyProductVariant | null;
   onVariantSelect: (variant: CompanyProductVariant | null) => void;
+  showVariantSelector?: boolean;
 }
 
 export const CompanyProductDetailInfo = ({
@@ -22,6 +23,7 @@ export const CompanyProductDetailInfo = ({
   selectedVariantId,
   selectedVariant,
   onVariantSelect,
+  showVariantSelector = true,
 }: CompanyProductDetailInfoProps) => {
   return (
     <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
@@ -42,7 +44,7 @@ export const CompanyProductDetailInfo = ({
         </div>
 
         {/* Variant Selector - Only show if there are multiple variants */}
-        {variants.length > 1 && (
+        {showVariantSelector && variants.length > 1 && (
           <div className="space-y-2">
               <Label className="text-sm font-medium text-foreground">Select Variant</Label>
               <Select 

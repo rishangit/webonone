@@ -1,11 +1,10 @@
 import { useState, useMemo, useEffect } from "react";
 import { useIsMobile } from "@/components/ui/use-mobile";
 import { 
-  Check, FileText, Clock, Search, Plus, X, Trash2, Calculator, 
-  Package, DollarSign, Percent, ShoppingCart, Receipt, User, Calendar, Save
+  FileText, Clock, Plus,
+  Package, ShoppingCart, Receipt, Calendar, Save
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -26,6 +25,12 @@ import { Service as ServiceType } from "@/services/services";
 import { companyProductVariantsService } from "@/services/companyProductVariants";
 import { Currency } from "@/services/currencies";
 import { fetchCurrencyRequest } from "@/store/slices/currenciesSlice";
+import {
+  ProductServiceSelectionDialog,
+  ProductSelectionItem,
+  ServiceSelectionItem,
+} from "@/components/common/ProductServiceSelectionDialog";
+import { CartItemEditorCard } from "@/components/common/CartItemEditorCard";
 
 interface ProductVariant {
   id: string;
@@ -76,6 +81,7 @@ interface BillingItem {
   // Display data (for UI only, not saved to DB)
   name: string;
   description: string;
+  image?: string;
   quantity: number;
   unitPrice: number;
   discount: number;
@@ -220,33 +226,9 @@ export function AppointmentBillingDialog({
   
   // Billing states
   const [billingItems, setBillingItems] = useState<BillingItem[]>([]);
-  
-  // Initialize billing items when dialog opens
-  useEffect(() => {
-    if (open && appointment) {
-      // Always add initial service item (serviceId will be included if available)
-      setBillingItems([
-        {
-          id: "service-1",
-          type: "service",
-          serviceId: appointment.serviceId, // Will be undefined if not available, but item will still be shown
-          name: appointment.service || "Service",
-          description: "Professional service provided",
-          quantity: 1,
-          unitPrice: appointment.servicePrice || 0,
-          discount: 0
-        }
-      ]);
-    } else if (!open) {
-      // Reset when dialog closes
-      setBillingItems([]);
-    }
-  }, [open, appointment]);
-  const [searchQuery, setSearchQuery] = useState("");
+
   const [showItemSearch, setShowItemSearch] = useState(false);
-  const [searchType, setSearchType] = useState<'products' | 'services'>('products');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [showVariantSelection, setShowVariantSelection] = useState(false);
   const [productVariantsMap, setProductVariantsMap] = useState<Record<string, CompanyProductVariant[]>>({});
 
@@ -314,20 +296,25 @@ export function AppointmentBillingDialog({
             ...(variant.weight && { weight: variant.weight }),
             ...(variant.material && { material: variant.material }),
           },
-          price: variant.sellPrice || variant.costPrice || 0,
-          inStock: variant.currentStock || 0,
+          price: Number(variant.activeStock?.sellPrice ?? variant.activeStock?.costPrice ?? 0),
+          inStock: Number(variant.activeStock?.quantity ?? 0),
           isActive: variant.isActive
         }));
 
         // Get default price from variants
         // If no variants, we'll still show the product but with 0 price (user can't add it until variants are added)
         const defaultPrice = activeVariants.length > 0 
-          ? (activeVariants.find(v => v.isDefault)?.sellPrice || activeVariants[0]?.sellPrice || activeVariants[0]?.costPrice || 0)
+          ? Number(
+              activeVariants.find((v) => v.isDefault)?.activeStock?.sellPrice ??
+              activeVariants[0]?.activeStock?.sellPrice ??
+              activeVariants[0]?.activeStock?.costPrice ??
+              0
+            )
           : 0;
 
         // Get total stock
         const totalStock = activeVariants.length > 0
-          ? activeVariants.reduce((sum, v) => sum + (v.currentStock || 0), 0)
+          ? activeVariants.reduce((sum, v) => sum + Number(v.activeStock?.quantity ?? 0), 0)
           : 0;
 
         return {
@@ -335,18 +322,13 @@ export function AppointmentBillingDialog({
           name: product.name || 'Unnamed Product',
           description: product.description || '',
           price: defaultPrice,
-          unit: activeVariants[0]?.stockUnit || 'piece',
+          unit: 'piece',
           category: product.tags?.[0]?.name || 'Uncategorized',
           inStock: totalStock,
           image: product.imageUrl ? formatAvatarUrl(product.imageUrl) : undefined,
           hasVariants: mappedVariants.length > 1,
           variants: mappedVariants.length > 0 ? mappedVariants : undefined
         };
-      })
-      .filter(product => {
-        // Only show products that have at least one variant with a price, or allow products without variants for now
-        // This allows products to show even if variants are still loading
-        return true; // Show all products, even if they don't have variants yet
       });
   }, [reduxCompanyProducts, productVariantsMap]);
 
@@ -365,6 +347,56 @@ export function AppointmentBillingDialog({
       }));
   }, [reduxServices]);
 
+  const initialServiceImage = useMemo(() => {
+    const matchedById = appointment.serviceId
+      ? companyServices.find((service) => service.id === appointment.serviceId)
+      : undefined;
+    if (matchedById?.image) return matchedById.image;
+
+    const normalizedAppointmentService = (appointment.service || "").trim().toLowerCase();
+    if (!normalizedAppointmentService) return undefined;
+
+    return companyServices.find(
+      (service) => service.name.trim().toLowerCase() === normalizedAppointmentService
+    )?.image;
+  }, [appointment.serviceId, appointment.service, companyServices]);
+
+  // Initialize billing items when dialog opens
+  useEffect(() => {
+    if (open && appointment) {
+      // Always add initial service item (serviceId will be included if available, plus service image when available)
+      setBillingItems([
+        {
+          id: "service-1",
+          type: "service",
+          serviceId: appointment.serviceId,
+          name: appointment.service || "Service",
+          description: "Professional service provided",
+          image: initialServiceImage,
+          quantity: 1,
+          unitPrice: appointment.servicePrice || 0,
+          discount: 0,
+        },
+      ]);
+    } else if (!open) {
+      // Reset when dialog closes
+      setBillingItems([]);
+    }
+  }, [open, appointment, initialServiceImage]);
+
+  useEffect(() => {
+    if (!open || !initialServiceImage) return;
+
+    setBillingItems((prev) =>
+      prev.map((item) => {
+        if (item.type === "service" && item.id === "service-1" && !item.image) {
+          return { ...item, image: initialServiceImage };
+        }
+        return item;
+      })
+    );
+  }, [open, initialServiceImage]);
+
   // Debug: Log products and services (after they're defined)
   useEffect(() => {
     if (open) {
@@ -376,25 +408,31 @@ export function AppointmentBillingDialog({
     }
   }, [open, reduxCompanyProducts, companyProducts, reduxServices, companyServices, productVariantsMap]);
 
-  // Filter products based on search
-  const filteredProducts = useMemo(() => {
-    if (!searchQuery.trim()) return companyProducts;
-    return companyProducts.filter(product =>
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.category.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [searchQuery, companyProducts]);
+  const selectionProducts: ProductSelectionItem[] = useMemo(
+    () =>
+      companyProducts.map((product) => ({
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        inStock: product.inStock,
+        image: product.image,
+      })),
+    [companyProducts]
+  );
 
-  // Filter services based on search
-  const filteredServices = useMemo(() => {
-    if (!searchQuery.trim()) return companyServices;
-    return companyServices.filter(service =>
-      service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      service.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      service.category.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [searchQuery, companyServices]);
+  const selectionServices: ServiceSelectionItem[] = useMemo(
+    () =>
+      companyServices.map((service) => ({
+        id: service.id,
+        name: service.name,
+        description: service.description,
+        price: service.price,
+        duration: service.duration,
+        image: service.image,
+      })),
+    [companyServices]
+  );
 
   // Calculate billing totals
   const calculations = useMemo(() => {
@@ -431,7 +469,6 @@ export function AppointmentBillingDialog({
         // Multiple variants - show variant selection dialog
         console.log('[AppointmentBillingDialog] Multiple variants, showing selector');
         setSelectedProduct(product);
-        setSelectedVariant(null);
         setShowItemSearch(false); // Close search dialog first
         setShowVariantSelection(true); // Then show variant selection
       }
@@ -495,6 +532,7 @@ export function AppointmentBillingDialog({
       variantId: variant?.id,
       name: effectiveName,
       description: effectiveDescription,
+      image: product.image,
       quantity,
       unitPrice, // Per-unit price for calculations
       discount: 0,
@@ -505,9 +543,7 @@ export function AppointmentBillingDialog({
     setBillingItems(prev => [...prev, newItem]);
     
     // Reset states
-    setSearchQuery("");
     setSelectedProduct(null);
-    setSelectedVariant(null);
     setShowItemSearch(false);
     
     toast.success(`${effectiveName} added to bill`);
@@ -520,14 +556,34 @@ export function AppointmentBillingDialog({
       serviceId: service.id,
       name: service.name,
       description: service.description,
+      image: service.image,
       quantity: 1,
       unitPrice: service.price,
       discount: 0
     };
     setBillingItems(prev => [...prev, newItem]);
-    setSearchQuery("");
     setShowItemSearch(false); // Close the search dialog
     toast.success(`${service.name} added to bill`);
+  };
+
+  const handleSelectProductItem = (productItem: ProductSelectionItem) => {
+    const product = companyProducts.find((item) => item.id === productItem.id);
+    if (!product) {
+      toast.error("Unable to find selected product.");
+      return;
+    }
+
+    selectProduct(product);
+  };
+
+  const handleSelectServiceItem = (serviceItem: ServiceSelectionItem) => {
+    const service = companyServices.find((item) => item.id === serviceItem.id);
+    if (!service) {
+      toast.error("Unable to find selected service.");
+      return;
+    }
+
+    addService(service);
   };
 
   const removeBillingItem = (itemId: string) => {
@@ -725,7 +781,7 @@ export function AppointmentBillingDialog({
                 <h3 className="font-medium text-foreground">Billing & Products</h3>
               </div>
               <Button
-                onClick={() => setShowItemSearch(!showItemSearch)}
+                onClick={() => setShowItemSearch(true)}
                 className="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] hover:from-[var(--accent-primary-hover)] hover:to-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-lg shadow-[var(--accent-primary)]/25"
               >
                 <Plus className="w-4 h-4 mr-2" />
@@ -737,78 +793,25 @@ export function AppointmentBillingDialog({
             <div className="flex-1 overflow-y-auto custom-scrollbar">
               <div className="space-y-3">
                 {billingItems.map((item) => (
-                  <Card key={item.id} className="p-4 bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-sm">
-                    <div className="space-y-3">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            {item.type === 'product' ? <Package className="w-4 h-4 text-[var(--accent-text)]" /> : <FileText className="w-4 h-4 text-[var(--accent-text)]" />}
-                            <h4 className="font-medium text-foreground truncate">{item.name}</h4>
-                          </div>
-                          <p className="text-sm text-muted-foreground">{item.description}</p>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeBillingItem(item.id)}
-                          className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950 flex-shrink-0 ml-2"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-
-                      <div className="grid grid-cols-3 gap-3">
-                        <div>
-                          <Label className="text-xs text-muted-foreground">Quantity</Label>
-                          <Input
-                            type="number"
-                            min="1"
-                            value={item.quantity}
-                            onChange={(e) => updateBillingItem(item.id, 'quantity', parseFloat(e.target.value) || 1)}
-                            className="text-sm bg-[var(--input-background)] border-[var(--glass-border)]"
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-xs text-muted-foreground">
-                            {item.variantVolume && item.displayPrice 
-                              ? `Price/${item.variantVolume}` 
-                              : `Price${item.unit ? `/${item.unit}` : ''}`
-                            }
-                          </Label>
-                          <div className="text-sm font-medium text-foreground p-2 bg-[var(--input-background)] border border-[var(--glass-border)] rounded">
-                            {item.variantVolume && item.displayPrice 
-                              ? formatCurrency(item.displayPrice)
-                              : formatCurrency(item.unitPrice)
-                            }
-                          </div>
-                        </div>
-                        <div>
-                          <Label className="text-xs text-muted-foreground">Discount %</Label>
-                          <Input
-                            type="number"
-                            min="0"
-                            max="100"
-                            value={item.discount}
-                            onChange={(e) => updateBillingItem(item.id, 'discount', parseFloat(e.target.value) || 0)}
-                            className="text-sm bg-[var(--input-background)] border-[var(--glass-border)]"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex justify-between items-center pt-2 border-t border-border">
-                        <span className="text-sm text-muted-foreground">
-                          {item.quantity} × {item.variantVolume && item.displayPrice 
-                            ? formatCurrency(item.displayPrice)
-                            : formatCurrency(item.unitPrice)
-                          }
-                          {item.discount > 0 && ` (-${item.discount}%)`}
-                        </span>
-                        <span className="font-medium text-foreground">
-                          {formatCurrency((item.quantity * item.unitPrice) * (1 - item.discount / 100))}
-                        </span>
-                      </div>
-                    </div>
-                  </Card>
+                  <CartItemEditorCard
+                    key={item.id}
+                    id={item.id}
+                    type={item.type}
+                    name={item.name}
+                    description={item.description}
+                    image={item.image}
+                    quantity={item.quantity}
+                    unitPrice={item.unitPrice}
+                    discount={item.discount}
+                    unit={item.unit}
+                    variantVolume={item.variantVolume}
+                    displayPrice={item.displayPrice}
+                    formatCurrency={formatCurrency}
+                    onRemove={removeBillingItem}
+                    onQuantityChange={(itemId, quantity) => updateBillingItem(itemId, "quantity", quantity)}
+                    onDiscountChange={(itemId, discount) => updateBillingItem(itemId, "discount", discount)}
+                    quantityMin={0}
+                  />
                 ))}
               </div>
             </div>
@@ -839,156 +842,29 @@ export function AppointmentBillingDialog({
         </div>
       </CustomDialog>
 
-      {/* Product/Service Search Dialog */}
-      {showItemSearch && (
-        <CustomDialog
-          open={showItemSearch}
-          onOpenChange={setShowItemSearch}
-          title="Add Items to Bill"
-          description="Search and add products or services to the appointment bill"
-          icon={<Search className="w-5 h-5" />}
-          maxWidth="max-w-4xl"
-          className="max-h-[85vh]"
-        >
-          <div className="space-y-4">
-            {/* Search Controls */}
-            <div className="flex gap-3">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder={`Search ${searchType}...`}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-[var(--input-background)] border-[var(--glass-border)]"
-                />
-              </div>
-              <Select value={searchType} onValueChange={(value: 'products' | 'services') => setSearchType(value)}>
-                <SelectTrigger className="w-32 bg-[var(--glass-bg)] border-[var(--glass-border)]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="products">Products</SelectItem>
-                  <SelectItem value="services">Services</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Search Results */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto custom-scrollbar">
-              {searchType === 'products' ? (
-                productsLoading ? (
-                  <div className="col-span-full text-center py-8 text-muted-foreground">
-                    <p className="text-sm">Loading products...</p>
-                  </div>
-                ) : productsError ? (
-                  <div className="col-span-full text-center py-8">
-                    <p className="text-sm text-red-600 dark:text-red-400 mb-2">Error loading products</p>
-                    <p className="text-xs text-muted-foreground">{productsError}</p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="mt-4"
-                      onClick={() => {
-                        if (companyId) {
-                          dispatch(fetchCompanyProductsRequest({ companyId }));
-                        }
-                      }}
-                    >
-                      Retry
-                    </Button>
-                  </div>
-                ) : filteredProducts.length === 0 ? (
-                  <div className="col-span-full text-center py-8 text-muted-foreground">
-                    <Package className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">No products found{searchQuery ? ` matching "${searchQuery}"` : ''}</p>
-                    {reduxCompanyProducts.length > 0 && (
-                      <p className="text-xs mt-2">
-                        {reduxCompanyProducts.length} product(s) available but may not be available for purchase
-                      </p>
-                    )}
-                  </div>
-                ) : (
-                  filteredProducts.map((product) => (
-                  <Card key={product.id} className="p-4 hover:bg-accent/50 cursor-pointer transition-colors">
-                    <div onClick={() => selectProduct(product)}>
-                      <div className="aspect-square mb-3 bg-muted rounded-lg overflow-hidden">
-                        {product.image && (
-                          <img 
-                            src={product.image} 
-                            alt={product.name}
-                            className="w-full h-full object-cover"
-                          />
-                        )}
-                      </div>
-                      <h4 className="font-medium text-foreground mb-1">{product.name}</h4>
-                      <p className="text-sm text-muted-foreground mb-2">{product.description}</p>
-                      <div className="flex justify-between items-center">
-                        <span className="font-semibold text-[var(--accent-text)]">{formatCurrency(product.price)}</span>
-                        <Badge variant="outline" className="text-xs">
-                          {product.inStock} in stock
-                        </Badge>
-                      </div>
-                    </div>
-                  </Card>
-                  ))
-                )
-              ) : (
-                servicesLoading ? (
-                  <div className="col-span-full text-center py-8 text-muted-foreground">
-                    <p className="text-sm">Loading services...</p>
-                  </div>
-                ) : servicesError ? (
-                  <div className="col-span-full text-center py-8">
-                    <p className="text-sm text-red-600 dark:text-red-400 mb-2">Error loading services</p>
-                    <p className="text-xs text-muted-foreground">{servicesError}</p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="mt-4"
-                      onClick={() => {
-                        if (companyId) {
-                          dispatch(fetchServicesRequest({ companyId }));
-                        }
-                      }}
-                    >
-                      Retry
-                    </Button>
-                  </div>
-                ) : filteredServices.length === 0 ? (
-                  <div className="col-span-full text-center py-8 text-muted-foreground">
-                    <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">No services found{searchQuery ? ` matching "${searchQuery}"` : ''}</p>
-                  </div>
-                ) : (
-                  filteredServices.map((service) => (
-                  <Card key={service.id} className="p-4 hover:bg-accent/50 cursor-pointer transition-colors">
-                    <div onClick={() => addService(service)}>
-                      <div className="aspect-square mb-3 bg-muted rounded-lg overflow-hidden">
-                        {service.image && (
-                          <img 
-                            src={service.image} 
-                            alt={service.name}
-                            className="w-full h-full object-cover"
-                          />
-                        )}
-                      </div>
-                      <h4 className="font-medium text-foreground mb-1">{service.name}</h4>
-                      <p className="text-sm text-muted-foreground mb-2">{service.description}</p>
-                      <div className="flex justify-between items-center">
-                        <span className="font-semibold text-[var(--accent-text)]">{formatCurrency(service.price)}</span>
-                        <Badge variant="outline" className="text-xs">
-                          {service.duration} min
-                        </Badge>
-                      </div>
-                    </div>
-                  </Card>
-                  ))
-                )
-              )}
-            </div>
-          </div>
-        </CustomDialog>
-      )}
+      <ProductServiceSelectionDialog
+        open={showItemSearch}
+        onOpenChange={setShowItemSearch}
+        products={selectionProducts}
+        services={selectionServices}
+        productsLoading={productsLoading}
+        servicesLoading={servicesLoading}
+        productsError={productsError}
+        servicesError={servicesError}
+        onRetryProducts={() => {
+          if (companyId) {
+            dispatch(fetchCompanyProductsRequest({ companyId }));
+          }
+        }}
+        onRetryServices={() => {
+          if (companyId) {
+            dispatch(fetchServicesRequest({ companyId }));
+          }
+        }}
+        onSelectProduct={handleSelectProductItem}
+        onSelectService={handleSelectServiceItem}
+        formatCurrency={formatCurrency}
+      />
 
       {/* Product Variant Selection Dialog */}
       {showVariantSelection && selectedProduct && (

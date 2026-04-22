@@ -456,12 +456,52 @@ class Appointment {
 
   // Delete appointment
   static async delete(id) {
+    const connection = await pool.getConnection();
+
     try {
-      const query = 'DELETE FROM company_appointments WHERE id = ?';
-      const [result] = await pool.execute(query, [id]);
-      return result.affectedRows > 0;
+      await connection.beginTransaction();
+
+      const [appointmentRows] = await connection.execute(
+        'SELECT id, saleId FROM company_appointments WHERE id = ? LIMIT 1',
+        [id]
+      );
+
+      if (appointmentRows.length === 0) {
+        await connection.rollback();
+        return false;
+      }
+
+      const appointment = appointmentRows[0];
+      const saleId = appointment.saleId || null;
+
+      // Delete appointment first, then remove linked billing records.
+      // If a sale is somehow referenced by multiple appointments, preserve it.
+      const [deleteAppointmentResult] = await connection.execute(
+        'DELETE FROM company_appointments WHERE id = ?',
+        [id]
+      );
+
+      if (saleId) {
+        const [saleRefRows] = await connection.execute(
+          'SELECT COUNT(*) AS total FROM company_appointments WHERE saleId = ?',
+          [saleId]
+        );
+
+        const remainingReferences = Number(saleRefRows[0]?.total || 0);
+
+        if (remainingReferences === 0) {
+          await connection.execute('DELETE FROM company_sales_items WHERE saleId = ?', [saleId]);
+          await connection.execute('DELETE FROM company_sales WHERE id = ?', [saleId]);
+        }
+      }
+
+      await connection.commit();
+      return deleteAppointmentResult.affectedRows > 0;
     } catch (error) {
+      await connection.rollback();
       throw new Error(`Error deleting appointment: ${error.message}`);
+    } finally {
+      connection.release();
     }
   }
 

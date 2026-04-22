@@ -92,38 +92,42 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
 
   // Fetch appointments with pagination and search for company owners
   useEffect(() => {
-    if (companyId) {
-      if (isCompanyOwner) {
-        // For company owners: use server-side pagination and search
-        const offset = (currentPage - 1) * itemsPerPage;
-        const filters: any = {
-          page: currentPage,
-          limit: itemsPerPage,
-          offset,
-        };
+    if (isCompanyOwner) {
+      if (!companyId) return;
 
-        // Add search
-        if (debouncedSearchTerm.trim()) {
-          filters.search = debouncedSearchTerm.trim();
-        }
+      // For company owners: use server-side pagination and search
+      const offset = (currentPage - 1) * itemsPerPage;
+      const filters: any = {
+        page: currentPage,
+        limit: itemsPerPage,
+        offset,
+      };
 
-        // Add status filter
-        if (statusFilter !== "all-status") {
-          filters.status = statusFilter;
-        }
-
-        // Add staff filter
-        if (selectedStaff.length > 0) {
-          filters.staffId = selectedStaff[0]; // Backend currently supports single staffId
-        }
-
-        dispatch(fetchAppointmentsRequest({ companyId, filters }));
-      } else {
-        // For non-company owners: fetch all appointments (client-side filtering)
-        dispatch(fetchAppointmentsRequest({ companyId }));
+      // Add search
+      if (debouncedSearchTerm.trim()) {
+        filters.search = debouncedSearchTerm.trim();
       }
 
-      dispatch(fetchUsersRequest({}));
+      // Add status filter
+      if (statusFilter !== "all-status") {
+        filters.status = statusFilter;
+      }
+
+      // Add staff filter
+      if (selectedStaff.length > 0) {
+        filters.staffId = selectedStaff[0]; // Backend currently supports single staffId
+      }
+
+      dispatch(fetchAppointmentsRequest({ companyId, filters }));
+    } else {
+      // For staff/users: backend applies role-based filtering.
+      // Allow fetching even when companyId is not present in auth state.
+      dispatch(fetchAppointmentsRequest({ companyId }));
+    }
+
+    dispatch(fetchUsersRequest({}));
+
+    if (companyId) {
       dispatch(fetchServicesRequest({ companyId }));
       dispatch(fetchStaffRequest({ companyId }));
       dispatch(fetchSpacesRequest({ companyId }));

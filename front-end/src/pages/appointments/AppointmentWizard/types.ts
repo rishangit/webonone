@@ -4,6 +4,9 @@ export interface AppointmentWizardProps {
   currentUser: any;
   selectedDate?: Date;
   selectedTime?: string;
+  selectedServiceId?: string;
+  selectedUserId?: string;
+  companyIdOverride?: string;
   trigger?: React.ReactNode;
 }
 

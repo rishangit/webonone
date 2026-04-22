@@ -9,6 +9,7 @@ interface ServiceDetailInfoProps {
   companyCurrency: Currency | null;
   formatCurrency: (amount: number) => string;
   formatDuration: (minutes: number) => string;
+  bookAppointmentTrigger?: React.ReactNode;
 }
 
 export const ServiceDetailInfo = ({
@@ -16,6 +17,7 @@ export const ServiceDetailInfo = ({
   companyCurrency,
   formatCurrency,
   formatDuration,
+  bookAppointmentTrigger,
 }: ServiceDetailInfoProps) => {
   return (
     <Card className="p-6 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] w-full">
@@ -67,6 +69,12 @@ export const ServiceDetailInfo = ({
                 {typeof tag === 'string' ? tag : tag.name}
               </Badge>
             ))}
+          </div>
+        )}
+
+        {bookAppointmentTrigger && (
+          <div className="pt-2">
+            {bookAppointmentTrigger}
           </div>
         )}
       </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Stethoscope } from "lucide-react";
+import { CalendarPlus, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TabSwitcher } from "@/components/ui/tab-switcher";
@@ -16,6 +16,7 @@ import { ServiceDetailHeader } from "./ServiceDetailHeader";
 import { ServiceOverviewTab } from "./overview/ServiceOverviewTab";
 import { ServiceGalleryTab } from "./gallery/ServiceGalleryTab";
 import { ServiceStatisticsTab } from "./statistics/ServiceStatisticsTab";
+import { AppointmentWizard } from "@/pages/appointments";
 
 interface ServiceDetailPageProps {
   serviceId: string;
@@ -27,8 +28,11 @@ export const ServiceDetailPage = ({ serviceId, onBack }: ServiceDetailPageProps)
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
   const { companies, currentCompany } = useAppSelector((state) => state.companies);
-  const { currentService, loading } = useAppSelector((state) => state.services);
+  const { currentService } = useAppSelector((state) => state.services);
   const isCompanyOwner = isRole(user?.role, UserRole.COMPANY_OWNER);
+  const isSystemAdmin = isRole(user?.role, UserRole.SYSTEM_ADMIN);
+  const canManageService = isCompanyOwner || isSystemAdmin;
+  const canBookFromServicePage = !canManageService;
 
   const [service, setService] = useState<Service | null>(null);
   const [localLoading, setLocalLoading] = useState(true);
@@ -188,7 +192,7 @@ export const ServiceDetailPage = ({ serviceId, onBack }: ServiceDetailPageProps)
     toast.info("Navigate to the service in the list to edit");
   };
 
-  if (localLoading || loading) {
+  if (localLoading) {
     return (
       <div className="flex-1 p-4 lg:p-6 flex items-center justify-center">
         <div className="text-center">
@@ -220,7 +224,7 @@ export const ServiceDetailPage = ({ serviceId, onBack }: ServiceDetailPageProps)
     <div className="flex-1 p-4 lg:p-6 space-y-6 w-full">
       <ServiceDetailHeader
         service={service}
-        isCompanyOwner={isCompanyOwner}
+        isCompanyOwner={canManageService}
         onBack={onBack}
         onEdit={handleEditService}
         onDelete={() => setShowDeleteDialog(true)}
@@ -231,7 +235,7 @@ export const ServiceDetailPage = ({ serviceId, onBack }: ServiceDetailPageProps)
           tabs={[
             { value: "overview", label: "Overview" },
             { value: "gallery", label: "Gallery" },
-            { value: "statistics", label: "Statistics" }
+            { value: "statistics", label: "Statistics" },
           ]}
           activeTab={activeTab}
           onTabChange={setActiveTab}
@@ -244,6 +248,22 @@ export const ServiceDetailPage = ({ serviceId, onBack }: ServiceDetailPageProps)
               companyCurrency={companyCurrency}
               formatCurrency={formatCurrency}
               formatDuration={formatDuration}
+              bookAppointmentTrigger={
+                canBookFromServicePage ? (
+                  <AppointmentWizard
+                    currentUser={user}
+                    companyIdOverride={service.companyId}
+                    selectedServiceId={service.id}
+                    selectedUserId={user?.id ? String(user.id) : undefined}
+                    trigger={
+                      <Button variant="accent" className="h-10">
+                        <CalendarPlus className="w-4 h-4 mr-2" />
+                        Book Appointment
+                      </Button>
+                    }
+                  />
+                ) : undefined
+              }
             />
           </div>
         )}
@@ -253,6 +273,7 @@ export const ServiceDetailPage = ({ serviceId, onBack }: ServiceDetailPageProps)
             <ServiceGalleryTab
               service={service}
               companyId={companyId}
+              canEditGallery={canManageService}
               onServiceUpdate={(updatedService) => setService(updatedService)}
             />
           </div>
@@ -262,8 +283,8 @@ export const ServiceDetailPage = ({ serviceId, onBack }: ServiceDetailPageProps)
           <div className="mt-6">
             <ServiceStatisticsTab
               service={service}
-              companyCurrency={companyCurrency}
               formatCurrency={formatCurrency}
+              canViewPricingDetails={canManageService}
             />
           </div>
         )}

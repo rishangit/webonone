@@ -138,7 +138,8 @@ export function AppointmentCompletionDialog({
       onOpenChange={onOpenChange}
       title="Complete Appointment"
       description="Mark this appointment as completed and add relevant notes and details"
-      maxWidth="max-w-2xl"
+      sizeWidth="medium"
+      sizeHeight="large"
       className="backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]"
       footer={
         <>

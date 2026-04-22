@@ -2,21 +2,20 @@ import { Calendar, DollarSign, TrendingUp, Users, Clock } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Service } from "@/services/services";
-import { Currency } from "@/services/currencies";
 import { DateDisplay } from "@/components/common/DateDisplay";
 import { CardTitle } from "@/components/common/CardTitle";
 import { Badge } from "@/components/ui/badge";
 
 interface ServiceStatisticsTabProps {
   service: Service;
-  companyCurrency: Currency | null;
   formatCurrency: (amount: number) => string;
+  canViewPricingDetails?: boolean;
 }
 
 export const ServiceStatisticsTab = ({
   service,
-  companyCurrency,
   formatCurrency,
+  canViewPricingDetails = false,
 }: ServiceStatisticsTabProps) => {
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -51,30 +50,46 @@ export const ServiceStatisticsTab = ({
                   </div>
                 </div>
               </div>
-              <div className="flex items-center justify-between p-4 rounded-lg bg-[var(--accent-bg)]/10 border border-[var(--accent-border)]/20">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-[var(--accent-bg)]">
-                    <DollarSign className="w-5 h-5 text-[var(--accent-text)]" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">This Month Revenue</p>
-                    <p className="text-2xl font-semibold text-[var(--accent-text)]">
-                      {formatCurrency(service.bookings?.revenue || 0)}
-                    </p>
+              {canViewPricingDetails ? (
+                <div className="flex items-center justify-between p-4 rounded-lg bg-[var(--accent-bg)]/10 border border-[var(--accent-border)]/20">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-[var(--accent-bg)]">
+                      <DollarSign className="w-5 h-5 text-[var(--accent-text)]" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">This Month Revenue</p>
+                      <p className="text-2xl font-semibold text-[var(--accent-text)]">
+                        {formatCurrency(service.bookings?.revenue || 0)}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              ) : (
+                <div className="flex items-center justify-between p-4 rounded-lg bg-[var(--accent-bg)]/10 border border-[var(--accent-border)]/20">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-[var(--accent-bg)]">
+                      <Clock className="w-5 h-5 text-[var(--accent-text)]" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Service Duration</p>
+                      <p className="text-2xl font-semibold text-foreground">{service.duration} min</p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             <Separator />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Average Booking Value</span>
-                <span className="text-lg font-semibold text-foreground">
-                  {service.bookings?.thisMonth && service.bookings.thisMonth > 0
-                    ? formatCurrency((service.bookings.revenue || 0) / service.bookings.thisMonth)
-                    : formatCurrency(0)}
-                </span>
-              </div>
+              {canViewPricingDetails && (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Average Booking Value</span>
+                  <span className="text-lg font-semibold text-foreground">
+                    {service.bookings?.thisMonth && service.bookings.thisMonth > 0
+                      ? formatCurrency((service.bookings.revenue || 0) / service.bookings.thisMonth)
+                      : formatCurrency(0)}
+                  </span>
+                </div>
+              )}
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Total Bookings</span>
                 <span className="text-lg font-semibold text-foreground">{service.bookings?.thisMonth || 0}</span>
@@ -87,11 +102,13 @@ export const ServiceStatisticsTab = ({
         <Card className="p-6 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]">
           <CardTitle title="Performance Metrics" icon={TrendingUp}  />
           <div className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="p-4 rounded-lg bg-[var(--accent-bg)]/10 border border-[var(--accent-border)]/20">
-                <p className="text-sm text-muted-foreground mb-1">Service Price</p>
-                <p className="text-xl font-semibold text-foreground">{formatCurrency(service.price)}</p>
-              </div>
+            <div className={`grid grid-cols-1 ${canViewPricingDetails ? "sm:grid-cols-2" : ""} gap-4`}>
+              {canViewPricingDetails && (
+                <div className="p-4 rounded-lg bg-[var(--accent-bg)]/10 border border-[var(--accent-border)]/20">
+                  <p className="text-sm text-muted-foreground mb-1">Service Price</p>
+                  <p className="text-xl font-semibold text-foreground">{formatCurrency(service.price)}</p>
+                </div>
+              )}
               <div className="p-4 rounded-lg bg-[var(--accent-bg)]/10 border border-[var(--accent-border)]/20">
                 <p className="text-sm text-muted-foreground mb-1">Service Duration</p>
                 <p className="text-xl font-semibold text-foreground flex items-center gap-2">

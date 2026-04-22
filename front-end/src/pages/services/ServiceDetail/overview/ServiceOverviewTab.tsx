@@ -8,6 +8,7 @@ interface ServiceOverviewTabProps {
   companyCurrency: Currency | null;
   formatCurrency: (amount: number) => string;
   formatDuration: (minutes: number) => string;
+  bookAppointmentTrigger?: React.ReactNode;
 }
 
 export const ServiceOverviewTab = ({
@@ -15,6 +16,7 @@ export const ServiceOverviewTab = ({
   companyCurrency,
   formatCurrency,
   formatDuration,
+  bookAppointmentTrigger,
 }: ServiceOverviewTabProps) => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -30,6 +32,7 @@ export const ServiceOverviewTab = ({
           companyCurrency={companyCurrency}
           formatCurrency={formatCurrency}
           formatDuration={formatDuration}
+          bookAppointmentTrigger={bookAppointmentTrigger}
         />
       </div>
     </div>
