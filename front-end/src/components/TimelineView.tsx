@@ -8,13 +8,13 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { HoverCard, HoverCardTrigger, HoverCardContent, HoverCardArrow } from "./ui/hover-card";
 import { DateDisplay } from "./common/DateDisplay";
-import { AppointmentWizard } from "../pages/appointments";
+import { AppointmentWizard } from "@/features/appointments/components/AppointmentWizard";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { updateAppointmentRequest, deleteAppointmentRequest } from "@/store/slices/appointmentsSlice";
-import { fetchStaffRequest } from "@/store/slices/staffSlice";
+import { updateAppointmentRequest, deleteAppointmentRequest } from "@/features/appointments/store";
+import { fetchStaffRequest } from "@/features/staff/store";
 import { toast } from "sonner";
-import { formatAvatarUrl } from "../utils";
-import { normalizeAppointmentStatus, getAppointmentStatusLabel, AppointmentStatus } from "@/types/appointmentStatus";
+import { formatAvatarUrl } from "@/shared/utils";
+import { normalizeAppointmentStatus, getAppointmentStatusLabel, AppointmentStatus } from "@/features/appointments/types";
 
 interface User {
   email: string;
@@ -634,7 +634,7 @@ export function TimelineView({ currentUser, selectedDate, appointments, onDateCh
               )}
 
               {/* Appointments */}
-              {appointmentPositions.length > 0 && appointmentPositions.map((position, index) => {
+              {appointmentPositions.length > 0 && appointmentPositions.map((position) => {
                 // Check if this appointment has overlaps using ORIGINAL positions
                 const originalTop = position.originalTop ?? position.top;
                 const hasOverlaps = appointmentPositions.some(other => {

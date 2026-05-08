@@ -5,8 +5,8 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { cn } from "../ui/utils";
-import { formatAvatarUrl } from "../../utils";
-import { User } from "@/types/user";
+import { formatAvatarUrl } from "@/shared/utils";
+import { User } from "@/shared/types/user";
 
 interface UserSelectorProps {
   value: string | null;

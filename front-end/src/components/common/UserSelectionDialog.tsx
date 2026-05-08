@@ -1,13 +1,13 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Check, User } from "lucide-react";
 import { CustomDialog } from "../ui/custom-dialog";
-import { User as UserType } from "@/types/user";
+import { User as UserType } from "@/shared/types/user";
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { formatAvatarUrl } from "@/utils";
+import { formatAvatarUrl } from "@/shared/utils";
 import { cn } from "../ui/utils";
 import { SearchInput } from "./SearchInput";
-import { usersService } from "@/services/users";
+import { usersService } from "@/features/users/services";
 
 interface UserSelectionDialogProps {
   open: boolean;

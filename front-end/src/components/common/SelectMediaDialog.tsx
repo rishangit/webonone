@@ -3,8 +3,8 @@ import { Image as ImageIcon, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { CustomDialog } from "../ui/custom-dialog";
 import { Button } from "../ui/button";
-import { companyWebMediaService, getMediaFileUrl, MediaFile } from "@/services/companyWebMedia";
-import { MediaUploadDialog } from "../../pages/website/MediaPage/components/MediaUploadDialog";
+import { companyWebMediaService, getMediaFileUrl, MediaFile } from "@/features/website/services/companyWebMedia";
+import { MediaUploadDialog } from "@/features/website/pages/MediaPage/components/MediaUploadDialog";
 
 interface SelectMediaDialogProps {
   open: boolean;

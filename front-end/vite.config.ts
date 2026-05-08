@@ -15,6 +15,8 @@ export default defineConfig({
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
     alias: {
+      '@/hooks': resolve(__dirname, './src/shared/hooks'),
+      '@/store': resolve(__dirname, './src/app/store'),
       '@': resolve(__dirname, './src'),
     },
   },

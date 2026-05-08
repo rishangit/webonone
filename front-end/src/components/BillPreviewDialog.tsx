@@ -7,10 +7,10 @@ import { Badge } from "./ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Card } from "./ui/card";
 import { toast } from "sonner";
-import { appointmentHistoryService } from "@/services/appointmentHistory";
-import { companiesService, Company } from "@/services/companies";
+import { appointmentHistoryService } from "@/features/appointments/services";
+import { companiesService, Company } from "@/features/companies/services";
 import { useAppSelector } from "@/store/hooks";
-import { formatAvatarUrl } from "../utils";
+import { formatAvatarUrl } from "@/shared/utils";
 
 interface BillingItem {
   id: string;

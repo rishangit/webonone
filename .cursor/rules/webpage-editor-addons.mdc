@@ -1,14 +1,18 @@
 ---
 description: Conventions for WebpageEditor content addons (follow the image addon pattern).
-globs: front-end/src/pages/website/WebpageEditor/addons/**/*
+globs: front-end/src/features/website/pages/WebpageEditor/**/*
 alwaysApply: true
 ---
 
 # WebpageEditor content addons
 
-Use **`front-end/src/pages/website/WebpageEditor/addons/image/ImageAddon.tsx`** as the reference implementation. New addons must match its structure, props contracts, and UI patterns.
+**Base path (website feature):** `front-end/src/features/website/pages/WebpageEditor/`
+
+Use **`front-end/src/features/website/pages/WebpageEditor/addons/image/ImageAddon.tsx`** as the reference implementation. New addons must match its structure, props contracts, and UI patterns.
 
 ## Types (`WebpageEditor/types.ts`)
+
+Path: **`front-end/src/features/website/pages/WebpageEditor/types.ts`** (import as `@/features/website/pages/WebpageEditor/types` or relative paths from the editor tree).
 
 1. Add a literal to **`ContentAddonType`** (e.g. `'image' | 'my-addon'`).
 2. Define **`MyAddonContentAddonData extends ContentAddonBaseData`** with addon-specific fields. Include **`companyId`** and **`contentElementId`** on saved data when the editor passes them (same as image).
@@ -19,6 +23,8 @@ Use **`front-end/src/pages/website/WebpageEditor/addons/image/ImageAddon.tsx`** 
 Do not widen `data` with ad-hoc `as any` at save sites; keep shapes typed in `types.ts`.
 
 ## Module file layout
+
+Under **`.../WebpageEditor/addons/`**:
 
 - One folder per addon: **`addons/<kebab-or-short-name>/`** (e.g. `image/`).
 - Single entry file **`ImageAddon.tsx`** (same base name pattern for others) that exports one **`AddonModule`** constant, e.g. **`imageAddonModule`**.
@@ -48,7 +54,7 @@ Each module exports an object with:
 - On open, **`reset`** default values from **`addon.data`** (see image **`useEffect`** tied to `open`).
 - On save, build **`updatedAddon`**: **`{ ...addon, data: { ...addon.data, ...fields, companyId: effectiveCompanyId, contentElementId } }`**, then **`onSave(updatedAddon)`** and **`onOpenChange(false)`**.
 - Styling: use the shared editor theme variables (e.g. `border-[var(--glass-border)]`, `bg-[var(--input-background)]`, `text-muted-foreground`, `text-destructive` for errors).
-- Inputs must use shared system UI components from `front-end/src/components/ui` (do not use raw native `input`/`select`/`textarea` directly):
+- Inputs must use shared system UI from **`@/components/ui`** (do not use raw native `input`/`select`/`textarea` directly):
   - `Input` for single-line fields
   - `Textarea` for multi-line fields
   - `Select` (`SelectTrigger`/`SelectContent`/`SelectItem`) for dropdowns
@@ -70,4 +76,4 @@ In **`addons/registry.ts`**: **import** the new module and **append** it to the 
 
 ## Imports
 
-From inside an addon file, shared contracts come from **`../types`** (`AddonModule`, `AddonRenderProps`, `AddonEditProps`); **`ContentAddon`** from **`../../types`**.
+From inside an addon file under **`.../WebpageEditor/addons/<name>/`**, shared contracts come from **`../types`** (`AddonModule`, `AddonRenderProps`, `AddonEditProps`); **`ContentAddon`** from **`../../types`**.

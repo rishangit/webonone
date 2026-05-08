@@ -1,0 +1,61 @@
+---
+description: Redux Toolkit global store, feature slices/actions, redux-observable epics
+globs: front-end/**/store/**/*.ts
+alwaysApply: false
+---
+
+# Redux store, actions, and epics
+
+Narrative and examples: **`front-end/REDUX_RXJS_IMPLEMENTATION.md`**.
+
+## Where code lives
+
+| Area | Path | Responsibility |
+|------|------|------------------|
+| Global store | `front-end/src/app/store/index.ts` | Single `configureStore`, all `reducer` keys, `redux-observable` middleware, `epicMiddleware.run(rootEpic)` |
+| Typed hooks | `front-end/src/app/store/hooks.ts` | `useAppDispatch`, `useAppSelector` (`RootState` / `AppDispatch` from `./index`) |
+| Re-export | `front-end/src/app/store/store.ts` | Optional `store` / type re-exports from `index.ts` (same instance) |
+| Root epic | `front-end/src/app/store/epics/rootEpic.ts` | `combineEpics(...)` — import epics from `@/features/<domain>/store` barrels only |
+| Feature Redux | `front-end/src/features/<domain>/store/` | `*Slice.ts`, `*Epics.ts`, `index.ts` public exports |
+| API used by epics | `front-end/src/features/<domain>/services/` | HTTP and side-effect helpers; **no** network I/O inside reducers |
+
+**Bootstrap:** `front-end/src/main.tsx` wraps with `react-redux` **`Provider`** and `import { store } from "./app/store"`. There is no `ReduxProvider.tsx` under `app/store`.
+
+## Imports (aliases)
+
+- **`@/store/hooks`** — `useAppDispatch`, `useAppSelector` in components and hooks.
+- **`@/store`** — `store`, `RootState`, `AppDispatch` when needed outside React (rare).
+- **`@/features/<domain>/store`** — actions, epics, reducers from the feature barrel when wiring or consuming from **router, layouts, or another allowed boundary**.
+
+**Cross-feature:** a feature **must not** deep-import another feature’s store. For intentional shared action surfaces, use **`@/shared/store/...`** (see **`front-end-structure.mdc`**).
+
+## Slices (RTK `createSlice`)
+
+- One primary slice per concern is typical (`authSlice.ts`, `productSlice.ts`); additional slices in the same `store/` folder when needed (`profileSlice.ts`).
+- Reducers stay **pure and synchronous**: loading flags, errors, normalized entities only.
+- Export slice, actions, and reducers through **`features/<domain>/store/index.ts`** for `rootEpic` and `app/store/index.ts` imports.
+
+## Epics (`redux-observable` + RxJS)
+
+- File naming: **`*Epics.ts`** (e.g. `authEpics.ts`, `productsEpics.ts`). Export named epics or spreadable arrays (e.g. `...profileEpics`).
+- **`rootEpic.ts`** is the **only** place that combines all epics; add new epics there when introducing a domain or new async flows.
+- Use **`ofType`** against actions from the feature slice; async work via **`from`**, **`switchMap`** / **`exhaustMap`** / **`mergeMap`** as appropriate.
+- **`catchError`** must return **`of(failureAction)`** (or equivalent) so streams do not error silently.
+- Call **`features/<domain>/services/*`** from epics; keep HTTP and parsing out of epics when a service already encapsulates it.
+
+## Async model
+
+- **`configureStore`** uses **`thunk: false`**. Prefer **epics + services** for async; do not introduce **`createAsyncThunk`** unless the team explicitly changes store middleware.
+
+## Checklist: new domain or new async flow
+
+1. Add or extend **`*Slice.ts`** and export from **`features/<domain>/store/index.ts`**.
+2. Add **`*Epics.ts`** and export epics from the same barrel.
+3. Register **`reducer`** in **`app/store/index.ts`**.
+4. Register epic(s) in **`app/store/epics/rootEpic.ts`** (`combineEpics`).
+
+Do not add a second `configureStore` or duplicate `rootEpic` composition.
+
+## Verification
+
+From repo root: `cd front-end`, then **`npm run type-check`** and **`npm run lint`** after changing slices, epics, or global store wiring.

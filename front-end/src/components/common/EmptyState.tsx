@@ -18,7 +18,7 @@ interface EmptyStateProps {
 }
 
 export const EmptyState = ({
-  icon: Icon,
+  icon: displayIcon,
   title,
   description,
   action,
@@ -27,24 +27,24 @@ export const EmptyState = ({
   // Render icon - Lucide icons are function components, render them directly
   // This matches the pattern used in SpacesPage
   const renderIcon = () => {
-    if (!Icon) return null;
+    if (!displayIcon) return null;
     
-    // If Icon is a function (Lucide icon component), render it using Icon component
-    if (typeof Icon === "function") {
-      const IconComponent = Icon as LucideIcon;
+    // If displayIcon is a function (Lucide icon component), render it using Icon component
+    if (typeof displayIcon === "function") {
+      const IconComponent = displayIcon as LucideIcon;
       return <Icon icon={IconComponent} size="xl" color="muted" className="mx-auto mb-4" />;
     }
     
     // If it's already a React element, use it directly
-    if (React.isValidElement(Icon)) {
-      return Icon;
+    if (React.isValidElement(displayIcon)) {
+      return displayIcon;
     }
     
     // For primitive types, wrap them
-    if (typeof Icon === "string" || typeof Icon === "number") {
+    if (typeof displayIcon === "string" || typeof displayIcon === "number") {
       return (
         <div className="w-12 h-12 text-muted-foreground mx-auto mb-4 flex items-center justify-center">
-          {Icon}
+          {displayIcon}
         </div>
       );
     }

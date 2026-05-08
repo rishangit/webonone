@@ -1,0 +1,1619 @@
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams, useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
+
+// Types
+import type { Theme, AccentColor } from "@/shared/types";
+
+// Utils
+import { applyTheme, storage, performance } from "@/shared/utils";
+
+// Layout Components
+import {
+  MainLayout,
+  AuthLayout,
+  LoadingLayout,
+  ErrorLayout,
+} from "@/layouts";
+
+// Auth Pages
+import {
+  LoginPage,
+  SignUpWizardPage,
+  VerifyEmailPage,
+  ForgotPasswordPage,
+  ResetPasswordPage,
+} from "@/features/auth/pages";
+
+// Dashboard
+import { Dashboard } from "@/features/dashboard/pages";
+
+// Appointments
+import { AppointmentsPage, UserAppointmentHistoryPage, AppointmentDetailPage } from "@/features/appointments/pages";
+
+// Companies
+import { CompaniesPage, CompanyProfilePage, CompanySettingsPage } from "@/features/companies/pages";
+
+// Products
+import {
+  ProductsPage,
+  SystemProductsPage,
+  SystemProductAttributesPage,
+  UnitsOfMeasurePage,
+  ProductDetailPage,
+  CompanyProductDetailPage,
+  VariantStockDetailsPage,
+} from "@/features/products/pages";
+
+// Tags
+import { TagsPage } from "@/features/tags/pages";
+
+// Backlog
+import { BacklogPage } from "@/features/backlog/pages";
+
+// Sales
+import { SalesPage, SalesDetailPage } from "@/features/sales/pages";
+
+// Services
+import { ServicesPage, ServiceDetailPage } from "@/features/services/pages";
+
+// Spaces
+import { SpacesPage, SpaceDetailPage } from "@/features/spaces/pages";
+
+// Settings
+import { SettingsPage } from "@/features/settings/pages";
+
+// Staff
+import { StaffPage } from "@/features/staff/pages";
+
+// Users
+import { UsersPage, ProfilePage, UserProfilePage } from "@/features/users/pages";
+
+// Notifications
+import { NotificationsPage } from "@/features/notifications/pages";
+
+// Search
+import { SearchPage } from "@/features/search/pages";
+
+// Analytics
+import { AnalyticsPage } from "@/features/analytics/pages";
+
+// Website
+import {
+  WebsitePage,
+  WebpageFormPage,
+  WebpageEditor,
+  HeaderWebEditor,
+  FooterWebEditor,
+  PublicWebPage,
+  PublicWebsiteLayout,
+} from "@/features/website/pages";
+
+// Showcase
+import { ShowcasePage } from "@/features/showcase/pages";
+
+// State management
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { loginSuccess, logout, refreshUserRequest } from "@/features/auth/store/authSlice";
+
+// Redirect component that preserves query parameters
+const VerifyEmailRedirect = () => {
+  const location = useLocation();
+  const searchParams = location.search; // Preserves ?token=...
+  return <Navigate to={`/system/email-verify${searchParams}`} replace />;
+};
+
+// Wrapper component for protected routes with logout functionality
+function ProtectedRouteWrapper({ children }: { children: React.ReactNode }) {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAppSelector((state) => state.auth);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Get current page from URL
+  const getCurrentPage = () => {
+    const path = location.pathname;
+    if (path.includes('/companies')) return 'companies';
+    if (path.includes('/appointments')) return 'appointments';
+    if (path.includes('/users')) return 'users';
+    if (path.includes('/system-product-attributes')) return 'system-product-attributes';
+    if (path.includes('/units-of-measure')) return 'units-of-measure';
+    if (path.includes('/system-products')) return 'system-products';
+    if (path.includes('/company-products')) return 'products';
+    if (path.includes('/products')) return 'products';
+    if (path.includes('/tags')) return 'tags';
+    if (path.includes('/sales')) return 'sales';
+    if (path.includes('/services')) return 'services';
+    if (path.includes('/spaces')) return 'spaces';
+    if (path.includes('/staff')) return 'staff';
+    if (path.includes('/profile')) return 'profile';
+    if (path.includes('/company-settings')) return 'company-settings';
+    if (path.includes('/notifications')) return 'notifications';
+    if (path.includes('/search')) return 'search';
+    if (path.includes('/analytics')) return 'analytics';
+    if (path.includes('/settings')) return 'settings';
+    if (path.includes('/showcase')) return 'showcase';
+    if (path.includes('/web/webpages')) return 'web-webpages';
+    if (path.includes('/web/headers')) return 'web-headers';
+    if (path.includes('/web/footers')) return 'web-footers';
+    if (path.includes('/web/themes')) return 'web-themes';
+    if (path.includes('/web/presets')) return 'web-presets';
+    if (path.includes('/web/media')) return 'web-media';
+    if (path.includes('/web')) return 'web-webpages';
+    return 'dashboard';
+  };
+
+  const handleLogout = () => {
+    console.log('Logout clicked');
+    dispatch(logout());
+    // Show logout success message
+    toast.success('Logged out successfully');
+    // Small delay to ensure state is updated before navigation
+    setTimeout(() => {
+      navigate('/system/login');
+    }, 100);
+  };
+
+  const handlePageChange = (page: string) => {
+    // Handle navigation for different pages
+    switch (page) {
+      case 'dashboard':
+        navigate('/system/dashboard');
+        break;
+      case 'appointments':
+        navigate('/system/appointments');
+        break;
+      case 'companies':
+        navigate('/system/companies');
+        break;
+      case 'products':
+        navigate('/system/company-products');
+        break;
+      case 'sales':
+        navigate('/system/sales');
+        break;
+      case 'services':
+        navigate('/system/services');
+        break;
+      case 'settings':
+        navigate('/system/settings');
+        break;
+      case 'spaces':
+        navigate('/system/spaces');
+        break;
+      case 'staff':
+        navigate('/system/staff');
+        break;
+      case 'users':
+        navigate('/system/users');
+        break;
+      case 'profile':
+        navigate('/system/profile');
+        break;
+      case 'notifications':
+        navigate('/system/notifications');
+        break;
+      case 'search':
+        navigate('/system/search');
+        break;
+      case 'analytics':
+        navigate('/system/analytics');
+        break;
+      case 'company-settings':
+        navigate('/system/company-settings');
+        break;
+      case 'system-products':
+        navigate('/system/system-products');
+        break;
+      case 'system-product-attributes':
+        navigate('/system/system-product-attributes');
+        break;
+      case 'units-of-measure':
+        navigate('/system/units-of-measure');
+        break;
+      case 'tags':
+        navigate('/system/tags');
+        break;
+      case 'backlog':
+        navigate('/system/backlog');
+        break;
+      case 'web-webpages':
+        navigate('/system/web/webpages');
+        break;
+      case 'web-headers':
+        navigate('/system/web/headers');
+        break;
+      case 'web-footers':
+        navigate('/system/web/footers');
+        break;
+      case 'web-themes':
+        navigate('/system/web/themes');
+        break;
+      case 'web-presets':
+        navigate('/system/web/presets');
+        break;
+      case 'web-media':
+        navigate('/system/web/media');
+        break;
+      default:
+        // Handle company-settings with ID (e.g., "company-settings/4")
+        if (page.startsWith('company-settings/')) {
+          const companyId = page.split('/')[1];
+          navigate(`/system/company-settings/${companyId}`);
+        } else {
+          navigate('/system/dashboard');
+        }
+        break;
+    }
+  };
+
+  return (
+    <MainLayout
+      currentPage={getCurrentPage()}
+      onPageChange={handlePageChange}
+      sidebarOpen={sidebarOpen}
+      setSidebarOpen={setSidebarOpen}
+      currentUser={user as any}
+      onLogout={handleLogout}
+    >
+      {children}
+    </MainLayout>
+  );
+}
+
+
+// CompaniesPage Wrapper Component
+function CompaniesPageWrapper() {
+  const navigate = useNavigate();
+
+  const handleViewCompany = (id: string) => {
+    navigate(`/system/companies/${id}`);
+  };
+
+  return <CompaniesPage onViewCompany={handleViewCompany} />;
+}
+
+// UsersPage Wrapper Component
+function UsersPageWrapper() {
+  const navigate = useNavigate();
+
+  const handleViewProfile = (userId: string) => {
+    navigate(`/system/users/${userId}`);
+  };
+
+  const handleViewAppointments = (userId: string) => {
+    navigate(`/system/users/${userId}/history`);
+  };
+
+  return <UsersPage onViewProfile={handleViewProfile} onViewAppointments={handleViewAppointments} />;
+}
+
+// CompanyProfilePage Wrapper Component
+function CompanyProfilePageWrapper() {
+  const { id, serviceId, productId } = useParams<{ id: string; serviceId?: string; productId?: string }>();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isServicesRoute = location.pathname.includes('/services');
+  const isProductsRoute = location.pathname.includes('/products');
+
+  const handleBack = () => {
+    navigate('/system/companies');
+  };
+
+  if (!id) {
+    return <div>Company ID not found</div>;
+  }
+
+  return (
+    <CompanyProfilePage
+      companyId={id}
+      onBack={handleBack}
+      initialTab={isServicesRoute ? 'services' : isProductsRoute ? 'products' : 'profile'}
+      selectedServiceId={serviceId}
+      selectedProductId={productId}
+    />
+  );
+}
+
+// UserProfilePage Wrapper Component
+function UserProfilePageWrapper() {
+  const { userId } = useParams<{ userId: string }>();
+  const navigate = useNavigate();
+
+  const handleBack = () => {
+    navigate('/system/users');
+  };
+
+  if (!userId) {
+    return <div>User ID not found</div>;
+  }
+
+  return (
+    <UserProfilePage 
+      userId={userId} 
+      onBack={handleBack} 
+    />
+  );
+}
+
+// AppointmentDetailPage Wrapper Component
+function AppointmentDetailPageWrapper() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+
+  const handleBack = () => {
+    navigate('/system/appointments');
+  };
+
+  if (!id) {
+    return (
+      <div className="flex-1 p-4 lg:p-8 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-foreground mb-2">Appointment Not Found</h3>
+          <p className="text-muted-foreground mb-4">Invalid appointment ID</p>
+          <button 
+            onClick={() => navigate('/system/appointments')}
+            className="px-4 py-2 bg-[var(--accent-primary)] text-[var(--accent-button-text)] rounded-lg hover:bg-[var(--accent-primary-hover)]"
+          >
+            Back to Appointments
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <AppointmentDetailPage 
+      appointmentId={id}
+      onBack={handleBack} 
+    />
+  );
+}
+
+// CompanySettingsPage Wrapper Component
+function CompanySettingsPageWrapper() {
+  const navigate = useNavigate();
+  const { id } = useParams<{ id?: string }>();
+  const { user } = useAppSelector((state) => state.auth);
+  const { companies } = useAppSelector((state) => state.companies);
+
+  // If no ID in URL, try to find user's company and redirect
+  useEffect(() => {
+    if (!id && user?.id) {
+      const userCompany = companies.find(c => 
+        c.ownerId !== null && String(c.ownerId) === String(user.id)
+      );
+      if (userCompany) {
+        navigate(`/system/company-settings/${userCompany.id}`, { replace: true });
+      }
+    }
+  }, [id, user?.id, companies, navigate]);
+
+  const handleBack = () => {
+    navigate('/system/dashboard');
+  };
+
+  return (
+    <CompanySettingsPage 
+      onBack={handleBack} 
+    />
+  );
+}
+
+// VariantStockDetailsPage Wrapper Component
+function VariantStockDetailsPageWrapper() {
+  const { id: productId, variantId } = useParams<{ id: string; variantId: string }>();
+  const navigate = useNavigate();
+
+  const handleBack = () => {
+    if (productId) {
+      navigate(`/system/company-products/${productId}`);
+    } else {
+      navigate('/system/company-products');
+    }
+  };
+
+  if (!productId || !variantId) {
+    return <div>Product ID or Variant ID not found</div>;
+  }
+
+  return (
+    <VariantStockDetailsPage 
+      productId={productId} 
+      variantId={variantId}
+      onBack={handleBack} 
+    />
+  );
+}
+
+// UserAppointmentHistoryPage Wrapper Component
+function UserAppointmentHistoryPageWrapper() {
+  const { userId } = useParams<{ userId: string }>();
+  const navigate = useNavigate();
+  const { user } = useAppSelector((state) => state.auth);
+
+  const handleBack = () => {
+    navigate('/system/users');
+  };
+
+  if (!userId) {
+    return (
+      <div className="flex-1 p-4 lg:p-8 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-foreground mb-2">User Not Found</h3>
+          <p className="text-muted-foreground mb-4">Invalid user ID</p>
+          <button 
+            onClick={() => navigate('/system/users')}
+            className="px-4 py-2 bg-[var(--accent-primary)] text-[var(--accent-button-text)] rounded-lg hover:bg-[var(--accent-primary-hover)]"
+          >
+            Back to Users
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <UserAppointmentHistoryPage 
+      userId={userId}
+      onBack={handleBack}
+      currentUser={user as any}
+    />
+  );
+}
+
+// SystemProductsPage Wrapper Component
+function SystemProductsPageWrapper() {
+  const { user } = useAppSelector((state) => state.auth);
+  const navigate = useNavigate();
+
+  const handleViewProduct = (productId: string) => {
+    navigate(`/system/system-products/${productId}`);
+  };
+
+  return (
+    <SystemProductsPage 
+      currentUser={user as any}
+      onViewProduct={handleViewProduct}
+    />
+  );
+}
+
+
+// ProductsPage Wrapper Component
+function ProductsPageWrapper() {
+  const navigate = useNavigate();
+  const { user } = useAppSelector((state) => state.auth);
+
+  return (
+    <ProductsPage 
+      currentUser={user as any}
+      onNavigate={(path: string) => navigate(path)}
+    />
+  );
+}
+
+// ProductDetailPage Wrapper Component
+function ProductDetailPageWrapper() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { user } = useAppSelector((state) => state.auth);
+
+  if (!id) {
+    return (
+      <div className="flex-1 p-4 lg:p-8 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-foreground mb-2">Product Not Found</h3>
+          <p className="text-muted-foreground mb-4">Invalid product ID</p>
+          <button 
+            onClick={() => navigate('/system/system-products')}
+            className="px-4 py-2 bg-[var(--accent-primary)] text-[var(--accent-button-text)] rounded-lg hover:bg-[var(--accent-primary-hover)]"
+          >
+            Back to System Products
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <ProductDetailPage 
+      currentUser={user as any}
+      productId={id}
+      productType="system"
+      onBack={() => navigate('/system/system-products')}
+    />
+  );
+}
+
+// CompanyProductDetailPage Wrapper Component
+function CompanyProductDetailPageWrapper() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+
+  if (!id) {
+    return (
+      <div className="flex-1 p-4 lg:p-8 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-foreground mb-2">Product Not Found</h3>
+          <p className="text-muted-foreground mb-4">Invalid product ID</p>
+          <button 
+            onClick={() => navigate('/system/company-products')}
+            className="px-4 py-2 bg-[var(--accent-primary)] text-[var(--accent-button-text)] rounded-lg hover:bg-[var(--accent-primary-hover)]"
+          >
+            Back to Products
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <CompanyProductDetailPage 
+      productId={id}
+      onBack={() => navigate('/system/company-products')}
+    />
+  );
+}
+
+// SalesDetailPage Wrapper Component
+function SalesDetailPageWrapper() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+
+  if (!id) {
+    return (
+      <div className="flex-1 p-4 lg:p-8 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-foreground mb-2">Sale Not Found</h3>
+          <p className="text-muted-foreground mb-4">Invalid sale ID</p>
+          <button 
+            onClick={() => navigate('/system/sales')}
+            className="px-4 py-2 bg-[var(--accent-primary)] text-[var(--accent-button-text)] rounded-lg hover:bg-[var(--accent-primary-hover)]"
+          >
+            Back to Sales
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <SalesDetailPage 
+      saleId={id}
+      onBack={() => navigate('/system/sales')}
+    />
+  );
+}
+
+// ServiceDetailPage Wrapper Component
+function ServiceDetailPageWrapper() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+
+  if (!id) {
+    return (
+      <div className="flex-1 p-4 lg:p-8 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-foreground mb-2">Service Not Found</h3>
+          <p className="text-muted-foreground mb-4">Invalid service ID</p>
+          <button 
+            onClick={() => navigate('/system/services')}
+            className="px-4 py-2 bg-[var(--accent-primary)] text-[var(--accent-button-text)] rounded-lg hover:bg-[var(--accent-primary-hover)]"
+          >
+            Back to Services
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <ServiceDetailPage 
+      serviceId={id}
+      onBack={() => navigate('/system/services')}
+    />
+  );
+}
+
+// Company ServiceDetailPage Wrapper Component
+function CompanyServiceDetailPageWrapper() {
+  const { id: companyId, serviceId } = useParams<{ id: string; serviceId: string }>();
+  const navigate = useNavigate();
+
+  if (!companyId || !serviceId) {
+    return (
+      <div className="flex-1 p-4 lg:p-8 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-foreground mb-2">Service Not Found</h3>
+          <p className="text-muted-foreground mb-4">Invalid company or service ID</p>
+          <button
+            onClick={() => navigate('/system/companies')}
+            className="px-4 py-2 bg-[var(--accent-primary)] text-[var(--accent-button-text)] rounded-lg hover:bg-[var(--accent-primary-hover)]"
+          >
+            Back to Companies
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <ServiceDetailPage
+      serviceId={serviceId}
+      onBack={() => navigate(`/system/companies/${companyId}/services`)}
+    />
+  );
+}
+
+// Company ProductDetailPage Wrapper Component
+function CompanyScopedProductDetailPageWrapper() {
+  const { id: companyId, productId } = useParams<{ id: string; productId: string }>();
+  const navigate = useNavigate();
+
+  if (!companyId || !productId) {
+    return (
+      <div className="flex-1 p-4 lg:p-8 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-foreground mb-2">Product Not Found</h3>
+          <p className="text-muted-foreground mb-4">Invalid company or product ID</p>
+          <button
+            onClick={() => navigate('/system/companies')}
+            className="px-4 py-2 bg-[var(--accent-primary)] text-[var(--accent-button-text)] rounded-lg hover:bg-[var(--accent-primary-hover)]"
+          >
+            Back to Companies
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <CompanyProductDetailPage
+      productId={productId}
+      onBack={() => navigate(`/system/companies/${companyId}/products`)}
+    />
+  );
+}
+
+// SpaceDetailPage Wrapper Component
+function SpaceDetailPageWrapper() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+
+  if (!id) {
+    return (
+      <div className="flex-1 p-4 lg:p-8 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-foreground mb-2">Space Not Found</h3>
+          <p className="text-muted-foreground mb-4">Invalid space ID</p>
+          <button 
+            onClick={() => navigate('/system/spaces')}
+            className="px-4 py-2 bg-[var(--accent-primary)] text-[var(--accent-button-text)] rounded-lg hover:bg-[var(--accent-primary-hover)]"
+          >
+            Back to Spaces
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <SpaceDetailPage 
+      spaceId={id}
+      onBack={() => navigate('/system/spaces')}
+    />
+  );
+}
+
+function App() {
+  const dispatch = useAppDispatch();
+  const { isAuthenticated, isLoading, user } = useAppSelector((state) => state.auth);
+  
+  // Theme and accent color state
+  const [theme, setTheme] = useState<Theme>("dark");
+  const [accentColor, setAccentColor] = useState<AccentColor>("orange");
+  
+  // Authentication restoration state
+  const [isRestoringAuth, setIsRestoringAuth] = useState(true);
+
+  // Apply theme and accent color
+  useEffect(() => {
+    applyTheme(theme, accentColor);
+  }, [accentColor, theme]);
+
+  // Listen for system theme changes
+  useEffect(() => {
+    if (theme === "system") {
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      let timeoutId: number;
+      
+      const handleChange = () => {
+        clearTimeout(timeoutId);
+        timeoutId = window.setTimeout(() => {
+          requestAnimationFrame(() => {
+            const root = window.document.documentElement;
+            root.classList.remove("light", "dark");
+            root.classList.add(mediaQuery.matches ? "dark" : "light");
+          });
+        }, 50);
+      };
+
+      mediaQuery.addEventListener("change", handleChange);
+      return () => {
+        mediaQuery.removeEventListener("change", handleChange);
+        clearTimeout(timeoutId);
+      };
+    }
+  }, [theme]);
+
+  // Load settings from localStorage
+  useEffect(() => {
+    let isMounted = true;
+    
+    const loadSettings = async () => {
+      try {
+        if (window.requestIdleCallback) {
+          window.requestIdleCallback(() => {
+            if (!isMounted) return;
+            
+            const savedTheme = storage.get("theme") as Theme | null;
+            const savedAccentColor = storage.get("accentColor") as AccentColor | null;
+            
+            if (savedTheme) setTheme(savedTheme);
+            if (savedAccentColor) setAccentColor(savedAccentColor);
+            
+            // Apply theme immediately after loading
+            applyTheme(savedTheme || "dark", savedAccentColor || "orange");
+          });
+        } else {
+          const savedTheme = storage.get("theme") as Theme | null;
+          const savedAccentColor = storage.get("accentColor") as AccentColor | null;
+          
+          if (savedTheme) setTheme(savedTheme);
+          if (savedAccentColor) setAccentColor(savedAccentColor);
+          
+          // Apply theme immediately after loading
+          applyTheme(savedTheme || "dark", savedAccentColor || "orange");
+        }
+      } catch (error) {
+        console.error("Error loading theme settings:", error);
+        // Apply default theme if loading fails
+        applyTheme("dark", "orange");
+      }
+    };
+
+    loadSettings();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Theme change handlers
+  const handleThemeChange = (newTheme: Theme) => {
+    setTheme(newTheme);
+    storage.set("theme", newTheme);
+  };
+
+  const handleAccentColorChange = (newAccentColor: AccentColor) => {
+    setAccentColor(newAccentColor);
+    storage.set("accentColor", newAccentColor);
+  };
+
+  // Performance monitoring
+  useEffect(() => {
+    performance.mark("app-init-start");
+    performance.mark("app-init-end");
+    performance.measure("app-init", "app-init-start", "app-init-end");
+  }, []);
+
+  // One-time authentication restoration on app mount
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    const savedUser = localStorage.getItem('user');
+    
+    console.log('Initial auth restoration check:', { 
+      hasToken: !!token, 
+      hasSavedUser: !!savedUser, 
+      isAuthenticated, 
+      user: !!user 
+    });
+    
+    if (token && savedUser) {
+      try {
+        const userData = JSON.parse(savedUser);
+        console.log('Restoring user from localStorage on app mount:', userData);
+        dispatch(loginSuccess({ user: userData, token }));
+        
+        // Refresh user data from server to get latest information
+        console.log('Refreshing user data from server...');
+        dispatch(refreshUserRequest());
+      } catch (error) {
+        console.error('Error parsing saved user:', error);
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+      }
+    }
+    
+    // Mark restoration as complete
+    setIsRestoringAuth(false);
+  }, []); // Empty dependency array - runs only once on mount
+
+  // Handle authentication state changes
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    const savedUser = localStorage.getItem('user');
+    
+    if (!token && !savedUser && isAuthenticated) {
+      // If no token/user in localStorage but Redux says authenticated, log out
+      console.log('No session data found, logging out');
+      dispatch(logout());
+    }
+  }, [dispatch, isAuthenticated]);
+
+  // Debug authentication state changes
+  useEffect(() => {
+    console.log('Authentication state changed:', { isAuthenticated });
+  }, [isAuthenticated]);
+
+  // Loading state
+  if (isLoading || isRestoringAuth) {
+    return <LoadingLayout />;
+  }
+
+  return (
+    <Router>
+      <div className="min-h-screen bg-background text-foreground">
+        <Routes>
+          {/* Public Routes - Authentication */}
+          <Route 
+            path="/system/login" 
+            element={
+              isAuthenticated ? (
+                <Navigate to="/system/dashboard" replace />
+              ) : (
+                <AuthLayout><LoginPage /></AuthLayout>
+              )
+            } 
+          />
+          <Route 
+            path="/system/signup" 
+            element={
+              isAuthenticated ? (
+                <Navigate to="/system/dashboard" replace />
+              ) : (
+                <SignUpWizardPage />
+              )
+            } 
+          />
+          <Route 
+            path="/system/email-verify" 
+            element={
+              isAuthenticated ? (
+                <Navigate to="/system/dashboard" replace />
+              ) : (
+                <VerifyEmailPage />
+              )
+            } 
+          />
+          <Route 
+            path="/system/verify-email" 
+            element={
+              isAuthenticated ? (
+                <Navigate to="/system/dashboard" replace />
+              ) : (
+                <VerifyEmailRedirect />
+              )
+            } 
+          />
+          <Route 
+            path="/system/forgot-password" 
+            element={
+              isAuthenticated ? (
+                <Navigate to="/system/dashboard" replace />
+              ) : (
+                <AuthLayout><ForgotPasswordPage /></AuthLayout>
+              )
+            } 
+          />
+          <Route 
+            path="/system/reset-password" 
+            element={
+              isAuthenticated ? (
+                <Navigate to="/system/dashboard" replace />
+              ) : (
+                <AuthLayout><ResetPasswordPage /></AuthLayout>
+              )
+            } 
+          />
+          
+          {/* System root redirect */}
+          <Route path="/system" element={<Navigate to="/system/login" replace />} />
+
+          {/* Protected Routes */}
+          <Route 
+            path="/system/dashboard" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <Dashboard />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/appointments" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <AppointmentsPage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/appointments/:id" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <AppointmentDetailPageWrapper />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/companies" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <CompaniesPageWrapper />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/companies/:id" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <CompanyProfilePageWrapper />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+
+          <Route
+            path="/system/companies/:id/services"
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <CompanyProfilePageWrapper />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+
+          <Route
+            path="/system/companies/:id/services/:serviceId"
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <CompanyServiceDetailPageWrapper />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+
+          <Route
+            path="/system/companies/:id/products"
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <CompanyProfilePageWrapper />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+
+          <Route
+            path="/system/companies/:id/products/:productId"
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <CompanyScopedProductDetailPageWrapper />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/company-products" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <ProductsPageWrapper />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/system-products" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <SystemProductsPageWrapper />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/system-product-attributes" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <SystemProductAttributesPage currentUser={user as any} />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/units-of-measure" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <UnitsOfMeasurePage currentUser={user as any} />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/tags" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <TagsPage currentUser={user as any} />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/backlog" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <BacklogPage currentUser={user as any} />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/system-products/:id" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <ProductDetailPageWrapper />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/company-products/:id/variants/:variantId/stock" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <VariantStockDetailsPageWrapper />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/company-products/:id" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <CompanyProductDetailPageWrapper />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/sales" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <SalesPage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/sales/:id" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <SalesDetailPageWrapper />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/services" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <ServicesPage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/services/:id" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <ServiceDetailPageWrapper />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/settings" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <SettingsPage 
+                    onThemeChange={handleThemeChange}
+                    currentTheme={theme}
+                    onAccentColorChange={handleAccentColorChange}
+                    currentAccentColor={accentColor}
+                  />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/spaces" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <SpacesPage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/spaces/:id" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <SpaceDetailPageWrapper />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/staff/:staffId" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <StaffPage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/staff" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <StaffPage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/users" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <UsersPageWrapper />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/users/:userId" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <UserProfilePageWrapper />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/users/:userId/history" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <UserAppointmentHistoryPageWrapper />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/profile" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <ProfilePage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/company-settings/:id" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <CompanySettingsPageWrapper />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          <Route 
+            path="/system/company-settings" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <CompanySettingsPageWrapper />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/notifications" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <NotificationsPage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/search" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <SearchPage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/analytics" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <AnalyticsPage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+
+          <Route 
+            path="/system/web/webpages/new" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <WebpageFormPage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          <Route 
+            path="/system/web/webpages/:pageId/edit" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <WebpageEditor />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          <Route 
+            path="/system/web/webpages/:pageId" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <WebpageFormPage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          <Route 
+            path="/system/web/webpages" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <WebsitePage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/system/web/headers/:headerId/edit"
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <HeaderWebEditor />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/system/web/headers"
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <WebsitePage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/system/web/footers/:footerId/edit"
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <FooterWebEditor />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/system/web/footers"
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <WebsitePage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          <Route 
+            path="/system/web/themes" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <WebsitePage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          <Route 
+            path="/system/web/presets" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <WebsitePage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          <Route 
+            path="/system/web/media" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <WebsitePage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          <Route 
+            path="/system/web" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <WebsitePage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+
+          <Route 
+            path="/showcase" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <ShowcasePage 
+                    onThemeChange={handleThemeChange}
+                    currentTheme={theme}
+                    onAccentColorChange={handleAccentColorChange}
+                    currentAccentColor={accentColor}
+                  />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+
+          {/* Public site: layout keeps default header mounted; child route swaps page body */}
+          <Route path="/web/:companyId" element={<PublicWebsiteLayout />}>
+            <Route path="*" element={<PublicWebPage />} />
+          </Route>
+          {/* Full-width editor route - opens in new tab without sidebar */}
+          <Route 
+            path="/editor/:pageId" 
+            element={
+              isAuthenticated ? (
+                <WebpageEditor fullWidth={true} />
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/editor/header/:headerId"
+            element={
+              isAuthenticated ? (
+                <HeaderWebEditor fullWidth={true} />
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/editor/footer/:footerId"
+            element={
+              isAuthenticated ? (
+                <FooterWebEditor fullWidth={true} />
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+
+          {/* Root redirect */}
+          <Route path="/" element={<Navigate to="/system" replace />} />
+          
+          {/* Catch all route */}
+          <Route path="*" element={<ErrorLayout />} />
+        </Routes>
+      </div>
+    </Router>
+  );
+}
+
+export { App as AppRouter };
+export default App;

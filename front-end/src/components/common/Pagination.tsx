@@ -1,5 +1,3 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "../ui/button";
 import {
   Pagination as PaginationRoot,
   PaginationContent,

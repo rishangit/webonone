@@ -38,10 +38,10 @@ export const MultiSelect = React.forwardRef<
       defaultValue = [],
       value,
       placeholder = "Select options",
-      animation = 0,
-      maxCount = 3,
+      animation: _animation = 0,
+      maxCount: _maxCount = 3,
       modalPopover = false,
-      asChild = false,
+      asChild: _asChild = false,
       className,
       ...props
     },
@@ -104,11 +104,6 @@ export const MultiSelect = React.forwardRef<
     const handleTogglePopover = React.useCallback(() => {
       setIsPopoverOpen((prev) => !prev);
     }, []);
-
-    const clearExtraOptions = React.useCallback(() => {
-      const newSelectedValues = selectedValues.slice(0, maxCount);
-      updateValues(newSelectedValues);
-    }, [selectedValues, maxCount, updateValues]);
 
     const toggleAll = React.useCallback(() => {
       if (selectedValues.length === options.length) {

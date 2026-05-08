@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { formatDate } from "../../utils";
+import { formatDate } from "@/shared/utils";
 
 interface DateDisplayProps {
   date: string | Date | null | undefined;

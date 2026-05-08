@@ -1,0 +1,32 @@
+import { Card } from "@/components/ui/card";
+import { ImageWithFallback } from "@/components/common/ImageWithFallback";
+import { formatAvatarUrl } from "../../../../utils";
+import { Service } from "@/features/services/services";
+
+interface ServiceDetailImageProps {
+  service: Service;
+}
+
+export const ServiceDetailImage = ({ service }: ServiceDetailImageProps) => {
+  const getImageUrl = () => {
+    if (service.image) {
+      return formatAvatarUrl(service.image);
+    }
+    return undefined;
+  };
+
+  const displayImageUrl = getImageUrl();
+
+  return (
+    <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
+      <div className="aspect-square rounded-lg overflow-hidden">
+        <ImageWithFallback 
+          src={displayImageUrl}
+          alt={service.name}
+          className="w-full h-full object-cover"
+          fallbackSrc="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=400&fit=crop"
+        />
+      </div>
+    </Card>
+  );
+};

@@ -17,6 +17,9 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
+      "@/hooks": ["./src/shared/hooks"],
+      "@/store": ["./src/app/store"],
+      "@/store/*": ["./src/app/store/*"],
       "@/*": ["./src/*"]
     }
   },

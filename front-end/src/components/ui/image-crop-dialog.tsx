@@ -1,9 +1,8 @@
 import React, { useState, useCallback } from 'react';
-import Cropper from 'react-easy-crop';
+import Cropper, { type Area, type Point } from 'react-easy-crop';
 import { CustomDialog } from './custom-dialog';
 import { Button } from './button';
-import { Crop, X } from 'lucide-react';
-import type { Area, Point } from 'react-easy-crop';
+import { Crop } from 'lucide-react';
 
 interface ImageCropDialogProps {
   open: boolean;

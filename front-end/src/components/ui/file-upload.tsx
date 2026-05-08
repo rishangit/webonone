@@ -4,9 +4,9 @@ import { Card } from './card';
 import { Alert, AlertDescription } from './alert';
 import { Upload, X, Loader2 } from 'lucide-react';
 import { ProgressBar } from './progress-bar';
-import { fileUploadService, FileUploadData } from '@/services/fileUploadService';
+import { fileUploadService } from '@/shared/services/fileUploadService';
 import { toast } from 'sonner';
-import { formatAvatarUrl } from '../../utils';
+import { formatAvatarUrl } from "@/shared/utils";
 import { ImageCropDialog } from './image-crop-dialog';
 
 interface FileUploadProps {
@@ -207,7 +207,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
             <div className="relative">
               <img
                 src={previewUrl}
-                alt="Current image"
+                alt="Current upload preview"
                 className="w-32 h-32 object-cover object-center rounded-lg border-2 border-gray-200"
                 style={{ objectFit: 'cover', objectPosition: 'center' }}
                 onError={(e) => {
