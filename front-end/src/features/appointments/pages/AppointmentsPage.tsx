@@ -1,6 +1,7 @@
 import { Plus, Calendar, Filter, Search, ChevronDown, Clock, Users, CheckCircle, XCircle, Phone, MapPin, Play, User, Building, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { EmptyState } from "@/components/common/EmptyState";
 import { AppointmentCard } from "@/features/appointments/components/AppointmentCard";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -415,6 +416,21 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
     }
   }, [transformedAppointments, isCompanyOwner, searchQuery, statusFilter, timeFilter, selectedStaff, selectedSpaces]);
 
+  const appointmentsEmptyHasFilters =
+    selectedStaff.length > 0 ||
+    selectedSpaces.length > 0 ||
+    Boolean(searchQuery.trim()) ||
+    statusFilter !== "all-status" ||
+    timeFilter !== "all-time";
+
+  const clearAppointmentFilters = () => {
+    setSearchQuery("");
+    setSelectedStaff([]);
+    setSelectedSpaces([]);
+    setStatusFilter("all-status");
+    setTimeFilter("all-time");
+  };
+
   return (
     <div className="flex-1 p-6 flex flex-col min-h-0">
       {/* Header */}
@@ -693,13 +709,24 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
                   />
                 ))
               ) : (
-                <Card className="p-8 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] text-center">
-                  <div className="flex flex-col items-center gap-3">
-                    <Calendar className="w-12 h-12 text-muted-foreground" />
-                    <h3 className="text-lg font-semibold text-foreground">No appointments found</h3>
-                    <p className="text-muted-foreground">Try adjusting your filters or search query</p>
-                  </div>
-                </Card>
+                <EmptyState
+                  icon={Calendar}
+                  title="No appointments found"
+                  description={
+                    appointmentsEmptyHasFilters
+                      ? "Try adjusting your filters or search query."
+                      : "No appointments scheduled. Create one with New Appointment."
+                  }
+                  action={
+                    appointmentsEmptyHasFilters
+                      ? {
+                          label: "Clear filters",
+                          variant: "outline",
+                          onClick: clearAppointmentFilters,
+                        }
+                      : undefined
+                  }
+                />
               )}
             </div>
           ) : (
@@ -733,13 +760,24 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
                 ))
               ) : (
                 <div className="col-span-full">
-                  <Card className="p-8 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] text-center">
-                    <div className="flex flex-col items-center gap-3">
-                      <Calendar className="w-12 h-12 text-muted-foreground" />
-                      <h3 className="text-lg font-semibold text-foreground">No appointments found</h3>
-                      <p className="text-muted-foreground">Try adjusting your filters or search query</p>
-                    </div>
-                  </Card>
+                  <EmptyState
+                    icon={Calendar}
+                    title="No appointments found"
+                    description={
+                      appointmentsEmptyHasFilters
+                        ? "Try adjusting your filters or search query."
+                        : "No appointments scheduled. Create one with New Appointment."
+                    }
+                    action={
+                      appointmentsEmptyHasFilters
+                        ? {
+                            label: "Clear filters",
+                            variant: "outline",
+                            onClick: clearAppointmentFilters,
+                          }
+                        : undefined
+                    }
+                  />
                 </div>
               )}
             </div>

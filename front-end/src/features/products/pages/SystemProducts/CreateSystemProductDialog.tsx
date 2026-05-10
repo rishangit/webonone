@@ -159,7 +159,8 @@ export function CreateSystemProductDialog({
       title="Create System Product"
       description="Create a new product template for companies to use"
       icon={<Package className="w-5 h-5" />}
-      maxWidth="max-w-2xl"
+      sizeWidth="small"
+      sizeHeight="large"
       footer={
         <div className="flex items-center justify-end gap-2">
           <Button 

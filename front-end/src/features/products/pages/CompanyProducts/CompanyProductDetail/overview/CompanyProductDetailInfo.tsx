@@ -1,99 +1,48 @@
-import { Package } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CardTitle } from "@/components/common/CardTitle";
-import type { CompanyProduct } from '@/features/products/services/productApi';
-import { CompanyProductVariant } from "@/features/products/services/companyProductVariants";
+import { DateTime } from "@/components/common/DateTime";
+import type { CompanyProduct } from "@/features/products/services/productApi";
 
 interface CompanyProductDetailInfoProps {
   product: CompanyProduct;
-  variants: CompanyProductVariant[];
-  variantsLoading: boolean;
-  selectedVariantId: string | null;
-  selectedVariant: CompanyProductVariant | null;
-  onVariantSelect: (variant: CompanyProductVariant | null) => void;
-  showVariantSelector?: boolean;
 }
 
-export const CompanyProductDetailInfo = ({
-  product,
-  variants,
-  variantsLoading,
-  selectedVariantId,
-  selectedVariant,
-  onVariantSelect,
-  showVariantSelector = true,
-}: CompanyProductDetailInfoProps) => {
+export const CompanyProductDetailInfo = ({ product }: CompanyProductDetailInfoProps) => {
   return (
     <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
-      <CardTitle title="Product Information" icon={Package} />
+      <h3 className="font-semibold text-foreground mb-4">Product Information</h3>
       <div className="space-y-4">
         <div>
           <Label className="text-muted-foreground">Description</Label>
-          <p className="text-foreground mt-1">{product.description || 'No description available'}</p>
+          <p className="text-foreground mt-1">
+            {product.description || "No description available"}
+          </p>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        <div className="space-y-4">
           {product.sku && (
             <div>
               <Label className="text-muted-foreground">SKU</Label>
               <p className="text-foreground">{product.sku}</p>
             </div>
           )}
-        </div>
-
-        {/* Variant Selector - Only show if there are multiple variants */}
-        {showVariantSelector && variants.length > 1 && (
-          <div className="space-y-2">
-              <Label className="text-sm font-medium text-foreground">Select Variant</Label>
-              <Select 
-                value={selectedVariantId || ''} 
-                onValueChange={(value) => {
-                  const variant = variants.find(v => v.id === value);
-                  onVariantSelect(variant || null);
-                }}
-                disabled={variantsLoading}
-              >
-                <SelectTrigger className="w-full bg-[var(--input-background)] border-[var(--glass-border)] text-foreground">
-                  <SelectValue placeholder={variantsLoading ? "Loading variants..." : "Select variant"} />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border">
-                  {variants.map((variant) => (
-                    <SelectItem 
-                      key={variant.id} 
-                      value={variant.id}
-                    >
-                      {variant.name}
-                      {variant.isDefault && ' (Default)'}
-                      {variant.color && ` - ${variant.color}`}
-                      {variant.size && ` (${variant.size})`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {selectedVariant && (
-                <div className="mt-2 pt-2 border-t border-border space-y-1 text-xs">
-                  {selectedVariant.sku && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">SKU:</span>
-                      <span className="text-foreground font-medium">{selectedVariant.sku}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Stock:</span>
-                    <span className="text-foreground font-medium">{selectedVariant.activeStock?.quantity || 0}</span>
-                  </div>
-                  {selectedVariant.isDefault && (
-                    <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
-                      <span className="text-xs">⭐ Default Variant</span>
-                    </div>
-                  )}
-                </div>
-              )}
+          {product.createdAt && (
+            <div>
+              <Label className="text-muted-foreground">Created</Label>
+              <p className="text-foreground">
+                <DateTime date={product.createdAt} />
+              </p>
             </div>
-        )}
-
+          )}
+          {product.updatedAt && (
+            <div>
+              <Label className="text-muted-foreground">Last Modified</Label>
+              <p className="text-foreground">
+                <DateTime date={product.updatedAt} />
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </Card>
   );

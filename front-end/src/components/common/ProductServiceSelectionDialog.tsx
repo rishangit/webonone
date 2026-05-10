@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/components/ui/utils";
 import { SearchInput } from "./SearchInput";
+import { EmptyState } from "@/components/common/EmptyState";
 
 export interface ProductSelectionItem {
   id: string;
@@ -225,15 +226,17 @@ export function ProductServiceSelectionDialog({
               </Button>
             </div>
           ) : visibleItems.length === 0 ? (
-            <div className="h-full min-h-[240px] flex flex-col items-center justify-center text-center px-4">
-              {searchType === "products" ? (
-                <Package className="w-8 h-8 text-muted-foreground opacity-60 mb-2" />
-              ) : (
-                <FileText className="w-8 h-8 text-muted-foreground opacity-60 mb-2" />
-              )}
-              <p className="text-sm text-muted-foreground">
-                No {searchType} found{debouncedSearchTerm ? ` for "${debouncedSearchTerm}"` : ""}
-              </p>
+            <div className="h-full min-h-[240px] flex items-center justify-center px-2">
+              <EmptyState
+                className="!p-8 w-full max-w-md"
+                icon={searchType === "products" ? Package : FileText}
+                title={`No ${searchType} found`}
+                description={
+                  debouncedSearchTerm
+                    ? `Nothing matches "${debouncedSearchTerm}". Try another search.`
+                    : `No ${searchType} are available to select.`
+                }
+              />
             </div>
           ) : (
             <div className="space-y-3">

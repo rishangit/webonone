@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, LayoutTemplate } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { CustomDialog } from "@/components/ui/custom-dialog";
 import { useAppSelector } from "@/store/hooks";
 import { companyWebHeadersService, type CompanyWebHeader } from "@/features/website/services/companyWebHeaders";
 import { AddHeaderDialog, HeaderCard, type AddHeaderFormValues } from "./components";
+import { EmptyState } from "@/components/common/EmptyState";
 import { toast } from "sonner";
 
 export const HeadersPage = () => {
@@ -98,9 +98,11 @@ export const HeadersPage = () => {
           <h1 className="text-xl sm:text-2xl font-semibold text-foreground">Headers</h1>
           <p className="text-muted-foreground mt-1">Select a company to manage site headers.</p>
         </div>
-        <Card className="p-6 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]">
-          <p className="text-center text-muted-foreground py-8">Please select a company from the header bar.</p>
-        </Card>
+        <EmptyState
+          icon={LayoutTemplate}
+          title="Select a company"
+          description="Choose a company from the header bar to manage site headers."
+        />
       </div>
     );
   }
@@ -124,13 +126,17 @@ export const HeadersPage = () => {
       {loading ? (
         <p className="text-muted-foreground">Loading…</p>
       ) : headers.length === 0 ? (
-        <Card className="p-8 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] text-center">
-          <p className="text-muted-foreground mb-4">No headers yet. Add one to show a site-wide navigation bar.</p>
-          <Button variant="accent" onClick={() => setAddOpen(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Add header
-          </Button>
-        </Card>
+        <EmptyState
+          icon={LayoutTemplate}
+          title="No headers yet"
+          description="Add one to show a site-wide navigation bar on your public site."
+          action={{
+            label: "Add header",
+            onClick: () => setAddOpen(true),
+            variant: "accent",
+            icon: Plus,
+          }}
+        />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {headers.map((h) => (

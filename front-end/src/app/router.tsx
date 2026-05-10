@@ -1405,12 +1405,12 @@ function App() {
             }
           />
 
-          <Route 
-            path="/system/web/webpages/new" 
+          <Route
+            path="/system/web/webpages/new"
             element={
               isAuthenticated ? (
                 <ProtectedRouteWrapper>
-                  <WebpageFormPage />
+                  <Navigate to="/system/web/webpages" replace state={{ openAddWebpage: true }} />
                 </ProtectedRouteWrapper>
               ) : (
                 <Navigate to="/system/login" replace />

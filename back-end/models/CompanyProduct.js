@@ -78,10 +78,27 @@ class CompanyProduct {
       // Tags are inherited from the system product, so we don't set them here
       // They will be retrieved from the system product when fetching company products
 
-      // Handle variants if provided (in the same transaction)
-      if (variants && Array.isArray(variants) && variants.length > 0) {
+      // Handle variants in the same transaction.
+      // If the caller did not provide any variants but the company product is linked to
+      // a system product, automatically mirror that system product's variants so the
+      // company product starts with the same set the system owner has defined.
+      let variantsToCreate = Array.isArray(variants) ? variants.filter(Boolean) : [];
+
+      if (variantsToCreate.length === 0 && systemProductId) {
+        const [systemVariantRows] = await connection.execute(
+          'SELECT id, isDefault, isActive FROM product_variants WHERE productId = ? ORDER BY isDefault DESC, createdAt ASC',
+          [systemProductId]
+        );
+        variantsToCreate = systemVariantRows.map((sv) => ({
+          systemProductVariantId: sv.id,
+          isDefault: Boolean(sv.isDefault),
+          isActive: sv.isActive === null || sv.isActive === undefined ? true : Boolean(sv.isActive),
+        }));
+      }
+
+      if (variantsToCreate.length > 0) {
         const CompanyProductVariant = require('./CompanyProductVariant');
-        await CompanyProductVariant.createBulk(productId, variants, connection);
+        await CompanyProductVariant.createBulk(productId, variantsToCreate, connection);
       }
 
       await connection.commit();

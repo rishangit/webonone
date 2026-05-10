@@ -266,7 +266,9 @@ export const CompanyProductDetailPage = ({ productId, onBack }: CompanyProductDe
 
         {!isRegularUser && activeTab === "attributes" && (
           <div className="mt-6">
-            <CompanyProductAttributesTab />
+            <CompanyProductAttributesTab
+              systemProductId={currentCompanyProduct.systemProductId}
+            />
           </div>
         )}
       </div>

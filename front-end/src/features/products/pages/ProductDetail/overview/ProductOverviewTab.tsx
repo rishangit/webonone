@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { formatAvatarUrl } from "@/shared/utils";
 import { ProductDetailImage } from "./ProductDetailImage";
 import { ProductDetailInfo } from "./ProductDetailInfo";
@@ -50,36 +49,6 @@ export const ProductOverviewTab = ({
     ? (imageUrl.startsWith('http') ? imageUrl : formatAvatarUrl(imageUrl))
     : undefined;
 
-  // Get the currently selected variant
-  const selectedVariant = variants.find(v => v.id === selectedVariantId) || null;
-
-  // Auto-select default variant or first variant if none selected
-  // This ensures selection happens even if parent component hasn't set it yet
-  useEffect(() => {
-    if (onVariantSelect && variants.length > 0 && !variantsLoading) {
-      // Only auto-select if no variant is currently selected
-      if (!selectedVariantId) {
-        const defaultVariant = variants.find(v => v.isDefault);
-        if (defaultVariant) {
-          onVariantSelect(defaultVariant);
-        } else {
-          onVariantSelect(variants[0]);
-        }
-      } else {
-        // If a variant is selected but it's not in the variants list, reselect
-        const currentVariant = variants.find(v => v.id === selectedVariantId);
-        if (!currentVariant) {
-          const defaultVariant = variants.find(v => v.isDefault);
-          if (defaultVariant) {
-            onVariantSelect(defaultVariant);
-          } else {
-            onVariantSelect(variants[0]);
-          }
-        }
-      }
-    }
-  }, [variants, selectedVariantId, variantsLoading, onVariantSelect]);
-
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Left Side - Product Image */}
@@ -90,24 +59,20 @@ export const ProductOverviewTab = ({
         />
       </div>
 
-      {/* Right Side - Product Information */}
+      {/* Right Side - Product Attributes and Information */}
       <div className="space-y-6">
-        <ProductDetailInfo 
-          product={product}
-          variants={variants}
-          variantsLoading={variantsLoading}
-          selectedVariantId={selectedVariantId}
-          selectedVariant={selectedVariant}
-          onVariantSelect={onVariantSelect}
-        />
-
-        {/* Product Attributes - Shows values for selected variant */}
+        {/* Product Attributes — embeds variant configuration and resolved values */}
         {product.id && (
           <ProductAttributesDisplay
             productId={product.id}
-            selectedVariant={selectedVariant}
+            variants={variants}
+            variantsLoading={variantsLoading}
+            selectedVariantId={selectedVariantId}
+            onVariantSelect={onVariantSelect}
           />
         )}
+
+        <ProductDetailInfo product={product} />
 
         {product.tags && product.tags.length > 0 && (
           <ProductDetailTags tags={product.tags} />

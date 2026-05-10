@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useAppDispatch } from "@/store/hooks";
 import { fetchSpaceRequest } from "@/features/spaces/store";
 import { CardTitle } from "@/components/common/CardTitle";
+import { EmptyState } from "@/components/common/EmptyState";
 
 interface SpaceGalleryTabProps {
   space: Space;
@@ -148,10 +149,11 @@ export const SpaceGalleryTab = ({ space, companyId, onSpaceUpdate }: SpaceGaller
           </div>
         </Card>
       ) : (
-        <Card className="p-12 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] text-center">
-          <ImageIcon className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-          <p className="text-muted-foreground">No gallery images yet. Upload images to get started.</p>
-        </Card>
+        <EmptyState
+          icon={ImageIcon}
+          title="No gallery images"
+          description="Upload images using the section above to build your space gallery."
+        />
       )}
     </div>
   );

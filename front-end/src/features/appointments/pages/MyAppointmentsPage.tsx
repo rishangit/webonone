@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Calendar, Clock, Users, CheckCircle, XCircle, Phone, MapPin, Search, Filter } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { EmptyState } from "@/components/common/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -259,18 +260,28 @@ export function MyAppointmentsPage({ currentUser }: MyAppointmentsPageProps) {
             <AppointmentCard key={appointment.id} {...appointment} viewMode="list" />
           ))
         ) : (
-          <Card className="p-8 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] text-center">
-            <div className="flex flex-col items-center gap-3">
-              <Calendar className="w-12 h-12 text-muted-foreground" />
-              <h3 className="text-lg font-semibold text-foreground">No appointments found</h3>
-              <p className="text-muted-foreground">
-                {searchQuery || statusFilter !== "all" || timeFilter !== "all" 
-                  ? "Try adjusting your filters or search query" 
-                  : "You don't have any scheduled appointments yet"
-                }
-              </p>
-            </div>
-          </Card>
+          <EmptyState
+            icon={Calendar}
+            title="No appointments found"
+            description={
+              searchQuery || statusFilter !== "all" || timeFilter !== "all"
+                ? "Try adjusting your filters or search query."
+                : "You don't have any scheduled appointments yet."
+            }
+            action={
+              searchQuery || statusFilter !== "all" || timeFilter !== "all"
+                ? {
+                    label: "Clear filters",
+                    variant: "outline",
+                    onClick: () => {
+                      setSearchQuery("");
+                      setStatusFilter("all");
+                      setTimeFilter("all");
+                    },
+                  }
+                : undefined
+            }
+          />
         )}
       </div>
 

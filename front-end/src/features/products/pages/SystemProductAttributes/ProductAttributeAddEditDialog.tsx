@@ -1,3 +1,4 @@
+import { Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,7 +36,8 @@ export const ProductAttributeAddEditDialog = ({
       onOpenChange={onOpenChange}
       title={mode === "create" ? "Create Product Attribute" : "Edit Product Attribute"}
       description={mode === "create" ? "Add a new product attribute to the system" : "Update product attribute information"}
-      maxWidth="max-w-2xl"
+      sizeWidth="small"
+      sizeHeight="medium"
       footer={
         <div className="flex items-center justify-end gap-2">
           <Button
@@ -51,8 +53,10 @@ export const ProductAttributeAddEditDialog = ({
             variant="accent"
             onClick={onSubmit}
             size="default"
+            className="h-10"
             disabled={loading}
           >
+            <Save className="w-4 h-4 mr-2" />
             {loading ? (mode === "create" ? "Creating..." : "Updating...") : (mode === "create" ? "Create Attribute" : "Update Attribute")}
           </Button>
         </div>

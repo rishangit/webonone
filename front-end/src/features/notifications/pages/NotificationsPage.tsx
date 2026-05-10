@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/common/EmptyState";
 import { NotificationCard } from "./NotificationCard";
 import { toast } from "sonner";
 
@@ -520,16 +521,29 @@ export function NotificationsPage({ currentUser }: NotificationsPageProps) {
               ))}
             </div>
           ) : (
-            <Card className="p-12 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] text-center">
-              <Bell className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">No notifications found</h3>
-              <p className="text-muted-foreground mb-4">
-                {searchTerm || filterType !== "all" || filterPriority !== "all" || filterStatus !== "all"
-                  ? "Try adjusting your filters to see more notifications"
+            <EmptyState
+              icon={Bell}
+              title="No notifications found"
+              description={
+                searchTerm || filterType !== "all" || filterPriority !== "all" || filterStatus !== "all"
+                  ? "Try adjusting your filters to see more notifications."
                   : "You're all caught up! No new notifications at this time."
-                }
-              </p>
-            </Card>
+              }
+              action={
+                searchTerm || filterType !== "all" || filterPriority !== "all" || filterStatus !== "all"
+                  ? {
+                      label: "Clear filters",
+                      variant: "outline",
+                      onClick: () => {
+                        setSearchTerm("");
+                        setFilterType("all");
+                        setFilterPriority("all");
+                        setFilterStatus("all");
+                      },
+                    }
+                  : undefined
+              }
+            />
           )}
       </div>
     </div>

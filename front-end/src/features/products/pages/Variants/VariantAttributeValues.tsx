@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { ProductRelatedAttribute } from "@/features/products/services/productRelatedAttributes";
-import { ProductRelatedAttributeValue } from "@/features/products/services/productRelatedAttributeValues";
+import { VariantDefiningAttributeValueField } from "./VariantDefiningAttributeValueField";
 
 interface VariantAttributeValuesProps {
   productId: string;
@@ -17,7 +16,7 @@ interface VariantAttributeValuesProps {
 
 export const VariantAttributeValues = ({
   productId,
-  variantId,
+  variantId: _variantId,
   attributeValues,
   onChange,
   excludeAttributeIds = [],
@@ -101,57 +100,13 @@ export const VariantAttributeValues = ({
                 </div>
                 
                 <div className="mt-3">
-                  {attr.valueDataType === "text" && (
-                    <Input
-                      type="text"
-                      value={currentValue}
-                      onChange={(e) => handleValueChange(attr.id, e.target.value)}
-                      placeholder="Enter value..."
-                      disabled={readOnly}
-                      className="bg-[var(--input-background)] border-[var(--glass-border)] text-foreground"
-                    />
-                  )}
-                  {attr.valueDataType === "number" && (
-                    <Input
-                      type="number"
-                      value={currentValue}
-                      onChange={(e) => handleValueChange(attr.id, e.target.value)}
-                      placeholder="Enter number..."
-                      disabled={readOnly}
-                      className="bg-[var(--input-background)] border-[var(--glass-border)] text-foreground"
-                    />
-                  )}
-                  {attr.valueDataType === "boolean" && (
-                    <select
-                      value={currentValue}
-                      onChange={(e) => handleValueChange(attr.id, e.target.value)}
-                      disabled={readOnly}
-                      className="w-full px-3 py-2 bg-[var(--input-background)] border border-[var(--glass-border)] rounded-md text-foreground disabled:opacity-50"
-                    >
-                      <option value="">Select...</option>
-                      <option value="true">True</option>
-                      <option value="false">False</option>
-                    </select>
-                  )}
-                  {attr.valueDataType === "date" && (
-                    <Input
-                      type="date"
-                      value={currentValue}
-                      onChange={(e) => handleValueChange(attr.id, e.target.value)}
-                      disabled={readOnly}
-                      className="bg-[var(--input-background)] border-[var(--glass-border)] text-foreground"
-                    />
-                  )}
-                  {attr.valueDataType === "json" && (
-                    <textarea
-                      value={currentValue}
-                      onChange={(e) => handleValueChange(attr.id, e.target.value)}
-                      placeholder="Enter JSON..."
-                      disabled={readOnly}
-                      className="w-full px-3 py-2 bg-[var(--input-background)] border border-[var(--glass-border)] rounded-md text-foreground disabled:opacity-50"
-                      rows={4}
-                    />
-                  )}
+                  <VariantDefiningAttributeValueField
+                    valueDataType={attr.valueDataType ?? "text"}
+                    value={currentValue}
+                    onChange={(v) => handleValueChange(attr.id, v)}
+                    variantOptionValues={attr.variantOptionValues}
+                    readOnly={readOnly}
+                  />
                 </div>
               </div>
             </Card>

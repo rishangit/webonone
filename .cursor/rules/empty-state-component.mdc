@@ -1,0 +1,64 @@
+---
+description: Use EmptyState for empty primary content; verify when adding empty UI
+globs: front-end/**/*.tsx
+alwaysApply: false
+---
+
+# Empty list / no-data UI (`EmptyState`)
+
+## When to use
+
+For **primary content areas** where a list, grid, or table has **no rows after load** (not loading skeleton), use the shared **`EmptyState`** component so spacing, glass card, typography, and optional CTA stay aligned with the rest of the app.
+
+**Component:** `front-end/src/components/common/EmptyState.tsx`  
+**Import:** `@/components/common/EmptyState`
+
+## Contract
+
+- **`icon`**: Lucide icon component or `ReactNode` (see `SpacesPage`, `WebpagesPage`, `TagsPage`).
+- **`title`**: Short heading (`text-lg font-semibold` is inside the component).
+- **`description`**: `string` or `ReactNode` — explain empty vs filtered state when useful.
+- **`action`** (optional): `{ label, onClick, variant?, icon? }` for the primary recovery action (e.g. “Add …”, “Clear filters”).
+- **`className`** (optional): append to the root `Card` (e.g. tone down padding when `EmptyState` is nested inside another `Card`).
+
+Do **not** recreate the same layout with raw `Card` + centered headings + `text-muted-foreground` for main empty states.
+
+## Nested inside another `Card`
+
+When the empty branch lives inside a parent `Card` (e.g. a detail section), pass a **`className`** so the inner shell does not feel like a double card, e.g. `className="!p-8 border-0 shadow-none bg-transparent"` (see `SalesDetailPage` items section).
+
+## When `EmptyState` is not required
+
+- **Return `null`** for optional adornments (e.g. no tags on a card).
+- **Wizard / step** pickers with a one-line “none available” inside a small panel.
+- **Dense table cell** or **dropdown** “No options” where a full card would break layout — prefer existing `Select` / `CommandEmpty` patterns or a minimal inline line; if the pattern grows to a full panel, switch to `EmptyState`.
+
+## Before you finish a feature
+
+1. Search the same feature folder for `length === 0`, `!.*\.length`, and empty branches.
+2. Compare with similar pages that already use `EmptyState` (see reference list below).
+3. If you add or change empty-state UX, **re-read this rule** and confirm `EmptyState` is used for the main empty body unless an exception above applies.
+
+## Verification
+
+From repo root:
+
+```bash
+rg "EmptyState" front-end/src --glob "*.tsx"
+```
+
+For a page you changed, ensure the main “no data” branch renders `<EmptyState … />` rather than a bespoke centered block.
+
+## Reference implementations
+
+`WebpagesPage.tsx`, `TagsPage.tsx`, `SystemProductsPage.tsx`, `ServicesPage.tsx`, `MediaPage.tsx`, `ThemePage/index.tsx`, `StaffPage.tsx`, `BacklogPage.tsx`, `SearchPage.tsx`, `NotificationsPage.tsx`, `AppointmentsPage.tsx`, `MyAppointmentsPage.tsx`, `UserAppointmentHistoryPage.tsx`, `SalesDetailPage.tsx`, `HeadersPage.tsx`, `FootersPage.tsx`, `CompanyProductVariantList.tsx`, `ProductVariantList.tsx`, `StockEntriesList.tsx`, `CompanyProductAttributesTab.tsx`, `CategoryDetailPage.tsx`, `ServiceGalleryTab.tsx`, `SpaceGalleryTab.tsx`, `UserSearchSection.tsx`, `ProductServiceSelectionDialog.tsx`, `SelectMediaDialog.tsx`, `BillPreviewDialog.tsx`, `ShowcasePage.tsx` (demo block).
+
+## Audit hints (candidates when touching these files)
+
+Compact or specialized UIs may still use custom empty copy by design. When expanding them to a **full-panel** empty experience, migrate to `EmptyState`. Discover text patterns with:
+
+```bash
+rg "No (results|items|data|users|products|tags)" front-end/src --glob "*.tsx"
+```
+
+Examples that often stay **inline** unless redesigned: `AppointmentWizard` steps, `UserSelector` / `TagSelector` / `ProductServiceSelectionDialog`, `POSSalesPage` product grid cells, `BillPreviewDialog`, `UserSearchSection`.

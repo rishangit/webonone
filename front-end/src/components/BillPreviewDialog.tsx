@@ -6,6 +6,7 @@ import { Separator } from "./ui/separator";
 import { Badge } from "./ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Card } from "./ui/card";
+import { EmptyState } from "@/components/common/EmptyState";
 import { toast } from "sonner";
 import { appointmentHistoryService } from "@/features/appointments/services";
 import { companiesService, Company } from "@/features/companies/services";
@@ -469,9 +470,12 @@ export function BillPreviewDialog({ open, onOpenChange, appointmentId, billData 
                   </div>
                 );
               })) : (
-                <div className="text-center py-4 text-muted-foreground">
-                  <p className="text-sm">No items found in bill</p>
-                </div>
+                <EmptyState
+                  className="!p-6 border-0 shadow-none bg-transparent"
+                  icon={Package}
+                  title="No items in bill"
+                  description="There are no line items on this bill."
+                />
               )}
             </div>
           </Card>

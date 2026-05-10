@@ -1,7 +1,7 @@
 import { Package, Plus } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/common/EmptyState";
 import { StockEntriesListProps } from "../types";
 import { StockEntryCard } from "./StockEntryCard";
 
@@ -28,18 +28,18 @@ export const StockEntriesList = ({
 
       <div className="space-y-4">
         {entries.length === 0 ? (
-          <div className="text-center py-8">
-            <Package className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-            <p className="text-muted-foreground mb-4">No stock entries found</p>
-            <Button
-              onClick={onAddStock}
-              variant="accent"
-              size="sm"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add First Stock Entry
-            </Button>
-          </div>
+          <EmptyState
+            className="!p-8 border-0 shadow-none bg-transparent"
+            icon={Package}
+            title="No stock entries"
+            description="Add a stock entry to track quantity and pricing for this variant."
+            action={{
+              label: "Add first stock entry",
+              variant: "accent",
+              icon: Plus,
+              onClick: onAddStock,
+            }}
+          />
         ) : (
           entries.map((entry) => (
             <StockEntryCard

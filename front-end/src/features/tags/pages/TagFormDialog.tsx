@@ -1,12 +1,13 @@
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { Tag as TagIcon } from "lucide-react";
+import { Save, Tag as TagIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { CustomDialog } from "@/components/ui/custom-dialog";
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
@@ -142,7 +143,8 @@ export const TagFormDialog = ({
       title={mode === "edit" ? "Edit Tag" : "Add Tag"}
       description={mode === "edit" ? "Update tag information" : "Create a new tag for companies and products"}
       icon={<TagIcon className="w-5 h-5" />}
-      maxWidth="max-w-2xl"
+      sizeWidth="small"
+      sizeHeight="large"
       footer={
         <div className="flex items-center justify-end gap-2">
           <Button
@@ -157,8 +159,10 @@ export const TagFormDialog = ({
             onClick={tagForm.handleSubmit(handleSave)}
             size="default"
             variant="accent"
+            className="h-10"
             disabled={loading}
           >
+            <Save className="w-4 h-4 mr-2" />
             {loading ? "Saving..." : mode === "edit" ? "Update Tag" : "Create Tag"}
           </Button>
         </div>
@@ -174,7 +178,7 @@ export const TagFormDialog = ({
             className="bg-[var(--input-background)] border-[var(--glass-border)] text-foreground"
           />
           {tagForm.formState.errors.name && (
-            <p className="text-sm text-red-500">{tagForm.formState.errors.name.message}</p>
+            <p className="text-sm text-destructive">{tagForm.formState.errors.name.message}</p>
           )}
         </div>
 
@@ -218,7 +222,7 @@ export const TagFormDialog = ({
             ))}
           </div>
           {tagForm.formState.errors.color && (
-            <p className="text-sm text-red-500">{tagForm.formState.errors.color.message}</p>
+            <p className="text-sm text-destructive">{tagForm.formState.errors.color.message}</p>
           )}
         </div>
 
@@ -235,11 +239,16 @@ export const TagFormDialog = ({
         </div>
 
         <div className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            id="tag-active"
-            {...tagForm.register("isActive")}
-            className="w-4 h-4 rounded border-[var(--glass-border)] bg-[var(--input-background)] text-[var(--accent-primary)] focus:ring-[var(--accent-primary)]"
+          <Controller
+            name="isActive"
+            control={tagForm.control}
+            render={({ field }) => (
+              <Checkbox
+                id="tag-active"
+                checked={field.value}
+                onCheckedChange={(checked) => field.onChange(checked === true)}
+              />
+            )}
           />
           <Label htmlFor="tag-active" className="text-foreground cursor-pointer">
             Active (Tag will be available for use)
@@ -248,7 +257,7 @@ export const TagFormDialog = ({
 
         <div className="space-y-2">
           <Label className="text-foreground">Preview</Label>
-          <div className="p-4 rounded-lg border border-[var(--glass-border)] bg-[var(--input-background)]">
+          <div className="p-4 rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg)]">
             <div className="flex items-center gap-2">
               <div
                 className="w-8 h-8 rounded-lg flex items-center justify-center text-sm"

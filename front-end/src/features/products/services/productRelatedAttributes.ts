@@ -7,6 +7,8 @@ export interface ProductRelatedAttribute {
   productId: string;
   attributeId: string;
   isVariantDefining: boolean;
+  /** Predefined values for variant-defining attributes; when set, add-variant uses a dropdown. */
+  variantOptionValues?: string[] | null;
   createdAt: string;
   updatedAt: string;
   // Joined fields from product_attributes
@@ -24,6 +26,7 @@ export interface CreateProductRelatedAttributeData {
 
 export interface UpdateProductRelatedAttributeData {
   isVariantDefining?: boolean;
+  variantOptionValues?: string[] | null;
 }
 
 class ProductRelatedAttributesService {

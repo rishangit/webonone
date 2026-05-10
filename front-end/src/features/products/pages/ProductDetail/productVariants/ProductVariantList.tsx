@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SearchInput } from "@/components/common/SearchInput";
+import { EmptyState } from "@/components/common/EmptyState";
 import { ViewSwitcher } from "@/components/ui/view-switcher";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RightPanel } from "@/components/common/RightPanel";
@@ -218,32 +219,35 @@ export const ProductVariantList = ({
           )}
         </>
       ) : variants && variants.length > 0 ? (
-        <Card className="p-12 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] text-center">
-          <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-          <h4 className="font-medium text-foreground mb-2">No Variants Match Your Filters</h4>
-          <p className="text-muted-foreground text-sm mb-4">
-            Try adjusting your search or filter criteria.
-          </p>
-          <Button
-            variant="outline"
-            onClick={() => {
+        <EmptyState
+          icon={Package}
+          title="No variants match your filters"
+          description="Try adjusting your search or filter criteria."
+          action={{
+            label: "Clear filters",
+            variant: "outline",
+            onClick: () => {
               setSearchTerm("");
               setFilterStatus("all");
               setFilterDefault("all");
               if (productType === "system") {
                 setFilterVerified("all");
               }
-            }}
-          >
-            Clear Filters
-          </Button>
-        </Card>
+            },
+          }}
+        />
       ) : (
-        <Card className="p-12 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] text-center">
-          <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-          <h4 className="font-medium text-foreground mb-2">No Variants Available</h4>
-          <p className="text-muted-foreground text-sm">This product doesn't have any variants configured.</p>
-        </Card>
+        <EmptyState
+          icon={Package}
+          title="No variants available"
+          description="This product doesn't have any variants configured yet."
+          action={{
+            label: "Add variant",
+            variant: "accent",
+            icon: Plus,
+            onClick: onAddVariant,
+          }}
+        />
       )}
 
       {/* Filter Right Panel */}

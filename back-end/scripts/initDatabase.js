@@ -1,5 +1,23 @@
 const { pool } = require('../config/database');
 
+const ensureProductRelatedAttributesVariantOptionValues = async () => {
+  const [columns] = await pool.execute(`
+    SELECT COLUMN_NAME
+    FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'product_related_attributes'
+      AND COLUMN_NAME = 'variant_option_values'
+  `);
+
+  if (columns.length === 0) {
+    await pool.execute(`
+      ALTER TABLE product_related_attributes
+      ADD COLUMN variant_option_values JSON NULL DEFAULT NULL
+    `);
+    console.log('✅ Added product_related_attributes.variant_option_values column');
+  }
+};
+
 const ensureCompanySalesPaymentColumns = async () => {
   const [columns] = await pool.execute(`
     SELECT COLUMN_NAME
@@ -394,6 +412,7 @@ const createTables = async () => {
         id VARCHAR(10) PRIMARY KEY,
         productId VARCHAR(10) NOT NULL,
         attributeId VARCHAR(10) NOT NULL,
+        variant_option_values JSON NULL DEFAULT NULL,
         createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         UNIQUE KEY unique_product_attribute (productId, attributeId),
@@ -677,6 +696,8 @@ const createTables = async () => {
     // Backward-compatible migration for existing databases where company_sales
     // was created without payment columns used by POS sales.
     await ensureCompanySalesPaymentColumns();
+
+    await ensureProductRelatedAttributesVariantOptionValues();
 
     console.log('✅ Database tables created successfully');
   } catch (error) {

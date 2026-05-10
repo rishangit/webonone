@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
-import { ArrowLeft, Calendar, Clock, CheckCircle, XCircle, Phone, User, Mail, Package, FileText } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, CheckCircle, XCircle, Phone, User, Mail, Package, FileText, History } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { EmptyState } from "@/components/common/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -205,6 +206,16 @@ export const UserAppointmentHistoryPage = ({ userId, onBack, currentUser }: User
       return true;
     });
   }, [transformedSalesHistory, debouncedSearchTerm, statusFilter, timeFilter, staff]);
+
+  const historyEmptyHasFilters =
+    Boolean(searchQuery.trim()) || statusFilter !== "all" || timeFilter !== "all";
+
+  const clearHistoryFilters = () => {
+    setSearchQuery("");
+    setDebouncedSearchTerm("");
+    setStatusFilter("all");
+    setTimeFilter("all");
+  };
 
   if (currentUserHistoryLoading && currentUserHistory.length === 0) {
     return (
@@ -504,18 +515,24 @@ export const UserAppointmentHistoryPage = ({ userId, onBack, currentUser }: User
             );
           })
         ) : (
-          <Card className="p-8 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] text-center">
-            <div className="flex flex-col items-center gap-3">
-              <Calendar className="w-12 h-12 text-muted-foreground" />
-              <h3 className="text-lg font-semibold text-foreground">No appointments found</h3>
-              <p className="text-muted-foreground">
-                {searchQuery || statusFilter !== "all" || timeFilter !== "all" 
-                  ? "Try adjusting your filters or search query" 
-                  : "This user doesn't have sales history yet"
-                }
-              </p>
-            </div>
-          </Card>
+          <EmptyState
+            icon={History}
+            title="No sale records found"
+            description={
+              historyEmptyHasFilters
+                ? "Try adjusting your filters or search query."
+                : "This user doesn't have sales history yet."
+            }
+            action={
+              historyEmptyHasFilters
+                ? {
+                    label: "Clear filters",
+                    variant: "outline",
+                    onClick: clearHistoryFilters,
+                  }
+                : undefined
+            }
+          />
         )}
       </div>
 

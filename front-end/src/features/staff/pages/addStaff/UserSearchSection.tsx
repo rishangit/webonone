@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { SearchInput } from "@/components/common/SearchInput";
+import { EmptyState } from "@/components/common/EmptyState";
 import { Users } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchUsersRequest } from "@/shared/store/users";
@@ -226,10 +227,28 @@ export const UserSearchSection = ({ selectedUser, onSelectUser }: UserSearchSect
             </div>
           </>
         ) : !usersLoading && allLoadedUsers.length === 0 && reduxUsers.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <Users className="w-8 h-8 mx-auto mb-2 opacity-50" />
-            <p>No users found matching your search.</p>
-          </div>
+          <EmptyState
+            className="!p-8"
+            icon={Users}
+            title="No users found"
+            description={
+              debouncedSearchQuery.trim() || searchQuery.trim()
+                ? "No users match your search. Try different keywords."
+                : "There are no users to display yet."
+            }
+            action={
+              debouncedSearchQuery.trim() || searchQuery.trim()
+                ? {
+                    label: "Clear search",
+                    variant: "outline",
+                    onClick: () => {
+                      setSearchQuery("");
+                      handleDebouncedSearchChange("");
+                    },
+                  }
+                : undefined
+            }
+          />
         ) : displayUsers.length > 0 ? (
           <>
             {displayUsers.map((user) => (

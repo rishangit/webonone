@@ -14,6 +14,12 @@ const productRelatedAttributeSchema = {
   }),
   update: Joi.object({
     isVariantDefining: Joi.boolean().optional(),
+    variantOptionValues: Joi.alternatives()
+      .try(
+        Joi.array().items(Joi.string().trim().min(1).max(2000)).max(500),
+        Joi.valid(null)
+      )
+      .optional(),
   }).min(1)
 };
 

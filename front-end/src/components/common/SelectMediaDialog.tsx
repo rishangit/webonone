@@ -5,6 +5,7 @@ import { CustomDialog } from "../ui/custom-dialog";
 import { Button } from "../ui/button";
 import { companyWebMediaService, getMediaFileUrl, MediaFile } from "@/features/website/services/companyWebMedia";
 import { MediaUploadDialog } from "@/features/website/pages/MediaPage/components/MediaUploadDialog";
+import { EmptyState } from "@/components/common/EmptyState";
 
 interface SelectMediaDialogProps {
   open: boolean;
@@ -114,8 +115,19 @@ export const SelectMediaDialog = ({
               })}
 
               {!mediaFiles.length && (
-                <div className="col-span-full rounded-md border border-dashed border-[var(--glass-border)] p-4 text-sm text-muted-foreground">
-                  No image media found. Upload one to continue.
+                <div className="col-span-full">
+                  <EmptyState
+                    className="!p-6"
+                    icon={ImageIcon}
+                    title="No image media"
+                    description="Upload an image to your media library, then select it here."
+                    action={{
+                      label: "Upload image",
+                      variant: "accent",
+                      icon: Upload,
+                      onClick: () => setUploadDialogOpen(true),
+                    }}
+                  />
                 </div>
               )}
               </div>

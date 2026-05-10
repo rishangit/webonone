@@ -263,8 +263,39 @@ class CompanyProductVariant {
         WHERE cpv.companyProductId = ?
         ORDER BY cpv.isDefault DESC, cpv.createdAt ASC
       `;
-      const [rows] = await pool.execute(query, [companyProductId]);
-      
+      let [rows] = await pool.execute(query, [companyProductId]);
+
+      // Self-heal: if this company product has no variants yet but the linked
+      // system product has variants, mirror them so the company product matches
+      // the system product. This covers products that were added before the
+      // auto-mirror behavior in CompanyProduct.create existed.
+      if (rows.length === 0) {
+        const [productRows] = await pool.execute(
+          'SELECT systemProductId FROM company_products WHERE id = ?',
+          [companyProductId]
+        );
+        const systemProductId = productRows[0] && productRows[0].systemProductId;
+        if (systemProductId) {
+          const [sysVariantRows] = await pool.execute(
+            'SELECT id, isDefault, isActive FROM product_variants WHERE productId = ? ORDER BY isDefault DESC, createdAt ASC',
+            [systemProductId]
+          );
+          if (sysVariantRows.length > 0) {
+            const toCreate = sysVariantRows.map((sv) => ({
+              systemProductVariantId: sv.id,
+              isDefault: Boolean(sv.isDefault),
+              isActive: sv.isActive === null || sv.isActive === undefined ? true : Boolean(sv.isActive),
+            }));
+            try {
+              await CompanyProductVariant.createBulk(companyProductId, toCreate);
+              [rows] = await pool.execute(query, [companyProductId]);
+            } catch (healError) {
+              console.error('Self-heal of company product variants failed:', healError.message);
+            }
+          }
+        }
+      }
+
       return rows.map(row => {
         const variant = new CompanyProductVariant(row);
         // Add active stock data to variant object

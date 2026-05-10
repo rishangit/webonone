@@ -15,6 +15,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { CustomDialog } from "@/components/ui/custom-dialog";
 import { currenciesService, Currency } from "@/shared/services/currencies";
 import { BackButton } from "@/components/common/BackButton";
+import { EmptyState } from "@/components/common/EmptyState";
 
 interface SalesDetailPageProps {
   saleId: string;
@@ -299,7 +300,12 @@ export const SalesDetailPage = ({ saleId, onBack }: SalesDetailPageProps) => {
             </div>
             <div className="space-y-3">
               {allItems.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">No items in this sale</p>
+                <EmptyState
+                  className="!p-8 border-0 shadow-none bg-transparent"
+                  icon={Package}
+                  title="No items in this sale"
+                  description="This sale has no line items to display."
+                />
               ) : (
                 allItems.map((item: any, index: number) => (
                   <div

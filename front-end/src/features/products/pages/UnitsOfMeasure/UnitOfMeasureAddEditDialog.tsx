@@ -1,3 +1,4 @@
+import { Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,7 +37,8 @@ export const UnitOfMeasureAddEditDialog = ({
       onOpenChange={onOpenChange}
       title={mode === "create" ? "Create Unit of Measure" : "Edit Unit of Measure"}
       description={mode === "create" ? "Add a new unit of measure to the system" : "Update unit of measure information"}
-      maxWidth="max-w-2xl"
+      sizeWidth="small"
+      sizeHeight="medium"
       footer={
         <div className="flex items-center justify-end gap-2">
           <Button
@@ -52,8 +54,10 @@ export const UnitOfMeasureAddEditDialog = ({
             variant="accent"
             onClick={onSubmit}
             size="default"
+            className="h-10"
             disabled={loading}
           >
+            <Save className="w-4 h-4 mr-2" />
             {loading ? (mode === "create" ? "Creating..." : "Updating...") : (mode === "create" ? "Create Unit" : "Update Unit")}
           </Button>
         </div>

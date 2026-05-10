@@ -1,6 +1,67 @@
 const { pool } = require('../config/database');
 const { nanoid } = require('nanoid');
 
+/** Normalize JSON column / API payloads to string[] | null */
+function parseVariantOptionValues(raw) {
+  if (raw == null || raw === '') return null;
+  if (Array.isArray(raw)) {
+    const strings = raw.map((v) => String(v).trim()).filter((s) => s.length > 0);
+    return strings.length > 0 ? strings : null;
+  }
+  if (typeof raw === 'string') {
+    try {
+      const p = JSON.parse(raw);
+      return parseVariantOptionValues(p);
+    } catch {
+      return null;
+    }
+  }
+  if (Buffer.isBuffer(raw)) {
+    return parseVariantOptionValues(raw.toString('utf8'));
+  }
+  return null;
+}
+
+function variantOptionValuesToDb(value) {
+  if (value == null) return null;
+  const arr = Array.isArray(value) ? value : [];
+  const strings = arr.map((v) => String(v).trim()).filter((s) => s.length > 0);
+  if (strings.length === 0) return null;
+  return JSON.stringify(strings);
+}
+
+/**
+ * Ensure the `variant_option_values` JSON column exists on `product_related_attributes`.
+ * Self-heals when the deployment skipped `initDatabase`. Result is cached per process.
+ */
+let variantOptionValuesColumnReady = null;
+async function ensureVariantOptionValuesColumn() {
+  if (variantOptionValuesColumnReady === true) return true;
+  try {
+    const [cols] = await pool.execute(
+      `SELECT COLUMN_NAME
+       FROM INFORMATION_SCHEMA.COLUMNS
+       WHERE TABLE_SCHEMA = DATABASE()
+         AND TABLE_NAME = 'product_related_attributes'
+         AND COLUMN_NAME = 'variant_option_values'`
+    );
+    if (cols.length > 0) {
+      variantOptionValuesColumnReady = true;
+      return true;
+    }
+    await pool.execute(
+      `ALTER TABLE product_related_attributes
+       ADD COLUMN variant_option_values JSON NULL DEFAULT NULL`
+    );
+    console.log('✅ Auto-added product_related_attributes.variant_option_values column');
+    variantOptionValuesColumnReady = true;
+    return true;
+  } catch (error) {
+    console.error('Failed to ensure variant_option_values column:', error.message);
+    return false;
+  }
+}
+
 class ProductRelatedAttribute {
   constructor(data) {
     this.id = data.id;
@@ -9,6 +70,9 @@ class ProductRelatedAttribute {
     this.isVariantDefining = Boolean(data.isVariantDefining !== undefined ? data.isVariantDefining : (data.is_variant_defining !== undefined ? data.is_variant_defining : false));
     this.createdAt = data.createdAt || data.created_at;
     this.updatedAt = data.updatedAt || data.updated_at;
+    this.variantOptionValues = parseVariantOptionValues(
+      data.variantOptionValues ?? data.variant_option_values
+    );
   }
 
   toJSON() {
@@ -17,6 +81,7 @@ class ProductRelatedAttribute {
       productId: this.productId,
       attributeId: this.attributeId,
       isVariantDefining: this.isVariantDefining,
+      variantOptionValues: this.variantOptionValues,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
     };
@@ -176,6 +241,16 @@ class ProductRelatedAttribute {
         }
       } catch (error) {
         console.warn('Could not check for isVariantDefining column:', error.message);
+      }
+    }
+
+    if (data.variantOptionValues !== undefined) {
+      const ready = await ensureVariantOptionValuesColumn();
+      if (ready) {
+        updates.push('variant_option_values = ?');
+        values.push(variantOptionValuesToDb(data.variantOptionValues));
+      } else {
+        console.warn('variant_option_values column not ready, skipping update.');
       }
     }
 

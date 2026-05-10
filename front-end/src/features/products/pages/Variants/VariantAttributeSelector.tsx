@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ProductRelatedAttribute } from "@/features/products/services/productRelatedAttributes";
 import { unitsOfMeasureService, UnitsOfMeasure } from "@/features/products/services/unitsOfMeasure";
+import { VariantDefiningAttributeValueField } from "./VariantDefiningAttributeValueField";
 
 interface VariantAttributeSelectorProps {
   productId: string;
@@ -66,6 +66,22 @@ export const VariantAttributeSelector = ({
     );
   }
 
+  // Only attributes with 2+ predefined option values can drive a variant choice.
+  // Single-option (or none) leaves nothing to pick, so exclude from the picker.
+  const selectableAttributes = productAttributes.filter(
+    (attr) => Array.isArray(attr.variantOptionValues) && attr.variantOptionValues.length > 1,
+  );
+
+  if (selectableAttributes.length === 0) {
+    return (
+      <div className="text-sm text-muted-foreground">
+        No attributes with multiple values. Open the Product Attributes tab and use the
+        kebab menu &rarr; <span className="font-medium">Set values</span> to define two or
+        more options before adding a variant.
+      </div>
+    );
+  }
+
   const handleCheckboxChange = (attributeId: string, checked: boolean) => {
     onAttributeSelect(attributeId, checked);
     // Note: We keep the value even when unchecking - value input is always visible
@@ -76,7 +92,7 @@ export const VariantAttributeSelector = ({
     <div className="space-y-3">
       <div className="max-h-96 overflow-y-auto custom-scrollbar pr-2">
         <div className="space-y-2">
-          {productAttributes.map((attr) => {
+          {selectableAttributes.map((attr) => {
             // variantDefiningAttributes contains attributeIds, not productRelatedAttributeIds
             const isSelected = variantDefiningAttributes.includes(attr.attributeId);
             // Check if this attribute is marked as variant-defining in the database
@@ -131,58 +147,15 @@ export const VariantAttributeSelector = ({
                     </div>
                     
                     {/* Value input in same row */}
-                    <div className="flex-shrink-0 w-48">
-                      {attr.valueDataType === "text" && (
-                        <Input
-                          type="text"
-                          value={currentValue}
-                          onChange={(e) => onValueChange(attr.id, e.target.value)}
-                          placeholder="Enter value..."
-                          disabled={readOnly}
-                          className="bg-[var(--input-background)] border-[var(--glass-border)] text-foreground text-sm h-9"
-                        />
-                      )}
-                      {attr.valueDataType === "number" && (
-                        <Input
-                          type="number"
-                          value={currentValue}
-                          onChange={(e) => onValueChange(attr.id, e.target.value)}
-                          placeholder="Enter number..."
-                          disabled={readOnly}
-                          className="bg-[var(--input-background)] border-[var(--glass-border)] text-foreground text-sm h-9"
-                        />
-                      )}
-                      {attr.valueDataType === "boolean" && (
-                        <select
-                          value={currentValue}
-                          onChange={(e) => onValueChange(attr.id, e.target.value)}
-                          disabled={readOnly}
-                          className="w-full px-2 py-1.5 text-sm bg-[var(--input-background)] border border-[var(--glass-border)] rounded-md text-foreground disabled:opacity-50 h-9"
-                        >
-                          <option value="">Select...</option>
-                          <option value="true">True</option>
-                          <option value="false">False</option>
-                        </select>
-                      )}
-                      {attr.valueDataType === "date" && (
-                        <Input
-                          type="date"
-                          value={currentValue}
-                          onChange={(e) => onValueChange(attr.id, e.target.value)}
-                          disabled={readOnly}
-                          className="bg-[var(--input-background)] border-[var(--glass-border)] text-foreground text-sm h-9"
-                        />
-                      )}
-                      {attr.valueDataType === "json" && (
-                        <textarea
-                          value={currentValue}
-                          onChange={(e) => onValueChange(attr.id, e.target.value)}
-                          placeholder="Enter JSON..."
-                          disabled={readOnly}
-                          className="w-full px-2 py-1.5 text-sm bg-[var(--input-background)] border border-[var(--glass-border)] rounded-md text-foreground disabled:opacity-50"
-                          rows={2}
-                        />
-                      )}
+                    <div className="flex-shrink-0 w-48 min-w-[10rem]">
+                      <VariantDefiningAttributeValueField
+                        valueDataType={attr.valueDataType ?? "text"}
+                        value={currentValue}
+                        onChange={(v) => onValueChange(attr.id, v)}
+                        variantOptionValues={attr.variantOptionValues}
+                        readOnly={readOnly}
+                        compact
+                      />
                     </div>
                   </div>
                 </div>

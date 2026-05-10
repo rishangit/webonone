@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Plus, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -12,6 +14,8 @@ import {
 } from "./components";
 
 export const WebpagesPage = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const {
     viewMode,
     setViewMode,
@@ -45,6 +49,14 @@ export const WebpagesPage = () => {
     handleClearFilters,
     handleAdd,
   } = useWebpagesPage();
+
+  useEffect(() => {
+    const state = location.state as { openAddWebpage?: boolean } | null;
+    if (state?.openAddWebpage) {
+      setIsAddDialogOpen(true);
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, location.pathname, navigate, setIsAddDialogOpen]);
 
   const showSkeleton = loading && displayedWebPages.length === 0;
 

@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/common/EmptyState";
 import { SearchResultRenderer } from "@/features/search/components/SearchResultRenderer";
 import { toast } from "sonner";
 
@@ -572,27 +573,30 @@ export function SearchPage({ currentUser, onNavigate }: SearchPageProps) {
               ))}
             </div>
           ) : searchQuery && !loading ? (
-            <Card className="p-12 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] text-center">
-              <Search className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">No results found</h3>
-              <p className="text-muted-foreground mb-6">
-                We couldn't find anything matching "{searchQuery}". Try different keywords or search terms.
-              </p>
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">Suggestions:</p>
-                <div className="flex flex-wrap gap-2 justify-center">
-                  <Button variant="outline" size="sm" onClick={() => setSearchQuery("appointments")}>
-                    Search appointments
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => setSearchQuery("services")}>
-                    Search services
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => setSearchQuery("users")}>
-                    Search users
-                  </Button>
-                </div>
-              </div>
-            </Card>
+            <EmptyState
+              icon={Search}
+              title="No results found"
+              description={
+                <>
+                  <p className="mb-4">
+                    We couldn&apos;t find anything matching &quot;{searchQuery}&quot;. Try different keywords or search
+                    terms.
+                  </p>
+                  <p className="text-sm mb-2">Suggestions:</p>
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    <Button variant="outline" size="sm" onClick={() => setSearchQuery("appointments")}>
+                      Search appointments
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => setSearchQuery("services")}>
+                      Search services
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => setSearchQuery("users")}>
+                      Search users
+                    </Button>
+                  </div>
+                </>
+              }
+            />
           ) : null}
         </>
       )}

@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useAppDispatch } from "@/store/hooks";
 import { fetchServiceRequest } from "@/features/services/store";
 import { CardTitle } from "@/components/common/CardTitle";
+import { EmptyState } from "@/components/common/EmptyState";
 
 interface ServiceGalleryTabProps {
   service: Service;
@@ -160,14 +161,15 @@ export const ServiceGalleryTab = ({
           </div>
         </Card>
       ) : (
-        <Card className="p-12 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] text-center">
-          <ImageIcon className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-          <p className="text-muted-foreground">
-            {canEditGallery
-              ? "No gallery images yet. Upload images to get started."
-              : "No gallery images available yet."}
-          </p>
-        </Card>
+        <EmptyState
+          icon={ImageIcon}
+          title="No gallery images"
+          description={
+            canEditGallery
+              ? "Upload images using the section above to build your service gallery."
+              : "No gallery images have been added for this service yet."
+          }
+        />
       )}
     </div>
   );

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { CustomDialog } from "@/components/ui/custom-dialog";
@@ -44,6 +44,9 @@ export const VariantDialog = ({
   const [variantDefiningAttributes, setVariantDefiningAttributes] = useState<string[]>([]);
   const [loadingAttributeValues, setLoadingAttributeValues] = useState(false);
   const [productAttributes, setProductAttributes] = useState<any[]>([]);
+  const [existingCombos, setExistingCombos] = useState<
+    Array<{ variantId: string; variantName?: string; attrValues: Record<string, string> }>
+  >([]);
   // Wizard state - only for 'add' mode
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 2;
@@ -142,6 +145,68 @@ export const VariantDialog = ({
 
     loadAttributeValues();
   }, [open, variant?.id, mode, productId]);
+
+  // Load existing variants + their attribute values for duplicate-combination validation
+  useEffect(() => {
+    if (!open || !productId || !isWizardMode) {
+      setExistingCombos([]);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const { productVariantsService } = await import(
+          "@/features/products/services/productVariants"
+        );
+        const variants = await productVariantsService.getVariantsByProductId(productId);
+        const results = await Promise.all(
+          variants.map((v) =>
+            productRelatedAttributeValuesService
+              .getValuesByVariantId(v.id)
+              .then((rows) => {
+                const map: Record<string, string> = {};
+                for (const row of rows) {
+                  const val = (row.attributeValue ?? "").trim();
+                  if (val) map[row.productRelatedAttributeId] = val;
+                }
+                return { variantId: v.id, variantName: v.name, attrValues: map };
+              })
+              .catch(() => ({
+                variantId: v.id,
+                variantName: v.name,
+                attrValues: {} as Record<string, string>,
+              })),
+          ),
+        );
+        if (!cancelled) setExistingCombos(results);
+      } catch (error) {
+        console.error("Error loading existing variants for duplicate check:", error);
+        if (!cancelled) setExistingCombos([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, productId, isWizardMode]);
+
+  // Detect a variant whose variant-defining attribute values exactly match the current picks
+  const duplicateVariant = useMemo(() => {
+    if (variantDefiningAttributes.length === 0) return null;
+    const variantDefiningProductAttrs = productAttributes.filter((attr) =>
+      variantDefiningAttributes.includes(attr.attributeId),
+    );
+    const requiredIds = variantDefiningProductAttrs.map((a) => a.id as string);
+    if (requiredIds.length === 0) return null;
+    const currentValues = requiredIds.map((id) => (attributeValues[id] ?? "").trim());
+    if (currentValues.some((v) => !v)) return null;
+    const found = existingCombos.find((combo) => {
+      if (variant?.id && combo.variantId === variant.id) return false;
+      return requiredIds.every(
+        (id) => (combo.attrValues[id] ?? "").trim() === (attributeValues[id] ?? "").trim(),
+      );
+    });
+    return found ?? null;
+  }, [existingCombos, attributeValues, variantDefiningAttributes, productAttributes, variant?.id]);
 
   // Reset wizard step when dialog closes or when mode changes
   useEffect(() => {
@@ -319,8 +384,11 @@ export const VariantDialog = ({
         const value = attributeValues[productAttr.id];
         return value && value.trim() !== '';
       });
-      
-      return hasAllValues;
+
+      if (!hasAllValues) return false;
+      // Block proceeding when the chosen combination already exists for another variant
+      if (duplicateVariant) return false;
+      return true;
     }
     if (currentStep === 2) {
       // Step 2: Name and SKU are required
@@ -339,6 +407,13 @@ export const VariantDialog = ({
     }
     
     if (currentStep === 1) {
+      // Block proceeding when the chosen combination already exists (any mode)
+      if (duplicateVariant) {
+        toast.error(
+          `This combination already exists as variant "${duplicateVariant.variantName ?? "another variant"}". Please choose a different combination.`,
+        );
+        return;
+      }
       // For add mode, validate step 1
       if (mode === 'add' && !canProceedToNextStep()) {
         toast.error("Please select at least one variant-defining attribute and set its value");
@@ -441,7 +516,7 @@ export const VariantDialog = ({
           {currentStep === totalSteps ? (
             <Button
               type="button"
-              disabled={isSubmitting || (mode === "add" && !canProceedToNextStep())}
+              disabled={isSubmitting || (mode === "add" && !canProceedToNextStep()) || !!duplicateVariant}
               onClick={async (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -482,7 +557,7 @@ export const VariantDialog = ({
                 e.stopPropagation();
                 handleNext(e);
               }}
-              disabled={isSubmitting || (mode === "add" && !canProceedToNextStep())}
+              disabled={isSubmitting || (mode === "add" && !canProceedToNextStep()) || !!duplicateVariant}
               variant="accent"
               size="default"
               className="h-10 px-4"
@@ -654,6 +729,24 @@ export const VariantDialog = ({
                         onValueChange={handleAttributeValueChange}
                         readOnly={isReadOnly}
                       />
+                    )}
+                    {duplicateVariant && (
+                      <div
+                        role="alert"
+                        className="flex items-start gap-2 rounded-md border border-[oklch(0.637_0.237_25.331)]/40 bg-[oklch(0.637_0.237_25.331)]/10 p-3 text-sm text-[oklch(0.637_0.237_25.331)]"
+                      >
+                        <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+                        <div className="space-y-0.5">
+                          <p className="font-medium">This combination already exists.</p>
+                          <p className="text-xs opacity-90">
+                            Variant{" "}
+                            <span className="font-semibold">
+                              {duplicateVariant.variantName ?? "another variant"}
+                            </span>{" "}
+                            already uses these attribute values. Please choose a different combination.
+                          </p>
+                        </div>
+                      </div>
                     )}
                   </div>
                 )}

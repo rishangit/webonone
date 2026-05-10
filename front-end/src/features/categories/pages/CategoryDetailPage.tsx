@@ -3,6 +3,7 @@ import { ArrowLeft, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/common/EmptyState";
 import { categoriesService } from "../services";
 import type { IndustryCategory } from "../types";
 
@@ -109,9 +110,11 @@ export const CategoryDetailPage = ({ categoryId, onBack }: CategoryDetailPagePro
                 ))}
               </div>
             ) : (
-              <Card className="border-[var(--glass-border)] bg-[var(--glass-bg)] p-6 text-sm text-muted-foreground">
-                No subcategories for this industry yet.
-              </Card>
+              <EmptyState
+                icon={Layers}
+                title="No subcategories yet"
+                description="There are no subcategories for this industry yet."
+              />
             )}
           </div>
         </>
