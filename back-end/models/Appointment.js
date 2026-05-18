@@ -113,10 +113,10 @@ class Appointment {
         u.phone as clientPhone,
         u.avatar as clientAvatar,
         c.name as companyName,
-        cs.name as serviceName,
+        s.name as serviceName,
         cs.duration as serviceDuration,
         cs.price as servicePrice,
-        cs.imageUrl as serviceImageUrl,
+        JSON_UNQUOTE(JSON_EXTRACT(s.images, '$[0]')) as serviceImageUrl,
         staffUser.firstName as providerFirstName,
         staffUser.lastName as providerLastName,
         staffUser.avatar as providerAvatar,
@@ -128,6 +128,7 @@ class Appointment {
       LEFT JOIN users u ON ca.clientId = u.id
       LEFT JOIN companies c ON ca.companyId = c.id
       LEFT JOIN company_services cs ON ca.serviceId = cs.id
+      LEFT JOIN services s ON cs.systemServiceId = s.id
       LEFT JOIN company_staff staff ON ca.staffId = staff.id
       LEFT JOIN users staffUser ON staff.userId = staffUser.id
       LEFT JOIN company_spaces sp ON ca.spaceId = sp.id
@@ -211,10 +212,10 @@ class Appointment {
         u.phone as clientPhone,
         u.avatar as clientAvatar,
         c.name as companyName,
-        cs.name as serviceName,
+        s.name as serviceName,
         cs.duration as serviceDuration,
         cs.price as servicePrice,
-        cs.imageUrl as serviceImageUrl,
+        JSON_UNQUOTE(JSON_EXTRACT(s.images, '$[0]')) as serviceImageUrl,
         staffUser.firstName as providerFirstName,
         staffUser.lastName as providerLastName,
         staffUser.avatar as providerAvatar,
@@ -226,6 +227,7 @@ class Appointment {
       LEFT JOIN users u ON ca.clientId = u.id
       LEFT JOIN companies c ON ca.companyId = c.id
       LEFT JOIN company_services cs ON ca.serviceId = cs.id
+      LEFT JOIN services s ON cs.systemServiceId = s.id
       LEFT JOIN company_staff staff ON ca.staffId = staff.id
       LEFT JOIN users staffUser ON staff.userId = staffUser.id
       LEFT JOIN company_spaces sp ON ca.spaceId = sp.id
@@ -559,10 +561,10 @@ class Appointment {
         u.phone as clientPhone,
         u.avatar as clientAvatar,
         c.name as companyName,
-        cs.name as serviceName,
+        s.name as serviceName,
         cs.duration as serviceDuration,
         cs.price as servicePrice,
-        cs.imageUrl as serviceImageUrl,
+        JSON_UNQUOTE(JSON_EXTRACT(s.images, '$[0]')) as serviceImageUrl,
         staffUser.firstName as providerFirstName,
         staffUser.lastName as providerLastName,
         staffUser.avatar as providerAvatar,
@@ -574,6 +576,7 @@ class Appointment {
       LEFT JOIN users u ON ca.clientId = u.id
       LEFT JOIN companies c ON ca.companyId = c.id
       LEFT JOIN company_services cs ON ca.serviceId = cs.id
+      LEFT JOIN services s ON cs.systemServiceId = s.id
       LEFT JOIN company_staff staff ON ca.staffId = staff.id
       LEFT JOIN users staffUser ON staff.userId = staffUser.id
       LEFT JOIN company_spaces sp ON ca.spaceId = sp.id
@@ -647,10 +650,10 @@ class Appointment {
         u.phone as clientPhone,
         u.avatar as clientAvatar,
         c.name as companyName,
-        cs.name as serviceName,
+        s.name as serviceName,
         cs.duration as serviceDuration,
         cs.price as servicePrice,
-        cs.imageUrl as serviceImageUrl,
+        JSON_UNQUOTE(JSON_EXTRACT(s.images, '$[0]')) as serviceImageUrl,
         staffUser.firstName as providerFirstName,
         staffUser.lastName as providerLastName,
         staffUser.avatar as providerAvatar,
@@ -662,6 +665,7 @@ class Appointment {
       LEFT JOIN users u ON ca.clientId = u.id
       LEFT JOIN companies c ON ca.companyId = c.id
       LEFT JOIN company_services cs ON ca.serviceId = cs.id
+      LEFT JOIN services s ON cs.systemServiceId = s.id
       LEFT JOIN company_staff staff ON ca.staffId = staff.id
       LEFT JOIN users staffUser ON staff.userId = staffUser.id
       LEFT JOIN company_spaces sp ON ca.spaceId = sp.id

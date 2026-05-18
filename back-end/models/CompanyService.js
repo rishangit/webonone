@@ -1,113 +1,190 @@
 const { pool } = require('../config/database');
 const { nanoid } = require('nanoid');
+const Service = require('./Service');
+
+function parseImages(raw) {
+  if (raw == null || raw === '') return [];
+  if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed.filter(Boolean).map(String) : [];
+    } catch {
+      return [];
+    }
+  }
+  if (Array.isArray(raw)) {
+    return raw.filter(Boolean).map(String);
+  }
+  return [];
+}
+
+function parseDefaultProducts(raw) {
+  if (raw == null || raw === '') return [];
+  if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  if (Array.isArray(raw)) {
+    return raw;
+  }
+  return [];
+}
 
 class CompanyService {
   constructor(data) {
     this.id = data.id;
     this.companyId = data.companyId;
-    this.name = data.name;
-    this.description = data.description;
+    this.systemServiceId = data.systemServiceId;
+    this.companyName = data.companyName || null;
+    this.overrideName = data.name == null ? null : String(data.name);
+    this.overrideDescription = data.description == null ? null : String(data.description);
+    this.overrideImages = parseImages(data.images);
+    this.name = data.name || data.systemServiceName;
+    this.description = data.description || data.systemServiceDescription;
     this.duration = data.duration;
     this.price = data.price;
-    this.category = data.category;
-    this.subcategory = data.subcategory;
-    this.categoryId = data.categoryId;
-    this.subcategoryId = data.subcategoryId;
     this.status = data.status || 'Active';
-    this.providerName = data.providerName;
-    this.providerAvatar = data.providerAvatar;
-    this.staffId = data.staffId;
-    this.imageUrl = data.imageUrl;
-    this.galleryImages = data.galleryImages;
+    this.images = parseImages(data.images || data.systemServiceImages);
+    this.defaultProducts = parseDefaultProducts(data.defaultProducts);
+    this.defaultDuration = data.defaultDuration == null ? null : Number(data.defaultDuration);
+    this.defaultPrice = data.defaultPrice == null ? null : Number(data.defaultPrice);
     this.createdAt = data.createdAt;
     this.updatedAt = data.updatedAt;
   }
 
   toJSON() {
+    const images = this.images;
+    const primaryImage = images[0] || '';
+    const hasNameCustomization = this.overrideName !== null && this.overrideName.trim() !== '';
+    const hasDescriptionCustomization = this.overrideDescription !== null && this.overrideDescription.trim() !== '';
+    const hasImagesCustomization = this.overrideImages.length > 0;
     return {
       id: this.id,
       companyId: this.companyId,
+      companyName: this.companyName,
+      systemServiceId: this.systemServiceId,
       name: this.name,
       description: this.description,
       duration: this.duration,
       price: parseFloat(this.price),
-      category: this.category,
-      subcategory: this.subcategory,
-      categoryId: this.categoryId,
-      subcategoryId: this.subcategoryId,
       status: this.status,
-      provider: {
-        name: this.providerName || '',
-        avatar: this.providerAvatar || '',
-        staffId: this.staffId
+      images,
+      image: primaryImage,
+      defaultDuration: this.defaultDuration,
+      defaultPrice: this.defaultPrice,
+      defaultProducts: this.defaultProducts,
+      customizations: {
+        name: hasNameCustomization,
+        description: hasDescriptionCustomization,
+        images: hasImagesCustomization,
+        hasAny: hasNameCustomization || hasDescriptionCustomization || hasImagesCustomization,
       },
       bookings: {
         thisMonth: 0,
-        revenue: 0
+        revenue: 0,
       },
       tags: [],
-      image: this.imageUrl || '',
-      galleryImages: this.galleryImages ? (typeof this.galleryImages === 'string' ? JSON.parse(this.galleryImages) : this.galleryImages) : [],
       createdAt: this.createdAt,
-      updatedAt: this.updatedAt
+      updatedAt: this.updatedAt,
     };
+  }
+
+  static async assertDefaultProductsForCompany(companyId, defaultProducts, connection = null) {
+    if (!defaultProducts || defaultProducts.length === 0) return;
+    const exec = connection ? (sql, p) => connection.execute(sql, p) : (sql, p) => pool.execute(sql, p);
+    for (const item of defaultProducts) {
+      if (!item.companyProductId) {
+        throw new Error('Each default product entry must include companyProductId');
+      }
+      const qty = parseFloat(item.quantity);
+      if (!Number.isFinite(qty) || qty <= 0) {
+        throw new Error('Each default product must have quantity > 0');
+      }
+      const [rows] = await exec(
+        'SELECT id FROM company_products WHERE id = ? AND companyId = ? LIMIT 1',
+        [item.companyProductId, companyId]
+      );
+      if (!rows || rows.length === 0) {
+        throw new Error(`Company product ${item.companyProductId} is not valid for this company`);
+      }
+    }
   }
 
   static async create(data) {
     const connection = await pool.getConnection();
-    
+
     try {
       await connection.beginTransaction();
-      
+
       const id = nanoid(10);
+      await CompanyService.assertDefaultProductsForCompany(data.companyId, data.defaultProducts, connection);
+      let systemServiceId = data.systemServiceId || null;
+      if (systemServiceId) {
+        const [existingSystemRows] = await connection.execute('SELECT id FROM services WHERE id = ? LIMIT 1', [systemServiceId]);
+        if (existingSystemRows.length === 0) {
+          throw new Error('Invalid systemServiceId');
+        }
+      } else {
+        const systemService = await Service.findOrCreateByName(
+          {
+            name: data.name,
+            description: data.description,
+            images: data.images,
+            defaultDuration: data.duration,
+            defaultPrice: data.price,
+          },
+          connection
+        );
+        systemServiceId = systemService.id;
+      }
+      const defaultProductsArr = Array.isArray(data.defaultProducts) ? data.defaultProducts : [];
+
       const query = `
         INSERT INTO company_services (
-          id, companyId, name, description, duration, price, category, subcategory,
-          categoryId, subcategoryId, status, providerName, providerAvatar, staffId, imageUrl, galleryImages
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          id, companyId, systemServiceId, name, description, images, duration, price, status, defaultProducts
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
-      const galleryImagesValue = data.galleryImages 
-        ? (Array.isArray(data.galleryImages) ? JSON.stringify(data.galleryImages) : data.galleryImages)
-        : null;
+      const defaultProductsValue = defaultProductsArr.length > 0 ? JSON.stringify(defaultProductsArr) : null;
+      const images = parseImages(data.images);
+      const hasSystemRef = Boolean(data.systemServiceId);
+      const overrideName = hasSystemRef ? (data.name ? String(data.name).trim() : null) : null;
+      const overrideDescription = hasSystemRef ? (data.description || null) : null;
+      const overrideImages = hasSystemRef && images.length > 0 ? JSON.stringify(images) : null;
 
       const values = [
         id,
         data.companyId,
-        data.name,
-        data.description || null,
+        systemServiceId,
+        overrideName,
+        overrideDescription,
+        overrideImages,
         data.duration,
         data.price,
-        data.category || null,
-        data.subcategory || null,
-        data.categoryId || null,
-        data.subcategoryId || null,
         data.status || 'Active',
-        data.providerName || null,
-        data.providerAvatar || null,
-        data.staffId || null,
-        data.imageUrl || null,
-        galleryImagesValue
+        defaultProductsValue,
       ];
 
       await connection.execute(query, values);
-      
-      // Set tags if provided (within transaction)
+      await Service.incrementUsageCount(systemServiceId, connection);
+
       let tagUpdateResult = null;
       if (data.tagIds && data.tagIds.length > 0) {
-        tagUpdateResult = await CompanyService.setTags(id, data.tagIds, connection);
+        tagUpdateResult = await Service.setTags(systemServiceId, data.tagIds, connection);
       }
-      
+
       await connection.commit();
-      
-      // Update usage counts asynchronously (non-blocking) after response
+
       if (tagUpdateResult) {
-        // Fire and forget - don't await, let it run in background
-        CompanyService.updateTagUsageCounts(tagUpdateResult.oldTagIds, tagUpdateResult.newTagIds).catch(err => {
+        CompanyService.updateTagUsageCounts(tagUpdateResult.oldTagIds, tagUpdateResult.newTagIds).catch((err) => {
           console.error(`[CompanyService.create] Background tag usage count update failed:`, err.message);
         });
       }
-      
+
       const service = await CompanyService.findById(id);
       return service;
     } catch (error) {
@@ -121,33 +198,45 @@ class CompanyService {
   static async findById(id) {
     try {
       const [rows] = await pool.execute(
-        'SELECT * FROM company_services WHERE id = ?',
+        `
+        SELECT
+          cs.*,
+          c.name AS companyName,
+          s.name AS systemServiceName,
+          s.description AS systemServiceDescription,
+          s.images AS systemServiceImages,
+          s.defaultDuration,
+          s.defaultPrice
+        FROM company_services cs
+        LEFT JOIN companies c ON cs.companyId = c.id
+        LEFT JOIN services s ON cs.systemServiceId = s.id
+        WHERE cs.id = ?
+      `,
         [id]
       );
-      
+
       if (rows.length === 0) {
         return null;
       }
 
       const service = new CompanyService(rows[0]);
       const serviceData = service.toJSON();
-      
-      // Fetch tags with full information (color, icon, etc.)
+
       try {
-        const tags = await CompanyService.getTags(id);
-        serviceData.tags = tags.map(tag => ({
+        const tags = service.systemServiceId ? await Service.getTags(service.systemServiceId) : [];
+        serviceData.tags = tags.map((tag) => ({
           id: tag.id,
           name: tag.name,
           color: tag.color || '#3B82F6',
           icon: tag.icon,
           description: tag.description,
-          isActive: tag.isActive
+          isActive: tag.isActive,
         }));
       } catch (error) {
         console.error(`Error fetching tags for service ${id}:`, error);
         serviceData.tags = [];
       }
-      
+
       return serviceData;
     } catch (error) {
       throw new Error(`Error finding service: ${error.message}`);
@@ -156,9 +245,22 @@ class CompanyService {
 
   static async findAll(options = {}) {
     try {
-      const { companyId, status, categoryId } = options;
-      
-      let query = 'SELECT * FROM company_services WHERE 1=1';
+      const { companyId, status } = options;
+
+      let query = `
+        SELECT
+          cs.*,
+          c.name AS companyName,
+          s.name AS systemServiceName,
+          s.description AS systemServiceDescription,
+          s.images AS systemServiceImages,
+          s.defaultDuration,
+          s.defaultPrice
+        FROM company_services cs
+        LEFT JOIN companies c ON cs.companyId = c.id
+        LEFT JOIN services s ON cs.systemServiceId = s.id
+        WHERE 1=1
+      `;
       const params = [];
 
       if (companyId) {
@@ -171,29 +273,23 @@ class CompanyService {
         params.push(status);
       }
 
-      if (categoryId) {
-        query += ' AND categoryId = ?';
-        params.push(categoryId);
-      }
-
       query += ' ORDER BY createdAt DESC';
 
       const [rows] = await pool.execute(query, params);
-      const services = rows.map(row => new CompanyService(row));
-      
-      // Fetch tags for each service with full information
+      const services = rows.map((row) => new CompanyService(row));
+
       const servicesWithTags = await Promise.all(
         services.map(async (service) => {
           const serviceData = service.toJSON();
           try {
-            const tags = await CompanyService.getTags(service.id);
-            serviceData.tags = tags.map(tag => ({
+            const tags = service.systemServiceId ? await Service.getTags(service.systemServiceId) : [];
+            serviceData.tags = tags.map((tag) => ({
               id: tag.id,
               name: tag.name,
               color: tag.color || '#3B82F6',
               icon: tag.icon,
               description: tag.description,
-              isActive: tag.isActive
+              isActive: tag.isActive,
             }));
           } catch (error) {
             console.error(`Error fetching tags for service ${service.id}:`, error);
@@ -202,7 +298,7 @@ class CompanyService {
           return serviceData;
         })
       );
-      
+
       return servicesWithTags;
     } catch (error) {
       throw new Error(`Error finding services: ${error.message}`);
@@ -211,20 +307,25 @@ class CompanyService {
 
   static async findAllPaginated(options = {}) {
     try {
-      const {
-        limit = 12,
-        offset = 0,
-        search = '',
-        companyId,
-        status,
-        categoryId,
-      } = options || {};
+      const { limit = 12, offset = 0, search = '', companyId, status } = options || {};
 
-      // Ensure limit and offset are integers
       const limitInt = parseInt(limit, 10) || 12;
       const offsetInt = parseInt(offset, 10) || 0;
 
-      let query = 'SELECT * FROM company_services WHERE 1=1';
+      let query = `
+        SELECT
+          cs.*,
+          c.name AS companyName,
+          s.name AS systemServiceName,
+          s.description AS systemServiceDescription,
+          s.images AS systemServiceImages,
+          s.defaultDuration,
+          s.defaultPrice
+        FROM company_services cs
+        LEFT JOIN companies c ON cs.companyId = c.id
+        LEFT JOIN services s ON cs.systemServiceId = s.id
+        WHERE 1=1
+      `;
       const params = [];
 
       if (companyId) {
@@ -237,34 +338,26 @@ class CompanyService {
         params.push(status);
       }
 
-      if (categoryId) {
-        query += ' AND categoryId = ?';
-        params.push(categoryId);
-      }
-
-      // Search filter
       if (search && search.trim()) {
         query += ` AND (
-          name LIKE ? OR 
-          description LIKE ? OR 
-          category LIKE ?
+          COALESCE(cs.name, s.name) LIKE ? OR 
+          COALESCE(cs.description, s.description) LIKE ?
         )`;
         const searchPattern = `%${search.trim()}%`;
-        params.push(searchPattern, searchPattern, searchPattern);
+        params.push(searchPattern, searchPattern);
       }
 
-      // Count total matching services
-      const countQuery = query.replace(/SELECT[\s\S]*?FROM/, 'SELECT COUNT(DISTINCT id) as total FROM').replace(/ORDER BY[\s\S]*$/, '');
+      const countQuery = query
+        .replace(/SELECT[\s\S]*?FROM/, 'SELECT COUNT(DISTINCT cs.id) as total FROM')
+        .replace(/ORDER BY[\s\S]*$/, '');
       const [countRows] = await pool.execute(countQuery, params);
       const total = countRows[0]?.total || 0;
 
-      // Get paginated services
       query += ' ORDER BY createdAt DESC';
       query += ` LIMIT ${limitInt} OFFSET ${offsetInt}`;
 
       const [rows] = await pool.execute(query, params);
-      
-      // If no rows, return empty array with pagination info
+
       if (!rows || rows.length === 0) {
         return {
           services: [],
@@ -278,21 +371,20 @@ class CompanyService {
         };
       }
 
-      const services = rows.map(row => new CompanyService(row));
-      
-      // Fetch tags for each service with full information
+      const services = rows.map((row) => new CompanyService(row));
+
       const servicesWithTags = await Promise.all(
         services.map(async (service) => {
           const serviceData = service.toJSON();
           try {
-            const tags = await CompanyService.getTags(service.id);
-            serviceData.tags = tags.map(tag => ({
+            const tags = service.systemServiceId ? await Service.getTags(service.systemServiceId) : [];
+            serviceData.tags = tags.map((tag) => ({
               id: tag.id,
               name: tag.name,
               color: tag.color || '#3B82F6',
               icon: tag.icon,
               description: tag.description,
-              isActive: tag.isActive
+              isActive: tag.isActive,
             }));
           } catch (error) {
             console.error(`Error fetching tags for service ${service.id}:`, error);
@@ -301,7 +393,7 @@ class CompanyService {
           return serviceData;
         })
       );
-      
+
       return {
         services: servicesWithTags,
         pagination: {
@@ -319,21 +411,22 @@ class CompanyService {
 
   async update(data) {
     const connection = await pool.getConnection();
-    
+
     try {
       await connection.beginTransaction();
-      
+
+      if (data.defaultProducts !== undefined) {
+        const [rows] = await connection.execute('SELECT companyId FROM company_services WHERE id = ?', [this.id]);
+        const companyId = rows[0]?.companyId;
+        if (companyId) {
+          await CompanyService.assertDefaultProductsForCompany(companyId, data.defaultProducts, connection);
+        }
+      }
+
       const fields = [];
       const values = [];
+      let newSystemServiceId = null;
 
-      if (data.name !== undefined) {
-        fields.push('name = ?');
-        values.push(data.name);
-      }
-      if (data.description !== undefined) {
-        fields.push('description = ?');
-        values.push(data.description);
-      }
       if (data.duration !== undefined) {
         fields.push('duration = ?');
         values.push(data.duration);
@@ -342,51 +435,55 @@ class CompanyService {
         fields.push('price = ?');
         values.push(data.price);
       }
-      if (data.category !== undefined) {
-        fields.push('category = ?');
-        values.push(data.category);
-      }
-      if (data.subcategory !== undefined) {
-        fields.push('subcategory = ?');
-        values.push(data.subcategory);
-      }
-      if (data.categoryId !== undefined) {
-        fields.push('categoryId = ?');
-        values.push(data.categoryId);
-      }
-      if (data.subcategoryId !== undefined) {
-        fields.push('subcategoryId = ?');
-        values.push(data.subcategoryId);
-      }
       if (data.status !== undefined) {
         fields.push('status = ?');
         values.push(data.status);
       }
-      if (data.providerName !== undefined) {
-        fields.push('providerName = ?');
-        values.push(data.providerName);
+      if (data.systemServiceId !== undefined) {
+        const [systemRows] = await connection.execute('SELECT id FROM services WHERE id = ? LIMIT 1', [data.systemServiceId]);
+        if (systemRows.length === 0) {
+          throw new Error('Invalid systemServiceId');
+        }
+        fields.push('systemServiceId = ?');
+        values.push(data.systemServiceId);
+        newSystemServiceId = data.systemServiceId;
+      } else if (data.name !== undefined || data.description !== undefined || data.images !== undefined) {
+        const [currentRows] = await connection.execute('SELECT systemServiceId FROM company_services WHERE id = ? LIMIT 1', [this.id]);
+        const currentSystemServiceId = currentRows[0]?.systemServiceId || this.systemServiceId;
+        if (currentSystemServiceId) {
+          if (data.name !== undefined) {
+            fields.push('name = ?');
+            values.push(data.name ? String(data.name).trim() : null);
+          }
+          if (data.description !== undefined) {
+            fields.push('description = ?');
+            values.push(data.description || null);
+          }
+          if (data.images !== undefined) {
+            const images = parseImages(data.images);
+            fields.push('images = ?');
+            values.push(images.length > 0 ? JSON.stringify(images) : null);
+          }
+        } else {
+          const created = await Service.findOrCreateByName(
+            {
+              name: data.name,
+              description: data.description,
+              images: data.images,
+            },
+            connection
+          );
+          fields.push('systemServiceId = ?');
+          values.push(created.id);
+          newSystemServiceId = created.id;
+        }
       }
-      if (data.providerAvatar !== undefined) {
-        fields.push('providerAvatar = ?');
-        values.push(data.providerAvatar);
-      }
-      if (data.staffId !== undefined) {
-        fields.push('staffId = ?');
-        values.push(data.staffId);
-      }
-      if (data.imageUrl !== undefined) {
-        fields.push('imageUrl = ?');
-        values.push(data.imageUrl);
-      }
-      if (data.galleryImages !== undefined) {
-        const galleryImagesValue = Array.isArray(data.galleryImages) 
-          ? JSON.stringify(data.galleryImages) 
-          : (data.galleryImages || null);
-        fields.push('galleryImages = ?');
-        values.push(galleryImagesValue);
+      if (data.defaultProducts !== undefined) {
+        const dp = Array.isArray(data.defaultProducts) ? data.defaultProducts : [];
+        fields.push('defaultProducts = ?');
+        values.push(dp.length > 0 ? JSON.stringify(dp) : null);
       }
 
-      // Update service fields if any
       if (fields.length > 0) {
         fields.push('updatedAt = CURRENT_TIMESTAMP');
         values.push(this.id);
@@ -394,22 +491,23 @@ class CompanyService {
         await connection.execute(query, values);
       }
 
-      // Update tags if provided
       let tagUpdateResult = null;
       if (data.tagIds !== undefined) {
-        tagUpdateResult = await CompanyService.setTags(this.id, data.tagIds, connection);
+        const [currentRows] = await connection.execute('SELECT systemServiceId FROM company_services WHERE id = ? LIMIT 1', [this.id]);
+        const systemServiceIdForTags = newSystemServiceId || currentRows[0]?.systemServiceId || this.systemServiceId;
+        if (systemServiceIdForTags) {
+          tagUpdateResult = await Service.setTags(systemServiceIdForTags, data.tagIds, connection);
+        }
       }
-      
+
       await connection.commit();
-      
-      // Update usage counts asynchronously (non-blocking) after response
+
       if (tagUpdateResult) {
-        // Fire and forget - don't await, let it run in background
-        CompanyService.updateTagUsageCounts(tagUpdateResult.oldTagIds, tagUpdateResult.newTagIds).catch(err => {
+        CompanyService.updateTagUsageCounts(tagUpdateResult.oldTagIds, tagUpdateResult.newTagIds).catch((err) => {
           console.error(`[CompanyService.update] Background tag usage count update failed:`, err.message);
         });
       }
-      
+
       const updated = await CompanyService.findById(this.id);
       return updated;
     } catch (error) {
@@ -422,22 +520,18 @@ class CompanyService {
 
   static async delete(id) {
     try {
-      const [result] = await pool.execute(
-        'DELETE FROM company_services WHERE id = ?',
-        [id]
-      );
+      const [result] = await pool.execute('DELETE FROM company_services WHERE id = ?', [id]);
       return result.affectedRows > 0;
     } catch (error) {
       throw new Error(`Error deleting service: ${error.message}`);
     }
   }
 
-  // Tag management methods
   static async getTags(serviceId) {
     try {
-      const { getEntityTags } = require('../utils/entityTags');
-      const { EntityType } = require('../constants/entityType');
-      return await getEntityTags(EntityType.SERVICE, serviceId);
+      const [rows] = await pool.execute('SELECT systemServiceId FROM company_services WHERE id = ? LIMIT 1', [serviceId]);
+      if (rows.length === 0 || !rows[0].systemServiceId) return [];
+      return await Service.getTags(rows[0].systemServiceId);
     } catch (error) {
       throw new Error(`Error getting service tags: ${error.message}`);
     }
@@ -445,39 +539,27 @@ class CompanyService {
 
   static async setTags(serviceId, tagIds, connection = null) {
     try {
-      const { setEntityTags, updateTagUsageCounts } = require('../utils/entityTags');
-      const { EntityType } = require('../constants/entityType');
-      
-      // Set tags in unified entity_tags table (use provided connection if available)
-      const result = await setEntityTags(EntityType.SERVICE, serviceId, tagIds, connection);
-      
-      // Update usage counts asynchronously (non-blocking) if not in transaction
-      if (!connection) {
-        updateTagUsageCounts(result.oldTagIds, result.newTagIds).catch(err => {
-          console.error(`[CompanyService.setTags] Background tag usage count update failed:`, err.message);
-        });
+      const exec = connection ? (sql, p) => connection.execute(sql, p) : (sql, p) => pool.execute(sql, p);
+      const [rows] = await exec('SELECT systemServiceId FROM company_services WHERE id = ? LIMIT 1', [serviceId]);
+      if (rows.length === 0 || !rows[0].systemServiceId) {
+        return { oldTagIds: [], newTagIds: [] };
       }
-      
-      // Return old and new tag IDs for async usage count update (don't update here)
-      return { oldTagIds: result.oldTagIds, newTagIds: result.newTagIds };
+      return await Service.setTags(rows[0].systemServiceId, tagIds, connection);
     } catch (error) {
       throw new Error(`Error setting service tags: ${error.message}`);
     }
   }
 
-  // Separate method for updating tag usage counts asynchronously
   static async updateTagUsageCounts(oldTagIds, newTagIds) {
     const Tag = require('./Tag');
-    
+
     try {
-      // Decrement usage count for removed tags
       for (const oldTagId of oldTagIds) {
         if (!newTagIds || !newTagIds.includes(oldTagId)) {
           await Tag.decrementUsageCount(oldTagId);
         }
       }
-      
-      // Increment usage count for new tags
+
       if (newTagIds && newTagIds.length > 0) {
         for (const tagId of newTagIds) {
           if (!oldTagIds.includes(tagId)) {
@@ -486,13 +568,12 @@ class CompanyService {
         }
       }
     } catch (usageError) {
-      // Non-critical error - log but don't fail
-      console.error(`[CompanyService.updateTagUsageCounts] Error updating tag usage counts (non-critical):`, usageError.message);
+      console.error(
+        `[CompanyService.updateTagUsageCounts] Error updating tag usage counts (non-critical):`,
+        usageError.message
+      );
     }
   }
 }
 
 module.exports = CompanyService;
-
-
-

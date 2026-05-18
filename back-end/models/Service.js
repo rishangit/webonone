@@ -1,253 +1,261 @@
 const { pool } = require('../config/database');
 const { nanoid } = require('nanoid');
+const { EntityType } = require('../constants/entityType');
+
+function parseImages(raw) {
+  if (raw == null || raw === '') return [];
+  if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed.filter(Boolean).map(String) : [];
+    } catch {
+      return [];
+    }
+  }
+  if (Array.isArray(raw)) return raw.filter(Boolean).map(String);
+  return [];
+}
+
+function normalizeServiceName(name) {
+  return String(name || '').trim().replace(/\s+/g, ' ').toLowerCase();
+}
 
 class Service {
   constructor(data) {
     this.id = data.id;
     this.name = data.name;
     this.description = data.description;
-    this.duration = data.duration;
-    this.price = data.price;
-    this.category = data.category;
-    this.subcategory = data.subcategory;
-    this.status = data.status;
-    this.companyId = data.companyId;
-    this.provider = data.provider ? JSON.parse(data.provider) : null;
-    this.bookings = data.bookings ? JSON.parse(data.bookings) : {};
-    this.tags = data.tags ? JSON.parse(data.tags) : [];
-    this.image = data.image;
-    this.createdAt = data.createdAt;
-    this.updatedAt = data.updatedAt;
+    this.images = parseImages(data.images);
+    this.isActive = data.isActive === undefined ? true : Boolean(data.isActive);
+    this.isVerified = data.isVerified === undefined ? true : Boolean(data.isVerified);
+    this.usageCount = Number(data.usageCount || 0);
+    this.defaultDuration = data.defaultDuration == null ? null : Number(data.defaultDuration);
+    this.defaultPrice = data.defaultPrice == null ? null : Number(data.defaultPrice);
+    this.createdDate = data.createdDate;
+    this.lastModified = data.lastModified;
   }
 
-  // Create a new service
+  toJSON() {
+    return {
+      id: this.id,
+      name: this.name,
+      description: this.description,
+      images: this.images,
+      image: this.images[0] || '',
+      isActive: this.isActive,
+      isVerified: this.isVerified,
+      usageCount: this.usageCount,
+      defaultDuration: this.defaultDuration,
+      defaultPrice: this.defaultPrice,
+      createdDate: this.createdDate,
+      lastModified: this.lastModified,
+    };
+  }
+
   static async create(serviceData) {
     try {
-      const {
-        name, description, duration, price, category, subcategory,
-        status, companyId, provider, bookings, tags, image
-      } = serviceData;
-
-      const id = nanoid(10); // Generate NanoID for new service
-      const query = `
+      const id = nanoid(10);
+      const images = parseImages(serviceData.images);
+      await pool.execute(
+        `
         INSERT INTO services (
-          id, name, description, duration, price, category, subcategory,
-          status, companyId, provider, bookings, tags, image, createdAt
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
-      `;
+          id, name, description, images, isActive, isVerified, usageCount, defaultDuration, defaultPrice
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `,
+        [
+          id,
+          serviceData.name,
+          serviceData.description || null,
+          images.length > 0 ? JSON.stringify(images) : null,
+          serviceData.isActive !== undefined ? Boolean(serviceData.isActive) : true,
+          serviceData.isVerified !== undefined ? Boolean(serviceData.isVerified) : true,
+          Number(serviceData.usageCount || 0),
+          serviceData.defaultDuration == null ? null : Number(serviceData.defaultDuration),
+          serviceData.defaultPrice == null ? null : Number(serviceData.defaultPrice),
+        ]
+      );
 
-      const values = [
-        id,
-        name, description, duration, price, category, subcategory,
-        status, companyId,
-        JSON.stringify(provider || null),
-        JSON.stringify(bookings || {}),
-        JSON.stringify(tags || []),
-        image
-      ];
-
-      await pool.execute(query, values);
-      return id;
+      return await Service.findById(id);
     } catch (error) {
       throw new Error(`Error creating service: ${error.message}`);
     }
   }
 
-  // Get service by ID
   static async findById(id) {
     try {
-      const query = 'SELECT * FROM services WHERE id = ?';
-      const [rows] = await pool.execute(query, [id]);
+      const [rows] = await pool.execute('SELECT * FROM services WHERE id = ?', [id]);
       return rows.length > 0 ? new Service(rows[0]) : null;
     } catch (error) {
       throw new Error(`Error finding service: ${error.message}`);
     }
   }
 
-  // Get all services with filters
   static async findAll(options = {}) {
     try {
-      const {
-        page = 1,
-        limit = 10,
-        companyId,
-        category,
-        subcategory,
-        status,
-        search
-      } = options;
-
-      const offset = (page - 1) * limit;
-      let query = 'SELECT * FROM services WHERE 1=1';
+      const { page = 1, limit = 20, search = '', isActive } = options;
+      const pageNum = Number.parseInt(String(page), 10);
+      const limitNum = Number.parseInt(String(limit), 10);
+      const safePage = Number.isFinite(pageNum) && pageNum > 0 ? pageNum : 1;
+      const safeLimit = Number.isFinite(limitNum) && limitNum > 0 ? limitNum : 20;
+      const safeOffset = (safePage - 1) * safeLimit;
       const params = [];
+      let query = 'SELECT * FROM services WHERE 1=1';
 
-      if (companyId) {
-        query += ' AND companyId = ?';
-        params.push(companyId);
+      if (isActive !== undefined) {
+        query += ' AND isActive = ?';
+        params.push(Boolean(isActive) ? 1 : 0);
       }
-
-      if (category) {
-        query += ' AND category = ?';
-        params.push(category);
-      }
-
-      if (subcategory) {
-        query += ' AND subcategory = ?';
-        params.push(subcategory);
-      }
-
-      if (status) {
-        query += ' AND status = ?';
-        params.push(status);
-      }
-
-      if (search) {
+      if (search && search.trim()) {
         query += ' AND (name LIKE ? OR description LIKE ?)';
-        params.push(`%${search}%`, `%${search}%`);
+        const searchPattern = `%${search.trim()}%`;
+        params.push(searchPattern, searchPattern);
       }
 
-      query += ' ORDER BY createdAt DESC LIMIT ? OFFSET ?';
-      params.push(limit, offset);
-
+      query += ` ORDER BY usageCount DESC, name ASC LIMIT ${safeLimit} OFFSET ${safeOffset}`;
       const [rows] = await pool.execute(query, params);
-      return rows.map(row => new Service(row));
+      return rows.map((row) => new Service(row));
     } catch (error) {
       throw new Error(`Error finding services: ${error.message}`);
     }
   }
 
-  // Update service
-  async update(updateData) {
+  /** Same filters as {@link findAll} but returns total row count (no pagination). */
+  static async countAll(options = {}) {
     try {
-      const fields = [];
-      const values = [];
-
-      Object.keys(updateData).forEach(key => {
-        if (updateData[key] !== undefined) {
-          if (key === 'provider' || key === 'bookings' || key === 'tags') {
-            fields.push(`${key} = ?`);
-            values.push(JSON.stringify(updateData[key]));
-          } else {
-            fields.push(`${key} = ?`);
-            values.push(updateData[key]);
-          }
-        }
-      });
-
-      if (fields.length === 0) return;
-
-      fields.push('updatedAt = NOW()');
-      values.push(this.id);
-
-      const query = `UPDATE services SET ${fields.join(', ')} WHERE id = ?`;
-      await pool.execute(query, values);
-
-      // Update local instance
-      Object.assign(this, updateData);
-    } catch (error) {
-      throw new Error(`Error updating service: ${error.message}`);
-    }
-  }
-
-  // Delete service
-  static async delete(id) {
-    try {
-      const query = 'DELETE FROM services WHERE id = ?';
-      const [result] = await pool.execute(query, [id]);
-      return result.affectedRows > 0;
-    } catch (error) {
-      throw new Error(`Error deleting service: ${error.message}`);
-    }
-  }
-
-  // Get services by company
-  static async getByCompany(companyId, options = {}) {
-    try {
-      const { category, status = 'Active' } = options;
-      let query = 'SELECT * FROM services WHERE companyId = ?';
-      const params = [companyId];
-
-      if (category) {
-        query += ' AND category = ?';
-        params.push(category);
-      }
-
-      if (status) {
-        query += ' AND status = ?';
-        params.push(status);
-      }
-
-      query += ' ORDER BY name';
-
-      const [rows] = await pool.execute(query, params);
-      return rows.map(row => new Service(row));
-    } catch (error) {
-      throw new Error(`Error getting services by company: ${error.message}`);
-    }
-  }
-
-  // Get service statistics
-  static async getStats(companyId = null) {
-    try {
-      let whereClause = '';
+      const { search = '', isActive } = options;
       const params = [];
+      let query = 'SELECT COUNT(*) AS total FROM services WHERE 1=1';
 
-      if (companyId) {
-        whereClause = 'WHERE companyId = ?';
-        params.push(companyId);
+      if (isActive !== undefined) {
+        query += ' AND isActive = ?';
+        params.push(Boolean(isActive) ? 1 : 0);
+      }
+      if (search && search.trim()) {
+        query += ' AND (name LIKE ? OR description LIKE ?)';
+        const searchPattern = `%${search.trim()}%`;
+        params.push(searchPattern, searchPattern);
       }
 
-      const queries = [
-        `SELECT COUNT(*) as totalServices FROM services ${whereClause}`,
-        `SELECT COUNT(*) as activeServices FROM services ${whereClause} AND status = 'Active'`,
-        `SELECT AVG(price) as averagePrice FROM services ${whereClause} WHERE price IS NOT NULL`,
-        `SELECT SUM(JSON_EXTRACT(bookings, '$.revenue')) as totalRevenue FROM services ${whereClause}`
-      ];
-
-      const [totalServices] = await pool.execute(queries[0], params);
-      const [activeServices] = await pool.execute(queries[1], params);
-      const [averagePrice] = await pool.execute(queries[2], params);
-      const [totalRevenue] = await pool.execute(queries[3], params);
-
-      return {
-        totalServices: totalServices[0].totalServices,
-        activeServices: activeServices[0].activeServices,
-        averagePrice: averagePrice[0].averagePrice || 0,
-        totalRevenue: totalRevenue[0].totalRevenue || 0
-      };
+      const [rows] = await pool.execute(query, params);
+      return Number(rows[0]?.total || 0);
     } catch (error) {
-      throw new Error(`Error getting service statistics: ${error.message}`);
+      throw new Error(`Error counting services: ${error.message}`);
     }
   }
 
-  // Search services
-  static async search(searchTerm, options = {}) {
-    try {
-      const { companyId, category, limit = 20 } = options;
-      let query = `
-        SELECT * FROM services 
-        WHERE (name LIKE ? OR description LIKE ? OR JSON_SEARCH(tags, 'one', ?) IS NOT NULL)
-      `;
-      const params = [`%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`];
-
-      if (companyId) {
-        query += ' AND companyId = ?';
-        params.push(companyId);
-      }
-
-      if (category) {
-        query += ' AND category = ?';
-        params.push(category);
-      }
-
-      query += ' AND status = "Active" ORDER BY name LIMIT ?';
-      params.push(limit);
-
-      const [rows] = await pool.execute(query, params);
-      return rows.map(row => new Service(row));
-    } catch (error) {
-      throw new Error(`Error searching services: ${error.message}`);
+  static async findOrCreateByName(payload, connection = null) {
+    const exec = connection ? (sql, p) => connection.execute(sql, p) : (sql, p) => pool.execute(sql, p);
+    const normalizedName = normalizeServiceName(payload.name);
+    if (!normalizedName) {
+      throw new Error('Service name is required to create or resolve a system service');
     }
+
+    const [existingRows] = await exec(
+      `
+      SELECT * FROM services
+      WHERE LOWER(TRIM(name)) = ?
+      ORDER BY usageCount DESC, createdDate ASC
+      LIMIT 1
+    `,
+      [normalizedName]
+    );
+
+    if (existingRows.length > 0) {
+      return new Service(existingRows[0]);
+    }
+
+    const id = nanoid(10);
+    const images = parseImages(payload.images);
+    await exec(
+      `
+      INSERT INTO services (
+        id, name, description, images, isActive, isVerified, usageCount, defaultDuration, defaultPrice
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `,
+      [
+        id,
+        String(payload.name).trim(),
+        payload.description || null,
+        images.length > 0 ? JSON.stringify(images) : null,
+        true,
+        true,
+        0,
+        payload.defaultDuration == null ? null : Number(payload.defaultDuration),
+        payload.defaultPrice == null ? null : Number(payload.defaultPrice),
+      ]
+    );
+
+    const [createdRows] = await exec('SELECT * FROM services WHERE id = ? LIMIT 1', [id]);
+    return new Service(createdRows[0]);
+  }
+
+  static async update(id, updateData, connection = null) {
+    const exec = connection ? (sql, p) => connection.execute(sql, p) : (sql, p) => pool.execute(sql, p);
+    const fields = [];
+    const values = [];
+
+    if (updateData.name !== undefined) {
+      fields.push('name = ?');
+      values.push(String(updateData.name).trim());
+    }
+    if (updateData.description !== undefined) {
+      fields.push('description = ?');
+      values.push(updateData.description || null);
+    }
+    if (updateData.images !== undefined) {
+      const images = parseImages(updateData.images);
+      fields.push('images = ?');
+      values.push(images.length > 0 ? JSON.stringify(images) : null);
+    }
+    if (updateData.isActive !== undefined) {
+      fields.push('isActive = ?');
+      values.push(Boolean(updateData.isActive));
+    }
+    if (updateData.isVerified !== undefined) {
+      fields.push('isVerified = ?');
+      values.push(Boolean(updateData.isVerified));
+    }
+    if (updateData.defaultDuration !== undefined) {
+      fields.push('defaultDuration = ?');
+      values.push(updateData.defaultDuration == null ? null : Number(updateData.defaultDuration));
+    }
+    if (updateData.defaultPrice !== undefined) {
+      fields.push('defaultPrice = ?');
+      values.push(updateData.defaultPrice == null ? null : Number(updateData.defaultPrice));
+    }
+
+    if (fields.length === 0) {
+      return await Service.findById(id);
+    }
+
+    fields.push('lastModified = CURRENT_TIMESTAMP');
+    values.push(id);
+    await exec(`UPDATE services SET ${fields.join(', ')} WHERE id = ?`, values);
+
+    return await Service.findById(id);
+  }
+
+  static async incrementUsageCount(id, connection = null) {
+    const exec = connection ? (sql, p) => connection.execute(sql, p) : (sql, p) => pool.execute(sql, p);
+    await exec(
+      `
+      UPDATE services
+      SET usageCount = COALESCE(usageCount, 0) + 1,
+          lastModified = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `,
+      [id]
+    );
+  }
+
+  static async getTags(serviceId) {
+    const { getEntityTags } = require('../utils/entityTags');
+    return getEntityTags(EntityType.SERVICE, serviceId);
+  }
+
+  static async setTags(serviceId, tagIds, connection = null) {
+    const { setEntityTags } = require('../utils/entityTags');
+    return setEntityTags(EntityType.SERVICE, serviceId, tagIds, connection);
   }
 }
 

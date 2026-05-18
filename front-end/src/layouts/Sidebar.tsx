@@ -19,6 +19,16 @@ const getNavigationItems = (role: UserRole, selectedEntities?: string[] | null) 
       ...baseItems,
       { icon: Users, label: "Users", id: "users" },
       { icon: Building, label: "Companies", id: "companies" },
+      {
+        icon: CreditCard,
+        label: "Services",
+        id: "services",
+        hasSubmenu: true,
+        submenu: [
+          { label: "System Services", id: "system-services" },
+          { label: "Company Services", id: "services" },
+        ],
+      },
       { 
         icon: PackageCheck, 
         label: "System Products", 

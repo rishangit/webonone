@@ -1,0 +1,57 @@
+---
+description: Standardize responsive card grids on list pages
+globs: front-end/src/features/**/pages/**/*.{ts,tsx}
+alwaysApply: true
+---
+
+# List Pages Card View Standards
+
+Use this rule for any **list page** that renders data cards in a grid (for example services, products, users, spaces, tags, etc.).
+
+## Required card-grid breakpoints
+
+For list/card views, use this exact responsive column pattern:
+
+- `xs` (default): **1** card
+- `sm`: **2** cards
+- `md`: **3** cards
+- `lg` and above: **4** cards
+
+Tailwind class contract:
+
+- `grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4`
+
+## Scope
+
+Apply the same breakpoint rule to:
+
+- Main card list containers on list pages
+- Loading/skeleton card grids for the same pages
+- Empty-state recovery grids if cards are still rendered
+
+Do **not** apply this rule to:
+
+- Table/list row layouts (`space-y-*`, table rows)
+- Detail pages and dashboard metric tiles
+- Wizards/forms where card counts are intentionally different
+
+## Consistency requirements
+
+- Keep gap spacing consistent with page design (`gap-4` or `gap-6`).
+- Avoid mixing `xl:*` overrides that conflict with the 4-card `lg+` requirement.
+- When refactoring existing pages, update both runtime grid and skeleton grid together.
+
+## Verification
+
+For touched list pages, verify card counts at these widths:
+
+- `<640px`: 1 card
+- `>=640px`: 2 cards
+- `>=768px`: 3 cards
+- `>=1024px`: 4 cards
+
+Run frontend checks after changes:
+
+- `cd front-end`
+- `npm run type-check`
+- `npm run lint`

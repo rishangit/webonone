@@ -48,6 +48,14 @@ interface ProductServiceSelectionDialogProps {
   onSelectService: (service: ServiceSelectionItem) => void;
   formatCurrency: (amount: number) => string;
   initialType?: "products" | "services";
+  /** When `productsOnly`, hides the product/service switch and only lists products (e.g. service wizard). */
+  selectionMode?: "both" | "productsOnly";
+  /** Product ids to hide from the grid (already linked elsewhere). */
+  excludeProductIds?: string[];
+  /** Override default dialog title (billing copy). */
+  title?: string;
+  /** Override default description. */
+  description?: string;
 }
 
 const ITEMS_PER_PAGE = 24;
@@ -67,8 +75,13 @@ export function ProductServiceSelectionDialog({
   onSelectService,
   formatCurrency,
   initialType = "products",
+  selectionMode = "both",
+  excludeProductIds = [],
+  title: titleProp,
+  description: descriptionProp,
 }: ProductServiceSelectionDialogProps) {
-  const [searchType, setSearchType] = useState<"products" | "services">(initialType);
+  const productsOnly = selectionMode === "productsOnly";
+  const [searchType, setSearchType] = useState<"products" | "services">(productsOnly ? "products" : initialType);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -78,7 +91,7 @@ export function ProductServiceSelectionDialog({
 
   useEffect(() => {
     if (!open) {
-      setSearchType(initialType);
+      setSearchType(productsOnly ? "products" : initialType);
       setSearchTerm("");
       setDebouncedSearchTerm("");
       setCurrentPage(1);
@@ -90,9 +103,9 @@ export function ProductServiceSelectionDialog({
       return;
     }
 
-    setSearchType(initialType);
+    setSearchType(productsOnly ? "products" : initialType);
     setCurrentPage(1);
-  }, [open, initialType]);
+  }, [open, initialType, productsOnly]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -106,17 +119,20 @@ export function ProductServiceSelectionDialog({
     };
   }, []);
 
-  const filteredProducts = useMemo(() => {
-    const query = debouncedSearchTerm.trim().toLowerCase();
-    if (!query) return products;
+  const excluded = useMemo(() => new Set(excludeProductIds), [excludeProductIds]);
 
-    return products.filter((product) => {
+  const filteredProducts = useMemo(() => {
+    const notExcluded = products.filter((p) => !excluded.has(p.id));
+    const query = debouncedSearchTerm.trim().toLowerCase();
+    if (!query) return notExcluded;
+
+    return notExcluded.filter((product) => {
       return (
         product.name.toLowerCase().includes(query) ||
         product.description.toLowerCase().includes(query)
       );
     });
-  }, [products, debouncedSearchTerm]);
+  }, [products, debouncedSearchTerm, excluded]);
 
   const filteredServices = useMemo(() => {
     const query = debouncedSearchTerm.trim().toLowerCase();
@@ -161,12 +177,16 @@ export function ProductServiceSelectionDialog({
     }
   }, [loadingMore, isInitialLoading, hasMore, handleLoadMore]);
 
+  const dialogTitle = titleProp ?? "Add Items to Bill";
+  const dialogDescription =
+    descriptionProp ?? "Search and add products or services to the appointment bill";
+
   return (
     <CustomDialog
       open={open}
       onOpenChange={onOpenChange}
-      title="Add Items to Bill"
-      description="Search and add products or services to the appointment bill"
+      title={dialogTitle}
+      description={dialogDescription}
       icon={<Search className="w-5 h-5" />}
       sizeWidth="medium"
       sizeHeight="large"
@@ -189,18 +209,20 @@ export function ProductServiceSelectionDialog({
             onChange={setSearchTerm}
             onDebouncedChange={setDebouncedSearchTerm}
             debounceDelay={300}
-            placeholder={`Search ${searchType}...`}
+            placeholder={productsOnly ? "Search products…" : `Search ${searchType}...`}
             className="flex-1"
           />
-          <Select value={searchType} onValueChange={(value: "products" | "services") => setSearchType(value)}>
-            <SelectTrigger className="w-36 bg-[var(--glass-bg)] border-[var(--glass-border)]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="products">Products</SelectItem>
-              <SelectItem value="services">Services</SelectItem>
-            </SelectContent>
-          </Select>
+          {!productsOnly && (
+            <Select value={searchType} onValueChange={(value: "products" | "services") => setSearchType(value)}>
+              <SelectTrigger className="w-36 bg-[var(--glass-bg)] border-[var(--glass-border)]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="products">Products</SelectItem>
+                <SelectItem value="services">Services</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
         </div>
 
         <div

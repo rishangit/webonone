@@ -13,7 +13,7 @@ import {
 } from "@/features/products/store";
 import { tagsReducer } from "@/features/tags/store";
 import { spacesReducer } from "@/features/spaces/store";
-import { servicesReducer } from "@/features/services/store";
+import { servicesReducer, systemServicesReducer } from "@/features/services/store";
 import { staffReducer } from "@/features/staff/store";
 import { appointmentsReducer, appointmentHistoryReducer } from "@/features/appointments/store";
 import {
@@ -41,6 +41,7 @@ export const store = configureStore({
     tags: tagsReducer,
     spaces: spacesReducer,
     services: servicesReducer,
+    systemServices: systemServicesReducer,
     staff: staffReducer,
     appointments: appointmentsReducer,
     appointmentHistory: appointmentHistoryReducer,

@@ -25,7 +25,7 @@ import {
   deleteTagEpic,
 } from "@/features/tags/store";
 import { spacesEpics } from "@/features/spaces/store";
-import { servicesEpics } from "@/features/services/store";
+import { servicesEpics, systemServicesEpics } from "@/features/services/store";
 import { staffEpics } from "@/features/staff/store";
 import {
   appointmentsEpics,
@@ -67,6 +67,7 @@ export const rootEpic = combineEpics(
   deleteTagEpic,
   ...spacesEpics,
   ...servicesEpics,
+  ...systemServicesEpics,
   ...staffEpics,
   ...appointmentsEpics,
   fetchAppointmentHistoryEpic,

@@ -14,23 +14,29 @@ export const UserRoleNames = {
   [UserRole.USER]: "User",
 } as const;
 
-// Helper function to map string role to UserRole enum
-export const getRoleFromString = (role: string | number | UserRole): UserRole | null => {
+const normalizeRole = (role: string | number | UserRole): UserRole | null => {
   if (typeof role === "number") {
     return role as UserRole;
   }
 
-  const roleStr = String(role).toLowerCase();
-  if (roleStr === "super admin" || roleStr === "system admin" || roleStr === "0") {
+  const roleStr = String(role).trim().toLowerCase();
+  const normalizedRole = roleStr.replace(/[_-]+/g, " ");
+  if (
+    normalizedRole === "super admin" ||
+    normalizedRole === "system admin" ||
+    roleStr === "super_admin" ||
+    roleStr === "system_admin" ||
+    roleStr === "0"
+  ) {
     return UserRole.SYSTEM_ADMIN;
   }
-  if (roleStr === "company owner" || roleStr === "1") {
+  if (normalizedRole === "company owner" || roleStr === "company_owner" || roleStr === "1") {
     return UserRole.COMPANY_OWNER;
   }
-  if (roleStr === "staff member" || roleStr === "staff" || roleStr === "2") {
+  if (normalizedRole === "staff member" || normalizedRole === "staff" || roleStr === "staff_member" || roleStr === "2") {
     return UserRole.STAFF_MEMBER;
   }
-  if (roleStr === "user" || roleStr === "3") {
+  if (normalizedRole === "user" || roleStr === "3") {
     return UserRole.USER;
   }
 
@@ -40,7 +46,7 @@ export const getRoleFromString = (role: string | number | UserRole): UserRole | 
 // Helper function to check if role matches enum
 export const isRole = (role: string | number | UserRole | undefined, targetRole: UserRole): boolean => {
   if (role === undefined) return false;
-  const normalizedRole = getRoleFromString(role);
+  const normalizedRole = normalizeRole(role);
   return normalizedRole === targetRole;
 };
 

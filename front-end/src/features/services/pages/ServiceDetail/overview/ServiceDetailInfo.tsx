@@ -3,22 +3,38 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Service } from "@/features/services/services";
 import { Currency } from "@/shared/services/currencies";
+import type { CompanyProduct } from "@/features/products/services/productApi";
+import { getCompanyProductDefaultUnitPrice } from "@/features/services/utils/serviceProductPricing";
 
 interface ServiceDetailInfoProps {
   service: Service;
   companyCurrency: Currency | null;
   formatCurrency: (amount: number) => string;
   formatDuration: (minutes: number) => string;
+  companyProducts?: CompanyProduct[];
+  showProductsPricingBreakdown?: boolean;
   bookAppointmentTrigger?: React.ReactNode;
 }
 
 export const ServiceDetailInfo = ({
   service,
-  companyCurrency,
+  companyCurrency: _companyCurrency,
   formatCurrency,
   formatDuration,
+  companyProducts = [],
+  showProductsPricingBreakdown = false,
   bookAppointmentTrigger,
 }: ServiceDetailInfoProps) => {
+  const productsSubtotal = (service.defaultProducts || []).reduce((sum, row) => {
+    const product = companyProducts.find((item) => item.id === row.companyProductId);
+    const quantity = Math.max(1, Number(row.quantity) || 1);
+    const unitPrice = product ? getCompanyProductDefaultUnitPrice(product) : 0;
+    const discount = Math.min(100, Math.max(0, Number(row.discount) || 0));
+    const lineTotal = quantity * unitPrice * (1 - discount / 100);
+    return sum + lineTotal;
+  }, 0);
+  const serviceTotal = productsSubtotal + (Number(service.price) || 0);
+
   return (
     <Card className="p-6 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] w-full">
       <div className="space-y-4 w-full">
@@ -42,21 +58,6 @@ export const ServiceDetailInfo = ({
           </div>
         </div>
 
-        {(service.category || service.subcategory) && (
-          <div className="flex flex-wrap gap-2">
-            {service.category && (
-              <Badge variant="outline" className="bg-[var(--accent-bg)] text-[var(--accent-text)] border-[var(--accent-border)]">
-                {service.category}
-              </Badge>
-            )}
-            {service.subcategory && (
-              <Badge variant="outline" className="bg-[var(--accent-bg)] text-[var(--accent-text)] border-[var(--accent-border)]">
-                {service.subcategory}
-              </Badge>
-            )}
-          </div>
-        )}
-
         {service.tags && service.tags.length > 0 && (
           <div className="flex flex-wrap gap-2">
             <TagIcon className="w-4 h-4 text-muted-foreground mt-1 flex-shrink-0" />
@@ -69,6 +70,23 @@ export const ServiceDetailInfo = ({
                 {typeof tag === 'string' ? tag : tag.name}
               </Badge>
             ))}
+          </div>
+        )}
+
+        {showProductsPricingBreakdown && (
+          <div className="rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg)] p-4 space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Products subtotal</span>
+              <span className="font-medium text-foreground">{formatCurrency(productsSubtotal)}</span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Service price</span>
+              <span className="font-medium text-foreground">{formatCurrency(service.price)}</span>
+            </div>
+            <div className="border-t border-[var(--glass-border)] pt-2 flex items-center justify-between">
+              <span className="text-sm font-semibold text-foreground">Service total</span>
+              <span className="text-base font-bold text-[var(--accent-text)]">{formatCurrency(serviceTotal)}</span>
+            </div>
           </div>
         )}
 

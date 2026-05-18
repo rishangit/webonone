@@ -19,9 +19,18 @@ export interface Tag {
   isActive?: boolean;
 }
 
+export interface ServiceDefaultProduct {
+  companyProductId: string;
+  quantity: number;
+  /** Optional row discount % (0–100). UI state on the wizard; may be dropped at save time per backend. */
+  discount?: number;
+}
+
 export interface Service {
   id: string;
   companyId: string;
+  companyName?: string;
+  systemServiceId?: string;
   name: string;
   description?: string;
   duration: number;
@@ -31,7 +40,7 @@ export interface Service {
   categoryId?: string;
   subcategoryId?: string;
   status: "Active" | "Inactive" | "Draft";
-  provider: {
+  provider?: {
     name: string;
     avatar: string;
     staffId?: string;
@@ -42,11 +51,20 @@ export interface Service {
   };
   tags: (string | Tag)[];
   image: string;
+  images?: string[];
+  defaultProducts?: ServiceDefaultProduct[];
+  customizations?: {
+    name: boolean;
+    description: boolean;
+    images: boolean;
+    hasAny: boolean;
+  };
   createdAt?: string;
   updatedAt?: string;
 }
 
 export interface CreateServiceData {
+  systemServiceId?: string;
   name: string;
   description?: string;
   duration: number;
@@ -59,7 +77,8 @@ export interface CreateServiceData {
   providerName?: string;
   providerAvatar?: string;
   staffId?: string;
-  imageUrl?: string;
+  images?: string[];
+  defaultProducts?: ServiceDefaultProduct[];
   tagIds?: string[];
 }
 
@@ -77,7 +96,7 @@ class ServicesService {
   /**
    * Get all services for a company
    */
-  async getServices(companyId: string, filters?: {
+  async getServices(companyId?: string, filters?: {
     limit?: number;
     offset?: number;
     page?: number;
@@ -88,7 +107,9 @@ class ServicesService {
     console.log('[ServicesService] Fetching services for companyId:', companyId, 'filters:', filters);
     
     const params = new URLSearchParams();
-    params.append('companyId', companyId);
+    if (companyId && companyId !== 'undefined' && companyId !== 'null') {
+      params.append('companyId', companyId);
+    }
     
     if (filters) {
       if (filters.limit !== undefined) params.append('limit', String(filters.limit));
@@ -206,7 +227,6 @@ class ServicesService {
 }
 
 export const servicesService = new ServicesService();
-export type { CreateServiceData, UpdateServiceData };
 
 
 

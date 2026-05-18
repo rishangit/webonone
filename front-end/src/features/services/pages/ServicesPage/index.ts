@@ -1,2 +1,1 @@
-export { ServicesPage } from "../ServicesPage";
-export type { ServiceCardProps, ServiceViewProps } from "./types";
+export { ServicesPage } from "./ServicesPage";

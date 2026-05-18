@@ -2,12 +2,15 @@ import { ServiceDetailImage } from "./ServiceDetailImage";
 import { ServiceDetailInfo } from "./ServiceDetailInfo";
 import { Service } from "@/features/services/services";
 import { Currency } from "@/shared/services/currencies";
+import type { CompanyProduct } from "@/features/products/services/productApi";
 
 interface ServiceOverviewTabProps {
   service: Service;
   companyCurrency: Currency | null;
   formatCurrency: (amount: number) => string;
   formatDuration: (minutes: number) => string;
+  companyProducts?: CompanyProduct[];
+  showProductsPricingBreakdown?: boolean;
   bookAppointmentTrigger?: React.ReactNode;
 }
 
@@ -16,6 +19,8 @@ export const ServiceOverviewTab = ({
   companyCurrency,
   formatCurrency,
   formatDuration,
+  companyProducts = [],
+  showProductsPricingBreakdown = false,
   bookAppointmentTrigger,
 }: ServiceOverviewTabProps) => {
   return (
@@ -32,6 +37,8 @@ export const ServiceOverviewTab = ({
           companyCurrency={companyCurrency}
           formatCurrency={formatCurrency}
           formatDuration={formatDuration}
+          companyProducts={companyProducts}
+          showProductsPricingBreakdown={showProductsPricingBreakdown}
           bookAppointmentTrigger={bookAppointmentTrigger}
         />
       </div>

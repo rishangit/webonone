@@ -122,7 +122,7 @@ export function Header({ onMenuClick, onNavigate, onLogout, currentUser }: Heade
                       </p>
                       <div className="mt-1">
                         <UserRoleBadge 
-                          role={currentUser?.role} 
+                          role={currentUser?.role}
                           showIcon={true}
                         />
                       </div>

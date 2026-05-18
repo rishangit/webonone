@@ -71,9 +71,6 @@ export const ServiceCardView = ({
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1 min-w-0">
             <h3 className="text-lg font-semibold text-foreground mb-1">{service.name}</h3>
-            {service.category && (
-              <p className="text-[var(--accent-text)] text-sm">{service.category}</p>
-            )}
           </div>
         </div>
 

@@ -109,6 +109,24 @@ export function UserCard({
   const roleNamesToShow = userData.roleNames || rolesToShow.map((r: any) => {
     return UserRoleNames[r.role] || 'User';
   });
+  const resolveRoleValue = (rawRole: unknown): UserRole | undefined => {
+    if (typeof rawRole === "number" && rawRole >= UserRole.SYSTEM_ADMIN && rawRole <= UserRole.USER) {
+      return rawRole as UserRole;
+    }
+    if (typeof rawRole === "string") {
+      const roleStr = rawRole.trim().toLowerCase();
+      const normalizedRole = roleStr.replace(/[_-]+/g, " ");
+      if (normalizedRole === "super admin" || normalizedRole === "system admin" || roleStr === "0") return UserRole.SYSTEM_ADMIN;
+      if (normalizedRole === "company owner" || roleStr === "1") return UserRole.COMPANY_OWNER;
+      if (normalizedRole === "staff member" || normalizedRole === "staff" || roleStr === "2") return UserRole.STAFF_MEMBER;
+      if (normalizedRole === "user" || roleStr === "3") return UserRole.USER;
+    }
+    return undefined;
+  };
+  const resolvedRolesToShow = rolesToShow.map((r: any) => {
+    return resolveRoleValue(r?.role);
+  });
+  const fallbackUserRole = resolveRoleValue(userData.role) ?? UserRole.USER;
   
   // Ensure firstName and lastName are available from user object
   if (user) {
@@ -236,7 +254,7 @@ export function UserCard({
                 {roleNamesToShow.map((roleName: string, index: number) => (
                   <UserRoleBadge 
                     key={index}
-                    role={rolesToShow[index]?.role || userData.role} 
+                    role={resolvedRolesToShow[index] ?? fallbackUserRole}
                     showIcon={false}
                     iconSize="w-3 h-3"
                     className="text-sm"
@@ -380,7 +398,7 @@ export function UserCard({
           {roleNamesToShow.map((roleName: string, index: number) => (
             <UserRoleBadge 
               key={index}
-              role={rolesToShow[index]?.role || userData.role} 
+              role={resolvedRolesToShow[index] ?? fallbackUserRole}
               showIcon={false}
               iconSize="w-3 h-3"
               className="text-sm"

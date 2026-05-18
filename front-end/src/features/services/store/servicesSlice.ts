@@ -1,7 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Service, CreateServiceData, UpdateServiceData } from '@/features/services/services';
-
-import { PaginationMeta } from '@/features/services/services';
+import { Service, CreateServiceData, UpdateServiceData, PaginationMeta } from '@/features/services/services';
 
 interface ServicesState {
   services: Service[];
@@ -26,7 +24,7 @@ const servicesSlice = createSlice({
   initialState,
   reducers: {
     // Fetch services
-    fetchServicesRequest: (state, action: PayloadAction<{ companyId: string; filters?: any }>) => {
+    fetchServicesRequest: (state, _action: PayloadAction<{ companyId?: string; filters?: any }>) => {
       state.loading = true;
       state.error = null;
     },
@@ -49,7 +47,7 @@ const servicesSlice = createSlice({
     },
 
     // Fetch single service
-    fetchServiceRequest: (state, action: PayloadAction<string>) => {
+    fetchServiceRequest: (state, _action: PayloadAction<string>) => {
       state.loading = true;
       state.error = null;
     },
@@ -64,7 +62,7 @@ const servicesSlice = createSlice({
     },
 
     // Create service
-    createServiceRequest: (state, action: PayloadAction<{ companyId: string; data: CreateServiceData }>) => {
+    createServiceRequest: (state, _action: PayloadAction<{ companyId: string; data: CreateServiceData }>) => {
       state.loading = true;
       state.error = null;
     },
@@ -79,7 +77,7 @@ const servicesSlice = createSlice({
     },
 
     // Update service
-    updateServiceRequest: (state, action: PayloadAction<{ id: string; data: UpdateServiceData }>) => {
+    updateServiceRequest: (state, _action: PayloadAction<{ id: string; data: UpdateServiceData }>) => {
       state.loading = true;
       state.error = null;
     },
@@ -100,7 +98,7 @@ const servicesSlice = createSlice({
     },
 
     // Delete service
-    deleteServiceRequest: (state, action: PayloadAction<string>) => {
+    deleteServiceRequest: (state, _action: PayloadAction<string>) => {
       state.loading = true;
       state.error = null;
     },
@@ -156,18 +154,4 @@ export const {
 } = servicesSlice.actions;
 
 export default servicesSlice.reducer;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

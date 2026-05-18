@@ -1,6 +1,5 @@
 import { FileText, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { BackButton } from "@/components/common/BackButton";
 import { Service } from "@/features/services/services";
@@ -11,6 +10,8 @@ interface ServiceDetailHeaderProps {
   onBack: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  /** When false, hides Delete from the actions menu (default true) */
+  showDelete?: boolean;
 }
 
 export const ServiceDetailHeader = ({
@@ -19,20 +20,8 @@ export const ServiceDetailHeader = ({
   onBack,
   onEdit,
   onDelete,
+  showDelete = true,
 }: ServiceDetailHeaderProps) => {
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Active":
-        return "bg-green-50 border-green-200 text-green-700 dark:bg-green-950 dark:border-green-800 dark:text-green-300";
-      case "Inactive":
-        return "bg-gray-50 border-gray-200 text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300";
-      case "Draft":
-        return "bg-yellow-50 border-yellow-200 text-yellow-700 dark:bg-yellow-950 dark:border-yellow-800 dark:text-yellow-300";
-      default:
-        return "bg-gray-50 border-gray-200 text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300";
-    }
-  };
-
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full">
       <div className="flex items-center gap-4 min-w-0 flex-1">
@@ -56,13 +45,15 @@ export const ServiceDetailHeader = ({
                 <Edit className="w-4 h-4 mr-2" />
                 Edit Service
               </DropdownMenuItem>
-              <DropdownMenuItem 
-                className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950"
-                onClick={onDelete}
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete Service
-              </DropdownMenuItem>
+              {showDelete && (
+                <DropdownMenuItem
+                  className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950"
+                  onClick={onDelete}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete Service
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

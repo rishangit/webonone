@@ -4,6 +4,7 @@ import { toast } from "sonner";
 
 // Types
 import type { Theme, AccentColor } from "@/shared/types";
+import { UserRole, isRole } from "@/shared/types/user";
 
 // Utils
 import { applyTheme, storage, performance } from "@/shared/utils";
@@ -55,7 +56,7 @@ import { BacklogPage } from "@/features/backlog/pages";
 import { SalesPage, SalesDetailPage } from "@/features/sales/pages";
 
 // Services
-import { ServicesPage, ServiceDetailPage } from "@/features/services/pages";
+import { ServicesPage, ServiceDetailPage, SystemServicesPage, SystemServiceDetailPage } from "@/features/services/pages";
 
 // Spaces
 import { SpacesPage, SpaceDetailPage } from "@/features/spaces/pages";
@@ -120,6 +121,7 @@ function ProtectedRouteWrapper({ children }: { children: React.ReactNode }) {
     if (path.includes('/system-product-attributes')) return 'system-product-attributes';
     if (path.includes('/units-of-measure')) return 'units-of-measure';
     if (path.includes('/system-products')) return 'system-products';
+    if (path.includes('/system-services')) return 'system-services';
     if (path.includes('/company-products')) return 'products';
     if (path.includes('/products')) return 'products';
     if (path.includes('/tags')) return 'tags';
@@ -175,6 +177,9 @@ function ProtectedRouteWrapper({ children }: { children: React.ReactNode }) {
         break;
       case 'services':
         navigate('/system/services');
+        break;
+      case 'system-services':
+        navigate('/system/system-services');
         break;
       case 'settings':
         navigate('/system/settings');
@@ -615,6 +620,46 @@ function ServiceDetailPageWrapper() {
       onBack={() => navigate('/system/services')}
     />
   );
+}
+
+function SystemServiceDetailPageWrapper() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+
+  if (!id) {
+    return (
+      <div className="flex-1 p-4 lg:p-8 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-foreground mb-2">System Service Not Found</h3>
+          <p className="text-muted-foreground mb-4">Invalid system service ID</p>
+          <button
+            onClick={() => navigate("/system/system-services")}
+            className="px-4 py-2 bg-[var(--accent-primary)] text-[var(--accent-button-text)] rounded-lg hover:bg-[var(--accent-primary-hover)]"
+          >
+            Back to System Services
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <SystemServiceDetailPage
+      serviceId={id}
+      onBack={() => navigate("/system/system-services")}
+    />
+  );
+}
+
+function SystemServicesPageWrapper() {
+  const { user } = useAppSelector((state) => state.auth);
+  const isSystemAdmin = isRole(user?.role, UserRole.SYSTEM_ADMIN);
+
+  if (!isSystemAdmin) {
+    return <Navigate to="/system/services" replace />;
+  }
+
+  return <SystemServicesPage />;
 }
 
 // Company ServiceDetailPage Wrapper Component
@@ -1186,6 +1231,32 @@ function App() {
               isAuthenticated ? (
                 <ProtectedRouteWrapper>
                   <SalesDetailPageWrapper />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+          
+          <Route 
+            path="/system/system-services" 
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <SystemServicesPageWrapper />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+
+          <Route
+            path="/system/system-services/:id"
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <SystemServiceDetailPageWrapper />
                 </ProtectedRouteWrapper>
               ) : (
                 <Navigate to="/system/login" replace />

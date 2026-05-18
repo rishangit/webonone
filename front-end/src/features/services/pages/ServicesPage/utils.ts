@@ -1,6 +1,6 @@
 import { Service as ServiceType } from "@/features/services/services";
 import { Currency } from "@/shared/services/currencies";
-import { formatAvatarUrl } from "../../../utils";
+import { formatAvatarUrl } from "@/shared/utils";
 
 export const formatDuration = (minutes: number): string => {
   if (minutes >= 60) {
@@ -47,11 +47,12 @@ export const formatPrice = (price: number, companyCurrency: Currency | null): st
 };
 
 export const getImageUrl = (service: ServiceType): string => {
-  if (service.image) {
-    if (service.image.startsWith('companies/') || service.image.startsWith('/uploads/')) {
-      return formatAvatarUrl(service.image);
+  const primary = service.images?.[0] || service.image;
+  if (primary) {
+    if (primary.startsWith('companies/') || primary.startsWith('/uploads/')) {
+      return formatAvatarUrl(primary);
     }
-    return service.image;
+    return primary;
   }
   return "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=300&h=200&fit=crop";
 };

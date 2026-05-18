@@ -55,9 +55,6 @@ export const ServiceListView = ({
           <div className="flex items-start justify-between mb-2">
             <div className="flex-1 min-w-0">
               <h3 className="text-lg font-semibold text-foreground mb-1">{service.name}</h3>
-              {service.category && (
-                <p className="text-[var(--accent-text)] text-sm mb-2">{service.category}</p>
-              )}
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
               <Badge className="bg-[var(--accent-bg)] text-[var(--accent-text)] border border-[var(--accent-border)] px-3 py-1 font-semibold">
