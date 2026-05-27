@@ -91,7 +91,7 @@ export const StaffStep = ({
               
               <div className="p-3 space-y-3">
                 <div className="flex items-center gap-3">
-                  <Avatar className="w-10 h-10 border-2 border-[var(--glass-border)]">
+                  <Avatar className="w-14 h-14">
                     <AvatarImage src={formatAvatarUrl(staffMember.avatar, staffMember.firstName, staffMember.lastName)} alt={`${staffMember.firstName || ''} ${staffMember.lastName || ''}`} />
                     <AvatarFallback className="text-xs">
                       {(staffMember.firstName?.[0] || '')}{(staffMember.lastName?.[0] || '')}

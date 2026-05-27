@@ -1,7 +1,13 @@
-import { MoreVertical, CheckCircle, XCircle, Eye, FileText, RotateCcw, Play, Check, Receipt, Trash2 } from "lucide-react";
+import { CheckCircle, XCircle, Eye, FileText, RotateCcw, Play, Check, Receipt, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CardKebabTrigger, type CardKebabTriggerVariant } from "@/components/common/CardKebabTrigger";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  CARD_LIST_AVATAR_CLASS,
+  CARD_LIST_AVATAR_FALLBACK_CLASS,
+} from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AppointmentStatus } from "@/features/appointments/types";
 
@@ -25,6 +31,11 @@ interface AppointmentCardHeaderProps {
   onViewDetails?: () => void;
   onDelete?: () => void;
   isCompact?: boolean;
+  /** When false, list layout omits inline menu (menu is in card top-right). */
+  showMenu?: boolean;
+  /** When false, portrait is shown in the list media column only. */
+  showPortrait?: boolean;
+  kebabVariant?: CardKebabTriggerVariant;
 }
 
 export const AppointmentCardHeader = ({
@@ -46,21 +57,17 @@ export const AppointmentCardHeader = ({
   onViewBill,
   onViewDetails,
   onDelete,
-  isCompact = false
+  isCompact = false,
+  showMenu = true,
+  showPortrait = true,
+  kebabVariant = "overlay",
 }: AppointmentCardHeaderProps) => {
   // Compact mode: only show dropdown menu button (for top-right corner)
   if (isCompact) {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-8 w-8 bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm border border-white/20" 
-            onClick={(e) => e.stopPropagation()}
-          >
-            <MoreVertical className="w-4 h-4" />
-          </Button>
+          <CardKebabTrigger variant={kebabVariant} />
         </DropdownMenuTrigger>
         <DropdownMenuContent className="bg-popover border-border" align="end" onClick={(e) => e.stopPropagation()}>
           {isStatus(status, AppointmentStatus.PENDING) && (
@@ -160,12 +167,39 @@ export const AppointmentCardHeader = ({
     );
   }
 
+  if (!showMenu) {
+    return (
+      <div className={showPortrait ? "mb-3 flex items-start gap-3" : "mb-3"}>
+        {showPortrait && (
+          <Avatar className={`${CARD_LIST_AVATAR_CLASS} flex-shrink-0`}>
+            <AvatarImage src={patientImage} />
+            <AvatarFallback
+              className={`bg-[var(--accent-bg)] text-[var(--accent-text)] ${CARD_LIST_AVATAR_FALLBACK_CLASS}`}
+            >
+              {patientName.split(" ").map((n) => n[0]).join("")}
+            </AvatarFallback>
+          </Avatar>
+        )}
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate text-lg font-semibold text-foreground">{patientName}</h3>
+          {hasServiceEntity && (
+            <p className="truncate text-sm text-muted-foreground">{service || type}</p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   // Full mode: show avatar, name, and dropdown (for list view)
   return (
     <div className="flex items-start gap-3 mb-3">
-      <Avatar className="w-12 h-12 sm:w-16 sm:h-16 ring-2 ring-[var(--accent-border)] flex-shrink-0">
+      <Avatar className={`${CARD_LIST_AVATAR_CLASS} flex-shrink-0`}>
         <AvatarImage src={patientImage} />
-        <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)]">{patientName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+        <AvatarFallback
+          className={`bg-[var(--accent-bg)] text-[var(--accent-text)] ${CARD_LIST_AVATAR_FALLBACK_CLASS}`}
+        >
+          {patientName.split(" ").map((n) => n[0]).join("")}
+        </AvatarFallback>
       </Avatar>
       <div className="flex-1 min-w-0 mr-2">
         <h3 className="font-semibold text-foreground text-lg truncate">{patientName}</h3>
@@ -176,9 +210,7 @@ export const AppointmentCardHeader = ({
       <div className="flex flex-col items-end gap-1 flex-shrink-0">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground hover:bg-accent h-8 w-8" onClick={(e) => e.stopPropagation()}>
-              <MoreVertical className="w-4 h-4" />
-            </Button>
+            <CardKebabTrigger variant="default" />
           </DropdownMenuTrigger>
           <DropdownMenuContent className="bg-popover border-border" align="end" onClick={(e) => e.stopPropagation()}>
             {isStatus(status, AppointmentStatus.PENDING) && (

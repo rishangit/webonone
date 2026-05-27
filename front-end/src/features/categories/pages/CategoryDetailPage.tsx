@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, Layers } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Layers } from "lucide-react";
+import { BackButton } from "@/components/common/BackButton";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/common/EmptyState";
@@ -35,16 +35,7 @@ export const CategoryDetailPage = ({ categoryId, onBack }: CategoryDetailPagePro
   return (
     <div className="space-y-6 p-6">
       <div className="flex flex-wrap items-center gap-3">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="h-9 border-[var(--glass-border)]"
-          onClick={onBack}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back
-        </Button>
+        <BackButton onClick={onBack} label="Back" />
         {loading ? (
           <div className="h-8 w-48 animate-pulse rounded-md bg-muted" />
         ) : category ? (

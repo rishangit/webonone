@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
+import { CardGridKebabSlot } from "@/components/common/CardGridKebabSlot";
+import { LIST_CARD_GRID_SHELL } from "@/components/common/CardKebabTrigger";
 import { SystemProductViewProps } from "./types";
 import { ProductImage } from "./components/ProductImage";
 import { ProductStatus } from "./components/ProductStatus";
@@ -21,10 +23,7 @@ export const SystemProductCardView = ({
   };
 
   return (
-    <Card 
-      className="overflow-hidden backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-300 hover:shadow-lg hover:shadow-[var(--glass-shadow)] group cursor-pointer"
-      onClick={handleCardClick}
-    >
+    <Card className={LIST_CARD_GRID_SHELL} onClick={handleCardClick}>
       <div className="relative">
         <ProductImage 
           imageUrl={product.imageUrl} 
@@ -38,15 +37,16 @@ export const SystemProductCardView = ({
             variant="grid"
           />
         </div>
-        <div className="absolute top-3 right-3">
+        <CardGridKebabSlot>
           <ProductActions
             product={product}
             onViewProduct={onViewProduct}
             onEdit={onEdit}
             onDelete={onDelete}
             onToggleStatus={onToggleStatus}
+            triggerVariant="overlay"
           />
-        </div>
+        </CardGridKebabSlot>
       </div>
       
       <div className="p-6">

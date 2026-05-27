@@ -104,7 +104,7 @@ export function Header({ onMenuClick, onNavigate, onLogout, currentUser }: Heade
                 {/* User Info Section */}
                 <div className="p-4 border-b border-border bg-popover">
                   <div className="flex items-center gap-3">
-                    <Avatar className="h-12 w-12">
+                    <Avatar className="h-14 w-14">
                       <AvatarImage 
                         src={formatAvatarUrl(currentUser?.avatar, currentUser?.firstName, currentUser?.lastName)} 
                         alt="Profile"

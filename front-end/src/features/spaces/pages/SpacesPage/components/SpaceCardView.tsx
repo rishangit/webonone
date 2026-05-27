@@ -1,4 +1,6 @@
 import { Card } from "@/components/ui/card";
+import { CardGridKebabSlot } from "@/components/common/CardGridKebabSlot";
+import { LIST_CARD_GRID_SHELL } from "@/components/common/CardKebabTrigger";
 import { SpaceViewProps } from "../types";
 import { SpaceImage } from "./SpaceImage";
 import { SpaceStatus } from "./SpaceStatus";
@@ -8,7 +10,7 @@ import { SpaceInfo } from "./SpaceInfo";
 export const SpaceCardView = ({ space, onView, onEdit, onDelete }: SpaceViewProps) => {
   return (
     <Card 
-      className="overflow-hidden backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-300 hover:shadow-lg hover:shadow-[var(--glass-shadow)] group cursor-pointer"
+      className={LIST_CARD_GRID_SHELL}
       onClick={(e) => {
         // Don't navigate if clicking on dropdown or button
         if ((e.target as HTMLElement).closest('button, [role="menuitem"]')) {
@@ -20,9 +22,9 @@ export const SpaceCardView = ({ space, onView, onEdit, onDelete }: SpaceViewProp
       <div className="relative">
         <SpaceImage imageUrl={space.imageUrl} spaceName={space.name} variant="grid" />
         <SpaceStatus status={space.status} variant="grid" />
-        <div className="absolute top-3 right-3">
+        <CardGridKebabSlot>
           <SpaceActions space={space} onView={onView} onEdit={onEdit} onDelete={onDelete} />
-        </div>
+        </CardGridKebabSlot>
       </div>
       
       <div className="p-6">

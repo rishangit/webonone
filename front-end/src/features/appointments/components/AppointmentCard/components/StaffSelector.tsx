@@ -1,6 +1,12 @@
 import { Users } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  COMPACT_AVATAR_CLASS,
+  COMPACT_AVATAR_FALLBACK_CLASS,
+} from "@/components/ui/avatar";
 
 interface StaffSelectorProps {
   staff?: {
@@ -28,7 +34,7 @@ export const StaffSelector = ({
   return (
     <div className="w-full" onClick={(e) => e.stopPropagation()}>
       {showLabel && (
-        <div className="flex items-center gap-2 mb-2">
+        <div className="flex items-center gap-2 mb-1">
           <Users className="w-4 h-4 text-[var(--accent-text)] flex-shrink-0" />
           <span className="text-sm text-muted-foreground">
             {staff ? 'Assigned Staff:' : 'Preferred Staff:'}
@@ -49,11 +55,13 @@ export const StaffSelector = ({
           }
         }}
       >
-        <SelectTrigger className="w-full h-auto py-2 !bg-transparent border-none shadow-none hover:!bg-transparent focus-visible:ring-0">
-          <div className="flex items-center gap-3 w-full">
-            <Avatar className="w-10 h-10 flex-shrink-0">
+        <SelectTrigger className="w-full h-auto py-1 !bg-transparent border-none shadow-none hover:!bg-transparent focus-visible:ring-0">
+          <div className="flex items-center gap-2 w-full">
+            <Avatar className={`${COMPACT_AVATAR_CLASS} flex-shrink-0`}>
               <AvatarImage src={availableStaff.find(s => (s.id || s.name) === currentStaffId)?.image} />
-              <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)] text-sm">
+              <AvatarFallback
+                className={`bg-[var(--accent-bg)] text-[var(--accent-text)] ${COMPACT_AVATAR_FALLBACK_CLASS}`}
+              >
                 {availableStaff.find(s => (s.id || s.name) === currentStaffId)?.name.split(' ').map(n => n[0]).join('') || ''}
               </AvatarFallback>
             </Avatar>
@@ -78,10 +86,12 @@ export const StaffSelector = ({
               value={staffMember.id || staffMember.name}
               className="cursor-pointer"
             >
-              <div className="flex items-center gap-3 py-1">
-                <Avatar className="w-8 h-8 flex-shrink-0">
+              <div className="flex items-center gap-2 py-1">
+                <Avatar className={`${COMPACT_AVATAR_CLASS} flex-shrink-0`}>
                   <AvatarImage src={staffMember.image} />
-                  <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)] text-xs">
+                  <AvatarFallback
+                    className={`bg-[var(--accent-bg)] text-[var(--accent-text)] ${COMPACT_AVATAR_FALLBACK_CLASS}`}
+                  >
                     {staffMember.name.split(' ').map(n => n[0]).join('')}
                   </AvatarFallback>
                 </Avatar>

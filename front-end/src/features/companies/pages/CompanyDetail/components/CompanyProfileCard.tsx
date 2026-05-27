@@ -20,7 +20,7 @@ export const CompanyProfileCard = ({ company }: CompanyProfileCardProps) => {
         <div className="space-y-2">
           <Label className="text-foreground">Company Logo</Label>
           <div className="flex items-center gap-4">
-            <Avatar className="w-20 h-20 ring-2 ring-[var(--accent-border)]">
+            <Avatar className="w-20 h-20">
               <AvatarImage 
                 src={company.logo ? formatAvatarUrl(company.logo) : undefined} 
                 alt="Company Logo" 

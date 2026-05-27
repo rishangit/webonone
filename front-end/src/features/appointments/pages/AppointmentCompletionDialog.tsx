@@ -173,7 +173,7 @@ export function AppointmentCompletionDialog({
           {/* Appointment Details */}
           <div className="p-4 rounded-lg bg-[var(--glass-bg)] border border-[var(--glass-border)]">
             <div className="flex items-center gap-4">
-              <Avatar className="w-12 h-12">
+              <Avatar className="w-14 h-14">
                 <AvatarImage src={appointment.patientImage} alt={appointment.patientName} />
                 <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)]">
                   {appointment.patientName.split(' ').map(n => n[0]).join('')}

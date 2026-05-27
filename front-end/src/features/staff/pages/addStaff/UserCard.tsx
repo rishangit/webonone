@@ -41,7 +41,7 @@ export const UserCard = ({ user, isSelected, onSelect }: UserCardProps) => {
       onClick={() => onSelect(user)}
     >
       <div className="flex items-center gap-3">
-        <Avatar className="w-10 h-10 ring-2 ring-[var(--glass-border)] flex-shrink-0">
+        <Avatar className="w-14 h-14 flex-shrink-0">
           <AvatarImage 
             src={formatAvatarUrl(user.avatar, user.firstName, user.lastName)} 
             alt={user.name}

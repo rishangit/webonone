@@ -38,6 +38,7 @@ export interface TagActionsProps {
   onEdit: (tag: Tag) => void;
   onDelete: (tag: Tag) => void;
   onToggleStatus: (tag: Tag) => void;
+  triggerVariant?: "overlay" | "default";
 }
 
 export interface TagInfoProps {

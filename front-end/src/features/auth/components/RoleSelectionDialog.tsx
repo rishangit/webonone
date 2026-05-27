@@ -126,7 +126,7 @@ export const RoleSelectionDialog = ({ open, roles, onRoleSelect, onCancel, isLoa
               <div className="flex items-start gap-3">
                 {/* Company logo or role icon */}
                 {hasCompanyLogo ? (
-                  <Avatar className="w-10 h-10 flex-shrink-0 ring-2 ring-[var(--accent-border)]">
+                  <Avatar className="w-14 h-14 flex-shrink-0">
                     <AvatarImage src={formatAvatarUrl(role.companyLogo)} alt={role.companyName || "Company"} />
                     <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)]">
                       {role.companyName ? role.companyName.slice(0, 2).toUpperCase() : <Icon icon={RoleIcon} size="md" />}

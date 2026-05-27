@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Save, Pencil } from "lucide-react";
+import { Save, Pencil } from "lucide-react";
+import { BackButton } from "@/components/common/BackButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -448,14 +449,7 @@ export const ThemeFormPage = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleBack}
-              className="hover:bg-[var(--accent-bg)]"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
+            <BackButton onClick={handleBack} label="Back to Themes" />
             <div>
               <h1 className="text-2xl font-bold text-foreground">{pageTitle}</h1>
               <p className="text-sm text-muted-foreground">

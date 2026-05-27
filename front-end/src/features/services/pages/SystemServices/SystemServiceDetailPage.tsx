@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Stethoscope, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { BackButton } from "@/components/common/BackButton";
 import { Button } from "@/components/ui/button";
 import { TabSwitcher } from "@/components/ui/tab-switcher";
 import { CustomDialog } from "@/components/ui/custom-dialog";
@@ -224,9 +225,7 @@ export const SystemServiceDetailPage = ({ serviceId, onBack }: SystemServiceDeta
           <Stethoscope className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
           <h3 className="text-lg font-semibold text-foreground mb-2">System service not found</h3>
           <p className="text-muted-foreground mb-4">The system service you are looking for does not exist.</p>
-          <Button onClick={onBack} variant="outline">
-            Back to system services
-          </Button>
+          <BackButton onClick={onBack} />
         </div>
       </div>
     );

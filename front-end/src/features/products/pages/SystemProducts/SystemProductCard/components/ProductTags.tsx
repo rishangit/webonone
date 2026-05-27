@@ -3,22 +3,26 @@ import { Badge } from "@/components/ui/badge";
 import { ProductTagsProps } from "../types";
 import type { Tag as TagType } from "@/features/products/types/product.types";
 
-export const ProductTags = ({ tags, variant = "grid" }: ProductTagsProps) => {
+export const ProductTags = ({ tags, variant = "grid", maxVisible }: ProductTagsProps & { maxVisible?: number }) => {
+  const limit = maxVisible ?? (variant === "list" ? 4 : 3);
+
   if (!tags || tags.length === 0) {
+    if (variant === "list") {
+      return null;
+    }
     return (
-      <div className={`flex items-center gap-2 text-xs text-muted-foreground ${variant === "list" ? "" : "mb-4"}`}>
-        <Tag className="w-3 h-3" />
-        <span>{variant === "list" ? "No tags" : "No tags assigned"}</span>
+      <div className="mb-4 flex items-center gap-2 text-xs text-muted-foreground">
+        <Tag className="h-3 w-3" />
+        <span>No tags assigned</span>
       </div>
     );
   }
 
-  const maxTags = variant === "list" ? 4 : 3;
-  const remainingCount = tags.length > maxTags ? tags.length - maxTags : 0;
+  const remainingCount = tags.length > limit ? tags.length - limit : 0;
 
   return (
-    <div className={`flex flex-wrap gap-1 ${variant === "list" ? "" : "mb-4"}`}>
-      {tags.slice(0, maxTags).map((tag, index) => {
+    <>
+      {tags.slice(0, limit).map((tag, index) => {
         const tagObj = typeof tag === 'string' 
           ? { id: index, name: tag, color: '#3B82F6', icon: undefined }
           : tag as TagType;
@@ -43,6 +47,6 @@ export const ProductTags = ({ tags, variant = "grid" }: ProductTagsProps) => {
           {variant === "list" ? `+${remainingCount} more` : `+${remainingCount}`}
         </Badge>
       )}
-    </div>
+    </>
   );
 };

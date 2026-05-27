@@ -254,7 +254,7 @@ export const SalesDetailPage = ({ saleId, onBack }: SalesDetailPageProps) => {
         <div className="lg:col-span-2 space-y-6">
           <Card className="p-6 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]">
             <div className="flex items-start gap-4">
-              <Avatar className="w-16 h-16 ring-2 ring-[var(--accent-border)]">
+              <Avatar className="w-14 h-14">
                 <AvatarImage src={sale.userAvatar ? formatAvatarUrl(sale.userAvatar) : undefined} />
                 <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)]">
                   {customerName.split(' ').map(n => n[0]).join('')}

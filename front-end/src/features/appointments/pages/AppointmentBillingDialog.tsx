@@ -661,7 +661,7 @@ export function AppointmentBillingDialog({
             <Card className="p-4 bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-sm">
               <div className={`${isMobile ? 'flex flex-col gap-3' : 'flex items-center gap-4'}`}>
                 <div className={`${isMobile ? 'flex items-center gap-3' : 'contents'}`}>
-                  <Avatar className="w-12 h-12">
+                  <Avatar className="w-14 h-14">
                     <AvatarImage src={appointment.clientAvatar} alt={appointment.clientName} />
                     <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)]">
                       {appointment.clientName.split(' ').map(n => n[0]).join('')}

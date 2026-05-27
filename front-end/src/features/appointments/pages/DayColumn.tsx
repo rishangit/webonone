@@ -415,7 +415,7 @@ export const DayColumn = ({ date, appointments, isToday, isSelected, onDateClick
               >
                 <div className="flex items-center gap-2 min-w-0 flex-1 px-2 py-1">
                   {/* User Avatar */}
-                  <Avatar className="w-6 h-6 ring-2 ring-[var(--accent-border)] shadow-md flex-shrink-0">
+                  <Avatar className="w-8 h-8 shadow-md flex-shrink-0">
                     <AvatarImage src={position.appointment.patientImage} />
                     <AvatarFallback className="bg-[var(--accent-primary)] text-[var(--accent-button-text)] text-xs font-medium">
                       {position.appointment.patientName.split(' ').map(n => n[0]).join('')}

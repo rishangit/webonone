@@ -14,6 +14,7 @@ import { Pagination } from "@/components/common/Pagination";
 import { EmptyState } from "@/components/common/EmptyState";
 import { RightPanel } from "@/components/common/RightPanel";
 import { cn } from "@/components/ui/utils";
+import { LIST_CARD_LIST_MEDIA_WIDTH_CLASS } from "@/components/common/CardKebabTrigger";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 
 interface Tag {
@@ -319,8 +320,8 @@ export function CompaniesPage({ onViewCompany }: CompaniesPageProps) {
               {[...Array(6)].map((_, index) => (
                 <Card key={index} className="p-6 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                   <div className="flex items-start gap-4">
-                    {/* Avatar */}
-                    <div className="h-20 w-20 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                    {/* Media column */}
+                    <div className={`${LIST_CARD_LIST_MEDIA_WIDTH_CLASS} min-h-48 bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0`} />
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between">
@@ -446,12 +447,11 @@ export function CompaniesPage({ onViewCompany }: CompaniesPageProps) {
             {viewMode === "list" ? (
               <div className="space-y-4">
                 {displayedCompanies.map((company) => (
-                  <Card key={company.id} className="p-6 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
-                    <CompanyListView
-                      company={company}
-                      onViewCompany={onViewCompany}
-                    />
-                  </Card>
+                  <CompanyListView
+                    key={company.id}
+                    company={company}
+                    onViewCompany={onViewCompany}
+                  />
                 ))}
               </div>
             ) : (

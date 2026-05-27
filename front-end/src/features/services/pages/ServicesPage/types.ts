@@ -47,6 +47,7 @@ export interface ServiceActionsProps {
   onDuplicate: (service: ServiceType) => void;
   onArchive: (service: ServiceType) => void;
   hideActions?: boolean; // Hide actions menu for regular users
+  triggerVariant?: "overlay" | "default";
 }
 
 export interface ServiceTagsProps {

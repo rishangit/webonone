@@ -414,7 +414,7 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
                   />
                 ) : (
                   <div className="flex items-center gap-4">
-                <Avatar className="w-20 h-20 ring-2 ring-[var(--accent-border)]">
+                <Avatar className="w-20 h-20">
                       <AvatarImage 
                         src={companyInfo.logo ? formatAvatarUrl(companyInfo.logo) : undefined} 
                         alt="Company Logo" 

@@ -1,6 +1,6 @@
 import { UserPlus, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { LIST_CARD_LIST_MEDIA_WIDTH_CLASS } from "@/components/common/CardKebabTrigger";
 import { Pagination } from "@/components/common/Pagination";
 import { EmptyState } from "@/components/common/EmptyState";
 import { StaffDetailPage } from "../StaffDetailPage";
@@ -143,7 +143,7 @@ export const StaffPage = ({ currentUser }: StaffPageProps) => {
                   {[...Array(6)].map((_, index) => (
                     <Card key={index} className="p-6 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                       <div className="flex items-center gap-4">
-                        <div className="h-20 w-20 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                        <div className={`flex-shrink-0 ${LIST_CARD_LIST_MEDIA_WIDTH_CLASS} min-h-48 bg-gray-200 dark:bg-gray-700 animate-pulse`} />
                         <div className="flex-1">
                           <div className="flex items-start justify-between mb-2">
                             <div>

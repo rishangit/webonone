@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate, useLocation, useOutletContext } from "react-router-dom";
+import { BackButton } from "@/components/common/BackButton";
 import { companyWebPagesService, type CompanyWebPage } from "@/features/website/services/companyWebPages";
 import { companyWebThemesService, type CompanyWebTheme } from "@/features/website/services/companyWebThemes";
 import { ContentAddon, ContentBlock, type ContentContainerSettings } from "./WebpageEditor/types";
@@ -144,13 +145,7 @@ export const PublicWebPage = () => {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-foreground mb-2">Page Not Found</h1>
           <p className="text-muted-foreground mb-4">{error || "The requested page could not be found."}</p>
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="text-[var(--accent-primary)] hover:underline"
-          >
-            Go Back
-          </button>
+          <BackButton onClick={() => navigate(-1)} label="Back" />
         </div>
       </div>
     );

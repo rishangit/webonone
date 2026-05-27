@@ -1,5 +1,5 @@
-import { Eye, Trash2, MoreVertical } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Eye, Trash2 } from "lucide-react";
+import { CardKebabTrigger, type CardKebabTriggerVariant } from "@/components/common/CardKebabTrigger";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { CompanyProduct } from '@/features/products/services/productApi';
 
@@ -7,10 +7,17 @@ interface ProductActionsProps {
   product: CompanyProduct;
   onView?: (product: CompanyProduct) => void;
   onDelete?: (product: CompanyProduct) => void;
-  hideActions?: boolean; // Hide actions menu for regular users
+  hideActions?: boolean;
+  triggerVariant?: CardKebabTriggerVariant;
 }
 
-export const ProductActions = ({ product, onView, onDelete, hideActions = false }: ProductActionsProps) => {
+export const ProductActions = ({
+  product,
+  onView,
+  onDelete,
+  hideActions = false,
+  triggerVariant = "overlay",
+}: ProductActionsProps) => {
   // Don't render actions menu for regular users
   if (hideActions) {
     return null;
@@ -18,12 +25,10 @@ export const ProductActions = ({ product, onView, onDelete, hideActions = false 
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-        <Button variant="ghost" size="icon" className="h-8 w-8 bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm border border-white/20">
-          <MoreVertical className="w-4 h-4" />
-        </Button>
+      <DropdownMenuTrigger asChild>
+        <CardKebabTrigger variant={triggerVariant} />
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="bg-popover border-border" align="end">
+      <DropdownMenuContent className="bg-popover border-border" align="end" onClick={(e) => e.stopPropagation()}>
         {onView && (
           <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onView(product); }} className="text-popover-foreground hover:bg-sidebar-accent">
             <Eye className="w-4 h-4 mr-2" />

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Mail, ArrowLeft, Zap, Shield } from "lucide-react";
+import { Mail, Zap, Shield } from "lucide-react";
+import { BackButton } from "@/components/common/BackButton";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -176,10 +177,11 @@ export const ForgotPasswordPage = () => {
 
             {/* Back to Login */}
             <div className="pt-4 border-t border-[var(--glass-border)]">
-              <Button variant="ghost" className="w-full" onClick={() => navigate("/system/login")}>
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Login
-              </Button>
+              <BackButton
+                onClick={() => navigate("/system/login")}
+                label="Back to Login"
+                className="w-full justify-center"
+              />
             </div>
           </div>
         </Card>

@@ -300,9 +300,9 @@ export function BillPreviewDialog({ open, onOpenChange, appointmentId, billData 
           {/* Company Header */}
           <div className="text-center mb-8 p-6 bg-gradient-to-br from-[var(--accent-bg)] to-[var(--accent-bg)]/50 border border-[var(--accent-border)] rounded-lg shadow-lg">
             <div className="flex items-center justify-center gap-3 mb-3">
-              <Avatar className="w-14 h-14 rounded-xl border border-[var(--accent-border)] shadow-lg">
+              <Avatar className="w-14 h-14 flex-shrink-0">
                 <AvatarImage src={companyLogoUrl} alt={companyDisplayName} className="object-cover" />
-                <AvatarFallback className="rounded-xl bg-gradient-to-br from-[var(--accent-primary)] to-[var(--accent-secondary)] text-[var(--accent-button-text)] font-bold text-xl">
+                <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)] text-base font-semibold">
                   {companyDisplayName.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
@@ -330,9 +330,9 @@ export function BillPreviewDialog({ open, onOpenChange, appointmentId, billData 
             {/* Patient Information */}
             <div className="mb-4">
               <div className="flex items-center gap-3">
-                <Avatar className="w-12 h-12">
+                <Avatar className="w-14 h-14 flex-shrink-0">
                   <AvatarImage src={displayBillData.patientImage} />
-                  <AvatarFallback className="bg-[var(--accent-primary)] text-white">
+                  <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)] text-base font-semibold">
                     {displayBillData.patientName.split(' ').map(n => n[0]).join('')}
                   </AvatarFallback>
                 </Avatar>
@@ -374,9 +374,9 @@ export function BillPreviewDialog({ open, onOpenChange, appointmentId, billData 
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Provider:</span>
                     <div className="flex items-center gap-2">
-                      <Avatar className="w-6 h-6">
+                      <Avatar className="w-8 h-8 flex-shrink-0">
                         <AvatarImage src={displayBillData.staff.image} />
-                        <AvatarFallback className="bg-[var(--accent-primary)] text-white text-xs">
+                        <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)] text-xs">
                           {displayBillData.staff.name.split(' ').map(n => n[0]).join('')}
                         </AvatarFallback>
                       </Avatar>

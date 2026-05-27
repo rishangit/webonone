@@ -248,24 +248,18 @@ export const SalesPage = () => {
           <div className="flex items-center justify-end gap-3 flex-wrap">
             <div className="flex bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg p-1">
               <Button
-                variant={activeTab === "sales" ? "default" : "ghost"}
+                variant={activeTab === "sales" ? "accent" : "ghost"}
                 size="sm"
                 onClick={() => setActiveTab("sales")}
-                className={activeTab === "sales"
-                  ? "bg-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-                }
+                className={activeTab !== "sales" ? "text-muted-foreground hover:text-foreground" : undefined}
               >
                 Sales History
               </Button>
               <Button
-                variant={activeTab === "products" ? "default" : "ghost"}
+                variant={activeTab === "products" ? "accent" : "ghost"}
                 size="sm"
                 onClick={() => setActiveTab("products")}
-                className={activeTab === "products"
-                  ? "bg-[var(--accent-primary)] text-[var(--accent-button-text)] shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-                }
+                className={activeTab !== "products" ? "text-muted-foreground hover:text-foreground" : undefined}
               >
                 Product Performance
               </Button>
@@ -298,7 +292,7 @@ export const SalesPage = () => {
                     {[...Array(6)].map((_, index) => (
                       <Card key={index} className="p-6 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                         <div className="flex items-start gap-4">
-                          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                          <div className="w-24 h-24 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
                           <div className="flex-1 min-w-0">
                             <div className="h-5 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2" />
                             <div className="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />

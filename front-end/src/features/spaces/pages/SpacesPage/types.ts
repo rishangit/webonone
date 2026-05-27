@@ -31,6 +31,7 @@ export interface SpaceActionsProps {
   onView: (space: Space) => void;
   onEdit: (space: Space) => void;
   onDelete: (space: Space) => void;
+  triggerVariant?: "overlay" | "default";
 }
 
 export interface SpaceInfoProps {

@@ -1,22 +1,15 @@
-import { MoreVertical, Eye, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Eye, Trash2 } from "lucide-react";
+import { CardKebabTrigger } from "@/components/common/CardKebabTrigger";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { StaffActionsProps } from "../types";
 
-export const StaffActions = ({ member, onView, onDelete }: StaffActionsProps) => {
+export const StaffActions = ({ member, onView, onDelete, triggerVariant = "overlay" }: StaffActionsProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="h-8 w-8 bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm border border-white/20"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <MoreVertical className="h-4 w-4" />
-        </Button>
+        <CardKebabTrigger variant={triggerVariant} />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="bg-popover border-border" onClick={(e) => e.stopPropagation()}>
         <DropdownMenuItem onClick={() => onView(member)}>
           <Eye className="h-4 w-4 mr-2" />
           View Details

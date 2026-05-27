@@ -46,15 +46,22 @@ export const formatPrice = (price: number, companyCurrency: Currency | null): st
   return formatted.replace('$', '$ ');
 };
 
+const SERVICE_IMAGE_FALLBACK =
+  "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&h=600&fit=crop";
+
 export const getImageUrl = (service: ServiceType): string => {
-  const primary = service.images?.[0] || service.image;
-  if (primary) {
-    if (primary.startsWith('companies/') || primary.startsWith('/uploads/')) {
-      return formatAvatarUrl(primary);
-    }
+  const raw = service.images?.[0] || service.image || "";
+  const primary = typeof raw === "string" ? raw.trim() : "";
+  if (!primary || primary === "null" || primary === "undefined") {
+    return SERVICE_IMAGE_FALLBACK;
+  }
+  if (primary.startsWith("companies/") || primary.startsWith("/uploads/")) {
+    return formatAvatarUrl(primary) || SERVICE_IMAGE_FALLBACK;
+  }
+  if (primary.startsWith("http://") || primary.startsWith("https://")) {
     return primary;
   }
-  return "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=300&h=200&fit=crop";
+  return formatAvatarUrl(primary) || SERVICE_IMAGE_FALLBACK;
 };
 
 export const getStatusColor = (status: string): string => {

@@ -55,12 +55,13 @@ export const DateTimeStep = ({
               return (
                 <Button
                   key={time}
-                  variant={appointmentTime === time ? "default" : "outline"}
+                  variant={appointmentTime === time ? "accent" : "outline"}
                   size="sm"
                   onClick={() => setAppointmentTime(time)}
-                  className={`text-xs h-9 px-2 touch-manipulation ${appointmentTime === time 
-                    ? "bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] text-[var(--accent-button-text)] ring-2 ring-[var(--accent-primary)]/20" 
-                    : "bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-border)] hover:text-[var(--accent-text)]"
+                  className={`text-xs h-9 px-2 touch-manipulation ${
+                    appointmentTime !== time
+                      ? "bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-border)] hover:text-[var(--accent-text)]"
+                      : "ring-2 ring-[var(--accent-primary)]/20"
                   }`}
                 >
                   {displayTime}

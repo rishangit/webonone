@@ -1,14 +1,30 @@
-import { Stethoscope, MoreVertical, Pencil, Trash2, Eye } from "lucide-react";
+import { Stethoscope, Pencil, Trash2, Eye, Users } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { CardGridKebabSlot } from "@/components/common/CardGridKebabSlot";
+import {
+  CardKebabTrigger,
+  LIST_CARD_GRID_SHELL,
+  LIST_CARD_HERO_HEIGHT_CLASS,
+  LIST_CARD_LIST_SHELL,
+} from "@/components/common/CardKebabTrigger";
+import {
+  ListCardContent,
+  ListCardCoverImage,
+  ListCardDetailDivider,
+  ListCardDetailField,
+  ListCardDetailGrid,
+  ListCardDetailsHeader,
+  ListCardMediaColumn,
+  CARD_PRICE_TEXT_CLASS,
+  ListCardPriceFooter,
+} from "@/components/common/ListCardLayout";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/components/ui/utils";
 import { formatAvatarUrl } from "@/shared/utils";
 import type { SystemService } from "@/features/services/services/systemServices";
 import { getPrimaryImagePath } from "@/features/services/utils/serviceMedia";
@@ -27,15 +43,12 @@ export function SystemServiceCard({ service, viewMode, onView, onEdit, onDelete 
 
   return (
     <Card
-      className={cn(
-        "overflow-hidden backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] cursor-pointer hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200",
-        viewMode === "list" && "p-4"
-      )}
+      className={viewMode === "grid" ? LIST_CARD_GRID_SHELL : LIST_CARD_LIST_SHELL}
       onClick={() => onView(service)}
     >
       {viewMode === "grid" ? (
         <>
-          <div className="relative h-40 bg-muted">
+          <div className={`relative ${LIST_CARD_HERO_HEIGHT_CLASS} bg-muted overflow-hidden`}>
             {primaryImage ? (
               <img src={primaryImageUrl} alt={service.name} className="w-full h-full object-cover" />
             ) : (
@@ -48,18 +61,10 @@ export function SystemServiceCard({ service, viewMode, onView, onEdit, onDelete 
                 {service.isActive ? "Active" : "Inactive"}
               </Badge>
             </div>
-            <div className="absolute top-3 right-3">
+            <CardGridKebabSlot>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm border border-white/20"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <MoreVertical className="w-4 h-4" />
-                  </Button>
+                  <CardKebabTrigger variant="overlay" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-popover border-border" align="end" onClick={(e) => e.stopPropagation()}>
                   <DropdownMenuItem onClick={() => onView(service)}>
@@ -76,9 +81,9 @@ export function SystemServiceCard({ service, viewMode, onView, onEdit, onDelete 
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </div>
+            </CardGridKebabSlot>
           </div>
-          <div className="p-4">
+          <div className="p-6">
             <h3 className="font-semibold text-foreground truncate">{service.name}</h3>
             <p className="text-sm text-muted-foreground mt-1 line-clamp-2 min-h-[40px]">
               {service.description || "No description provided"}
@@ -86,40 +91,37 @@ export function SystemServiceCard({ service, viewMode, onView, onEdit, onDelete 
             <div className="mt-3 flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Used by {service.usageCount || 0}</span>
               {service.defaultPrice != null && (
-                <span className="font-medium text-foreground">${Number(service.defaultPrice).toFixed(2)}</span>
+                <span className={CARD_PRICE_TEXT_CLASS}>
+                  ${Number(service.defaultPrice).toFixed(2)}
+                </span>
               )}
             </div>
           </div>
         </>
       ) : (
-        <div className="flex items-start gap-4">
-          <div className="w-20 h-16 rounded-md bg-muted overflow-hidden flex-shrink-0">
+        <>
+          <ListCardMediaColumn>
             {primaryImage ? (
-              <img src={primaryImageUrl} alt={service.name} className="w-full h-full object-cover" />
+              <ListCardCoverImage src={primaryImageUrl} alt={service.name} />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                <Stethoscope className="w-5 h-5" />
+              <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
+                <Stethoscope className="w-8 h-8" />
               </div>
             )}
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center justify-between gap-2">
-              <h3 className="font-semibold text-foreground truncate">{service.name}</h3>
-              <div className="flex items-center gap-2">
-                <Badge className={service.isActive ? "bg-green-500/20 text-green-600" : "bg-gray-500/20 text-gray-200"}>
+          </ListCardMediaColumn>
+          <ListCardContent>
+            <ListCardDetailsHeader
+              title={service.name}
+              description={service.description || "No description provided"}
+              status={
+                <Badge className={service.isActive ? "bg-green-500/20 text-green-600 border-green-500/30" : "bg-gray-500/20 text-gray-600 dark:text-gray-400 border-gray-500/30"}>
                   {service.isActive ? "Active" : "Inactive"}
                 </Badge>
+              }
+              actions={
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-accent"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <MoreVertical className="w-4 h-4" />
-                    </Button>
+                    <CardKebabTrigger variant="default" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="bg-popover border-border" align="end" onClick={(e) => e.stopPropagation()}>
                     <DropdownMenuItem onClick={() => onView(service)}>
@@ -136,11 +138,27 @@ export function SystemServiceCard({ service, viewMode, onView, onEdit, onDelete 
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              </div>
-            </div>
-            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{service.description || "No description provided"}</p>
-          </div>
-        </div>
+              }
+            />
+            <ListCardDetailGrid>
+              <ListCardDetailField
+                icon={Users}
+                label="Used by"
+                value={`${service.usageCount || 0} companies`}
+              />
+              <ListCardDetailField label="ID" value={service.id} />
+            </ListCardDetailGrid>
+            <ListCardDetailDivider />
+            <ListCardDetailGrid>
+              <ListCardDetailField label="Verified" value={service.isVerified ? "Yes" : "No"} />
+              <ListCardDetailField label="Duration" value={service.defaultDuration ? `${service.defaultDuration} min` : "—"} />
+              <ListCardDetailField label="Tags" value={service.tags?.length ? `${service.tags.length} assigned` : "—"} />
+            </ListCardDetailGrid>
+            {service.defaultPrice != null ? (
+              <ListCardPriceFooter label={`$${Number(service.defaultPrice).toFixed(2)}`} />
+            ) : null}
+          </ListCardContent>
+        </>
       )}
     </Card>
   );

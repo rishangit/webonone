@@ -10,6 +10,8 @@ export interface MediaCardViewProps {
   formatSize: (bytes: number) => string;
   onOpen: (path: string) => void;
   onDelete: (path: string, name: string, type: "file" | "folder") => void;
+  /** When set (e.g. showcase), use this URL instead of API media path. */
+  previewImageUrl?: string;
 }
 
 export const MediaCardView = ({
@@ -18,6 +20,7 @@ export const MediaCardView = ({
   formatSize,
   onOpen,
   onDelete,
+  previewImageUrl,
 }: MediaCardViewProps) => {
   const handleCardClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
@@ -50,7 +53,7 @@ export const MediaCardView = ({
                 <FolderOpen className="w-12 h-12 text-[var(--accent-primary)]" />
               ) : item.type === "file" && item.isImage ? (
                 <img
-                  src={getMediaFileUrl(companyId, item.path)}
+                  src={previewImageUrl ?? getMediaFileUrl(companyId, item.path)}
                   alt=""
                   className="w-full h-full object-cover"
                 />

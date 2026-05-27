@@ -2,11 +2,10 @@ import * as React from "react";
 import { Check, ChevronDown, X } from "lucide-react";
 import { cn } from "./utils";
 import { Badge } from "./badge";
-import { Button } from "./button";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "./command";
 import { SearchInput } from "../common/SearchInput";
-import { selectTriggerClasses, selectIconClasses } from "./select";
+import { selectTriggerClasses, selectIconClasses, selectDropdownPanelClasses } from "./select";
 
 export interface Option {
   label: string;
@@ -123,15 +122,12 @@ export const MultiSelect = React.forwardRef<
         modal={modalPopover}
       >
         <PopoverTrigger asChild>
-          <Button
+          <button
+            type="button"
             ref={setRefs}
             {...props}
             onClick={handleTogglePopover}
-            className={cn(
-              selectTriggerClasses,
-              "bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground hover:bg-[var(--accent-bg)] hover:border-[var(--accent-border)] font-normal",
-              className
-            )}
+            className={cn(selectTriggerClasses, "font-normal", className)}
           >
             {selectedValues.length > 0 ? (
               <>
@@ -168,10 +164,10 @@ export const MultiSelect = React.forwardRef<
                 )} aria-hidden="true" />
               </>
             )}
-          </Button>
+          </button>
         </PopoverTrigger>
         <PopoverContent
-          className="p-0 bg-popover border-border backdrop-blur-sm"
+          className={cn("p-0 bg-popover", selectDropdownPanelClasses)}
           align="start"
           onEscapeKeyDown={() => setIsPopoverOpen(false)}
           style={{ 
@@ -195,7 +191,7 @@ export const MultiSelect = React.forwardRef<
                 <CommandItem
                   key="all"
                   onSelect={toggleAll}
-                  className="cursor-pointer text-foreground hover:bg-[var(--accent-bg)] transition-colors"
+                  className="cursor-pointer text-foreground"
                 >
                   <div
                     className={cn(
@@ -220,7 +216,7 @@ export const MultiSelect = React.forwardRef<
                       <CommandItem
                         key={option.value}
                         onSelect={() => toggleOption(option.value)}
-                        className="cursor-pointer text-foreground hover:bg-[var(--accent-bg)] transition-colors"
+                        className="cursor-pointer text-foreground"
                       >
                       <div
                         className={cn(

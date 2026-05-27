@@ -1,40 +1,56 @@
-import { MapPin, Users, Mail, Phone, Eye, MoreVertical, Tag, User, CheckCircle, XCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { MapPin, Users, User } from "lucide-react";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { LIST_CARD_LIST_SHELL } from "@/components/common/CardKebabTrigger";
+import {
+  ListCardBlurredMedia,
+  ListCardContactEmail,
+  ListCardContactGrid,
+  ListCardContactPhone,
+  ListCardContent,
+  ListCardDetailDivider,
+  ListCardDetailField,
+  ListCardDetailGrid,
+  ListCardDetailsHeader,
+  ListCardMediaColumn,
+} from "@/components/common/ListCardLayout";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  CARD_LIST_AVATAR_CLASS,
+  CARD_LIST_AVATAR_FALLBACK_CLASS,
+} from "@/components/ui/avatar";
 import { formatAvatarUrl } from "../../../utils";
 import { DateDisplay } from "@/components/common/DateDisplay";
-import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import { approveCompanyRequest, rejectCompanyRequest, fetchCompaniesRequest } from "@/features/companies/store";
+import { useAppSelector } from "@/store/hooks";
 import { isRole, UserRole } from "@/shared/types/user";
 import { CompanyViewProps } from "./types";
+import { CompanyActions } from "./components/CompanyActions";
 
 export const CompanyListView = ({
   company,
   onViewCompany
 }: CompanyViewProps) => {
-  const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
   const isSuperAdmin = isRole(user?.role, UserRole.SYSTEM_ADMIN);
-  
-  // Determine status from isActive if status is not explicitly set or needs validation
+
   const getActualStatus = (): "pending" | "approved" | "rejected" => {
     if (company.status && ['pending', 'approved', 'rejected'].includes(company.status)) {
       const isActiveValue = company.isActive;
-      
+
       if ((isActiveValue === true || isActiveValue === 1) && company.status !== 'approved') {
         return 'approved';
       }
-      
-      if ((isActiveValue === false || isActiveValue === 0 || isActiveValue === null || isActiveValue === undefined) 
+
+      if ((isActiveValue === false || isActiveValue === 0 || isActiveValue === null || isActiveValue === undefined)
           && company.status === 'approved') {
         return 'pending';
       }
-      
+
       return company.status;
     }
-    
+
     const isActiveValue = company.isActive;
     if (isActiveValue === true || isActiveValue === 1) {
       return 'approved';
@@ -46,6 +62,10 @@ export const CompanyListView = ({
   };
 
   const actualStatus = getActualStatus();
+  const logoUrl = company.logo ? formatAvatarUrl(company.logo) : undefined;
+  const initials = company.name.substring(0, 2).toUpperCase();
+  const backgroundUrl =
+    logoUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(company.name)}&background=random`;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -56,180 +76,100 @@ export const CompanyListView = ({
     }
   };
 
+  const bottomThirdCell =
+    isSuperAdmin && company.owner ? (
+      <ListCardDetailField icon={User} label="Owner" value={company.owner.name} />
+    ) : (
+      <ListCardDetailField label="Submitted">
+        <DateDisplay date={company.submittedDate} className="text-sm font-medium text-foreground" />
+      </ListCardDetailField>
+    );
+
+  const statusBadge = (
+    <Badge className={`${getStatusColor(actualStatus)} border text-xs px-2 py-1`}>
+      {actualStatus.charAt(0).toUpperCase() + actualStatus.slice(1)}
+    </Badge>
+  );
+
+  const tagChips =
+    company.tags && company.tags.length > 0 ? (
+      <>
+        {company.tags.slice(0, 3).map((tag) => (
+          <Badge
+            key={tag.id}
+            variant="secondary"
+            className="text-xs"
+            style={{
+              backgroundColor: `${tag.color}20`,
+              color: tag.color,
+              borderColor: `${tag.color}40`,
+            }}
+          >
+            {tag.icon && <span className="mr-1">{tag.icon}</span>}
+            {tag.name}
+          </Badge>
+        ))}
+        {company.tags.length > 3 ? (
+          <span className="text-xs text-muted-foreground">+{company.tags.length - 3}</span>
+        ) : null}
+      </>
+    ) : undefined;
+
   return (
-    <div className="flex items-start gap-4">
-      <Avatar className="w-20 h-20 flex-shrink-0">
-        <AvatarImage src={company.logo ? formatAvatarUrl(company.logo) : undefined} alt={company.name} />
-        <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)]">
-          {company.name.substring(0, 2).toUpperCase()}
-        </AvatarFallback>
-      </Avatar>
-      
-      <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between">
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-foreground text-lg mb-1 truncate">{company.name}</h3>
-            <p className="text-muted-foreground text-sm mb-2 line-clamp-2">{company.description}</p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-sm">
-                  <Users className="w-4 h-4 text-[var(--accent-text)]" />
-                  <span className="text-muted-foreground">Contact:</span>
-                  <span className="text-foreground">{company.contactPerson}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Mail className="w-4 h-4 text-[var(--accent-text)]" />
-                  <span className="text-muted-foreground">Email:</span>
-                  <span className="text-foreground">{company.email}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Phone className="w-4 h-4 text-[var(--accent-text)]" />
-                  <span className="text-muted-foreground">Phone:</span>
-                  <span className="text-foreground">{company.phone}</span>
-                </div>
-              </div>
-              
-              <div className="space-y-1">
-                {company.city && company.state && (
-                  <div className="flex items-center gap-2 text-sm">
-                    <MapPin className="w-4 h-4 text-[var(--accent-text)]" />
-                    <span className="text-muted-foreground">Location:</span>
-                    <span className="text-foreground">{company.city}, {company.state}</span>
-                  </div>
-                )}
-                {company.address && !company.city && (
-                  <div className="flex items-center gap-2 text-sm">
-                    <MapPin className="w-4 h-4 text-[var(--accent-text)]" />
-                    <span className="text-muted-foreground">Address:</span>
-                    <span className="text-foreground">{company.address}</span>
-                  </div>
-                )}
-                {company.tags && company.tags.length > 0 && (
-                  <div className="flex items-start gap-2 text-sm">
-                    <Tag className="w-4 h-4 text-[var(--accent-text)] mt-0.5 flex-shrink-0" />
-                    <span className="text-muted-foreground">Tags:</span>
-                    <div className="flex flex-wrap gap-1.5 flex-1">
-                      {company.tags.map((tag) => (
-                        <Badge
-                          key={tag.id}
-                          variant="secondary"
-                          className="text-xs"
-                          style={{ 
-                            backgroundColor: `${tag.color}20`, 
-                            color: tag.color,
-                            borderColor: `${tag.color}40`
-                          }}
-                        >
-                          {tag.icon && <span className="mr-1">{tag.icon}</span>}
-                          {tag.name}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {company.employees && (
-                  <div className="flex items-center gap-2 text-sm">
-                    <Users className="w-4 h-4 text-[var(--accent-text)]" />
-                    <span className="text-muted-foreground">Employees:</span>
-                    <span className="text-foreground">{company.employees}</span>
-                  </div>
-                )}
-                
-                {/* Owner Information - Show for super admin */}
-                {isSuperAdmin && company.owner && (
-                  <div className="flex items-center gap-2 text-sm">
-                    <User className="w-4 h-4 text-[var(--accent-text)]" />
-                    <span className="text-muted-foreground">Owner:</span>
-                    <div className="flex items-center gap-2">
-                      <Avatar className="w-5 h-5">
-                        <AvatarImage src={company.owner.avatar ? formatAvatarUrl(company.owner.avatar) : undefined} alt={company.owner.name} />
-                        <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)] text-xs">
-                          {company.owner.name ? company.owner.name.substring(0, 2).toUpperCase() : 'U'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="text-foreground font-medium">{company.owner.name}</div>
-                        <div className="text-muted-foreground text-xs">{company.owner.email}</div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <Badge className={`${getStatusColor(actualStatus)} border text-xs px-2 py-1`}>
-                {actualStatus.charAt(0).toUpperCase() + actualStatus.slice(1)}
-              </Badge>
-              <span className="text-xs text-muted-foreground">
-                Submitted: <DateDisplay date={company.submittedDate} />
-              </span>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-2 flex-shrink-0">
-            {/* Only show View button if not super admin */}
-            {!isSuperAdmin && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onViewCompany(company.id)}
-                className="bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent text-foreground hover:text-foreground"
-              >
-                <Eye className="w-4 h-4 mr-2" />
-                View Details
-              </Button>
-            )}
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground hover:bg-accent">
-                  <MoreVertical className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-popover border-border" align="end">
-                <DropdownMenuItem onClick={() => onViewCompany(company.id)}>
-                  <Eye className="w-4 h-4 mr-2" />
-                  View Full Profile
-                </DropdownMenuItem>
-                {actualStatus === 'pending' && isSuperAdmin && (
-                  <>
-                    <DropdownMenuItem 
-                      className="text-green-600 dark:text-green-400"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        dispatch(approveCompanyRequest(company.id));
-                        setTimeout(() => {
-                          dispatch(fetchCompaniesRequest({}));
-                        }, 1000);
-                      }}
-                    >
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      Approve Company
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      className="text-red-600 dark:text-red-400"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (window.confirm('Are you sure you want to reject this company registration?')) {
-                          dispatch(rejectCompanyRequest({ id: company.id }));
-                          setTimeout(() => {
-                            dispatch(fetchCompaniesRequest({}));
-                          }, 1000);
-                        }
-                      }}
-                    >
-                      <XCircle className="w-4 h-4 mr-2" />
-                      Reject Company
-                    </DropdownMenuItem>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-      </div>
-    </div>
+    <Card className={LIST_CARD_LIST_SHELL}>
+      <ListCardMediaColumn>
+        <ListCardBlurredMedia backgroundImageUrl={backgroundUrl}>
+          <Avatar className={CARD_LIST_AVATAR_CLASS}>
+            <AvatarImage src={logoUrl} alt={company.name} />
+            <AvatarFallback
+              className={`bg-[var(--accent-bg)] text-[var(--accent-text)] ${CARD_LIST_AVATAR_FALLBACK_CLASS}`}
+            >
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+        </ListCardBlurredMedia>
+      </ListCardMediaColumn>
+
+      <ListCardContent>
+        <ListCardDetailsHeader
+          title={company.name}
+          description={company.description}
+          status={statusBadge}
+          actions={
+            <CompanyActions
+              company={company}
+              onViewCompany={onViewCompany}
+              actualStatus={actualStatus}
+              showViewButton={false}
+              triggerVariant="default"
+            />
+          }
+          tags={tagChips}
+        />
+        <ListCardContactGrid>
+          <ListCardContactEmail email={company.email} />
+          <ListCardContactPhone phone={company.phone} />
+          <ListCardDetailField icon={Users} label="Contact" value={company.contactPerson ?? "—"} />
+        </ListCardContactGrid>
+        <ListCardDetailDivider />
+        <ListCardDetailGrid>
+          <ListCardDetailField
+            icon={MapPin}
+            label="Location"
+            value={
+              company.city && company.state
+                ? `${company.city}, ${company.state}`
+                : company.address ?? "—"
+            }
+          />
+          <ListCardDetailField
+            icon={Users}
+            label="Employees"
+            value={company.employees ? String(company.employees) : "—"}
+          />
+          {bottomThirdCell}
+        </ListCardDetailGrid>
+      </ListCardContent>
+    </Card>
   );
 };

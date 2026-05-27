@@ -1,5 +1,11 @@
+import { Clock, Phone, MapPin } from "lucide-react";
+import { DateDisplay } from "@/components/common/DateDisplay";
+import {
+  ListCardDetailDivider,
+  ListCardDetailField,
+  ListCardDetailGrid,
+} from "@/components/common/ListCardLayout";
 import { AppointmentViewProps } from "./types";
-import { AppointmentDetails } from "./components/AppointmentDetails";
 import { StaffSelector } from "./components/StaffSelector";
 
 export const AppointmentListView = ({
@@ -17,26 +23,23 @@ export const AppointmentListView = ({
   handleStaffAssignment
 }: AppointmentViewProps) => {
   return (
-    <div className="flex flex-col lg:flex-row lg:gap-6">
-      {/* Left Side: Appointment Details */}
-      <div className="flex-1 min-w-0">
-        <div className="space-y-2 mb-3 lg:mb-0">
-          <AppointmentDetails
-            date={date}
-            time={time}
-            duration={duration}
-            phone={phone}
-            location={location}
-            hasSpaceEntity={hasSpaceEntity}
-            useDateDisplay={true}
-          />
-        </div>
-      </div>
-
-      {/* Right Side: Staff Information (Desktop/Tablet) - Only show if staff entity is enabled */}
-      {hasStaffEntity && (staff || preferredStaff) && (
-        <div className="lg:w-64 lg:flex-shrink-0 mt-3 lg:mt-0">
-          <div>
+    <>
+      <ListCardDetailGrid>
+        <ListCardDetailField label="Date">
+          <DateDisplay date={date} className="text-sm font-medium text-foreground" />
+        </ListCardDetailField>
+        <ListCardDetailField icon={Clock} value={`${time} (${duration})`} />
+        <ListCardDetailField icon={Phone} value={phone} />
+      </ListCardDetailGrid>
+      <ListCardDetailDivider />
+      <ListCardDetailGrid>
+        {hasSpaceEntity ? (
+          <ListCardDetailField icon={MapPin} label="Location" value={location} />
+        ) : (
+          <ListCardDetailField icon={MapPin} label="Location" value="—" />
+        )}
+        {hasStaffEntity && (staff || preferredStaff) ? (
+          <ListCardDetailField className="sm:col-span-2">
             <StaffSelector
               staff={staff}
               availableStaff={availableStaff}
@@ -44,9 +47,11 @@ export const AppointmentListView = ({
               onStaffChange={handleStaffAssignment}
               showLabel={true}
             />
-          </div>
-        </div>
-      )}
-    </div>
+          </ListCardDetailField>
+        ) : (
+          <ListCardDetailField label="Staff" value="—" className="sm:col-span-2" />
+        )}
+      </ListCardDetailGrid>
+    </>
   );
 };

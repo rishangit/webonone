@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { MapPin } from "lucide-react";
+import { BackButton } from "@/components/common/BackButton";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TabSwitcher } from "@/components/ui/tab-switcher";
@@ -99,9 +100,7 @@ export const SpaceDetailPage = ({ spaceId, onBack }: SpaceDetailPageProps) => {
           <MapPin className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
           <h3 className="text-lg font-semibold text-foreground mb-2">Space Not Found</h3>
           <p className="text-muted-foreground mb-4">The space you're looking for doesn't exist.</p>
-          <Button onClick={onBack} variant="outline">
-            Back to Spaces
-          </Button>
+          <BackButton onClick={onBack} label="Back to Spaces" />
         </div>
       </div>
     );

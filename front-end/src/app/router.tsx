@@ -9,6 +9,9 @@ import { UserRole, isRole } from "@/shared/types/user";
 // Utils
 import { applyTheme, storage, performance } from "@/shared/utils";
 
+// Common
+import { BackButton } from "@/components/common/BackButton";
+
 // Layout Components
 import {
   MainLayout,
@@ -91,7 +94,7 @@ import {
 } from "@/features/website/pages";
 
 // Showcase
-import { ShowcasePage } from "@/features/showcase/pages";
+import { ShowcaseAdminGuard, ShowcasePage } from "@/features/showcase";
 
 // State management
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -219,6 +222,9 @@ function ProtectedRouteWrapper({ children }: { children: React.ReactNode }) {
         break;
       case 'tags':
         navigate('/system/tags');
+        break;
+      case 'showcase':
+        navigate('/system/showcase');
         break;
       case 'backlog':
         navigate('/system/backlog');
@@ -357,12 +363,7 @@ function AppointmentDetailPageWrapper() {
         <div className="text-center">
           <h3 className="text-lg font-semibold text-foreground mb-2">Appointment Not Found</h3>
           <p className="text-muted-foreground mb-4">Invalid appointment ID</p>
-          <button 
-            onClick={() => navigate('/system/appointments')}
-            className="px-4 py-2 bg-[var(--accent-primary)] text-[var(--accent-button-text)] rounded-lg hover:bg-[var(--accent-primary-hover)]"
-          >
-            Back to Appointments
-          </button>
+          <BackButton onClick={() => navigate("/system/appointments")} label="Back to Appointments" />
         </div>
       </div>
     );
@@ -448,12 +449,7 @@ function UserAppointmentHistoryPageWrapper() {
         <div className="text-center">
           <h3 className="text-lg font-semibold text-foreground mb-2">User Not Found</h3>
           <p className="text-muted-foreground mb-4">Invalid user ID</p>
-          <button 
-            onClick={() => navigate('/system/users')}
-            className="px-4 py-2 bg-[var(--accent-primary)] text-[var(--accent-button-text)] rounded-lg hover:bg-[var(--accent-primary-hover)]"
-          >
-            Back to Users
-          </button>
+          <BackButton onClick={() => navigate("/system/users")} label="Back to Users" />
         </div>
       </div>
     );
@@ -511,12 +507,7 @@ function ProductDetailPageWrapper() {
         <div className="text-center">
           <h3 className="text-lg font-semibold text-foreground mb-2">Product Not Found</h3>
           <p className="text-muted-foreground mb-4">Invalid product ID</p>
-          <button 
-            onClick={() => navigate('/system/system-products')}
-            className="px-4 py-2 bg-[var(--accent-primary)] text-[var(--accent-button-text)] rounded-lg hover:bg-[var(--accent-primary-hover)]"
-          >
-            Back to System Products
-          </button>
+          <BackButton onClick={() => navigate("/system/system-products")} label="Back to System Products" />
         </div>
       </div>
     );
@@ -543,12 +534,7 @@ function CompanyProductDetailPageWrapper() {
         <div className="text-center">
           <h3 className="text-lg font-semibold text-foreground mb-2">Product Not Found</h3>
           <p className="text-muted-foreground mb-4">Invalid product ID</p>
-          <button 
-            onClick={() => navigate('/system/company-products')}
-            className="px-4 py-2 bg-[var(--accent-primary)] text-[var(--accent-button-text)] rounded-lg hover:bg-[var(--accent-primary-hover)]"
-          >
-            Back to Products
-          </button>
+          <BackButton onClick={() => navigate("/system/company-products")} label="Back to Products" />
         </div>
       </div>
     );
@@ -573,12 +559,7 @@ function SalesDetailPageWrapper() {
         <div className="text-center">
           <h3 className="text-lg font-semibold text-foreground mb-2">Sale Not Found</h3>
           <p className="text-muted-foreground mb-4">Invalid sale ID</p>
-          <button 
-            onClick={() => navigate('/system/sales')}
-            className="px-4 py-2 bg-[var(--accent-primary)] text-[var(--accent-button-text)] rounded-lg hover:bg-[var(--accent-primary-hover)]"
-          >
-            Back to Sales
-          </button>
+          <BackButton onClick={() => navigate("/system/sales")} label="Back to Sales" />
         </div>
       </div>
     );
@@ -603,12 +584,7 @@ function ServiceDetailPageWrapper() {
         <div className="text-center">
           <h3 className="text-lg font-semibold text-foreground mb-2">Service Not Found</h3>
           <p className="text-muted-foreground mb-4">Invalid service ID</p>
-          <button 
-            onClick={() => navigate('/system/services')}
-            className="px-4 py-2 bg-[var(--accent-primary)] text-[var(--accent-button-text)] rounded-lg hover:bg-[var(--accent-primary-hover)]"
-          >
-            Back to Services
-          </button>
+          <BackButton onClick={() => navigate("/system/services")} />
         </div>
       </div>
     );
@@ -632,12 +608,7 @@ function SystemServiceDetailPageWrapper() {
         <div className="text-center">
           <h3 className="text-lg font-semibold text-foreground mb-2">System Service Not Found</h3>
           <p className="text-muted-foreground mb-4">Invalid system service ID</p>
-          <button
-            onClick={() => navigate("/system/system-services")}
-            className="px-4 py-2 bg-[var(--accent-primary)] text-[var(--accent-button-text)] rounded-lg hover:bg-[var(--accent-primary-hover)]"
-          >
-            Back to System Services
-          </button>
+          <BackButton onClick={() => navigate("/system/system-services")} />
         </div>
       </div>
     );
@@ -673,12 +644,7 @@ function CompanyServiceDetailPageWrapper() {
         <div className="text-center">
           <h3 className="text-lg font-semibold text-foreground mb-2">Service Not Found</h3>
           <p className="text-muted-foreground mb-4">Invalid company or service ID</p>
-          <button
-            onClick={() => navigate('/system/companies')}
-            className="px-4 py-2 bg-[var(--accent-primary)] text-[var(--accent-button-text)] rounded-lg hover:bg-[var(--accent-primary-hover)]"
-          >
-            Back to Companies
-          </button>
+          <BackButton onClick={() => navigate("/system/companies")} label="Back to Companies" />
         </div>
       </div>
     );
@@ -703,12 +669,7 @@ function CompanyScopedProductDetailPageWrapper() {
         <div className="text-center">
           <h3 className="text-lg font-semibold text-foreground mb-2">Product Not Found</h3>
           <p className="text-muted-foreground mb-4">Invalid company or product ID</p>
-          <button
-            onClick={() => navigate('/system/companies')}
-            className="px-4 py-2 bg-[var(--accent-primary)] text-[var(--accent-button-text)] rounded-lg hover:bg-[var(--accent-primary-hover)]"
-          >
-            Back to Companies
-          </button>
+          <BackButton onClick={() => navigate("/system/companies")} label="Back to Companies" />
         </div>
       </div>
     );
@@ -733,12 +694,7 @@ function SpaceDetailPageWrapper() {
         <div className="text-center">
           <h3 className="text-lg font-semibold text-foreground mb-2">Space Not Found</h3>
           <p className="text-muted-foreground mb-4">Invalid space ID</p>
-          <button 
-            onClick={() => navigate('/system/spaces')}
-            className="px-4 py-2 bg-[var(--accent-primary)] text-[var(--accent-button-text)] rounded-lg hover:bg-[var(--accent-primary-hover)]"
-          >
-            Back to Spaces
-          </button>
+          <BackButton onClick={() => navigate("/system/spaces")} label="Back to Spaces" />
         </div>
       </div>
     );
@@ -1621,23 +1577,26 @@ function App() {
             }
           />
 
-          <Route 
-            path="/showcase" 
+          <Route
+            path="/system/showcase"
             element={
               isAuthenticated ? (
                 <ProtectedRouteWrapper>
-                  <ShowcasePage 
-                    onThemeChange={handleThemeChange}
-                    currentTheme={theme}
-                    onAccentColorChange={handleAccentColorChange}
-                    currentAccentColor={accentColor}
-                  />
+                  <ShowcaseAdminGuard>
+                    <ShowcasePage
+                      onThemeChange={handleThemeChange}
+                      currentTheme={theme}
+                      onAccentColorChange={handleAccentColorChange}
+                      currentAccentColor={accentColor}
+                    />
+                  </ShowcaseAdminGuard>
                 </ProtectedRouteWrapper>
               ) : (
                 <Navigate to="/system/login" replace />
               )
             }
           />
+          <Route path="/showcase" element={<Navigate to="/system/showcase" replace />} />
 
           {/* Public site: layout keeps default header mounted; child route swaps page body */}
           <Route path="/web/:companyId" element={<PublicWebsiteLayout />}>

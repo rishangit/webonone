@@ -5,6 +5,9 @@ import * as AvatarPrimitive from "@radix-ui/react-avatar";
 
 import { cn } from "./utils";
 
+/** Accent ring on all avatars — override only for documented exceptions (e.g. ring-offset). */
+export const AVATAR_ACCENT_RING_CLASS = "ring-2 ring-[var(--accent-border)]";
+
 function Avatar({
   className,
   ...props
@@ -13,7 +16,8 @@ function Avatar({
     <AvatarPrimitive.Root
       data-slot="avatar"
       className={cn(
-        "relative flex size-10 shrink-0 overflow-hidden rounded-full",
+        "relative flex size-14 shrink-0 overflow-hidden rounded-full",
+        AVATAR_ACCENT_RING_CLASS,
         className,
       )}
       {...props}
@@ -49,5 +53,16 @@ function AvatarFallback({
     />
   );
 }
+
+/** Default avatar when no size class is passed — 56×56px. */
+export const DEFAULT_AVATAR_CLASS = "w-14 h-14";
+
+/** Compact avatar for selectors, menus, notifications, calendar — 32×32px. */
+export const COMPACT_AVATAR_CLASS = "w-8 h-8";
+export const COMPACT_AVATAR_FALLBACK_CLASS = "text-xs font-medium";
+
+/** Leading entity image on card (grid hero) and list rows — 96×96px. */
+export const CARD_LIST_AVATAR_CLASS = "w-24 h-24";
+export const CARD_LIST_AVATAR_FALLBACK_CLASS = "text-2xl font-semibold";
 
 export { Avatar, AvatarImage, AvatarFallback };

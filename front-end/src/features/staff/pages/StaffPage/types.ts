@@ -30,6 +30,7 @@ export interface StaffActionsProps {
   member: Staff;
   onView: (member: Staff) => void;
   onDelete: (member: Staff) => void;
+  triggerVariant?: "overlay" | "default";
 }
 
 export interface StaffInfoProps {

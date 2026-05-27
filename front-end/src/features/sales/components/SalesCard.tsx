@@ -3,7 +3,13 @@ import { Calendar, Clock, CreditCard, Users, Package, FileText, MoreVertical, Ey
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Avatar,
+  AvatarImage,
+  AvatarFallback,
+  CARD_LIST_AVATAR_CLASS,
+  CARD_LIST_AVATAR_FALLBACK_CLASS,
+} from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { CustomDialog } from "@/components/ui/custom-dialog";
 import { DateDisplay } from "@/components/common/DateDisplay";
@@ -23,9 +29,11 @@ export const SalesCard = ({
     <>
       <Card className="p-6 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
         <div className="flex items-start gap-4">
-          <Avatar className="w-12 h-12 sm:w-16 sm:h-16 ring-2 ring-[var(--accent-border)] flex-shrink-0">
+          <Avatar className={`${CARD_LIST_AVATAR_CLASS} flex-shrink-0`}>
             <AvatarImage src={sale.customerImage} />
-            <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)]">
+            <AvatarFallback
+              className={`bg-[var(--accent-bg)] text-[var(--accent-text)] ${CARD_LIST_AVATAR_FALLBACK_CLASS}`}
+            >
               {sale.customerName.split(' ').map(n => n[0]).join('')}
             </AvatarFallback>
           </Avatar>

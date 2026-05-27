@@ -1,5 +1,5 @@
-import { Edit, Trash2, MoreVertical, Eye, Settings } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Edit, Trash2, Eye, Settings } from "lucide-react";
+import { CardKebabTrigger, type CardKebabTriggerVariant } from "@/components/common/CardKebabTrigger";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { ProductActionsProps } from "../types";
 
@@ -9,20 +9,14 @@ export const ProductActions = ({
   onEdit,
   onDelete,
   onToggleStatus,
-}: ProductActionsProps) => {
+  triggerVariant = "overlay",
+}: ProductActionsProps & { triggerVariant?: CardKebabTriggerVariant }) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="h-8 w-8 bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm border border-white/20"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <MoreVertical className="w-4 h-4" />
-        </Button>
+        <CardKebabTrigger variant={triggerVariant} />
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="bg-popover border-border" align="end">
+      <DropdownMenuContent className="bg-popover border-border" align="end" onClick={(e) => e.stopPropagation()}>
         <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onViewProduct?.(product.id); }}>
           <Eye className="w-4 h-4 mr-2" />
           View Details
