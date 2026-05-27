@@ -26,19 +26,17 @@ export const EditorToolbar = ({
         {onViewModeChange && (
           <>
             <Button
-              variant={viewMode === 'visual' ? 'default' : 'ghost'}
+              variant={viewMode === 'visual' ? 'accent' : 'ghost'}
               size="sm"
               onClick={() => onViewModeChange('visual')}
-              className={viewMode === 'visual' ? 'bg-[var(--accent-bg)] text-[var(--accent-text)]' : ''}
             >
               <FileText className="w-4 h-4 mr-2" />
               Visual
             </Button>
             <Button
-              variant={viewMode === 'edit' ? 'default' : 'ghost'}
+              variant={viewMode === 'edit' ? 'accent' : 'ghost'}
               size="sm"
               onClick={() => onViewModeChange('edit')}
-              className={viewMode === 'edit' ? 'bg-[var(--accent-bg)] text-[var(--accent-text)]' : ''}
             >
               <Edit className="w-4 h-4 mr-2" />
               Edit

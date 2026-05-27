@@ -387,7 +387,7 @@ export const MonthView = ({ currentUser, selectedDate, appointments, onDateChang
                             >
                               <div className="flex items-start gap-2">
                                 {/* Avatar */}
-                                <Avatar className="w-6 h-6 ring-2 ring-[var(--accent-border)] shadow-sm flex-shrink-0">
+                                <Avatar className="w-8 h-8 shadow-sm flex-shrink-0">
                                   <AvatarImage src={item.appointment.patientImage} />
                                   <AvatarFallback className="bg-[var(--accent-primary)] text-[var(--accent-button-text)] text-xs font-medium">
                                     {item.appointment.patientName.split(' ').map(n => n[0]).join('')}

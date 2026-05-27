@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
-  ArrowLeft,
   ChevronDown,
   ChevronRight,
   ChevronUp,
@@ -10,6 +9,7 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
+import { BackButton } from "@/components/common/BackButton";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -448,16 +448,7 @@ export const VisualWebEditor = ({
       <div className="flex-shrink-0 border-b border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-sm">
         <div className="flex items-center justify-between p-3">
           <div className="flex items-center gap-4">
-            {!fullWidth && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleBack}
-                className="hover:bg-[var(--accent-bg)]"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-            )}
+            {!fullWidth && <BackButton onClick={handleBack} label="Back" />}
             <div>
               <h1 className="text-lg font-bold text-foreground">{title}</h1>
               {subtitle ? <p className="text-sm text-muted-foreground">{subtitle}</p> : null}
@@ -476,13 +467,9 @@ export const VisualWebEditor = ({
                   <Button
                     key={bp.name}
                     type="button"
-                    variant={isEditing ? "default" : "ghost"}
+                    variant={isEditing ? "accent" : "ghost"}
                     size="sm"
-                    className={`h-7 px-2 text-xs font-mono ${
-                      isEditing
-                        ? "bg-[var(--accent-primary)] text-[var(--accent-button-text)]"
-                        : "text-muted-foreground"
-                    }`}
+                    className={`h-7 px-2 text-xs font-mono ${!isEditing ? "text-muted-foreground" : ""}`}
                     onClick={() => setEditorBreakpoint(bp.name)}
                     title={`Edit ${bp.name} (${bp.width}px wide canvas)`}
                   >
@@ -493,12 +480,7 @@ export const VisualWebEditor = ({
             </div>
           </div>
 
-          {fullWidth && (
-            <Button variant="ghost" size="sm" onClick={handleBack} className="hover:bg-[var(--accent-bg)]">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Close
-            </Button>
-          )}
+          {fullWidth && <BackButton onClick={handleBack} label="Back" />}
         </div>
         <EditorToolbar
           onSave={handleSave}

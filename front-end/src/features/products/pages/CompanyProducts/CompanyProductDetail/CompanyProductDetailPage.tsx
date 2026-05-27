@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft } from "lucide-react";
+import { BackButton } from "@/components/common/BackButton";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -192,10 +192,7 @@ export const CompanyProductDetailPage = ({ productId, onBack }: CompanyProductDe
         <Card className="p-12 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] text-center">
           <h3 className="text-lg font-semibold text-foreground mb-2">Error Loading Product</h3>
           <p className="text-muted-foreground mb-4">{error}</p>
-          <Button onClick={onBack}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Products
-          </Button>
+          <BackButton onClick={onBack} label="Back to Products" />
         </Card>
       </div>
     );
@@ -207,10 +204,7 @@ export const CompanyProductDetailPage = ({ productId, onBack }: CompanyProductDe
         <Card className="p-12 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] text-center">
           <h3 className="text-lg font-semibold text-foreground mb-2">Product Not Found</h3>
           <p className="text-muted-foreground mb-4">The product you're looking for doesn't exist.</p>
-          <Button onClick={onBack}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Products
-          </Button>
+          <BackButton onClick={onBack} label="Back to Products" />
         </Card>
       </div>
     );

@@ -8,14 +8,12 @@ export const ProductImage = ({ imageUrl, productName, variant = "grid" }: Produc
 
   if (variant === "list") {
     return (
-      <div className="flex-shrink-0">
-        <ImageWithFallback
-          src={url}
-          alt={productName}
-          className="w-20 h-16 object-cover rounded-lg"
-          fallbackSrc="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=80&h=64&fit=crop"
-        />
-      </div>
+      <ImageWithFallback
+        src={url}
+        alt={productName}
+        className="absolute inset-0 h-full w-full object-cover"
+        fallbackSrc="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=80&h=64&fit=crop"
+      />
     );
   }
 

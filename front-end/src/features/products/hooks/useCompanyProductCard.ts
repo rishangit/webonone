@@ -15,6 +15,11 @@ import {
   getAvailabilityStatus,
   calculateDisplayValues
 } from "@/features/products/pages/CompanyProducts/CompanyProductCard/utils";
+import {
+  isShowcaseFixtureId,
+  SHOWCASE_COMPANY_PRODUCT_VARIANTS,
+  SHOWCASE_FIXTURE_CURRENCY,
+} from "@/shared/utils/showcaseFixture";
 
 export const useCompanyProductCard = (product: CompanyProduct) => {
   const dispatch = useAppDispatch();
@@ -29,10 +34,17 @@ export const useCompanyProductCard = (product: CompanyProduct) => {
   
   const companyId = product.companyId || user?.companyId;
   const imageUrl = getImageUrl(product, imageError);
+  const isShowcaseProduct =
+    isShowcaseFixtureId(product.id) || isShowcaseFixtureId(product.companyId) || isShowcaseFixtureId(companyId);
 
   // Fetch company currency
   useEffect(() => {
     const fetchCompanyCurrency = async () => {
+      if (isShowcaseProduct) {
+        setCompanyCurrency(SHOWCASE_FIXTURE_CURRENCY);
+        return;
+      }
+
       if (!companyId) {
         try {
           const currencies = await currenciesService.getCurrencies();
@@ -87,11 +99,18 @@ export const useCompanyProductCard = (product: CompanyProduct) => {
     };
     
     fetchCompanyCurrency();
-  }, [companyId, companies, dispatch, product.companyId]);
+  }, [companyId, companies, dispatch, product.companyId, isShowcaseProduct]);
 
   // Fetch variants
   useEffect(() => {
     const fetchVariants = async () => {
+      if (isShowcaseFixtureId(product.id)) {
+        setVariants(SHOWCASE_COMPANY_PRODUCT_VARIANTS);
+        const defaultVariant = SHOWCASE_COMPANY_PRODUCT_VARIANTS.find((v) => v.isDefault);
+        setSelectedVariantId(defaultVariant?.id ?? SHOWCASE_COMPANY_PRODUCT_VARIANTS[0]?.id ?? null);
+        setImageLoading(false);
+        return;
+      }
       if (!product.id) return;
       try {
         const fetchedVariants = await companyProductVariantsService.getVariantsByCompanyProductId(product.id);
@@ -108,11 +127,12 @@ export const useCompanyProductCard = (product: CompanyProduct) => {
       }
     };
     fetchVariants();
-  }, [product.id]);
+  }, [product.id, isShowcaseProduct]);
 
   // Refresh variant data when selected variant changes
   useEffect(() => {
     const refreshVariantData = async () => {
+      if (isShowcaseFixtureId(product.id)) return;
       if (!selectedVariantId || !product.id) return;
       try {
         const refreshedVariant = await companyProductVariantsService.getVariantById(selectedVariantId);

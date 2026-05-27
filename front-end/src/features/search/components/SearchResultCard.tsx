@@ -2,7 +2,13 @@ import { Calendar, User, Building, Package, MapPin, Bell, Users, CreditCard, Mor
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  CARD_LIST_AVATAR_CLASS,
+  CARD_LIST_AVATAR_FALLBACK_CLASS,
+} from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 export interface SearchResult {
@@ -155,9 +161,11 @@ export function SearchResultCard({ result, searchQuery, onNavigate, onAction }: 
           </div>
 
           {result.avatar && (
-            <Avatar className="w-10 h-10 shrink-0">
+            <Avatar className={`${CARD_LIST_AVATAR_CLASS} shrink-0`}>
               <AvatarImage src={result.avatar} alt={result.title} />
-              <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)]">
+              <AvatarFallback
+                className={`bg-[var(--accent-bg)] text-[var(--accent-text)] ${CARD_LIST_AVATAR_FALLBACK_CLASS}`}
+              >
                 {result.title.split(' ').map(n => n[0]).join('').substring(0, 2)}
               </AvatarFallback>
             </Avatar>

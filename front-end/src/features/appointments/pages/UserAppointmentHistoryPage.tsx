@@ -1,11 +1,18 @@
 import { useState, useEffect, useMemo } from "react";
-import { ArrowLeft, Calendar, Clock, CheckCircle, XCircle, Phone, User, Mail, Package, FileText, History } from "lucide-react";
+import { Calendar, Clock, CheckCircle, XCircle, Phone, User, Mail, Package, FileText, History } from "lucide-react";
+import { BackButton } from "@/components/common/BackButton";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/common/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  CARD_LIST_AVATAR_CLASS,
+  CARD_LIST_AVATAR_FALLBACK_CLASS,
+} from "@/components/ui/avatar";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchUserAppointmentHistoryRequest } from "@/features/appointments/store";
 import { fetchUsersRequest } from "@/shared/store/users";
@@ -234,14 +241,7 @@ export const UserAppointmentHistoryPage = ({ userId, onBack, currentUser }: User
     return (
       <div className="flex-1 p-6 space-y-6">
         <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={onBack}
-            className="bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent text-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </Button>
+          <BackButton onClick={onBack} label="Back to Users" />
           <div>
             <h1 className="text-xl sm:text-2xl font-semibold text-foreground">Appointment History</h1>
           </div>
@@ -257,14 +257,7 @@ export const UserAppointmentHistoryPage = ({ userId, onBack, currentUser }: User
     <div className="flex-1 p-6 space-y-6">
       {/* Header with Back Button */}
       <div className="flex items-center gap-4">
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={onBack}
-          className="bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent text-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="w-4 h-4" />
-        </Button>
+        <BackButton onClick={onBack} label="Back to Users" />
         <div>
           <h1 className="text-xl sm:text-2xl font-semibold text-foreground">Appointment History</h1>
           <p className="text-muted-foreground mt-1 text-sm sm:text-base">
@@ -276,12 +269,14 @@ export const UserAppointmentHistoryPage = ({ userId, onBack, currentUser }: User
       {/* User Info Card */}
       <Card className="p-6 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)]">
         <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-          <Avatar className="w-20 h-20 mx-auto sm:mx-0">
+          <Avatar className={`${CARD_LIST_AVATAR_CLASS} mx-auto sm:mx-0 flex-shrink-0`}>
             <AvatarImage 
               src={formatAvatarUrl(userData.avatar, userData.firstName, userData.lastName)} 
               alt={userData.name} 
             />
-            <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)] text-lg">
+            <AvatarFallback
+              className={`bg-[var(--accent-bg)] text-[var(--accent-text)] ${CARD_LIST_AVATAR_FALLBACK_CLASS}`}
+            >
               {userData.name.split(' ').map(n => n[0]).join('')}
             </AvatarFallback>
           </Avatar>

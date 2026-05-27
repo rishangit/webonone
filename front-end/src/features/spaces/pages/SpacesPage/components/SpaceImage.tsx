@@ -8,13 +8,7 @@ export const SpaceImage = ({ imageUrl, spaceName, variant = "grid" }: SpaceImage
   
   if (variant === "list") {
     return (
-      <div className="flex-shrink-0">
-        <img 
-          src={imageSrc} 
-          alt={spaceName}
-          className="w-20 h-16 object-cover rounded-lg"
-        />
-      </div>
+      <img src={imageSrc} alt={spaceName} className="absolute inset-0 h-full w-full object-cover" />
     );
   }
 

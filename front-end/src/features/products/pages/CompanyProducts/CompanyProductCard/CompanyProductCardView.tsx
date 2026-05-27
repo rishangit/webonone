@@ -1,4 +1,6 @@
 import { Card } from "@/components/ui/card";
+import { CardGridKebabSlot } from "@/components/common/CardGridKebabSlot";
+import { LIST_CARD_GRID_SHELL } from "@/components/common/CardKebabTrigger";
 import { Badge } from "@/components/ui/badge";
 import type { CompanyProduct } from '@/features/products/services/productApi';
 import { ProductImage } from "./components/ProductImage";
@@ -40,7 +42,7 @@ export const CompanyProductCardView = ({
 
   return (
     <Card 
-      className="overflow-hidden backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-300 hover:shadow-lg hover:shadow-[var(--glass-shadow)] group cursor-pointer"
+      className={LIST_CARD_GRID_SHELL}
       onClick={() => onView?.(product)}
     >
       <div className="relative">
@@ -59,13 +61,13 @@ export const CompanyProductCardView = ({
         />
         {/* 3-dot menu top right - hidden for regular users */}
         {!isRegularUser && (
-          <div className="absolute top-3 right-3">
+          <CardGridKebabSlot>
             <ProductActions
               product={product}
               onView={onView}
               onDelete={onDelete}
             />
-          </div>
+          </CardGridKebabSlot>
         )}
         {/* Stock status badge bottom left */}
         <div className="absolute bottom-3 left-3">

@@ -1,10 +1,14 @@
+import {
+  formControlProgressIndicatorClasses,
+  formControlProgressTrackClasses,
+} from "./form-control-styles";
 import { cn } from "./utils";
 
 interface ProgressBarProps {
   value: number; // 0-100
   className?: string;
   wrapperClassName?: string;
-  variant?: "default" | "upload"; // default uses gray-200/gray-700, upload uses input-background
+  variant?: "default" | "upload";
   showLabel?: boolean;
   label?: string;
 }
@@ -20,13 +24,12 @@ export const ProgressBar = ({
   // Clamp value between 0 and 100
   const clampedValue = Math.min(100, Math.max(0, value));
 
-  const backgroundClass = variant === "upload" 
-    ? "bg-[var(--input-background)]"
-    : "bg-gray-200 dark:bg-gray-700";
+  const backgroundClass = formControlProgressTrackClasses;
 
-  const gradientClass = variant === "upload"
-    ? "bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)]"
-    : "bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-primary-hover)]";
+  const gradientClass =
+    variant === "upload"
+      ? "bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)]"
+      : formControlProgressIndicatorClasses;
 
   return (
     <div className={cn("w-full", wrapperClassName)}>

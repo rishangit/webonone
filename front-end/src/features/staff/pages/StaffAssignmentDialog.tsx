@@ -109,7 +109,7 @@ export function StaffAssignmentDialog({
             <div className="mb-4">
               <Card className="p-4 bg-[var(--accent-bg)] border-2 border-[var(--accent-border)] backdrop-blur-xl">
                 <div className="flex items-center gap-3">
-                  <Avatar className="w-12 h-12">
+                  <Avatar className="w-14 h-14">
                     <AvatarImage src={assignedStaff.image} alt={assignedStaff.name} />
                     <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)]">
                       {assignedStaff.name.split(' ').map(n => n[0]).join('')}
@@ -160,7 +160,7 @@ export function StaffAssignmentDialog({
                   onClick={() => handleStaffSelection(staff)}
                 >
                   <div className="flex items-center gap-3">
-                    <Avatar className="w-12 h-12">
+                    <Avatar className="w-14 h-14">
                       <AvatarImage src={staff.image} alt={staff.name} />
                       <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)]">
                         {staff.name.split(' ').map(n => n[0]).join('')}

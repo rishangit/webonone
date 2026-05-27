@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Calendar, CheckCircle, Clock, UserPlus, BarChart3, Settings, Bug, Play, XCircle } from "lucide-react";
+import { Calendar, CheckCircle, Clock, UserPlus, BarChart3, Settings, Bug, Play, XCircle, LayoutGrid } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { AppointmentCard } from "@/shared/components/appointments";
@@ -19,6 +19,7 @@ import { formatAvatarUrl, formatDate } from "../../utils";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { CardTitle } from "@/components/common/CardTitle";
+import { isRole, UserRole } from "@/shared/types/user";
 
 // Stats will be calculated from real data
 
@@ -41,6 +42,7 @@ export const Dashboard = ({ onNavigate }: DashboardProps = {}) => {
 
   // Get company ID from user
   const companyId = user?.companyId;
+  const isSystemAdmin = isRole(user?.role, UserRole.SYSTEM_ADMIN);
 
   // Get company's selected entities
   const company = (userCompany && String(userCompany.id) === String(companyId)) 
@@ -479,6 +481,16 @@ export const Dashboard = ({ onNavigate }: DashboardProps = {}) => {
                 <Settings className="w-4 h-4 mr-2" />
                 Settings
               </Button>
+              {isSystemAdmin && (
+                <Button
+                  variant="outline"
+                  className="w-full justify-start bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent text-foreground hover:text-foreground"
+                  onClick={() => navigate('/system/showcase')}
+                >
+                  <LayoutGrid className="w-4 h-4 mr-2" />
+                  Component Showcase
+                </Button>
+              )}
               <Button 
                 variant="accent" 
                 className="w-full justify-start"

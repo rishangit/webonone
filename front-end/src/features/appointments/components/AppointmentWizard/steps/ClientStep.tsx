@@ -89,7 +89,7 @@ export const ClientStep = ({
             <Card className="border-[var(--glass-border)] bg-[var(--glass-bg)]">
               <div className="p-3 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
-                  <Avatar className="w-10 h-10 border border-[var(--glass-border)]">
+                  <Avatar className="w-14 h-14">
                     <AvatarImage
                       src={
                         selectedUserData

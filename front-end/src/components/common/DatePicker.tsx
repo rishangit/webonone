@@ -3,8 +3,14 @@ import { format, startOfMonth } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Calendar } from "../ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { Button } from "../ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  selectTriggerClasses,
+} from "../ui/select";
 import { cn } from "../ui/utils";
 
 interface DatePickerProps {
@@ -121,28 +127,24 @@ export const DatePicker = ({
     <div className={cn("w-full", className)}>
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
-          <Button
+          <button
             type="button"
-            variant="outline"
             disabled={disabled}
             id={id}
             name={name}
             className={cn(
-              "w-full h-12 md:h-9 justify-start text-left font-normal text-lg md:text-sm bg-[var(--input-background)] border-[var(--glass-border)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-border)] hover:text-[var(--accent-text)]",
-              error && "border-red-500 focus:border-red-500 focus:ring-red-500",
+              selectTriggerClasses,
+              "justify-start text-left font-normal",
+              error &&
+                "border-red-500 focus:border-red-500 focus-visible:border-red-500 focus-visible:ring-red-500/25",
               !isValidDate && "text-muted-foreground",
-              isValidDate && "bg-[var(--accent-bg)] border-[var(--accent-border)] text-[var(--accent-text)]"
             )}
           >
-            <CalendarIcon className="mr-2 h-5 w-5 md:h-4 md:w-4 shrink-0" />
-            <span className="flex-1 text-left">
-              {isValidDate ? (
-                formatDisplayDate(dateValue)
-              ) : (
-                <span className="text-muted-foreground">{placeholder}</span>
-              )}
+            <CalendarIcon className="size-4 shrink-0 opacity-50" />
+            <span className="flex-1 truncate text-left">
+              {isValidDate ? formatDisplayDate(dateValue) : placeholder}
             </span>
-          </Button>
+          </button>
         </PopoverTrigger>
         <PopoverContent
           className="!w-[350px] !min-w-[350px] !max-w-[350px] p-0 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]"
@@ -157,7 +159,7 @@ export const DatePicker = ({
               onValueChange={handleMonthChange}
               disabled={disabled}
             >
-              <SelectTrigger className="flex-1 h-9 bg-[var(--input-background)] border-[var(--glass-border)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-border)]">
+              <SelectTrigger className="flex-1">
                 <SelectValue>
                   {months[currentMonth.getMonth()]}
                 </SelectValue>
@@ -176,7 +178,7 @@ export const DatePicker = ({
               onValueChange={handleYearChange}
               disabled={disabled}
             >
-              <SelectTrigger className="flex-1 h-9 bg-[var(--input-background)] border-[var(--glass-border)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-border)]">
+              <SelectTrigger className="flex-1">
                 <SelectValue>
                   {currentMonth.getFullYear()}
                 </SelectValue>

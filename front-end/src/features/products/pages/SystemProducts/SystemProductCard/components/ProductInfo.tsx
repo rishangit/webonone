@@ -1,22 +1,24 @@
-import { Users, CheckCircle } from "lucide-react";
+import { Users } from "lucide-react";
 import { DateDisplay } from "@/components/common/DateDisplay";
+import { ListCardDetailField, ListCardDetailGrid } from "@/components/common/ListCardLayout";
 import { ProductInfoProps } from "../types";
 
 export const ProductInfo = ({ product, variant = "grid" }: ProductInfoProps) => {
   if (variant === "list") {
     return (
       <>
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Users className="w-4 h-4 flex-shrink-0" />
-            <span className="truncate">{product.usageCount} companies</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <CheckCircle className="w-4 h-4 flex-shrink-0" />
-            <span className="truncate"><DateDisplay date={product.lastModified} /></span>
-          </div>
-        </div>
-        <p className="text-sm text-foreground mb-3 line-clamp-2">{product.description}</p>
+        <ListCardDetailGrid>
+          <ListCardDetailField
+            icon={Users}
+            label="Usage"
+            value={`${product.usageCount} companies`}
+          />
+          <ListCardDetailField label="Modified">
+            <DateDisplay date={product.lastModified} className="text-sm font-medium text-foreground" />
+          </ListCardDetailField>
+          <ListCardDetailField label="Type" value={product.type ?? "—"} />
+          <ListCardDetailField label="ID" value={product.id} />
+        </ListCardDetailGrid>
       </>
     );
   }

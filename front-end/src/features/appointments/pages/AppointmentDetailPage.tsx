@@ -310,7 +310,7 @@ export const AppointmentDetailPage = ({ appointmentId, onBack }: AppointmentDeta
           <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
             <CardTitle title="Client Information" icon={User} />
             <div className="flex items-start gap-4">
-              <Avatar className="w-16 h-16 ring-2 ring-[var(--accent-border)] ring-offset-2 ring-offset-background">
+              <Avatar className="w-14 h-14 ring-offset-2 ring-offset-background">
                 <AvatarImage src={formatAvatarUrl(clientAvatar, clientUser?.firstName, clientUser?.lastName)} />
                 <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)] font-semibold">
                   {clientName.split(' ').map(n => n[0]).join('')}
@@ -410,7 +410,7 @@ export const AppointmentDetailPage = ({ appointmentId, onBack }: AppointmentDeta
             <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">
               <CardTitle title="Assigned Staff" icon={User} />
               <div className="flex items-center gap-3">
-                <Avatar className="w-12 h-12 ring-2 ring-[var(--accent-border)] ring-offset-2 ring-offset-background">
+                <Avatar className="w-14 h-14 ring-offset-2 ring-offset-background">
                   <AvatarImage src={formatAvatarUrl(currentStaff.avatar, currentStaff.firstName, currentStaff.lastName)} />
                   <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)] font-semibold">
                     {`${currentStaff.firstName?.[0] || ''}${currentStaff.lastName?.[0] || ''}`}

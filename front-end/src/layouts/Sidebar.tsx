@@ -1,4 +1,4 @@
-import { Calendar, Users, Clock, BarChart3, FileText, MessageSquare, Settings, CreditCard, Building, UserCheck, MapPin, Package, PackageCheck, DollarSign, ChevronRight, Tag, Globe } from "lucide-react";
+import { Calendar, Users, Clock, BarChart3, FileText, MessageSquare, Settings, CreditCard, Building, UserCheck, MapPin, Package, PackageCheck, DollarSign, ChevronRight, Tag, Globe, LayoutGrid } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/components/ui/use-mobile";
 import { User as UserType, UserRole } from "@/shared/types/user";
@@ -55,6 +55,7 @@ const getNavigationItems = (role: UserRole, selectedEntities?: string[] | null) 
         ]
       },
       { icon: Tag, label: "Tags", id: "tags" },
+      { icon: LayoutGrid, label: "Showcase", id: "showcase" },
       { icon: BarChart3, label: "Analytics", id: "analytics" },
       { icon: FileText, label: "Reports", id: "reports" },
       { icon: MessageSquare, label: "Messages", id: "messages" },

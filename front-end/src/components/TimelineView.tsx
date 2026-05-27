@@ -706,7 +706,7 @@ export function TimelineView({ currentUser, selectedDate, appointments, onDateCh
                         }`}>
                           <div className="flex items-center gap-3 min-w-0 flex-1 ml-2">
                           {/* User Avatar */}
-                          <Avatar className="w-8 h-8 ring-2 ring-[var(--accent-border)] shadow-lg flex-shrink-0">
+                          <Avatar className="w-8 h-8 shadow-lg flex-shrink-0">
                             <AvatarImage src={position.appointment.patientImage} />
                             <AvatarFallback className="bg-[var(--accent-primary)] text-[var(--accent-button-text)] text-xs font-medium">
                               {position.appointment.patientName.split(' ').map(n => n[0]).join('')}
@@ -988,7 +988,7 @@ export function TimelineView({ currentUser, selectedDate, appointments, onDateCh
                       <div className="space-y-2.5">
                         {/* Header with Avatar and Name - Accent Styled */}
                         <div className="flex items-center gap-3 pb-2">
-                          <Avatar className="w-12 h-12 ring-2 ring-[var(--accent-primary)] shadow-lg">
+                          <Avatar className="w-14 h-14 shadow-lg">
                             <AvatarImage src={position.appointment.patientImage} />
                             <AvatarFallback className="bg-[var(--accent-primary)] text-[var(--accent-button-text)] text-sm font-semibold">
                               {position.appointment.patientName.split(' ').map(n => n[0]).join('')}
@@ -1238,7 +1238,7 @@ export function TimelineView({ currentUser, selectedDate, appointments, onDateCh
                                       onClick={(e) => e.stopPropagation()}
                                     >
                                       <div className="flex items-center gap-2">
-                                        <Avatar className="w-6 h-6">
+                                        <Avatar className="w-8 h-8">
                                           <AvatarImage src={formatAvatarUrl(assignedStaffMember.avatar, assignedStaffMember.firstName, assignedStaffMember.lastName)} />
                                           <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)] text-xs">
                                             {`${(assignedStaffMember.firstName?.[0] || '')}${(assignedStaffMember.lastName?.[0] || '')}`}
@@ -1278,7 +1278,7 @@ export function TimelineView({ currentUser, selectedDate, appointments, onDateCh
                                         onClick={(e) => e.stopPropagation()}
                                       >
                                         <div className="flex items-center gap-2">
-                                          <Avatar className="w-6 h-6">
+                                          <Avatar className="w-8 h-8">
                                             <AvatarImage src={formatAvatarUrl(staffMember.avatar, staffMember.firstName, staffMember.lastName)} />
                                             <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)] text-xs">
                                               {`${(staffMember.firstName?.[0] || '')}${(staffMember.lastName?.[0] || '')}`}

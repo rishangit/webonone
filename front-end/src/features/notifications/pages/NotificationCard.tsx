@@ -258,7 +258,7 @@ export function NotificationCard({
           {/* Sender Information */}
           {notification.sender && (
             <div className="flex items-center gap-2 mb-3">
-              <Avatar className="w-6 h-6">
+              <Avatar className="w-8 h-8">
                 <AvatarImage src={notification.sender.avatar} alt={notification.sender.name} />
                 <AvatarFallback className="text-xs bg-[var(--accent-bg)] text-[var(--accent-text)]">
                   {notification.sender.name.split(' ').map(n => n[0]).join('')}
@@ -321,7 +321,7 @@ export function NotificationCard({
           {/* Sender Information */}
           {notification.sender && (
             <div className="flex items-center gap-2">
-              <Avatar className="w-6 h-6">
+              <Avatar className="w-8 h-8">
                 <AvatarImage src={notification.sender.avatar} alt={notification.sender.name} />
                 <AvatarFallback className="text-xs bg-[var(--accent-bg)] text-[var(--accent-text)]">
                   {notification.sender.name.split(' ').map(n => n[0]).join('')}

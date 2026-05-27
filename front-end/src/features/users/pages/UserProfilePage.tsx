@@ -106,7 +106,7 @@ export const UserProfilePage = ({ userId, onBack }: UserProfilePageProps) => {
           {/* User Profile Header */}
           <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] shadow-lg">
             <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-              <Avatar className="w-24 h-24 ring-2 ring-[var(--accent-border)]">
+              <Avatar className="w-24 h-24">
                 <AvatarImage 
                   src={user.avatar ? formatAvatarUrl(user.avatar, user.firstName, user.lastName) : undefined} 
                   alt={fullName} 

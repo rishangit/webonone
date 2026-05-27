@@ -1,5 +1,11 @@
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  CARD_LIST_AVATAR_CLASS,
+  CARD_LIST_AVATAR_FALLBACK_CLASS,
+} from "@/components/ui/avatar";
 import { formatAvatarUrl } from "@/shared/utils";
 import { Company } from "../types";
 
@@ -16,9 +22,11 @@ export const CompanyCardHeader = ({
 }: CompanyCardHeaderProps) => {
   return (
     <div className="flex items-start gap-3">
-      <Avatar className="w-20 h-20 flex-shrink-0">
+      <Avatar className={`${CARD_LIST_AVATAR_CLASS} flex-shrink-0`}>
         <AvatarImage src={company.logo ? formatAvatarUrl(company.logo) : undefined} alt={company.name} />
-        <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)]">
+        <AvatarFallback
+          className={`bg-[var(--accent-bg)] text-[var(--accent-text)] ${CARD_LIST_AVATAR_FALLBACK_CLASS}`}
+        >
           {company.name.substring(0, 2).toUpperCase()}
         </AvatarFallback>
       </Avatar>

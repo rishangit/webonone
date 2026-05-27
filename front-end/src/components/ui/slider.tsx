@@ -3,6 +3,7 @@
 import * as React from "react";
 import * as SliderPrimitive from "@radix-ui/react-slider";
 
+import { formControlFocusClasses } from "./form-control-styles";
 import { cn } from "./utils";
 
 function Slider({
@@ -45,7 +46,7 @@ function Slider({
         <SliderPrimitive.Range
           data-slot="slider-range"
           className={cn(
-            "bg-primary absolute data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full",
+            "bg-[var(--accent-primary)] absolute data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full",
           )}
         />
       </SliderPrimitive.Track>
@@ -53,7 +54,11 @@ function Slider({
         <SliderPrimitive.Thumb
           data-slot="slider-thumb"
           key={index}
-          className="border-primary bg-background ring-ring/50 block size-4 shrink-0 rounded-full border shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
+          className={cn(
+            "border-[var(--accent-border)] bg-background block size-4 shrink-0 rounded-full border shadow-sm transition-[color,box-shadow] outline-none disabled:pointer-events-none disabled:opacity-50",
+            "hover:ring-4 hover:ring-[var(--accent-primary)]/20",
+            formControlFocusClasses,
+          )}
         />
       ))}
     </SliderPrimitive.Root>

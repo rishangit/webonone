@@ -14,7 +14,7 @@ export const CompanyOwnerInfo = ({ company }: CompanyOwnerInfoProps) => {
     <div className="flex items-center gap-2 text-sm pt-2 border-t border-border">
       <User className="w-4 h-4 text-[var(--accent-text)] flex-shrink-0" />
       <div className="flex items-center gap-2 flex-1 min-w-0">
-        <Avatar className="w-6 h-6 flex-shrink-0">
+        <Avatar className="w-8 h-8 flex-shrink-0">
           <AvatarImage src={company.owner.avatar ? formatAvatarUrl(company.owner.avatar) : undefined} alt={company.owner.name} />
           <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)] text-xs">
             {company.owner.name ? company.owner.name.substring(0, 2).toUpperCase() : 'U'}

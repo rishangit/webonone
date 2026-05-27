@@ -1,62 +1,163 @@
+import { Globe, Calendar } from "lucide-react";
+
 import { Card } from "@/components/ui/card";
+
 import { Badge } from "@/components/ui/badge";
-import { Globe } from "lucide-react";
+
+import { LIST_CARD_LIST_SHELL } from "@/components/common/CardKebabTrigger";
+
+import {
+
+  ListCardColorHero,
+
+  ListCardContent,
+
+  ListCardDetailField,
+
+  ListCardDetailGrid,
+
+  ListCardDetailsHeader,
+
+  ListCardMediaColumn,
+
+} from "@/components/common/ListCardLayout";
+
 import { WebpageViewProps } from "../types";
+
 import { WebpageActions } from "./WebpageActions";
 
+
+
 export const WebpageListView = ({
+
   webPage,
+
   onEdit,
+
   onBrowse,
+
   onDelete,
+
 }: WebpageViewProps) => {
+
   const handleRowClick = (e: React.MouseEvent) => {
+
     const target = e.target as HTMLElement;
+
     if (
+
       target.closest("button") ||
+
       target.closest('[role="menuitem"]') ||
+
       target.closest("[data-radix-popper-content-wrapper]")
+
     ) {
+
       return;
+
     }
+
     onBrowse(webPage);
+
   };
 
-  return (
-    <Card
-      className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 cursor-pointer"
-      onClick={handleRowClick}
-    >
-      <div className="flex items-center gap-4">
-        <div className="flex-shrink-0 p-3 rounded-lg bg-gradient-to-br from-[var(--accent-primary)]/10 to-[var(--accent-secondary)]/10">
-          <Globe className="w-6 h-6 text-[var(--accent-primary)]" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-3 mb-1">
-            <div>
-              <h3 className="font-semibold text-foreground">{webPage.name}</h3>
-              <p className="text-sm text-muted-foreground break-all line-clamp-1 mt-0.5">
-                {webPage.url}
-              </p>
-            </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
-              {webPage.isActive && (
-                <Badge
-                  className="bg-[var(--accent-bg)] text-[var(--accent-text)] border border-[var(--accent-border)] px-2 py-0.5 text-xs font-semibold"
-                >
-                  Active
-                </Badge>
-              )}
-              <WebpageActions
-                webPage={webPage}
-                onEdit={onEdit}
-                onBrowse={onBrowse}
-                onDelete={onDelete}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </Card>
+
+
+  const statusBadge = webPage.isActive ? (
+
+    <Badge className="border border-[var(--accent-border)] bg-[var(--accent-bg)] px-2 py-0.5 text-xs font-semibold text-[var(--accent-text)]">
+
+      Active
+
+    </Badge>
+
+  ) : (
+
+    <Badge variant="outline" className="border-[var(--glass-border)] px-2 py-0.5 text-xs text-muted-foreground">
+
+      Inactive
+
+    </Badge>
+
   );
+
+
+
+  return (
+
+    <Card className={LIST_CARD_LIST_SHELL} onClick={handleRowClick}>
+
+      <ListCardMediaColumn>
+
+        <ListCardColorHero
+
+          style={{
+
+            background:
+
+              "linear-gradient(135deg, color-mix(in oklch, var(--accent-primary) 25%, transparent) 0%, transparent 100%)",
+
+          }}
+
+        >
+
+          <div className="flex h-24 w-24 items-center justify-center rounded-2xl border border-[var(--accent-border)] bg-[var(--accent-bg)]/40 backdrop-blur-sm">
+
+            <Globe className="h-10 w-10 text-[var(--accent-primary)]" />
+
+          </div>
+
+        </ListCardColorHero>
+
+      </ListCardMediaColumn>
+
+
+
+      <ListCardContent>
+
+        <ListCardDetailsHeader
+
+          title={webPage.name}
+
+          description={webPage.url}
+
+          status={statusBadge}
+
+          actions={
+
+            <WebpageActions
+
+              webPage={webPage}
+
+              onEdit={onEdit}
+
+              onBrowse={onBrowse}
+
+              onDelete={onDelete}
+
+            />
+
+          }
+
+        />
+
+        <ListCardDetailGrid>
+          <ListCardDetailField
+            label="Blocks"
+            value={webPage.content?.blocks?.length ? String(webPage.content.blocks.length) : "0"}
+          />
+          <ListCardDetailField label="Type" value="Web page" />
+          <ListCardDetailField icon={Calendar} label="Updated" value={webPage.updatedAt ?? "—"} />
+          <ListCardDetailField label="ID" value={webPage.id} />
+        </ListCardDetailGrid>
+
+      </ListCardContent>
+
+    </Card>
+
+  );
+
 };
+
+

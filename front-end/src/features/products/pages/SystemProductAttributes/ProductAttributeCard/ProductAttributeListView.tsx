@@ -1,50 +1,145 @@
 import { ListChecks } from "lucide-react";
+
 import { Card } from "@/components/ui/card";
+
+import { Badge } from "@/components/ui/badge";
+
+import { LIST_CARD_LIST_SHELL } from "@/components/common/CardKebabTrigger";
+
+import {
+
+  ListCardColorHero,
+
+  ListCardContent,
+
+  ListCardDetailDivider,
+
+  ListCardDetailField,
+
+  ListCardDetailGrid,
+
+  ListCardDetailsHeader,
+
+  ListCardMediaColumn,
+
+} from "@/components/common/ListCardLayout";
+
 import { ProductAttributeViewProps } from "./types";
+
 import { AttributeStatus } from "./components/AttributeStatus";
+
 import { AttributeActions } from "./components/AttributeActions";
-import { AttributeInfo } from "./components/AttributeInfo";
+
+
 
 export const ProductAttributeListView = ({
+
   attribute,
+
   unitsOfMeasure,
+
   onEdit,
+
   onDelete,
+
 }: ProductAttributeViewProps) => {
-  const unit = attribute.unitOfMeasure 
-    ? unitsOfMeasure.find(u => u.id === attribute.unitOfMeasure)
+
+  const unit = attribute.unitOfMeasure
+
+    ? unitsOfMeasure.find((u) => u.id === attribute.unitOfMeasure)
+
     : null;
 
-  return (
-    <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:border-[var(--accent-border)] transition-all shadow-sm hover:shadow-md">
-      <div className="flex items-start gap-4">
-        <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-gradient-to-br from-[var(--accent-primary)]/20 to-[var(--accent-primary)]/10 flex items-center justify-center border border-[var(--accent-border)]/30">
-          <ListChecks className="w-6 h-6 text-[var(--accent-primary)]" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between mb-3">
-            <div className="min-w-0 flex-1 mr-2">
-              <h3 className="font-semibold text-foreground mb-1 truncate text-lg">
-                {attribute.name}
-              </h3>
-              {attribute.description && (
-                <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                  {attribute.description}
-                </p>
-              )}
-            </div>
-            <AttributeActions
-              attribute={attribute}
-              onEdit={onEdit}
-              onDelete={onDelete}
-            />
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <AttributeStatus isActive={attribute.isActive} />
-            <AttributeInfo attribute={attribute} unit={unit} variant="list" />
-          </div>
-        </div>
-      </div>
-    </Card>
+
+
+  const attributeTags = (
+
+    <>
+
+      <Badge variant="outline" className="border-[var(--glass-border)] text-xs">
+
+        {attribute.valueDataType}
+
+      </Badge>
+
+      {unit ? (
+
+        <Badge variant="outline" className="border-[var(--glass-border)] text-xs">
+
+          {unit.symbol}
+
+        </Badge>
+
+      ) : null}
+
+    </>
+
   );
+
+
+
+  return (
+
+    <Card className={LIST_CARD_LIST_SHELL}>
+
+      <ListCardMediaColumn>
+
+        <ListCardColorHero
+
+          style={{
+
+            background:
+
+              "linear-gradient(135deg, color-mix(in oklch, var(--accent-primary) 25%, transparent) 0%, transparent 100%)",
+
+          }}
+
+        >
+
+          <div className="flex h-24 w-24 items-center justify-center rounded-2xl border border-[var(--accent-border)] bg-[var(--accent-bg)]/40 backdrop-blur-sm">
+
+            <ListChecks className="h-10 w-10 text-[var(--accent-primary)]" />
+
+          </div>
+
+        </ListCardColorHero>
+
+      </ListCardMediaColumn>
+
+
+
+      <ListCardContent>
+
+        <ListCardDetailsHeader
+
+          title={attribute.name}
+
+          description={attribute.description}
+
+          status={<AttributeStatus isActive={attribute.isActive} />}
+
+          actions={<AttributeActions attribute={attribute} onEdit={onEdit} onDelete={onDelete} />}
+
+          tags={attributeTags}
+
+        />
+
+        <ListCardDetailGrid>
+
+          <ListCardDetailField label="Created" value={new Date(attribute.createdAt).toLocaleDateString()} />
+
+          <ListCardDetailField label="Updated" value={new Date(attribute.updatedAt).toLocaleDateString()} />
+
+          <ListCardDetailField label="ID" value={attribute.id} />
+
+        </ListCardDetailGrid>
+
+      </ListCardContent>
+
+    </Card>
+
+  );
+
 };
+
+

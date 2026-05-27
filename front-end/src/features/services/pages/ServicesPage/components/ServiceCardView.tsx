@@ -1,5 +1,7 @@
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { CardGridKebabSlot } from "@/components/common/CardGridKebabSlot";
+import { LIST_CARD_GRID_SHELL } from "@/components/common/CardKebabTrigger";
+import { CARD_PRICE_OVERLAY_TEXT_CLASS } from "@/components/common/ListCardLayout";
 import { ServiceViewProps } from "../types";
 import { ServiceImage } from "./ServiceImage";
 import { ServiceStatus } from "./ServiceStatus";
@@ -27,7 +29,7 @@ export const ServiceCardView = ({
 
   return (
     <Card 
-      className="overflow-hidden backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-300 hover:shadow-lg hover:shadow-[var(--glass-shadow)] group cursor-pointer"
+      className={LIST_CARD_GRID_SHELL}
       onClick={(e) => {
         if ((e.target as HTMLElement).closest('button, [role="menuitem"]')) {
           return;
@@ -49,12 +51,10 @@ export const ServiceCardView = ({
           />
         </div>
         <div className="absolute bottom-3 right-3">
-          <Badge className="bg-black/70 text-white backdrop-blur-sm border border-white/20 px-3 py-1.5 font-semibold">
-            {formatPrice(service.price)}
-          </Badge>
+          <span className={CARD_PRICE_OVERLAY_TEXT_CLASS}>{formatPrice(service.price)}</span>
         </div>
         {!isRegularUser && (
-          <div className="absolute top-3 right-3">
+          <CardGridKebabSlot>
             <ServiceActions
               service={service}
               onView={onView}
@@ -63,7 +63,7 @@ export const ServiceCardView = ({
               onDuplicate={onDuplicate}
               onArchive={onArchive}
             />
-          </div>
+          </CardGridKebabSlot>
         )}
       </div>
       

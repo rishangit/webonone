@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { CheckCircle, XCircle, Loader2, Eye, EyeOff, Lock } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { BackButton } from "@/components/common/BackButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -227,9 +228,11 @@ export const VerifyEmailPage = () => {
 
             {status === "error" && (
               <div className="space-y-3">
-                <Button variant="outline" className="w-full" onClick={() => navigate("/system/signup")}>
-                  Back to Sign Up
-                </Button>
+                <BackButton
+                  onClick={() => navigate("/system/signup")}
+                  label="Back to Sign Up"
+                  className="w-full justify-center"
+                />
                 <Link to="/system/login" className="block text-sm text-muted-foreground hover:text-[var(--accent-text)]">
                   Already have an account? Sign in
                 </Link>

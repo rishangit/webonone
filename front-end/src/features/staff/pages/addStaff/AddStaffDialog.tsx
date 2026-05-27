@@ -336,7 +336,7 @@ export const AddStaffDialog = ({
                 <h3 className="text-lg font-semibold text-foreground">Selected User</h3>
               </div>
               <div className="flex items-center gap-4">
-                <Avatar className="w-16 h-16">
+                <Avatar className="w-14 h-14">
                   <AvatarImage
                     src={formatAvatarUrl(selectedUser.avatar, selectedUser.firstName, selectedUser.lastName)}
                     alt={selectedUser.name}

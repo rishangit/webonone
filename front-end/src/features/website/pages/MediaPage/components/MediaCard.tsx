@@ -9,6 +9,7 @@ export interface MediaCardProps {
   formatSize: (bytes: number) => string;
   onOpen: (path: string) => void;
   onDelete: (path: string, name: string, type: "file" | "folder") => void;
+  previewImageUrl?: string;
 }
 
 export const MediaCard = ({
@@ -18,6 +19,7 @@ export const MediaCard = ({
   formatSize,
   onOpen,
   onDelete,
+  previewImageUrl,
 }: MediaCardProps) => {
   if (viewMode === "grid") {
     return (
@@ -27,6 +29,7 @@ export const MediaCard = ({
         formatSize={formatSize}
         onOpen={onOpen}
         onDelete={onDelete}
+        previewImageUrl={previewImageUrl}
       />
     );
   }
@@ -37,6 +40,7 @@ export const MediaCard = ({
       formatSize={formatSize}
       onOpen={onOpen}
       onDelete={onDelete}
+      previewImageUrl={previewImageUrl}
     />
   );
 };

@@ -1,1 +1,1 @@
-export {};
+export { useShowcaseCatalogFilter } from "./useShowcaseCatalogFilter";

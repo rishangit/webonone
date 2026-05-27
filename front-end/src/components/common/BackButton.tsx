@@ -28,8 +28,10 @@ export const BackButton = ({
         className
       )}
     >
-      <ArrowLeft className="w-4 h-4" {...(size === "sm" && label && { className: "mr-2" })} />
-      {size === "sm" && label}
+      <ArrowLeft
+        className={cn("w-4 h-4 shrink-0", size === "sm" && label ? "mr-2" : undefined)}
+      />
+      {size === "sm" && label ? label : null}
     </Button>
   );
 };

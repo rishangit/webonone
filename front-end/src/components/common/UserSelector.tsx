@@ -125,7 +125,7 @@ export const UserSelector = ({
             <div className="flex items-center gap-2 flex-1 min-w-0">
               {selectedUser ? (
                 <>
-                  <Avatar className="h-6 w-6 shrink-0">
+                  <Avatar className="h-8 w-8 shrink-0">
                     <AvatarImage
                       src={formatAvatarUrl(selectedUser.avatar, selectedUser.firstName, selectedUser.lastName)}
                       alt={getDisplayName(selectedUser)}

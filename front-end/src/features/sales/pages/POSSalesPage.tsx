@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Search, Package, ShoppingCart, X, Calculator, Check, User, CreditCard, Save } from "lucide-react";
+import { BackButton } from "@/components/common/BackButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -549,16 +550,7 @@ export const POSSalesPage = ({ onBack, currentUser }: POSSalesPageProps) => {
           <h1 className="text-2xl font-semibold text-foreground">Point of Sale</h1>
           <p className="text-sm text-muted-foreground">Sell products to customers</p>
         </div>
-        {onBack && (
-          <Button
-            variant="outline"
-            onClick={onBack}
-            className="border-[var(--accent-border)] text-foreground hover:bg-[var(--accent-bg)]"
-          >
-            <X className="w-4 h-4 mr-2" />
-            Close
-          </Button>
-        )}
+        {onBack && <BackButton onClick={onBack} label="Back" />}
       </div>
 
       <div className={`flex gap-6 ${isMobile ? 'flex-col' : 'flex-row'} ${isMobile ? '' : 'flex-1 min-h-0'}`}>

@@ -11,6 +11,26 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { isRole, UserRole } from "@/shared/types/user";
 import { updateAppointmentRequest } from "@/features/appointments/store";
 import { AppointmentCardProps } from "./types";
+import { CardGridKebabSlot } from "@/components/common/CardGridKebabSlot";
+import {
+  LIST_CARD_GRID_SHELL,
+  LIST_CARD_HERO_HEIGHT_CLASS,
+  LIST_CARD_LIST_SHELL,
+} from "@/components/common/CardKebabTrigger";
+import {
+  ListCardBlurredMedia,
+  ListCardContent,
+  ListCardDetailsHeader,
+  ListCardMediaColumn,
+  ListCardPriceFooter,
+} from "@/components/common/ListCardLayout";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  CARD_LIST_AVATAR_CLASS,
+  CARD_LIST_AVATAR_FALLBACK_CLASS,
+} from "@/components/ui/avatar";
 import { AppointmentCardHeader } from "./components/AppointmentCardHeader";
 import { AppointmentCardView } from "./AppointmentCardView";
 import { AppointmentListView } from "./AppointmentListView";
@@ -302,16 +322,13 @@ export const AppointmentCard = ({
       />
 
       <Card 
-        className={viewMode === 'card' 
-          ? "overflow-hidden backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-300 hover:shadow-lg hover:shadow-[var(--glass-shadow)] group cursor-pointer"
-          : "p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)] cursor-pointer"
-        }
+        className={viewMode === "card" ? LIST_CARD_GRID_SHELL : LIST_CARD_LIST_SHELL}
         onClick={handleCardClick}
       >
         {viewMode === 'card' ? (
           <>
             {/* Top area: Full image with blurred patient image background (Grid View) */}
-            <div className="relative h-48 overflow-hidden">
+            <div className={`relative ${LIST_CARD_HERO_HEIGHT_CLASS} overflow-hidden`}>
               {/* Blurred background image */}
               <div 
                 className="absolute inset-0 bg-cover bg-center"
@@ -326,7 +343,7 @@ export const AppointmentCard = ({
               
               {/* Avatar in center */}
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-24 h-24 ring-4 ring-white/20 backdrop-blur-sm rounded-full overflow-hidden">
+                <div className="w-24 h-24 ring-2 ring-[var(--accent-border)] rounded-full overflow-hidden">
                   {patientImage ? (
                     <img 
                       src={patientImage} 
@@ -349,7 +366,7 @@ export const AppointmentCard = ({
               </div>
               
               {/* Actions menu top right */}
-              <div className="absolute top-3 right-3">
+              <CardGridKebabSlot>
                 <AppointmentCardHeader
                   patientName={patientName}
                   patientImage={patientImage}
@@ -371,7 +388,7 @@ export const AppointmentCard = ({
                   onDelete={onDelete}
                   isCompact={true}
                 />
-              </div>
+              </CardGridKebabSlot>
             </div>
             
             {/* Bottom area: Appointment details (Grid View) */}
@@ -403,30 +420,60 @@ export const AppointmentCard = ({
           </>
         ) : (
           <>
-            {/* List View: Full header with avatar and details */}
-            <AppointmentCardHeader
-              patientName={patientName}
-              patientImage={patientImage}
-              service={service}
-              type={type}
-              status={status}
-              hasServiceEntity={hasServiceEntity}
-              getStatusColor={getStatusColor}
-              getStatusDisplay={getStatusDisplay}
-              isStatus={isStatus}
-              handleConfirmAppointment={handleConfirmAppointment}
-              handleCompleteAppointment={handleCompleteAppointment}
-              handleCancelAppointment={handleCancelAppointment}
-              handleStartSession={handleStartSession}
-              handleReschedule={handleReschedule}
-              canConfirmAppointment={canConfirmAppointment}
-              onViewBill={() => setShowBillPreview(true)}
-              onViewDetails={handleViewDetails}
-              onDelete={onDelete}
-              isCompact={false}
-            />
+            <ListCardMediaColumn>
+              <ListCardBlurredMedia
+                backgroundImageUrl={
+                  patientImage ||
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(patientName)}&background=random`
+                }
+              >
+                <Avatar className={CARD_LIST_AVATAR_CLASS}>
+                  <AvatarImage src={patientImage} alt={patientName} />
+                  <AvatarFallback
+                    className={`bg-[var(--accent-bg)] text-[var(--accent-text)] ${CARD_LIST_AVATAR_FALLBACK_CLASS}`}
+                  >
+                    {patientName.split(" ").map((n) => n[0]).join("")}
+                  </AvatarFallback>
+                </Avatar>
+              </ListCardBlurredMedia>
+            </ListCardMediaColumn>
 
-            <AppointmentListView
+            <ListCardContent>
+              <ListCardDetailsHeader
+                title={patientName}
+                description={hasServiceEntity ? (service || type) : undefined}
+                status={
+                  <div className={`rounded-md border px-3 py-1.5 text-xs font-semibold ${getStatusColor(status)}`}>
+                    {getStatusDisplay(status)}
+                  </div>
+                }
+                actions={
+                  <AppointmentCardHeader
+                    patientName={patientName}
+                    patientImage={patientImage}
+                    service={service}
+                    type={type}
+                    status={status}
+                    hasServiceEntity={hasServiceEntity}
+                    getStatusColor={getStatusColor}
+                    getStatusDisplay={getStatusDisplay}
+                    isStatus={isStatus}
+                    handleConfirmAppointment={handleConfirmAppointment}
+                    handleCompleteAppointment={handleCompleteAppointment}
+                    handleCancelAppointment={handleCancelAppointment}
+                    handleStartSession={handleStartSession}
+                    handleReschedule={handleReschedule}
+                    canConfirmAppointment={canConfirmAppointment}
+                    onViewBill={() => setShowBillPreview(true)}
+                    onViewDetails={handleViewDetails}
+                    onDelete={onDelete}
+                    isCompact
+                    kebabVariant="default"
+                  />
+                }
+              />
+
+              <AppointmentListView
               date={date}
               time={time}
               duration={duration}
@@ -439,7 +486,14 @@ export const AppointmentCard = ({
               availableStaff={availableStaff}
               currentStaffId={currentStaffId}
               handleStaffAssignment={handleStaffAssignment}
-            />
+              />
+
+              {hasServiceEntity && (_originalAppointment?.servicePrice ?? _originalAppointment?.price) != null ? (
+                <ListCardPriceFooter
+                  label={formatCurrency(Number(_originalAppointment?.servicePrice ?? _originalAppointment?.price ?? 0))}
+                />
+              ) : null}
+            </ListCardContent>
           </>
         )}
       </Card>

@@ -1,26 +1,37 @@
 import { Clock } from "lucide-react";
+import {
+  CARD_PRICE_TEXT_CLASS,
+  ListCardDetailDivider,
+  ListCardDetailField,
+  ListCardDetailGrid,
+} from "@/components/common/ListCardLayout";
 import { ServiceInfoProps } from "../types";
 
 export const ServiceInfo = ({ service, formatPrice, formatDuration, variant = "grid" }: ServiceInfoProps) => {
   if (variant === "list") {
     return (
       <>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Clock className="w-4 h-4 text-[var(--accent-text)]" />
-            <span>Duration: <span className="text-foreground font-medium">{formatDuration(service.duration)}</span></span>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span>Bookings: <span className="text-foreground font-medium">{service.bookings.thisMonth}</span></span>
-          </div>
-        </div>
-        
-        <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
-          <div className="text-sm">
-            <span className="text-muted-foreground">Revenue: </span>
-            <span className="text-[var(--accent-text)] font-semibold">{formatPrice(service.bookings.revenue)}</span>
-          </div>
-        </div>
+        <ListCardDetailGrid>
+          <ListCardDetailField
+            icon={Clock}
+            label="Duration"
+            value={formatDuration(service.duration)}
+          />
+          <ListCardDetailField
+            label="Bookings"
+            value={`${service.bookings.thisMonth} this month`}
+          />
+          <ListCardDetailField label="Category" value={service.category ?? "—"} />
+        </ListCardDetailGrid>
+        <ListCardDetailDivider />
+        <ListCardDetailGrid>
+          <ListCardDetailField
+            label="Revenue"
+            value={formatPrice(service.bookings.revenue)}
+            className="[&_span:last-child]:font-semibold [&_span:last-child]:text-[var(--accent-text)]"
+          />
+          <ListCardDetailField label="ID" value={service.id} />
+        </ListCardDetailGrid>
       </>
     );
   }
@@ -33,7 +44,7 @@ export const ServiceInfo = ({ service, formatPrice, formatDuration, variant = "g
       </div>
       <div className="flex items-center gap-1.5">
         <span className="text-muted-foreground">Price:</span>
-        <span className="text-[var(--accent-text)] font-semibold">{formatPrice(service.price)}</span>
+        <span className={CARD_PRICE_TEXT_CLASS}>{formatPrice(service.price)}</span>
       </div>
     </div>
   );

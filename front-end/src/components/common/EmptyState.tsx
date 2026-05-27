@@ -1,6 +1,7 @@
 import React, { ReactNode } from "react";
+import type { VariantProps } from "class-variance-authority";
 import { Card } from "../ui/card";
-import { Button } from "../ui/button";
+import { Button, buttonVariants } from "../ui/button";
 import { LucideIcon } from "lucide-react";
 import { Icon } from "./Icon";
 
@@ -11,7 +12,7 @@ interface EmptyStateProps {
   action?: {
     label: string;
     onClick: () => void;
-    variant?: "default" | "accent" | "outline" | "ghost" | "link";
+    variant?: VariantProps<typeof buttonVariants>["variant"];
     icon?: LucideIcon | ReactNode;
   };
   className?: string;

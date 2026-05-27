@@ -1,14 +1,39 @@
-import { MoreVertical, Calendar, User, MapPin, Mail, Phone, UserCheck, History, LogIn } from "lucide-react";
+import { Calendar, User, MapPin, Mail, Phone, UserCheck, History, LogIn } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  CARD_LIST_AVATAR_CLASS,
+  CARD_LIST_AVATAR_FALLBACK_CLASS,
+} from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { formatAvatarUrl } from "../../utils";
 import { UserRoleBadge } from "@/components/UserRoleBadge";
 import { UserRoleNames, UserRole } from "@/shared/types/user";
 import { DateDisplay } from "@/components/common/DateDisplay";
+import { CardGridKebabSlot } from "@/components/common/CardGridKebabSlot";
+import {
+  CardKebabTrigger,
+  LIST_CARD_GRID_SHELL,
+  LIST_CARD_HERO_HEIGHT_CLASS,
+  LIST_CARD_LIST_SHELL,
+} from "@/components/common/CardKebabTrigger";
+import {
+  ListCardBlurredMedia,
+  ListCardContactEmail,
+  ListCardContactGrid,
+  ListCardContactPhone,
+  ListCardContent,
+  ListCardDetailDivider,
+  ListCardDetailField,
+  ListCardDetailGrid,
+  ListCardDetailsHeader,
+  ListCardMediaColumn,
+} from "@/components/common/ListCardLayout";
 
 interface UserCardProps {
   id: string;
@@ -154,119 +179,107 @@ export function UserCard({
   };
 
   if (viewMode === "list") {
+    const roleTags = (
+      <>
+        {roleNamesToShow.map((roleName: string, index: number) => (
+          <UserRoleBadge
+            key={index}
+            role={resolvedRolesToShow[index] ?? fallbackUserRole}
+            showIcon={false}
+            iconSize="w-3 h-3"
+            className="text-sm"
+          />
+        ))}
+      </>
+    );
+
+    const userMenu = shouldUseDropdownMenu ? (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <CardKebabTrigger variant="default" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="bg-popover border-border" onClick={(e) => e.stopPropagation()}>
+          <DropdownMenuItem onClick={() => onViewProfile?.(userData.id)}>
+            <User className="h-4 w-4 mr-2" />
+            View Profile
+          </DropdownMenuItem>
+          {!isSuperAdmin && (
+            <DropdownMenuItem onClick={() => onViewAppointments?.(userData.id)}>
+              <Calendar className="h-4 w-4 mr-2" />
+              View Appointments
+            </DropdownMenuItem>
+          )}
+          <DropdownMenuItem onClick={handleViewHistory}>
+            <History className="h-4 w-4 mr-2" />
+            View History
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onSchedule?.(userData.id)}>
+            <Calendar className="h-4 w-4 mr-2" />
+            Schedule
+          </DropdownMenuItem>
+          {userData.status === "pending" && onApprove && (
+            <DropdownMenuItem onClick={() => onApprove(userData.id)}>
+              <UserCheck className="h-4 w-4 mr-2" />
+              Approve
+            </DropdownMenuItem>
+          )}
+          {isSuperAdmin && onImpersonate && (
+            <DropdownMenuItem onClick={() => onImpersonate(userData.id)}>
+              <LogIn className="h-4 w-4 mr-2" />
+              Login as User
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    ) : undefined;
+
     return (
-      <Card 
-        className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 cursor-pointer"
-        onClick={handleCardClick}
-      >
-        <div className="flex items-start gap-4">
-          <Avatar className="w-20 h-20">
-            <AvatarImage 
-              src={formatAvatarUrl(userData.avatar, userData.firstName, userData.lastName)} 
-              alt={userData.name}
-            />
-            <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)]">
-              {userData.name.split(' ').map((n: string) => n[0]).join('')}
-            </AvatarFallback>
-          </Avatar>
-          
-          <div className="flex-1">
-            <div className="flex items-start justify-between mb-2">
-              <div>
-                <h3 className="font-semibold text-foreground">{userData.name}</h3>
-                <div className="mt-0.5">
-                  <Badge className={getStatusColor(userData.status)}>
-                    {userData.status}
-                  </Badge>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                {shouldUseDropdownMenu ? (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onViewProfile?.(userData.id)}>
-                        <User className="h-4 w-4 mr-2" />
-                        View Profile
-                      </DropdownMenuItem>
-                      {!isSuperAdmin && (
-                        <DropdownMenuItem onClick={() => onViewAppointments?.(userData.id)}>
-                          <Calendar className="h-4 w-4 mr-2" />
-                          View Appointments
-                        </DropdownMenuItem>
-                      )}
-                      <DropdownMenuItem onClick={handleViewHistory}>
-                        <History className="h-4 w-4 mr-2" />
-                        View History
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => onSchedule?.(userData.id)}>
-                        <Calendar className="h-4 w-4 mr-2" />
-                        Schedule
-                      </DropdownMenuItem>
-                      {userData.status === "pending" && onApprove && (
-                        <DropdownMenuItem onClick={() => onApprove(userData.id)}>
-                          <UserCheck className="h-4 w-4 mr-2" />
-                          Approve
-                        </DropdownMenuItem>
-                      )}
-                      {isSuperAdmin && onImpersonate && (
-                        <DropdownMenuItem onClick={() => onImpersonate(userData.id)}>
-                          <LogIn className="h-4 w-4 mr-2" />
-                          Login as User
-                        </DropdownMenuItem>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                ) : (
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8"
-                    onClick={() => onViewProfile?.(userData.id)}
-                  >
-                    <User className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Mail className="w-4 h-4" />
-                <span className="truncate">{userData.email}</span>
-              </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Phone className="w-4 h-4" />
-                <span>{userData.phone}</span>
-              </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <MapPin className="w-4 h-4" />
-                <span className="truncate">{userData.location}</span>
-              </div>
-            </div>
-            
-            <div className="flex items-center justify-between mt-4">
-              <div className="flex items-center gap-2 flex-wrap">
-                {roleNamesToShow.map((roleName: string, index: number) => (
-                  <UserRoleBadge 
-                    key={index}
-                    role={resolvedRolesToShow[index] ?? fallbackUserRole}
-                    showIcon={false}
-                    iconSize="w-3 h-3"
-                    className="text-sm"
-                  />
-                ))}
-              </div>
-              <span className="text-xs text-muted-foreground">
-                Member since <DateDisplay date={userData.joinDate || userData.createdAt} className="text-xs text-muted-foreground" />
-              </span>
-            </div>
-          </div>
-        </div>
+      <Card className={LIST_CARD_LIST_SHELL} onClick={handleCardClick}>
+        <ListCardMediaColumn>
+          <ListCardBlurredMedia
+            backgroundImageUrl={formatAvatarUrl(
+              userData.avatar,
+              userData.firstName,
+              userData.lastName
+            ) || `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.name)}&background=random`}
+          >
+            <Avatar className={CARD_LIST_AVATAR_CLASS}>
+              <AvatarImage
+                src={formatAvatarUrl(userData.avatar, userData.firstName, userData.lastName)}
+                alt={userData.name}
+              />
+              <AvatarFallback
+                className={`bg-[var(--accent-bg)] text-[var(--accent-text)] ${CARD_LIST_AVATAR_FALLBACK_CLASS}`}
+              >
+                {userData.name.split(" ").map((n: string) => n[0]).join("")}
+              </AvatarFallback>
+            </Avatar>
+          </ListCardBlurredMedia>
+        </ListCardMediaColumn>
+
+        <ListCardContent>
+          <ListCardDetailsHeader
+            title={userData.name}
+            status={<Badge className={getStatusColor(userData.status)}>{userData.status}</Badge>}
+            actions={userMenu}
+            tags={roleTags}
+          />
+          <ListCardContactGrid>
+            <ListCardContactEmail email={userData.email} />
+            <ListCardContactPhone phone={userData.phone} />
+            <ListCardDetailField icon={MapPin} label="Location" value={userData.location || "—"} />
+          </ListCardContactGrid>
+          <ListCardDetailDivider />
+          <ListCardDetailGrid>
+            <ListCardDetailField label="Member since">
+              <DateDisplay
+                date={userData.joinDate || userData.createdAt}
+                className="text-sm font-medium text-foreground"
+              />
+            </ListCardDetailField>
+            <ListCardDetailField label="Appointments" value={String(userData.appointmentsCount ?? 0)} />
+          </ListCardDetailGrid>
+        </ListCardContent>
       </Card>
     );
   }
@@ -276,11 +289,11 @@ export function UserCard({
   
   return (
     <Card 
-      className="overflow-hidden backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-300 hover:shadow-lg hover:shadow-[var(--glass-shadow)] group cursor-pointer"
+      className={LIST_CARD_GRID_SHELL}
       onClick={handleCardClick}
     >
       {/* Top area: Full image with blurred avatar background */}
-      <div className="relative h-48 overflow-hidden">
+      <div className={`relative ${LIST_CARD_HERO_HEIGHT_CLASS} overflow-hidden`}>
         {/* Blurred background image */}
         <div 
           className="absolute inset-0 bg-cover bg-center"
@@ -295,12 +308,14 @@ export function UserCard({
         
         {/* Avatar in center */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <Avatar className="w-24 h-24 ring-4 ring-white/20 backdrop-blur-sm">
+          <Avatar className={CARD_LIST_AVATAR_CLASS}>
             <AvatarImage 
               src={avatarUrl} 
               alt={userData.name}
             />
-            <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)] text-2xl font-semibold">
+            <AvatarFallback
+              className={`bg-[var(--accent-bg)] text-[var(--accent-text)] ${CARD_LIST_AVATAR_FALLBACK_CLASS}`}
+            >
               {userData.name.split(' ').map((n: string) => n[0]).join('')}
             </AvatarFallback>
           </Avatar>
@@ -314,19 +329,12 @@ export function UserCard({
         </div>
         
         {/* Actions menu top right */}
-        <div className="absolute top-3 right-3">
+        <CardGridKebabSlot>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-8 w-8 bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm border border-white/20"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <MoreVertical className="h-4 w-4" />
-              </Button>
+              <CardKebabTrigger variant="overlay" />
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="bg-popover border-border" onClick={(e) => e.stopPropagation()}>
               <DropdownMenuItem onClick={() => onViewProfile?.(userData.id)}>
                 <User className="h-4 w-4 mr-2" />
                 View Profile
@@ -363,7 +371,7 @@ export function UserCard({
               )}
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
+        </CardGridKebabSlot>
       </div>
       
       {/* Bottom area: User details */}

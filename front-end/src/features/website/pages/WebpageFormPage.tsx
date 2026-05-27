@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Save, Globe, FileText } from "lucide-react";
+import { Save, Globe, FileText } from "lucide-react";
+import { BackButton } from "@/components/common/BackButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -133,15 +134,7 @@ export const WebpageFormPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <div className="max-w-3xl mx-auto px-6 py-8">
         <div className="mb-8">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleBack}
-            className="mb-6 hover:bg-[var(--accent-bg)] text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Webpages
-          </Button>
+          <BackButton onClick={handleBack} label="Back to Webpages" className="mb-6" />
           <div className="flex items-center gap-3 mb-2">
             <div className="p-2 rounded-lg bg-gradient-to-br from-[var(--accent-primary)]/10 to-[var(--accent-secondary)]/10">
               <FileText className="w-6 h-6 text-[var(--accent-primary)]" />

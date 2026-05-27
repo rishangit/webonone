@@ -165,7 +165,7 @@ export const StockFormFields = ({
               <div className="space-y-2">
                 {selectedUser ? (
                   <div className="flex items-center gap-3 p-3 bg-[var(--input-background)] border border-[var(--glass-border)] rounded-md">
-                    <Avatar className="h-10 w-10 shrink-0">
+                    <Avatar className="h-14 w-14 shrink-0">
                       <AvatarImage
                         src={formatAvatarUrl(selectedUser.avatar, selectedUser.firstName, selectedUser.lastName)}
                         alt={getDisplayName(selectedUser)}

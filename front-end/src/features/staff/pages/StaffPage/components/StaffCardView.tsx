@@ -1,6 +1,14 @@
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CardGridKebabSlot } from "@/components/common/CardGridKebabSlot";
+import { LIST_CARD_GRID_SHELL, LIST_CARD_HERO_HEIGHT_CLASS } from "@/components/common/CardKebabTrigger";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  CARD_LIST_AVATAR_CLASS,
+  CARD_LIST_AVATAR_FALLBACK_CLASS,
+} from "@/components/ui/avatar";
 import { formatAvatarUrl } from "../../../../utils";
 import { StaffViewProps } from "../types";
 import { StaffStatus } from "./StaffStatus";
@@ -23,11 +31,11 @@ export const StaffCardView = ({ member, onView, onDelete }: StaffViewProps) => {
 
   return (
     <Card 
-      className="overflow-hidden backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-300 hover:shadow-lg hover:shadow-[var(--glass-shadow)] group cursor-pointer"
+      className={LIST_CARD_GRID_SHELL}
       onClick={handleCardClick}
     >
       {/* Top area: Full image with blurred avatar background */}
-      <div className="relative h-48 overflow-hidden">
+      <div className={`relative ${LIST_CARD_HERO_HEIGHT_CLASS} overflow-hidden`}>
         {/* Blurred background image */}
         <div 
           className="absolute inset-0 bg-cover bg-center"
@@ -42,12 +50,14 @@ export const StaffCardView = ({ member, onView, onDelete }: StaffViewProps) => {
         
         {/* Avatar in center */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <Avatar className="w-24 h-24 ring-4 ring-white/20 backdrop-blur-sm">
+          <Avatar className={CARD_LIST_AVATAR_CLASS}>
             <AvatarImage 
               src={avatarUrl} 
               alt={fullName}
             />
-            <AvatarFallback className="bg-[var(--accent-bg)] text-[var(--accent-text)] text-2xl font-semibold">
+            <AvatarFallback
+              className={`bg-[var(--accent-bg)] text-[var(--accent-text)] ${CARD_LIST_AVATAR_FALLBACK_CLASS}`}
+            >
               {(member.firstName?.[0] || '')}{(member.lastName?.[0] || '')}
             </AvatarFallback>
           </Avatar>
@@ -59,9 +69,9 @@ export const StaffCardView = ({ member, onView, onDelete }: StaffViewProps) => {
         </div>
         
         {/* Actions menu top right */}
-        <div className="absolute top-3 right-3">
+        <CardGridKebabSlot>
           <StaffActions member={member} onView={onView} onDelete={onDelete} />
-        </div>
+        </CardGridKebabSlot>
       </div>
       
       {/* Bottom area: Staff details */}

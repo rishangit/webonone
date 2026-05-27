@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { ArrowLeft, Warehouse, Plus } from "lucide-react";
+import { Warehouse, Plus } from "lucide-react";
+import { BackButton } from "@/components/common/BackButton";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BackButton } from "@/components/common/BackButton";
 import { toast } from "sonner";
 import { companyProductVariantsService } from "@/features/products/services/companyProductVariants";
 import { companyProductStockService, CreateCompanyProductStockData } from "@/features/products/services/companyProductStock";
@@ -146,10 +146,7 @@ export const VariantStockDetailsPage = ({ productId, variantId, onBack }: Varian
             <Warehouse className="w-12 h-12 text-muted-foreground" />
             <h3 className="text-lg font-semibold text-foreground">Variant not found</h3>
             <p className="text-muted-foreground mb-4">The variant you're looking for doesn't exist.</p>
-            <Button onClick={onBack} variant="accent">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Product
-            </Button>
+            <BackButton onClick={onBack} label="Back to Product" />
           </div>
         </Card>
       </div>
@@ -172,7 +169,7 @@ export const VariantStockDetailsPage = ({ productId, variantId, onBack }: Varian
     <div className="flex-1 p-4 lg:p-6 space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <BackButton onClick={onBack} size="icon" label="" />
+          <BackButton onClick={onBack} label="Back" />
           <div className="flex-1">
             <h1 className="text-xl sm:text-2xl font-semibold text-foreground">Stock Details</h1>
             <p className="text-muted-foreground mt-1 text-sm sm:text-base">

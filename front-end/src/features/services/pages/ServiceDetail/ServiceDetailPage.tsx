@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { CalendarPlus, Stethoscope } from "lucide-react";
+import { BackButton } from "@/components/common/BackButton";
 import { Button } from "@/components/ui/button";
 import { TabSwitcher } from "@/components/ui/tab-switcher";
 import { servicesService, Service, type CreateServiceData } from "@/features/services/services";
@@ -231,9 +232,7 @@ export const ServiceDetailPage = ({ serviceId, onBack }: ServiceDetailPageProps)
           <Stethoscope className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
           <h3 className="text-lg font-semibold text-foreground mb-2">Service Not Found</h3>
           <p className="text-muted-foreground mb-4">The service you are looking for does not exist.</p>
-          <Button onClick={onBack} variant="outline">
-            Back to Services
-          </Button>
+          <BackButton onClick={onBack} />
         </div>
       </div>
     );

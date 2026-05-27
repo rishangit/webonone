@@ -1,17 +1,21 @@
-import { MoreVertical, Edit, Trash2, CheckCircle, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Edit, Trash2, CheckCircle, X } from "lucide-react";
+import { CardKebabTrigger } from "@/components/common/CardKebabTrigger";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { TagActionsProps } from "@/features/tags/types";
 
-export const TagActions = ({ tag, onEdit, onDelete, onToggleStatus }: TagActionsProps) => {
+export const TagActions = ({
+  tag,
+  onEdit,
+  onDelete,
+  onToggleStatus,
+  triggerVariant = "overlay",
+}: TagActionsProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-8 w-8">
-          <MoreVertical className="w-4 h-4" />
-        </Button>
+        <CardKebabTrigger variant={triggerVariant} />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="bg-popover border-border">
+      <DropdownMenuContent align="end" className="bg-popover border-border" onClick={(e) => e.stopPropagation()}>
         <DropdownMenuItem onClick={() => onEdit(tag)}>
           <Edit className="w-4 h-4 mr-2" />
           Edit Tag

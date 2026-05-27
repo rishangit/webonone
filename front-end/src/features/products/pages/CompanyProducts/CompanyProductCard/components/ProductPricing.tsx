@@ -1,5 +1,5 @@
 import { DollarSign, TrendingUp } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { CARD_PRICE_TEXT_CLASS } from "@/components/common/ListCardLayout";
 
 interface ProductPricingProps {
   displayCostPrice: number;
@@ -28,8 +28,8 @@ export const ProductPricing = ({
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <TrendingUp className="w-4 h-4 flex-shrink-0" />
             <div>
-              <div className="font-medium text-foreground">{formatPrice(displaySellPrice)}</div>
-              <div className="text-xs">{selectedVariant ? 'Price' : 'Avg Price'}</div>
+              <div className={CARD_PRICE_TEXT_CLASS}>{formatPrice(displaySellPrice)}</div>
+              <div className="text-xs text-muted-foreground">{selectedVariant ? "Price" : "Avg Price"}</div>
             </div>
           </div>
         </div>
@@ -48,8 +48,8 @@ export const ProductPricing = ({
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <TrendingUp className="w-4 h-4 flex-shrink-0" />
           <div>
-            <div className="font-medium text-foreground">{formatPrice(displaySellPrice)}</div>
-            <div className="text-xs">{selectedVariant ? 'Sell' : 'Avg Sell'}</div>
+            <div className={CARD_PRICE_TEXT_CLASS}>{formatPrice(displaySellPrice)}</div>
+            <div className="text-xs text-muted-foreground">{selectedVariant ? "Sell" : "Avg Sell"}</div>
           </div>
         </div>
         {displayMargin && (
@@ -72,7 +72,7 @@ export const ProductPricing = ({
       <div className="pt-2 border-t border-[var(--glass-border)]">
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">{selectedVariant ? 'Price:' : 'Avg Price:'}</span>
-          <span className="text-green-600 dark:text-green-400 font-medium">{formatPrice(displaySellPrice)}</span>
+          <span className={CARD_PRICE_TEXT_CLASS}>{formatPrice(displaySellPrice)}</span>
         </div>
       </div>
     );
@@ -86,7 +86,7 @@ export const ProductPricing = ({
       </div>
       <div className="flex items-center justify-between text-sm">
         <span className="text-muted-foreground">{selectedVariant ? 'Sell:' : 'Avg Sell:'}</span>
-        <span className="text-green-600 dark:text-green-400 font-medium">{formatPrice(displaySellPrice)}</span>
+        <span className={CARD_PRICE_TEXT_CLASS}>{formatPrice(displaySellPrice)}</span>
       </div>
       {displayMargin && (
         <div className="flex items-center justify-between text-sm col-span-2">

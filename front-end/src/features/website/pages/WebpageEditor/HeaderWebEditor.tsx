@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { BackButton } from "@/components/common/BackButton";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchWebPagesRequest } from "@/features/website/store/companyWebPagesSlice";
 import { fetchThemesRequest } from "@/features/website/store/companyWebThemesSlice";
@@ -102,9 +102,7 @@ export const HeaderWebEditor = (props: HeaderWebEditorProps = {}) => {
     return (
       <div className="h-screen flex flex-col items-center justify-center gap-4 bg-background p-6">
         <p className="text-muted-foreground">Header not found or you no longer have access.</p>
-        <Button variant="accent" onClick={handleBack}>
-          Back to headers
-        </Button>
+        <BackButton onClick={handleBack} label="Back to Headers" />
       </div>
     );
   }

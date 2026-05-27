@@ -686,7 +686,7 @@ export function ProductsPage({ currentUser, onNavigate, onViewProduct }: Product
               <img 
                 src={product.image} 
                 alt={product.name}
-                className="w-20 h-16 object-cover"
+                className="w-24 h-24 object-cover"
               />
               <div className="absolute top-1 right-1">
                 <Badge className={`${getStatusColor(product.status)} text-xs border`}>
@@ -1075,7 +1075,7 @@ export function ProductsPage({ currentUser, onNavigate, onViewProduct }: Product
               {[...Array(6)].map((_, index) => (
                 <Card key={index} className="p-6 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                   <div className="flex items-start gap-4 mb-4">
-                    <div className="flex-shrink-0 relative w-20 h-16 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse">
+                    <div className="flex-shrink-0 relative w-24 h-24 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse">
                       <div className="absolute top-1 right-1">
                         <div className="h-5 w-12 bg-gray-300 dark:bg-gray-600 rounded animate-pulse" />
                       </div>
