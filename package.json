@@ -1,6 +1,6 @@
 {
   "name": "appointment-app",
-  "version": "1.20.0",
+  "version": "1.20.1",
   "description": "Full-stack appointment booking application",
   "private": true,
   "workspaces": [
