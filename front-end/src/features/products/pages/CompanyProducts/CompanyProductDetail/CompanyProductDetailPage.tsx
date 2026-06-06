@@ -18,6 +18,7 @@ import { CompanyProductDetailHeader } from "./CompanyProductDetailHeader";
 import { CompanyProductOverviewTab } from "./overview/CompanyProductOverviewTab";
 import { CompanyProductAttributesTab } from "./attributes/CompanyProductAttributesTab";
 import { CompanyProductVariantsTab } from "./productVariants/CompanyProductVariantsTab";
+import { CompanyProductStatisticsTab } from "./statistics/CompanyProductStatisticsTab";
 
 interface CompanyProductDetailPageProps {
   productId: string;
@@ -38,7 +39,7 @@ export const CompanyProductDetailPage = ({ productId, onBack }: CompanyProductDe
   const isRegularUser = isRole(user?.role, UserRole.USER);
 
   useEffect(() => {
-    if (isRegularUser && (activeTab === "variants" || activeTab === "attributes")) {
+    if (isRegularUser && (activeTab === "variants" || activeTab === "attributes" || activeTab === "statistics")) {
       setActiveTab("overview");
     }
   }, [isRegularUser, activeTab]);
@@ -224,6 +225,7 @@ export const CompanyProductDetailPage = ({ productId, onBack }: CompanyProductDe
               { value: "overview", label: "Overview" },
               { value: "variants", label: "Product Variants" },
               { value: "attributes", label: "Product Attributes" },
+              { value: "statistics", label: "Statistics" },
             ]}
             activeTab={activeTab}
             onTabChange={setActiveTab}
@@ -262,6 +264,16 @@ export const CompanyProductDetailPage = ({ productId, onBack }: CompanyProductDe
           <div className="mt-6">
             <CompanyProductAttributesTab
               systemProductId={currentCompanyProduct.systemProductId}
+            />
+          </div>
+        )}
+
+        {!isRegularUser && activeTab === "statistics" && (
+          <div className="mt-6">
+            <CompanyProductStatisticsTab
+              companyProductId={currentCompanyProduct.id}
+              productName={currentCompanyProduct.name || "Unknown Product"}
+              variants={variants}
             />
           </div>
         )}

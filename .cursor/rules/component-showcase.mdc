@@ -1,0 +1,133 @@
+---
+description: Register new reusable cards and list rows in Component Showcase (/system/showcase)
+globs:
+  - front-end/src/**/*Card*.tsx
+  - front-end/src/**/*List*.tsx
+  - front-end/src/**/*ListView*.tsx
+  - front-end/src/shared/components/**
+  - front-end/src/features/showcase/**
+alwaysApply: false
+---
+
+# Component Showcase — new cards & list items
+
+**Route:** `/system/showcase` (`SYSTEM_ADMIN` only)  
+**Module:** `front-end/src/features/showcase/`  
+**Spec:** `docs/specs/1.20.0/component-showcase-upgrade.md` (§11 for file layout)
+
+When you add or materially change a **reusable** domain **card** or **list row** used on list pages, register it in the showcase so design and engineering can review alignment and theme in one place.
+
+## When to register
+
+**Do register:**
+
+- New `*Card` / list row components used on card-grid or list-view pages (appointments, services, products, users, etc.).
+- Significant visual or API changes to an existing card/list already in production.
+
+**Skip (document in PR if unsure):**
+
+- One-off layout inside a single page (wizard step, detail subsection, table cell).
+- Private feature-only UI that is **not** exported for reuse and will not be compared across the app.
+- Inline “no options” / compact pickers (same spirit as `empty-state-component.mdc` exceptions).
+
+## Shared export first
+
+Showcase must render **the same component the live app uses**, not a copy.
+
+1. If the card/list is (or will be) used across features, expose it via **`front-end/src/shared/components/<domain>/`** per `front-end-structure.mdc`.
+2. Showcase sections import from **`@/shared/components/...`**, not from `@/features/<other-module>/...`.
+3. Feature-local cards (e.g. only on one list page) may stay in the feature folder until promoted to `shared/` — then add showcase in the same change (or immediately after promotion).
+
+## Checklist — add a showcase entry
+
+Copy the pattern from **`SpaceShowcaseSection.tsx`** (`front-end/src/features/showcase/components/sections/`).
+
+### 1. Fixture data
+
+- Add or extend fixture objects in **`features/showcase/fixtures/showcaseFixtures.ts`** (or shared helpers in **`@/shared/utils/showcaseFixture`** for images/ids).
+- Use realistic but fake ids (prefix `showcase-`). No API calls.
+
+### 2. Section component
+
+Create **`<Domain>ShowcaseSection.tsx`** under `features/showcase/components/sections/`:
+
+| Requirement | Value |
+|-------------|--------|
+| Props | `ShowcaseSectionProps` — `sectionId`, `viewMode` (`"grid"` \| `"list"`) |
+| Heading | `ShowcaseSectionHeading` with `sectionId`, Lucide `icon`, `title` |
+| Cards tab layout | `grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4` (see `list-pages-card-view.mdc`) |
+| Lists tab layout | `space-y-4` |
+| Handlers | `createShowcaseNoopHandler()` from `features/showcase/fixtures/showcaseHandlers.ts` — **no Redux writes** |
+| `sectionId` on root | Pass through for catalog deep-link / scroll (`scroll-mt-24` on heading section) |
+
+Example structure:
+
+```tsx
+const GRID = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4";
+const LIST = "space-y-4";
+
+export function ExampleShowcaseSection({ sectionId, viewMode }: ShowcaseSectionProps) {
+  const noop = createShowcaseNoopHandler();
+  return (
+    <div>
+      <ShowcaseSectionHeading sectionId={sectionId} icon={Icon} title="Example card" />
+      <div className={viewMode === "grid" ? GRID : LIST}>
+        <ExampleCard item={showcaseExample} viewMode={viewMode} onView={() => noop()} />
+      </div>
+    </div>
+  );
+}
+```
+
+### 3. Wire tabs
+
+- Export from **`components/sections/index.ts`**.
+- Add to **`ShowcaseCardsTab.tsx`** with `sectionId="showcase-cards-<slug>"` and `viewMode="grid"`.
+- Add to **`ShowcaseListsTab.tsx`** with `sectionId="showcase-lists-<slug>"` and `viewMode="list"`.
+- Reuse the **same** section component for both tabs (only `viewMode` / `sectionId` differ).
+
+### 4. Catalog
+
+- Add an entry to **`constants/showcaseCatalog.ts`** in the `cards` array:
+  - `id`, `name`, `importPath` (production import path), `tab: "cards"`, `sectionId: "showcase-cards-<slug>"`.
+- List catalog rows are derived from cards via the existing `lists` map — no duplicate manual list unless the list uses a **different** component (e.g. `CompanyListView`).
+
+### 5. Dialogs (if applicable)
+
+- Reusable dialogs opened from cards: add a demo under **`components/dialog-demos/`** and **`ShowcaseDialogsTab.tsx`**, or a **catalog-only** row with `notes: "See feature X"` if mounting is impractical (see spec §11.5).
+
+## Before you finish a feature
+
+1. If you introduced a new **reusable** card or list row, confirm showcase is updated (sections + tabs + catalog) or explicitly skipped per exceptions above.
+2. Re-read this rule and **`list-pages-card-view.mdc`** for grid breakpoints on the showcase cards tab.
+3. Re-read **`system-kebab-menu.mdc`** if the card exposes row actions.
+
+## Verification
+
+From repo root:
+
+```bash
+cd front-end
+npm run type-check
+npm run lint
+```
+
+Manual (system admin): open **`/system/showcase`** → **Cards** and **Lists** tabs; switch theme/accent on **Primary** and confirm the new block matches production pages.
+
+Discover existing sections:
+
+```bash
+rg "ShowcaseSection" front-end/src/features/showcase --glob "*.tsx"
+```
+
+## Reference implementations
+
+| File | Component |
+|------|-----------|
+| `SpaceShowcaseSection.tsx` | `SpaceCard` — grid + list, noop handlers |
+| `AppointmentShowcaseSection.tsx` | Multiple fixture variants |
+| `CompanyShowcaseSection.tsx` | List-specific wrapper when needed |
+| `showcaseCatalog.ts` | Catalog `cards` / `lists` entries |
+| `ShowcaseCardsTab.tsx` / `ShowcaseListsTab.tsx` | Tab wiring |
+
+**Do not** add Redux slices or API calls under `features/showcase/store/` (see `store/README.md`).

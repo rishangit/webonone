@@ -160,7 +160,7 @@ export function UserCard({
   }
 
   const handleViewHistory = () => {
-    navigate(`/system/users/${userData.id}/history`);
+    navigate(`/system/users/${userData.id}?tab=history`);
   };
 
   const handleCardClick = (e: React.MouseEvent) => {

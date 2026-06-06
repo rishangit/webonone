@@ -33,7 +33,7 @@ import {
 import { Dashboard } from "@/features/dashboard/pages";
 
 // Appointments
-import { AppointmentsPage, UserAppointmentHistoryPage, AppointmentDetailPage } from "@/features/appointments/pages";
+import { AppointmentsPage, AppointmentDetailPage } from "@/features/appointments/pages";
 
 // Companies
 import { CompaniesPage, CompanyProfilePage, CompanySettingsPage } from "@/features/companies/pages";
@@ -95,6 +95,9 @@ import {
 
 // Showcase
 import { ShowcaseAdminGuard, ShowcasePage } from "@/features/showcase";
+
+// Custom forms
+import { CustomFormsPage, FormBuilderEditor } from "@/features/customForms";
 
 // State management
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -294,7 +297,7 @@ function UsersPageWrapper() {
   };
 
   const handleViewAppointments = (userId: string) => {
-    navigate(`/system/users/${userId}/history`);
+    navigate(`/system/users/${userId}?tab=history`);
   };
 
   return <UsersPage onViewProfile={handleViewProfile} onViewAppointments={handleViewAppointments} />;
@@ -433,35 +436,15 @@ function VariantStockDetailsPageWrapper() {
   );
 }
 
-// UserAppointmentHistoryPage Wrapper Component
-function UserAppointmentHistoryPageWrapper() {
+// Redirect legacy /users/:userId/history URLs to profile History tab
+function UserAppointmentHistoryRedirect() {
   const { userId } = useParams<{ userId: string }>();
-  const navigate = useNavigate();
-  const { user } = useAppSelector((state) => state.auth);
-
-  const handleBack = () => {
-    navigate('/system/users');
-  };
 
   if (!userId) {
-    return (
-      <div className="flex-1 p-4 lg:p-8 min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h3 className="text-lg font-semibold text-foreground mb-2">User Not Found</h3>
-          <p className="text-muted-foreground mb-4">Invalid user ID</p>
-          <BackButton onClick={() => navigate("/system/users")} label="Back to Users" />
-        </div>
-      </div>
-    );
+    return <Navigate to="/system/users" replace />;
   }
 
-  return (
-    <UserAppointmentHistoryPage 
-      userId={userId}
-      onBack={handleBack}
-      currentUser={user as any}
-    />
-  );
+  return <Navigate to={`/system/users/${userId}?tab=history`} replace />;
 }
 
 // SystemProductsPage Wrapper Component
@@ -1276,6 +1259,32 @@ function App() {
               )
             }
           />
+
+          <Route
+            path="/system/custom-forms"
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <CustomFormsPage />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
+
+          <Route
+            path="/system/custom-forms/:formId/builder"
+            element={
+              isAuthenticated ? (
+                <ProtectedRouteWrapper>
+                  <FormBuilderEditor />
+                </ProtectedRouteWrapper>
+              ) : (
+                <Navigate to="/system/login" replace />
+              )
+            }
+          />
           
           <Route 
             path="/system/spaces/:id" 
@@ -1347,7 +1356,7 @@ function App() {
             element={
               isAuthenticated ? (
                 <ProtectedRouteWrapper>
-                  <UserAppointmentHistoryPageWrapper />
+                  <UserAppointmentHistoryRedirect />
                 </ProtectedRouteWrapper>
               ) : (
                 <Navigate to="/system/login" replace />

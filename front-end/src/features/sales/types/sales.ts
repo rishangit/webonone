@@ -41,6 +41,7 @@ export interface SalesStatsProps {
   productRevenue: number;
   totalTransactions: number;
   formatCurrency: (amount: number) => string;
+  loading?: boolean;
 }
 
 export interface SalesCardProps {
@@ -64,9 +65,6 @@ export interface SalesFiltersProps {
   onDateRangeChange: (value: string) => void;
   filterType: string;
   onFilterTypeChange: (value: string) => void;
-  filterStatus: string;
-  onFilterStatusChange: (value: string) => void;
-  activeTab: "sales" | "products";
   hasActiveFilters: boolean;
   resultsCount: number;
   onClearFilters: () => void;

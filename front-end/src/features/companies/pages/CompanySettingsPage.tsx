@@ -1061,6 +1061,26 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
                   </p>
                 )}
               </div>
+
+              <div className="pt-3 border-t border-[var(--glass-border)]">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Custom Forms</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Design forms for appointments and client data collection
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0 border-[var(--glass-border)]"
+                    onClick={() => navigate('/system/custom-forms')}
+                  >
+                    Manage forms
+                  </Button>
+                </div>
+              </div>
             </div>
           </Card>
         </div>

@@ -1,2 +1,2 @@
-// TODO: migrate appointment-specific hooks into this folder.
-export {};
+export { useUserAppointmentHistory } from "./useUserAppointmentHistory";
+export type { UserAppointmentHistoryStat } from "./useUserAppointmentHistory";

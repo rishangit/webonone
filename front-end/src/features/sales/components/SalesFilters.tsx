@@ -12,9 +12,6 @@ export const SalesFilters = ({
   onDateRangeChange,
   filterType,
   onFilterTypeChange,
-  filterStatus,
-  onFilterStatusChange,
-  activeTab,
   hasActiveFilters,
   resultsCount,
   onClearFilters,
@@ -34,6 +31,7 @@ export const SalesFilters = ({
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-popover border-border">
+              <SelectItem value="all">All time</SelectItem>
               <SelectItem value="7days">Last 7 Days</SelectItem>
               <SelectItem value="30days">Last 30 Days</SelectItem>
               <SelectItem value="90days">Last 90 Days</SelectItem>
@@ -42,38 +40,19 @@ export const SalesFilters = ({
           </Select>
         </div>
 
-        {activeTab === "sales" && (
-          <>
-            <div className="space-y-2">
-              <Label htmlFor="sales-type-filter" className="text-sm font-medium text-foreground">Type</Label>
-              <Select value={filterType} onValueChange={onFilterTypeChange}>
-                <SelectTrigger id="sales-type-filter" className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border">
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="appointment">Appointment Sales</SelectItem>
-                  <SelectItem value="product">Direct Sales</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="sales-status-filter" className="text-sm font-medium text-foreground">Status</Label>
-              <Select value={filterStatus} onValueChange={onFilterStatusChange}>
-                <SelectTrigger id="sales-status-filter" className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border">
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="processing">Processing</SelectItem>
-                  <SelectItem value="refunded">Refunded</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </>
-        )}
+        <div className="space-y-2">
+          <Label htmlFor="sales-type-filter" className="text-sm font-medium text-foreground">Type</Label>
+          <Select value={filterType} onValueChange={onFilterTypeChange}>
+            <SelectTrigger id="sales-type-filter" className="w-full bg-[var(--glass-bg)] border-[var(--glass-border)] text-foreground">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-popover border-border">
+              <SelectItem value="all">All Types</SelectItem>
+              <SelectItem value="appointment">Appointment Sales</SelectItem>
+              <SelectItem value="product">Direct Sales</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
         {hasActiveFilters && (
           <div className="pt-4 border-t border-border space-y-3">

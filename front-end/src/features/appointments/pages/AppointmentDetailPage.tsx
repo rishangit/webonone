@@ -23,6 +23,7 @@ import { BillPreviewDialog } from "@/components/BillPreviewDialog";
 import { BackButton } from "@/components/common/BackButton";
 import { CardTitle } from "@/components/common/CardTitle";
 import { isRole, UserRole } from "@/shared/types/user";
+import { AppointmentUserDataCard } from "@/shared/components/customForms";
 
 interface AppointmentDetailPageProps {
   appointmentId: string;
@@ -226,6 +227,11 @@ export const AppointmentDetailPage = ({ appointmentId, onBack }: AppointmentDeta
         ((user as any)?.staffId && String((user as any).staffId) === String(appointment.staffId)))
   );
   const canChangeAppointmentStatus = isCompanyOwner || isAssignedStaffMember;
+  const canManageUserData =
+    isCompanyOwner ||
+    isAssignedStaffMember ||
+    isRole(user?.role, UserRole.STAFF_MEMBER);
+  const appointmentCompanyId = appointment.companyId || user?.companyId || '';
 
   const handleStatusChange = (nextStatusValue: string) => {
     const normalizedStatus = normalizeAppointmentStatus(nextStatusValue);
@@ -331,6 +337,15 @@ export const AppointmentDetailPage = ({ appointmentId, onBack }: AppointmentDeta
               </div>
             </div>
           </Card>
+
+          {appointmentCompanyId && (
+            <AppointmentUserDataCard
+              appointmentId={appointment.id}
+              companyId={appointmentCompanyId}
+              clientId={appointment.clientId}
+              canManage={canManageUserData}
+            />
+          )}
 
           {/* Appointment Details */}
           <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent/50 hover:border-[var(--accent-border)] transition-all duration-200 hover:shadow-lg hover:shadow-[var(--glass-shadow)]">

@@ -36,6 +36,7 @@ import {
   companyWebThemesEpics,
   companyWebPagesEpics,
 } from "@/features/website/store";
+import { customFormsEpics } from "@/features/customForms/store";
 import { currenciesEpics } from "@/features/sales/store";
 import {
   fetchBacklogItemsEpic,
@@ -74,6 +75,7 @@ export const rootEpic = combineEpics(
   fetchUserAppointmentHistoryEpic,
   ...companyWebThemesEpics,
   ...companyWebPagesEpics,
+  ...customFormsEpics,
   ...currenciesEpics,
   fetchBacklogItemsEpic,
   fetchBacklogItemEpic,
