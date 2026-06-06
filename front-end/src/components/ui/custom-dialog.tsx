@@ -100,8 +100,8 @@ export function CustomDialog({
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" />
-        <div className="fixed inset-0 z-50 w-full h-full px-2 py-2 sm:px-4 sm:py-4 pointer-events-none flex justify-center items-center">
+        <DialogPrimitive.Overlay className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm" />
+        <div className="fixed inset-0 z-[100] w-full h-full px-2 py-2 sm:px-4 sm:py-4 pointer-events-none flex justify-center items-center">
           <DialogPrimitive.Content
             className={cn(
               "bg-background dark:bg-[var(--glass-bg)] border-[var(--glass-border)] backdrop-blur-sm rounded-lg shadow-lg",

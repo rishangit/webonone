@@ -187,7 +187,7 @@ export function Sidebar({ currentPage, onPageChange, isOpen, onClose: _onClose, 
   
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
 
-  // Auto-open submenu if current page is a submenu item
+  // Auto-open submenu when navigating to a submenu route (do not depend on openSubmenu — allows manual toggle)
   useEffect(() => {
     const itemWithSubmenu = navigationItems.find(item => {
       const itemAny = item as any;
@@ -198,11 +198,9 @@ export function Sidebar({ currentPage, onPageChange, isOpen, onClose: _onClose, 
       }
       return false;
     });
-    
-    if (itemWithSubmenu && openSubmenu !== itemWithSubmenu.id) {
-      setOpenSubmenu(itemWithSubmenu.id);
-    }
-  }, [currentPage, navigationItems, openSubmenu]);
+
+    setOpenSubmenu(itemWithSubmenu ? itemWithSubmenu.id : null);
+  }, [currentPage, navigationItems]);
 
   const sidebarWidth = collapsed ? 'w-20' : 'w-64';
   const isCollapsed = !isMobile && collapsed;
@@ -272,16 +270,7 @@ export function Sidebar({ currentPage, onPageChange, isOpen, onClose: _onClose, 
                         : "text-sidebar-foreground hover:bg-[var(--accent-bg)] hover:text-[var(--accent-text)] hover:border hover:border-[var(--accent-border)] hover:shadow-md hover:shadow-[var(--accent-primary)]/20"
                     }`}
                     onClick={() => {
-                      // If submenu is closed, open it and navigate to default (first) submenu item
-                      if (openSubmenu !== item.id) {
-                        setOpenSubmenu(item.id);
-                        if (defaultSubmenuId && currentPage !== defaultSubmenuId) {
-                          onPageChange(defaultSubmenuId);
-                        }
-                      } else {
-                        // If submenu is open, just close it
-                        setOpenSubmenu(null);
-                      }
+                      setOpenSubmenu((prev) => (prev === item.id ? null : item.id));
                     }}
                   >
                     <div className="flex items-center gap-3">

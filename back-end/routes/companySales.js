@@ -4,18 +4,68 @@ const Sale = require('../models/Sale');
 const { authenticateToken } = require('../middleware/auth');
 const { asyncHandler, validationError } = require('../middleware/errorHandler');
 
+const resolveCompanyId = (req) => {
+  let filterCompanyId = req.query.companyId;
+  if (req.user.roleLevel > 0 && req.user.companyId) {
+    filterCompanyId = req.user.companyId;
+  }
+  return filterCompanyId;
+};
+
+// Sales summary totals (revenue + transaction counts)
+router.get('/summary',
+  authenticateToken,
+  asyncHandler(async (req, res) => {
+    const filterCompanyId = resolveCompanyId(req);
+    if (!filterCompanyId) {
+      throw validationError('Company ID is required');
+    }
+
+    const { userId, serviceId, staffId, dateFrom, dateTo, search, saleType } = req.query;
+    const summary = await Sale.getSalesSummary({
+      companyId: filterCompanyId,
+      userId,
+      serviceId,
+      staffId,
+      dateFrom: dateFrom || undefined,
+      dateTo: dateTo || undefined,
+      search: search || '',
+      saleType: saleType || undefined
+    });
+
+    res.json({ success: true, data: summary });
+  })
+);
+
+// Per-product sales statistics
+router.get('/product-stats/:companyProductId',
+  authenticateToken,
+  asyncHandler(async (req, res) => {
+    const filterCompanyId = resolveCompanyId(req);
+    if (!filterCompanyId) {
+      throw validationError('Company ID is required');
+    }
+
+    const { dateFrom, dateTo, staffId } = req.query;
+    const stats = await Sale.getProductStats(req.params.companyProductId, {
+      companyId: filterCompanyId,
+      dateFrom: dateFrom || undefined,
+      dateTo: dateTo || undefined,
+      staffId: staffId || undefined
+    });
+
+    res.json({ success: true, data: stats });
+  })
+);
+
 // Get all sales for a company (following users route pattern)
 router.get('/',
   authenticateToken,
   asyncHandler(async (req, res) => {
-    const { page, limit, offset, search, userId, companyId, serviceId, staffId, dateFrom, dateTo, ignoreDateFilter } = req.query;
-    
-    // If user is not super admin, filter by their company
-    let filterCompanyId = companyId;
-    if (req.user.roleLevel > 0 && req.user.companyId) {
-      filterCompanyId = req.user.companyId;
-    }
-    
+    const { page, limit, offset, search, userId, companyId, serviceId, staffId, dateFrom, dateTo, saleType } = req.query;
+
+    const filterCompanyId = resolveCompanyId(req);
+
     if (!filterCompanyId) {
       throw validationError('Company ID is required');
     }
@@ -36,10 +86,10 @@ router.get('/',
         companyId: filterCompanyId,
         userId,
         serviceId,
-        staffId
+        staffId,
+        saleType: saleType || undefined
       };
-      
-      // Apply date filters if both are provided (for paginated requests, always apply if provided)
+
       if (dateFrom && dateTo) {
         options.dateFrom = dateFrom;
         options.dateTo = dateTo;

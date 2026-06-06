@@ -37,6 +37,7 @@ const appointmentHistorySlice = createSlice({
       staffId?: string;
       dateFrom?: string;
       dateTo?: string;
+      saleType?: 'appointment' | 'product';
       enrich?: boolean;
     }>) => {
       state.loading = true;

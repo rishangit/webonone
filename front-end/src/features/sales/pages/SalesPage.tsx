@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
-import { Filter, DollarSign, Package, Plus, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Filter, DollarSign, Plus, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,8 +13,7 @@ import { isRole, UserRole } from "@/shared/types/user";
 import { companySalesService } from "@/features/sales/services";
 import { useAppSelector } from "@/store/hooks";
 import { useSalesData } from "@/features/sales/hooks/useSalesData";
-import { SalesStats, SalesCard, ProductSaleCard, SalesFilters } from "@/features/sales/components";
-import { ProductSale } from "@/features/sales/types";
+import { SalesStats, SalesCard, SalesFilters } from "@/features/sales/components";
 import { POSSalesPage } from "./POSSalesPage";
 
 export const SalesPage = () => {
@@ -27,9 +26,7 @@ export const SalesPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
   const [filterType, setFilterType] = useState<string>("all");
-  const [filterStatus, setFilterStatus] = useState<string>("all");
-  const [dateRange, setDateRange] = useState<string>("7days");
-  const [activeTab, setActiveTab] = useState<"sales" | "products">("sales");
+  const [dateRange, setDateRange] = useState<string>("all");
   const [showPOS, setShowPOS] = useState(false);
   const [deletingSaleId, setDeletingSaleId] = useState<string | null>(null);
   const [deletingItemId, setDeletingItemId] = useState<{ saleId: string; itemId: string } | null>(null);
@@ -43,12 +40,21 @@ export const SalesPage = () => {
   const {
     salesData,
     loading,
+    summary,
+    summaryLoading,
     error,
     pagination,
     formatCurrency,
     setSalesWithItems,
     refreshSales
-  } = useSalesData(companyId, dateRange, searchTerm, debouncedSearchTerm, currentPage, itemsPerPage);
+  } = useSalesData(
+    companyId ?? undefined,
+    dateRange,
+    debouncedSearchTerm,
+    currentPage,
+    itemsPerPage,
+    filterType
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -63,101 +69,9 @@ export const SalesPage = () => {
     }
   }, [error]);
 
-  const filteredSales = useMemo(() => {
-    return salesData.filter(sale => {
-      const matchesType = filterType === "all" || sale.type === filterType;
-      const matchesStatus = filterStatus === "all" || sale.status === filterStatus;
-      return matchesType && matchesStatus;
-    });
-  }, [salesData, filterType, filterStatus]);
-
-  const totalRevenue = useMemo(() => {
-    const sum = filteredSales.reduce((acc, sale) => {
-      const amount = typeof sale.totalAmount === 'string'
-        ? parseFloat(sale.totalAmount) || 0
-        : (sale.totalAmount || 0);
-      return acc + (isNaN(amount) ? 0 : amount);
-    }, 0);
-    return isNaN(sum) ? 0 : sum;
-  }, [filteredSales]);
-
-  const appointmentRevenue = useMemo(() => {
-    const sum = filteredSales
-      .filter(s => s.type === 'appointment')
-      .reduce((acc, sale) => {
-        const amount = typeof sale.totalAmount === 'string'
-          ? parseFloat(sale.totalAmount) || 0
-          : (sale.totalAmount || 0);
-        return acc + (isNaN(amount) ? 0 : amount);
-      }, 0);
-    return isNaN(sum) ? 0 : sum;
-  }, [filteredSales]);
-
-  const productRevenue = useMemo(() => {
-    const sum = filteredSales
-      .filter(s => s.type === 'product')
-      .reduce((acc, sale) => {
-        const amount = typeof sale.totalAmount === 'string'
-          ? parseFloat(sale.totalAmount) || 0
-          : (sale.totalAmount || 0);
-        return acc + (isNaN(amount) ? 0 : amount);
-      }, 0);
-    return isNaN(sum) ? 0 : sum;
-  }, [filteredSales]);
-
-  const totalTransactions = filteredSales.length;
-
-  const productSales = useMemo(() => {
-    const productMap = new Map<string, {
-      name: string;
-      category: string;
-      totalSold: number;
-      revenue: number;
-      prices: number[];
-      lastSold: string;
-    }>();
-
-    salesData.forEach((sale) => {
-      sale.items.forEach((item) => {
-        if (item.itemType === 'product') {
-          const productKey = item.name;
-          const existing = productMap.get(productKey);
-
-          if (existing) {
-            existing.totalSold += item.quantity || 1;
-            existing.revenue += (item.unitPrice || 0) * (item.quantity || 1) * (1 - (item.discount || 0) / 100);
-            existing.prices.push(item.unitPrice || 0);
-            const itemDate = sale.date;
-            if (itemDate > existing.lastSold) {
-              existing.lastSold = itemDate;
-            }
-          } else {
-            productMap.set(productKey, {
-              name: item.name,
-              category: 'Uncategorized',
-              totalSold: item.quantity || 1,
-              revenue: (item.unitPrice || 0) * (item.quantity || 1) * (1 - (item.discount || 0) / 100),
-              prices: [item.unitPrice || 0],
-              lastSold: sale.date
-            });
-          }
-        }
-      });
-    });
-
-    return Array.from(productMap.values()).map((product, index) => ({
-      id: `PROD-${String(index + 1).padStart(3, '0')}`,
-      name: product.name,
-      category: product.category,
-      totalSold: product.totalSold,
-      revenue: product.revenue,
-      averagePrice: product.prices.length > 0
-        ? product.prices.reduce((sum, p) => sum + p, 0) / product.prices.length
-        : 0,
-      lastSold: product.lastSold,
-      image: undefined
-    } as ProductSale)).sort((a, b) => b.revenue - a.revenue);
-  }, [salesData]);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchTerm, filterType, dateRange]);
 
   const handleDeleteSale = async (saleId: string) => {
     try {
@@ -171,9 +85,10 @@ export const SalesPage = () => {
 
       setShowDeleteSaleDialog(false);
       setDeletingSaleId(null);
-    } catch (error: any) {
-      console.error('Error deleting sale:', error);
-      toast.error(error.message || "Failed to delete sale");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to delete sale";
+      console.error('Error deleting sale:', err);
+      toast.error(message);
     } finally {
       setIsDeleting(false);
     }
@@ -197,9 +112,10 @@ export const SalesPage = () => {
 
       setShowDeleteItemDialog(false);
       setDeletingItemId(null);
-    } catch (error: any) {
-      console.error('Error deleting sale item:', error);
-      toast.error(error.message || "Failed to delete item");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to remove item";
+      console.error('Error deleting sale item:', err);
+      toast.error(message);
     } finally {
       setIsDeleting(false);
     }
@@ -209,18 +125,23 @@ export const SalesPage = () => {
     return <POSSalesPage onBack={() => setShowPOS(false)} currentUser={user} />;
   }
 
+  const totalRevenue = summary?.totalRevenue ?? 0;
+  const appointmentRevenue = summary?.appointmentRevenue ?? 0;
+  const productRevenue = summary?.productRevenue ?? 0;
+  const totalTransactions = summary?.totalTransactions ?? 0;
+  const resultsCount = pagination?.total ?? salesData.length;
+
   return (
     <div className="flex-1 p-4 lg:p-6 flex flex-col min-h-0">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-xl sm:text-2xl font-semibold text-foreground">Sales Overview</h1>
-          <p className="text-muted-foreground mt-1">Track your revenue from appointments and product sales</p>
+          <h1 className="text-xl sm:text-2xl font-semibold text-foreground">Sales History</h1>
+          <p className="text-muted-foreground mt-1">
+            All direct sales and completed appointment sales in one list
+          </p>
         </div>
         {isCompanyOwner && (
-          <Button
-            variant="accent"
-            onClick={() => setShowPOS(true)}
-          >
+          <Button variant="accent" onClick={() => setShowPOS(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Add Sale
           </Button>
@@ -233,6 +154,7 @@ export const SalesPage = () => {
         productRevenue={productRevenue}
         totalTransactions={totalTransactions}
         formatCurrency={formatCurrency}
+        loading={summaryLoading}
       />
 
       <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] mb-6">
@@ -246,31 +168,12 @@ export const SalesPage = () => {
           />
 
           <div className="flex items-center justify-end gap-3 flex-wrap">
-            <div className="flex bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg p-1">
-              <Button
-                variant={activeTab === "sales" ? "accent" : "ghost"}
-                size="sm"
-                onClick={() => setActiveTab("sales")}
-                className={activeTab !== "sales" ? "text-muted-foreground hover:text-foreground" : undefined}
-              >
-                Sales History
-              </Button>
-              <Button
-                variant={activeTab === "products" ? "accent" : "ghost"}
-                size="sm"
-                onClick={() => setActiveTab("products")}
-                className={activeTab !== "products" ? "text-muted-foreground hover:text-foreground" : undefined}
-              >
-                Product Performance
-              </Button>
-            </div>
-
             <Button
               variant="outline"
               onClick={() => setIsFilterPanelOpen(true)}
               className={cn(
                 "h-9",
-                (debouncedSearchTerm || (activeTab === "sales" && (filterType !== "all" || filterStatus !== "all")))
+                debouncedSearchTerm || filterType !== "all" || dateRange !== "all"
                   ? "bg-[var(--accent-bg)] border-[var(--accent-border)] text-[var(--accent-text)] hover:bg-[var(--accent-primary)] hover:border-[var(--accent-primary)]"
                   : "bg-[var(--glass-bg)] border-[var(--glass-border)] hover:bg-accent text-foreground hover:text-foreground"
               )}
@@ -284,110 +187,78 @@ export const SalesPage = () => {
 
       <div className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
         <div className="flex flex-col flex-1 min-h-0">
-          {activeTab === "sales" ? (
-            <div className="flex flex-col flex-1 min-h-0">
-              {loading && filteredSales.length === 0 ? (
-                <div className="flex-1">
-                  <div className="space-y-4">
-                    {[...Array(6)].map((_, index) => (
-                      <Card key={index} className="p-6 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                        <div className="flex items-start gap-4">
-                          <div className="w-24 h-24 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <div className="h-5 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2" />
-                            <div className="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-                          </div>
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              ) : filteredSales.length === 0 ? (
-                <EmptyState
-                  icon={DollarSign}
-                  title="No Sales Found"
-                  description={
-                    debouncedSearchTerm || filterType !== "all" || filterStatus !== "all"
-                      ? "No sales match your current filters. Try adjusting your search criteria."
-                      : "You haven't made any sales yet. Start by completing appointments or selling products."
-                  }
-                  action={
-                    isCompanyOwner
-                      ? {
-                          label: "Add Your First Sale",
-                          onClick: () => setShowPOS(true),
-                          variant: "accent",
-                          icon: Plus,
-                        }
-                      : undefined
-                  }
-                />
-              ) : (
-                <div className="flex flex-col flex-1 min-h-0">
-                  <div className="flex-1 space-y-4">
-                    {filteredSales.map((sale) => (
-                      <SalesCard
-                        key={sale.id}
-                        sale={sale}
-                        formatCurrency={formatCurrency}
-                        onViewDetails={(saleId) => navigate(`/system/sales/${saleId}`)}
-                        onDeleteSale={(saleId) => {
-                          setDeletingSaleId(saleId);
-                          setShowDeleteSaleDialog(true);
-                        }}
-                        onDeleteItem={handleDeleteSaleItem}
-                        isCompanyOwner={isCompanyOwner}
-                      />
-                    ))}
-                  </div>
-
-                  {pagination && pagination.total > 0 && (
-                    <div className="mt-auto pt-4">
-                      <Pagination
-                        totalItems={pagination.total}
-                        itemsPerPage={itemsPerPage}
-                        currentPage={currentPage}
-                        onPageChange={setCurrentPage}
-                        showItemsPerPageSelector={true}
-                        itemsPerPageOptions={[12, 24, 48, 96]}
-                        onItemsPerPageChange={(newItemsPerPage) => {
-                          setItemsPerPage(newItemsPerPage);
-                          setCurrentPage(1);
-                        }}
-                      />
+          {loading && salesData.length === 0 ? (
+            <div className="flex-1">
+              <div className="space-y-4">
+                {[...Array(6)].map((_, index) => (
+                  <Card key={index} className="p-6 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                    <div className="flex items-start gap-4">
+                      <div className="w-24 h-24 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="h-5 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2" />
+                        <div className="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                      </div>
                     </div>
-                  )}
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ) : salesData.length === 0 ? (
+            <EmptyState
+              icon={DollarSign}
+              title="No Sales Found"
+              description={
+                debouncedSearchTerm || filterType !== "all" || dateRange !== "all"
+                  ? "No sales match your current filters. Try adjusting your search criteria."
+                  : "You haven't made any sales yet. Start by completing appointments or selling products."
+              }
+              action={
+                isCompanyOwner
+                  ? {
+                      label: "Add Your First Sale",
+                      onClick: () => setShowPOS(true),
+                      variant: "accent",
+                      icon: Plus,
+                    }
+                  : undefined
+              }
+            />
+          ) : (
+            <div className="flex flex-col flex-1 min-h-0">
+              <div className="flex-1 space-y-4">
+                {salesData.map((sale) => (
+                  <SalesCard
+                    key={sale.id}
+                    sale={sale}
+                    formatCurrency={formatCurrency}
+                    onViewDetails={(saleId) => navigate(`/system/sales/${saleId}`)}
+                    onDeleteSale={(saleId) => {
+                      setDeletingSaleId(saleId);
+                      setShowDeleteSaleDialog(true);
+                    }}
+                    onDeleteItem={handleDeleteSaleItem}
+                    isCompanyOwner={isCompanyOwner}
+                  />
+                ))}
+              </div>
+
+              {pagination && pagination.total > 0 && (
+                <div className="mt-auto pt-4">
+                  <Pagination
+                    totalItems={pagination.total}
+                    itemsPerPage={itemsPerPage}
+                    currentPage={currentPage}
+                    onPageChange={setCurrentPage}
+                    showItemsPerPageSelector={true}
+                    itemsPerPageOptions={[12, 24, 48, 96]}
+                    onItemsPerPageChange={(newItemsPerPage) => {
+                      setItemsPerPage(newItemsPerPage);
+                      setCurrentPage(1);
+                    }}
+                  />
                 </div>
               )}
             </div>
-          ) : (
-            <Card className="bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-sm">
-              <div className="p-4 border-b border-[var(--glass-border)]">
-                <h3 className="font-medium text-foreground">Product Performance</h3>
-                <p className="text-sm text-muted-foreground">Track your best-selling products and revenue</p>
-              </div>
-              <div className="p-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {productSales.length === 0 ? (
-                    <div className="col-span-full text-center py-8">
-                      <Package className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-                      <h3 className="font-medium text-foreground mb-2">No Product Sales</h3>
-                      <p className="text-muted-foreground">
-                        No product sales found in the selected date range.
-                      </p>
-                    </div>
-                  ) : (
-                    productSales.map((product) => (
-                      <ProductSaleCard
-                        key={product.id}
-                        product={product}
-                        formatCurrency={formatCurrency}
-                      />
-                    ))
-                  )}
-                </div>
-              </div>
-            </Card>
           )}
         </div>
       </div>
@@ -453,16 +324,13 @@ export const SalesPage = () => {
         onDateRangeChange={setDateRange}
         filterType={filterType}
         onFilterTypeChange={setFilterType}
-        filterStatus={filterStatus}
-        onFilterStatusChange={setFilterStatus}
-        activeTab={activeTab}
-        hasActiveFilters={!!(debouncedSearchTerm || (activeTab === "sales" && (filterType !== "all" || filterStatus !== "all")))}
-        resultsCount={filteredSales.length}
+        hasActiveFilters={!!(debouncedSearchTerm || filterType !== "all" || dateRange !== "all")}
+        resultsCount={resultsCount}
         onClearFilters={() => {
           setSearchTerm("");
           setDebouncedSearchTerm("");
           setFilterType("all");
-          setFilterStatus("all");
+          setDateRange("all");
           setCurrentPage(1);
         }}
       />

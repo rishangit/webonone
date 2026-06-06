@@ -1,11 +1,12 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchAppointmentHistoryRequest } from "@/shared/store/appointments";
 import { fetchStaffRequest } from "@/shared/store/staff";
-import { companySalesService } from "@/shared/services/sales-public";
+import { companySalesService, SalesSummary } from "@/features/sales/services";
 import { currenciesService, Currency } from "@/shared/services/currencies";
 import { isRole, UserRole } from "@/shared/types/user";
 import { formatAvatarUrl } from "@/shared/utils";
+import { getSalesDateRange } from "@/features/sales/utils/dateRange";
 import { SaleData, SaleItem } from "../types";
 
 const normalizePaymentMethod = (value: unknown): "Cash" | "Card" => {
@@ -25,10 +26,10 @@ const normalizePaymentMethod = (value: unknown): "Cash" | "Card" => {
 export const useSalesData = (
   companyId: string | undefined,
   dateRange: string,
-  searchTerm: string,
   debouncedSearchTerm: string,
   currentPage: number,
-  itemsPerPage: number
+  itemsPerPage: number,
+  filterType: string
 ) => {
   const dispatch = useAppDispatch();
   const { history, loading, error, pagination } = useAppSelector((state) => state.appointmentHistory);
@@ -39,6 +40,11 @@ export const useSalesData = (
   const currentUserId = user?.id ? String(user.id) : "";
   const [companyCurrency, setCompanyCurrency] = useState<Currency | null>(null);
   const [salesWithItems, setSalesWithItems] = useState<Record<string, any>>({});
+  const [summary, setSummary] = useState<SalesSummary | null>(null);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+
+  const saleTypeParam: 'appointment' | 'product' | undefined =
+    filterType === "appointment" || filterType === "product" ? filterType : undefined;
 
   useEffect(() => {
     const fetchCompanyCurrency = async () => {
@@ -46,7 +52,7 @@ export const useSalesData = (
         const company = companyId
           ? (companies.find(c => String(c.id) === String(companyId)) || currentCompany)
           : null;
-        const currencyId = (company as any)?.currencyId;
+        const currencyId = (company as { currencyId?: string })?.currencyId;
 
         if (currencyId) {
           const currency = await currenciesService.getCurrency(currencyId);
@@ -56,18 +62,16 @@ export const useSalesData = (
             const currencies = await currenciesService.getCurrencies();
             const usdCurrency = currencies.find(c => c.name === 'USD');
             setCompanyCurrency(usdCurrency || null);
-          } catch (error) {
-            console.error('Error fetching default currency:', error);
+          } catch {
             setCompanyCurrency(null);
           }
         }
-      } catch (error) {
-        console.error('Error fetching company currency:', error);
+      } catch {
         try {
           const currencies = await currenciesService.getCurrencies();
           const usdCurrency = currencies.find(c => c.name === 'USD');
           setCompanyCurrency(usdCurrency || null);
-        } catch (fallbackError) {
+        } catch {
           setCompanyCurrency(null);
         }
       }
@@ -82,49 +86,66 @@ export const useSalesData = (
     }
   }, [dispatch, companyId, staff.length]);
 
-  const getDateRange = (range: string) => {
-    const now = new Date();
-    let dateFrom: string;
-    const dateTo: string = now.toISOString().split('T')[0];
-
-    switch (range) {
-      case '7days':
-        dateFrom = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-        break;
-      case '30days':
-        dateFrom = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-        break;
-      case '90days':
-        dateFrom = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-        break;
-      case 'year':
-        dateFrom = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0];
-        break;
-      default:
-        dateFrom = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    }
-
-    return { dateFrom, dateTo };
-  };
-
-  useEffect(() => {
-    if (!companyId && !currentUserId) return;
-
-    const { dateFrom, dateTo } = getDateRange(dateRange);
+  const buildFetchPayload = useCallback(() => {
+    const { dateFrom, dateTo } = getSalesDateRange(dateRange);
     const shouldFilterByUser = !isCompanyOwner && !!currentUserId;
 
-    dispatch(fetchAppointmentHistoryRequest({
+    return {
       companyId,
       userId: shouldFilterByUser ? currentUserId : undefined,
       limit: itemsPerPage,
       offset: (currentPage - 1) * itemsPerPage,
       page: currentPage,
-      dateFrom,
-      dateTo,
+      ...(dateFrom && dateTo ? { dateFrom, dateTo } : {}),
       search: debouncedSearchTerm || undefined,
-      enrich: true
-    }));
-  }, [dispatch, companyId, currentUserId, isCompanyOwner, currentPage, itemsPerPage, debouncedSearchTerm, dateRange, searchTerm]);
+      saleType: saleTypeParam,
+      enrich: true as const,
+    };
+  }, [
+    companyId,
+    currentUserId,
+    isCompanyOwner,
+    itemsPerPage,
+    currentPage,
+    dateRange,
+    debouncedSearchTerm,
+    saleTypeParam,
+  ]);
+
+  useEffect(() => {
+    if (!companyId && !currentUserId) return;
+    dispatch(fetchAppointmentHistoryRequest(buildFetchPayload()));
+  }, [dispatch, companyId, currentUserId, buildFetchPayload]);
+
+  useEffect(() => {
+    const fetchSummary = async () => {
+      if (!companyId) {
+        setSummary(null);
+        return;
+      }
+
+      setSummaryLoading(true);
+      try {
+        const { dateFrom, dateTo } = getSalesDateRange(dateRange);
+        const shouldFilterByUser = !isCompanyOwner && !!currentUserId;
+        const data = await companySalesService.getSalesSummary({
+          companyId,
+          userId: shouldFilterByUser ? currentUserId : undefined,
+          ...(dateFrom && dateTo ? { dateFrom, dateTo } : {}),
+          search: debouncedSearchTerm || undefined,
+          saleType: saleTypeParam,
+        });
+        setSummary(data);
+      } catch (err) {
+        console.error('Error fetching sales summary:', err);
+        setSummary(null);
+      } finally {
+        setSummaryLoading(false);
+      }
+    };
+
+    fetchSummary();
+  }, [companyId, currentUserId, isCompanyOwner, dateRange, debouncedSearchTerm, saleTypeParam]);
 
   useEffect(() => {
     const fetchSalesWithItems = async () => {
@@ -135,8 +156,8 @@ export const useSalesData = (
         try {
           const fullSale = await companySalesService.getCompanySaleById(sale.id, true);
           salesMap[sale.id] = fullSale;
-        } catch (error) {
-          console.error(`Error fetching sale ${sale.id}:`, error);
+        } catch (err) {
+          console.error(`Error fetching sale ${sale.id}:`, err);
         }
       }
       setSalesWithItems(salesMap);
@@ -246,7 +267,7 @@ export const useSalesData = (
           return isNaN(amount) ? 0 : amount;
         })(),
         status,
-        paymentMethod: normalizePaymentMethod(fullSale?.paymentMethod ?? item.paymentMethod),
+        paymentMethod: normalizePaymentMethod(fullSale?.paymentMethod ?? (item as { paymentMethod?: string }).paymentMethod),
         staffMember: item.staffId ? (staff.find(s => s.id === item.staffId)?.name || `${staff.find(s => s.id === item.staffId)?.firstName || ''} ${staff.find(s => s.id === item.staffId)?.lastName || ''}`.trim() || undefined) : undefined,
         notes: undefined
       } as SaleData;
@@ -281,29 +302,15 @@ export const useSalesData = (
   const refreshSales = async () => {
     if (!companyId && !currentUserId) return;
 
-    const { dateFrom, dateTo } = getDateRange(dateRange);
-    const shouldFilterByUser = !isCompanyOwner && !!currentUserId;
-
-    await dispatch(fetchAppointmentHistoryRequest({
-      companyId,
-      userId: shouldFilterByUser ? currentUserId : undefined,
-      limit: itemsPerPage,
-      offset: (currentPage - 1) * itemsPerPage,
-      page: currentPage,
-      dateFrom,
-      dateTo,
-      search: debouncedSearchTerm || undefined,
-      enrich: true
-    }));
+    await dispatch(fetchAppointmentHistoryRequest(buildFetchPayload()));
 
     const salesMap: Record<string, any> = {};
-    const currentHistory = useAppSelector.getState().appointmentHistory.history;
-    for (const sale of currentHistory) {
+    for (const sale of history) {
       try {
         const fullSale = await companySalesService.getCompanySaleById(sale.id, true);
         salesMap[sale.id] = fullSale;
-      } catch (error) {
-        console.error(`Error fetching sale ${sale.id}:`, error);
+      } catch (err) {
+        console.error(`Error fetching sale ${sale.id}:`, err);
       }
     }
     setSalesWithItems(salesMap);
@@ -312,8 +319,10 @@ export const useSalesData = (
   return {
     salesData,
     loading,
+    summaryLoading,
     error,
     pagination,
+    summary,
     companyCurrency,
     formatCurrency,
     salesWithItems,

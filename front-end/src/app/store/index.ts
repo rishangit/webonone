@@ -20,6 +20,7 @@ import {
   companyWebThemesReducer,
   companyWebPagesReducer,
 } from "@/features/website/store";
+import { customFormsReducer } from "@/features/customForms/store";
 import { currenciesReducer } from "@/features/sales/store";
 import { backlogReducer } from "@/features/backlog/store";
 import { rootEpic } from "./epics/rootEpic";
@@ -47,6 +48,7 @@ export const store = configureStore({
     appointmentHistory: appointmentHistoryReducer,
     companyWebThemes: companyWebThemesReducer,
     companyWebPages: companyWebPagesReducer,
+    customForms: customFormsReducer,
     currencies: currenciesReducer,
     backlog: backlogReducer,
   },

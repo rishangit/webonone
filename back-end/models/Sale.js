@@ -350,6 +350,177 @@ class Sale {
     }
   }
 
+  static appendSaleListFilters(query, params, options = {}) {
+    const { userId, companyId, serviceId, staffId, dateFrom, dateTo, search, saleType } = options;
+
+    if (userId) {
+      query += ' AND s.userId = ?';
+      params.push(userId);
+    }
+    if (companyId) {
+      query += ' AND s.companyId = ?';
+      params.push(companyId);
+    }
+    if (serviceId) {
+      query += ' AND ca.serviceId = ?';
+      params.push(serviceId);
+    }
+    if (staffId) {
+      query += ' AND s.staffId = ?';
+      params.push(staffId);
+    }
+    if (dateFrom) {
+      query += ' AND DATE(s.createdAt) >= ?';
+      params.push(dateFrom);
+    }
+    if (dateTo) {
+      query += ' AND DATE(s.createdAt) <= ?';
+      params.push(dateTo);
+    }
+    if (search && search.trim()) {
+      query += ` AND (
+          u.firstName LIKE ? OR 
+          u.lastName LIKE ? OR 
+          u.email LIKE ? OR 
+          u.phone LIKE ? OR
+          CONCAT(u.firstName, ' ', u.lastName) LIKE ? OR
+          s.id LIKE ?
+        )`;
+      const searchPattern = `%${search.trim()}%`;
+      params.push(searchPattern, searchPattern, searchPattern, searchPattern, searchPattern, searchPattern);
+    }
+    if (saleType === 'appointment') {
+      query += ` AND (
+        ca.id IS NOT NULL
+        OR EXISTS (SELECT 1 FROM company_sales_items si WHERE si.saleId = s.id AND si.itemType = 'service')
+      )`;
+    } else if (saleType === 'product') {
+      query += ` AND ca.id IS NULL
+        AND NOT EXISTS (SELECT 1 FROM company_sales_items si WHERE si.saleId = s.id AND si.itemType = 'service')`;
+    }
+
+    return query;
+  }
+
+  static getSalesListFromClause() {
+    return `FROM company_sales s
+      LEFT JOIN users u ON s.userId = u.id
+      LEFT JOIN companies c ON s.companyId = c.id
+      LEFT JOIN company_appointments ca ON ca.saleId = s.id`;
+  }
+
+  static async getSalesSummary(options = {}) {
+    try {
+      const { companyId, userId, serviceId, staffId, dateFrom, dateTo, search, saleType } = options;
+
+      const runDistinctSum = async (typeFilter) => {
+        let subQuery = `SELECT DISTINCT s.id, s.totalAmount as total
+          ${Sale.getSalesListFromClause()}
+          WHERE 1=1`;
+        const subParams = [];
+        subQuery = Sale.appendSaleListFilters(subQuery, subParams, {
+          companyId, userId, serviceId, staffId, dateFrom, dateTo, search, saleType: typeFilter || saleType
+        });
+        const outerQuery = `SELECT COUNT(*) as count, COALESCE(SUM(total), 0) as revenue FROM (${subQuery}) sub`;
+        const [rows] = await pool.execute(outerQuery, subParams);
+        return {
+          count: Number(rows[0]?.count) || 0,
+          revenue: parseFloat(rows[0]?.revenue) || 0
+        };
+      };
+
+      const all = await runDistinctSum(saleType);
+      const appointments = saleType === 'product'
+        ? { count: 0, revenue: 0 }
+        : await runDistinctSum('appointment');
+      const products = saleType === 'appointment'
+        ? { count: 0, revenue: 0 }
+        : await runDistinctSum('product');
+
+      return {
+        totalRevenue: all.revenue,
+        appointmentRevenue: appointments.revenue,
+        productRevenue: products.revenue,
+        totalTransactions: all.count
+      };
+    } catch (error) {
+      throw new Error(`Error fetching sales summary: ${error.message}`);
+    }
+  }
+
+  static async getProductStats(companyProductId, options = {}) {
+    try {
+      const { companyId, dateFrom, dateTo, staffId } = options;
+      const baseFrom = `
+        FROM company_sales_items si
+        INNER JOIN company_sales s ON s.id = si.saleId
+        INNER JOIN company_product_variants cpv ON cpv.id = si.variantId`;
+      let filterClause = `
+        WHERE si.itemType = 'product'
+          AND cpv.companyProductId = ?
+      `;
+      const params = [companyProductId];
+
+      if (companyId) {
+        filterClause += ' AND s.companyId = ?';
+        params.push(companyId);
+      }
+      if (staffId) {
+        filterClause += ' AND s.staffId = ?';
+        params.push(staffId);
+      }
+      if (dateFrom) {
+        filterClause += ' AND DATE(s.createdAt) >= ?';
+        params.push(dateFrom);
+      }
+      if (dateTo) {
+        filterClause += ' AND DATE(s.createdAt) <= ?';
+        params.push(dateTo);
+      }
+
+      const lineTotal = '(si.quantity * si.unitPrice * (1 - COALESCE(si.discount, 0) / 100))';
+
+      const summaryQuery = `SELECT
+        COALESCE(SUM(si.quantity), 0) as totalSold,
+        COALESCE(SUM(${lineTotal}), 0) as revenue,
+        COALESCE(AVG(si.unitPrice), 0) as averagePrice,
+        MAX(s.createdAt) as lastSold
+      ${baseFrom}
+      ${filterClause}`;
+
+      const [summaryRows] = await pool.execute(summaryQuery, params);
+      const row = summaryRows[0] || {};
+
+      const variantQuery = `SELECT
+        si.variantId,
+        MAX(pv.name) as variantName,
+        COALESCE(SUM(si.quantity), 0) as totalSold,
+        COALESCE(SUM(${lineTotal}), 0) as revenue
+      ${baseFrom}
+      LEFT JOIN product_variants pv ON cpv.systemProductVariantId = pv.id
+      ${filterClause}
+      GROUP BY si.variantId
+      ORDER BY revenue DESC`;
+
+      const [variantRows] = await pool.execute(variantQuery, params);
+
+      return {
+        totalSold: Number(row.totalSold) || 0,
+        revenue: parseFloat(row.revenue) || 0,
+        averagePrice: parseFloat(row.averagePrice) || 0,
+        lastSold: row.lastSold || null,
+        byVariant: (variantRows || []).map((v) => ({
+          variantId: v.variantId,
+          variantName: v.variantName || 'Variant',
+          totalSold: Number(v.totalSold) || 0,
+          revenue: parseFloat(v.revenue) || 0
+        }))
+      };
+    } catch (error) {
+      throw new Error(`Error fetching product stats: ${error.message}`);
+    }
+  }
+
   static async findAllPaginated(options = {}) {
     try {
       const {
@@ -361,7 +532,8 @@ class Sale {
         serviceId,
         staffId,
         dateFrom,
-        dateTo
+        dateTo,
+        saleType
       } = options || {};
 
       // Ensure limit and offset are integers
@@ -379,51 +551,20 @@ class Sale {
         u.phone as userPhone,
         u.avatar as userAvatar,
         c.name as companyName
-      FROM company_sales s
-      LEFT JOIN users u ON s.userId = u.id
-      LEFT JOIN companies c ON s.companyId = c.id
-      LEFT JOIN company_appointments ca ON ca.saleId = s.id
+      ${Sale.getSalesListFromClause()}
       WHERE 1=1`;
       const params = [];
 
-      if (userId) {
-        query += ' AND s.userId = ?';
-        params.push(userId);
-      }
-      if (companyId) {
-        query += ' AND s.companyId = ?';
-        params.push(companyId);
-      }
-      if (serviceId) {
-        query += ' AND ca.serviceId = ?';
-        params.push(serviceId);
-      }
-      if (staffId) {
-        query += ' AND s.staffId = ?';
-        params.push(staffId);
-      }
-      if (dateFrom) {
-        query += ' AND DATE(s.createdAt) >= ?';
-        params.push(dateFrom);
-      }
-      if (dateTo) {
-        query += ' AND DATE(s.createdAt) <= ?';
-        params.push(dateTo);
-      }
-
-      // Search filter
-      if (search && search.trim()) {
-        query += ` AND (
-          u.firstName LIKE ? OR 
-          u.lastName LIKE ? OR 
-          u.email LIKE ? OR 
-          u.phone LIKE ? OR
-          CONCAT(u.firstName, ' ', u.lastName) LIKE ? OR
-          s.id LIKE ?
-        )`;
-        const searchPattern = `%${search.trim()}%`;
-        params.push(searchPattern, searchPattern, searchPattern, searchPattern, searchPattern, searchPattern);
-      }
+      query = Sale.appendSaleListFilters(query, params, {
+        userId,
+        companyId,
+        serviceId,
+        staffId,
+        dateFrom,
+        dateTo,
+        search,
+        saleType
+      });
 
       // Count total matching sales
       const countQuery = query.replace(/SELECT[\s\S]*?FROM/, 'SELECT COUNT(DISTINCT s.id) as total FROM').replace(/ORDER BY[\s\S]*$/, '');

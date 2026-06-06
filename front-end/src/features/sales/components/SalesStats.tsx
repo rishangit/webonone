@@ -9,6 +9,7 @@ export const SalesStats = ({
   productRevenue,
   totalTransactions,
   formatCurrency,
+  loading = false,
 }: SalesStatsProps) => {
   const stats = [
     { label: "Total Revenue", value: totalRevenue, icon: DollarSign, color: "text-[var(--accent-text)]" },
@@ -29,7 +30,11 @@ export const SalesStats = ({
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
                     <p className="text-xl font-semibold text-foreground">
-                      {stat.label === "Transactions" ? stat.value : formatCurrency(stat.value)}
+                      {loading
+                        ? "—"
+                        : stat.label === "Transactions"
+                          ? stat.value
+                          : formatCurrency(stat.value)}
                     </p>
                   </div>
                   <Icon className={`w-8 h-8 ${stat.color}`} />
@@ -60,7 +65,11 @@ export const SalesStats = ({
                       <div>
                         <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
                         <p className="text-xl font-semibold text-foreground">
-                          {stat.label === "Transactions" ? stat.value : formatCurrency(stat.value)}
+                          {loading
+                            ? "—"
+                            : stat.label === "Transactions"
+                              ? stat.value
+                              : formatCurrency(stat.value)}
                         </p>
                       </div>
                       <Icon className={`w-8 h-8 ${stat.color}`} />

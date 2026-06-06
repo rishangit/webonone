@@ -702,6 +702,9 @@ const createTables = async () => {
     const { migrateCompanyServicesSchema } = require('./1.19.0/migrateCompanyServicesSchema');
     await migrateCompanyServicesSchema(pool);
 
+    const { setupCompanyCustomFormsTables } = require('./1.21.0/setupCompanyCustomFormsTables');
+    await setupCompanyCustomFormsTables(pool);
+
     console.log('✅ Database tables created successfully');
   } catch (error) {
     console.error('❌ Error creating tables:', error.message);
