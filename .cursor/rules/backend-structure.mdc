@@ -1,0 +1,62 @@
+---
+description: Back-end folder layout, models, system vs company data, nanoid IDs
+globs: back-end/**/*.js
+alwaysApply: false
+---
+
+# Back-end Structure
+
+Express + mysql2 stack: routes call model classes directly (no separate controller layer unless the team intentionally refactors).
+
+## Folder layout
+
+| Folder | Purpose |
+|--------|---------|
+| `config/` | DB pool, env-backed config |
+| `constants/` | Shared enums (`entityType`, etc.) |
+| `middleware/` | Auth, validation, error handling |
+| `models/` | One class per domain table/aggregate |
+| `routes/` | Express routers + Joi schemas |
+| `scripts/` | Init, seed, versioned migrations |
+| `types/` | Role/permission constants |
+| `utils/` | Cross-cutting helpers |
+| `server.js` | Bootstrap, middleware, route registration |
+
+New features: add `models/<Entity>.js` + `routes/<resource>.js`, register in `server.js` under `/api/...`.
+
+## System vs company data
+
+- **System catalog:** `products`, `services`, etc. — shared templates, `isVerified`, `usageCount`
+- **Company overlay:** `company_products`, `company_services`, etc. — pricing, stock, overrides via `systemProductId` / `systemServiceId`
+
+System routes: `/api/products`, `/api/system-services`. Company routes: `/api/company-products`, `/api/services`. Company models join system tables and expose merged `toJSON()`.
+
+## Model conventions
+
+- ES6 class; constructor maps DB rows
+- Static methods: `create`, `findById`, `findAll`, `findAllPaginated`, `update`, `delete`
+- `toJSON()` for API-safe output
+- IDs: **`nanoid(10)`** → `VARCHAR(10)` primary keys
+- SQL: parameterized `pool.execute()` only; transactions via `getConnection()` + `beginTransaction`
+- JSON columns: local `safeJsonParse` / `parseImages` helpers
+
+## Database naming
+
+- Tables: `snake_case` plural
+- Columns: **camelCase** in SQL (`companyId`, `createdAt`) — legacy exceptions exist; match sibling tables in the same domain
+- Tags: unified `entity_tags` + `utils/entityTags.js`; use `constants/entityType.js`
+
+## Do not treat as source of truth
+
+- `back-end/README.md` is partially stale — follow live code in `server.js`, models, and routes
+
+## Reference implementations
+
+- `back-end/server.js`
+- `back-end/models/Product.js`, `back-end/models/CompanyProduct.js`
+- `back-end/models/CompanyService.js`, `back-end/models/User.js`
+- `back-end/config/database.js`
+
+## Verification
+
+After model changes: smoke-test affected endpoints and run `node back-end/scripts/verifyDatabase.js` when schema touched.

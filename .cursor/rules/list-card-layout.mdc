@@ -1,0 +1,70 @@
+---
+description: Shared list/grid card anatomy — ListCardLayout shells and CardKebabTrigger
+globs: front-end/src/**/*{Card,ListView}*.tsx
+alwaysApply: false
+---
+
+# List Card Layout
+
+Use shared layout primitives from `@/components/common/ListCardLayout` and `@/components/common/CardKebabTrigger` for list-page cards. Pair with [system-kebab-menu.mdc](mdc:.cursor/rules/system-kebab-menu.mdc) for menu items and [list-pages-card-view.mdc](mdc:.cursor/rules/list-pages-card-view.mdc) for grid breakpoints.
+
+## Grid vs list
+
+- **Grid card:** use `LIST_CARD_GRID_SHELL` (or domain wrapper that composes it)
+- **List row:** use `LIST_CARD_LIST_SHELL` with `ListCardMediaColumn` + `ListCardContent`
+
+Both modes should accept `viewMode: "grid" | "list"` on the same card component when possible.
+
+## List row structure
+
+```
+[ListCardMediaColumn]  [ListCardContent]
+                         ListCardDetailsHeader (title, status badge, kebab)
+                         LIST_CARD_DETAIL_GRID_CLASS (detail fields)
+                         LIST_CARD_DETAIL_DIVIDER_CLASS (optional)
+                         footer (price, dates, actions)
+```
+
+Shared class exports from `ListCardLayout.tsx`:
+
+- `LIST_CARD_DETAIL_GRID_CLASS` — `grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-3`
+- `LIST_CARD_DETAIL_DIVIDER_CLASS` — low-contrast separator between detail blocks
+
+## Media helpers
+
+- `ListCardCoverImage` — full-bleed cover in media column
+- `ListCardBlurredMedia` — blurred background + centered avatar/logo (grid hero style)
+- `ListCardContactRow` — phone/email rows with Lucide icons
+
+## Kebab placement
+
+Use `CardKebabTrigger` with the correct variant:
+
+- **`overlay`** — on photo/dark media (compact dark trigger)
+- **`default`** — in list header row on light surfaces
+
+Always `stopPropagation` on trigger and menu content (see kebab-menu rule).
+
+## Status badges
+
+Use `statusBadgeClasses` from `@/shared/utils/statusBadges` with `Badge` — see [status-badges.mdc](mdc:.cursor/rules/status-badges.mdc). Do not inline ad-hoc Tailwind color strings per card.
+
+## Reusable cards
+
+When a card is used across features, promote to `@/shared/components/<domain>/` and register in showcase ([component-showcase.mdc](mdc:.cursor/rules/component-showcase.mdc)).
+
+## Reference implementations
+
+- `front-end/src/components/common/ListCardLayout.tsx`
+- `front-end/src/components/common/CardKebabTrigger.tsx`
+- `front-end/src/features/services/pages/ServicesPage/components/ServiceListView.tsx`
+- `front-end/src/features/companies/components/CompanyCard/CompanyListView.tsx`
+- `front-end/src/features/users/pages/UserCard.tsx`
+
+## Verification
+
+```bash
+cd front-end
+npm run type-check
+npm run lint
+```

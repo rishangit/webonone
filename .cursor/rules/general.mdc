@@ -1,0 +1,15 @@
+---
+description: General project-wide standards and expectations
+alwaysApply: true
+---
+
+# General Project Standards
+
+Apply these broad expectations alongside the other rules in `.cursor/rules/`.
+
+1. Follow existing conventions in the codebase before introducing new patterns.
+2. Prefer focused changes; avoid unrelated drive-by refactors in the same diff.
+3. Use the specialized rules in this folder for UI, structure, Redux, dialogs, and feature-specific work.
+4. Run verification commands listed in area-specific rules before considering work complete.
+
+See [README.md](.cursor/rules/README.md) for the full rules index and [cursor-rules.mdc](mdc:.cursor/rules/cursor-rules.mdc) for how to add or edit rules.

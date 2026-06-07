@@ -2,17 +2,16 @@
 description: Clean structure, path aliases, no dead code, and remove empty unused folders/files
 alwaysApply: true
 ---
-
 # Code cleanliness and structure
 
 Apply these expectations in every coding task for this repo.
 
-## How this rule “takes effect” (two layers)
+## How this rule "takes effect" (two layers)
 
 | Layer | What it does |
 |--------|----------------|
-| **This `.mdc` file** | Injected into Cursor’s context so the **AI follows** these guidelines while editing. It is **not** a program and does **not** run checks or fix files by itself. |
-| **Tooling & habits** | **Immediate, repeatable checks** come from **TypeScript**, **ESLint**, **Prettier**, and (optionally) **CI** / **git hooks**. Rules should **name the commands** you run so “correct path” is verifiable, not only hoped for. |
+| **This `.mdc` file** | Injected into Cursor's context so the **AI follows** these guidelines while editing. It is **not** a program and does **not** run checks or fix files by itself. |
+| **Tooling & habits** | **Immediate, repeatable checks** come from **TypeScript**, **ESLint**, **Prettier**, and (optionally) **CI** / **git hooks**. Rules should **name the commands** you run so "correct path" is verifiable, not only hoped for. |
 
 **Write rules to be actionable:** short bullets, one topic per file when possible, and a **Verification** section that lists exact `npm run …` commands (see below). Use **`alwaysApply: true`** only for repo-wide standards; use **`globs`** (e.g. `front-end/**/*.tsx`) for area-specific rules so they appear when those files are in scope.
 
@@ -32,7 +31,7 @@ Apply these expectations in every coding task for this repo.
 
 ## Empty or unused folders and files
 
-**TS/ESLint do not report empty directories** (see **Verification**). When a change leaves artifacts behind, clean them up as part of “done” work (when safe):
+**TS/ESLint do not report empty directories** (see **Verification**). When a change leaves artifacts behind, clean them up as part of "done" work (when safe):
 
 - Remove **empty folders** left after moving or deleting code.
 - Remove **unused files** (orphaned components, duplicate stubs, leftover `.tsx`/`.ts` that nothing imports) once you have confirmed nothing references them (grep or the toolchain).
@@ -40,7 +39,7 @@ Apply these expectations in every coding task for this repo.
 
 ## Unused imports, variables, and functions
 
-**Always treat removal of dead code as part of “done” work** when touching a file:
+**Always treat removal of dead code as part of "done" work** when touching a file:
 
 - Remove **unused imports** (including type-only imports that are no longer referenced).
 - Remove **unused variables** and **unused function parameters** (prefix with `_` only when the signature must stay for API/callback compatibility).

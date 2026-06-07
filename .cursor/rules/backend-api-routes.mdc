@@ -1,0 +1,69 @@
+---
+description: Express route handlers — response envelope, Joi, auth middleware, asyncHandler
+globs: back-end/routes/**/*.js
+alwaysApply: false
+---
+
+# Back-end API Routes
+
+Follow patterns in existing routes; see [backend-structure.mdc](mdc:.cursor/rules/backend-structure.mdc) for models and folder layout.
+
+## Handler stack
+
+```
+authenticateToken → role/permission guard → validate(Joi) → asyncHandler → { success, data }
+```
+
+Use helpers from `middleware/errorHandler.js`: `asyncHandler`, `validationError`, `notFoundError`.
+
+## Response envelope
+
+```json
+{ "success": true, "data": { ... }, "pagination": { ... } }
+{ "success": false, "message": "...", "errors": [ ... ] }
+```
+
+- **201** on create
+- Global error handler maps MySQL codes (`ER_DUP_ENTRY` → 409, JWT failures → 401)
+
+## Validation
+
+- Shared schemas in `middleware/validation.js` for core domains
+- Route-local Joi objects for resource-specific shapes (see `companies.js`)
+- Cap pagination `limit` (often max 100)
+
+## URLs
+
+- Kebab-case under `/api/` (e.g. `/api/company-product-stock`)
+- Register new routers in `server.js`
+
+## Auth & RBAC
+
+From `types/user.js` — lower `roleLevel` = higher privilege:
+
+| Level | Role |
+|-------|------|
+| 0 | SYSTEM_ADMIN |
+| 1 | COMPANY_OWNER |
+| 2 | STAFF_MEMBER |
+| 3 | USER |
+
+- `requireRole(n)` — denies when `req.user.roleLevel > n`
+- Company-scoped routes: filter by `req.user.companyId` or use `requireSameCompany`
+- Roles live in **`users_role`** (not deprecated `users.role`)
+
+## System catalog `isVerified`
+
+On system catalog POST/PUT: SYSTEM_ADMIN controls `isVerified`; COMPANY_OWNER submissions forced to `isVerified: false` on backend (see `systemServices.js`).
+
+## Reference implementations
+
+- `back-end/routes/companies.js` — pagination, Joi, role guards
+- `back-end/routes/systemServices.js` — system catalog + isVerified
+- `back-end/routes/services.js` — company services
+- `back-end/middleware/auth.js`
+- `back-end/middleware/errorHandler.js`
+
+## Verification
+
+Manual: hit new/changed endpoints with test credentials (`TESTING_CREDENTIALS.md`). Confirm envelope shape and auth failures return correct status codes.

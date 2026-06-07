@@ -32,8 +32,6 @@ If a new backend migration/setup script is introduced for this version:
 3. Keep existing script names descriptive (do not shorten names).
 4. Ensure script paths referenced by docs or npm scripts are updated.
 
-
-
 ## Init Database Verification
 
 After adding or moving DB-related scripts:

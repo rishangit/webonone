@@ -1,0 +1,64 @@
+---
+description: Loading skeleton patterns for list pages — grid and list viewMode branches
+globs: front-end/src/features/**/pages/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# List Loading Skeletons
+
+Show skeletons only on **initial load** when there is no data yet:
+
+```tsx
+const showSkeleton = loading && displayedItems.length === 0;
+```
+
+Do not replace visible rows with skeletons during pagination or refresh when items already display.
+
+## Extract a component
+
+Prefer `<Domain>LoadingSkeleton viewMode={viewMode} />` over large inline blocks in the page file (see Users, Services).
+
+## List view skeleton
+
+- Container: `space-y-4`
+- Each row: `Card` with flex layout matching real list cards
+- Media pulse: use `LIST_CARD_LIST_MEDIA_WIDTH_CLASS` from `CardKebabTrigger`
+- Placeholder blocks for title, status badge, kebab (`h-8 w-8`), detail grid, footer
+
+## Grid view skeleton
+
+Use the **same breakpoints** as [list-pages-card-view.mdc](mdc:.cursor/rules/list-pages-card-view.mdc):
+
+```
+grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4
+```
+
+(or `gap-6` if the live page uses `gap-6` — match the page, not a different breakpoint set)
+
+Each card: hero/media pulse + 2–3 text line pulses.
+
+## Styling
+
+- Pulse blocks: `bg-gray-200 dark:bg-gray-700 animate-pulse rounded`
+- Card shell: match live cards (`p-6`, glass/border tokens when used on the real card)
+
+## Do not
+
+- Use `xl:grid-cols-4` when the live grid stops at `lg:grid-cols-4`
+- Show skeleton and `EmptyState` simultaneously
+- Fetch-specific skeleton counts are fine (6 list rows, 8 grid cards) — keep consistent within a page
+
+## Reference implementations
+
+- `front-end/src/features/users/pages/UsersPage/components/LoadingSkeleton.tsx` (preferred extracted pattern)
+- `front-end/src/features/services/pages/ServicesPage/components/ServicesPageLoadingSkeleton.tsx`
+
+## Verification
+
+```bash
+cd front-end
+npm run type-check
+npm run lint
+```
+
+When refactoring a page, update **both** runtime grid and skeleton grid together.

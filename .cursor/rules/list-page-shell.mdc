@@ -1,0 +1,80 @@
+---
+description: List page layout — header, filters card, skeleton/empty/grid, pagination
+globs: front-end/src/features/**/pages/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# List Page Shell
+
+Use this pattern for domain **list pages** (users, services, products, spaces, tags, etc.). Defer to related rules for search ([search-input-component.mdc](mdc:.cursor/rules/search-input-component.mdc)), grid columns ([list-pages-card-view.mdc](mdc:.cursor/rules/list-pages-card-view.mdc)), empty state ([empty-state-component.mdc](mdc:.cursor/rules/empty-state-component.mdc)), and skeletons ([list-loading-skeletons.mdc](mdc:.cursor/rules/list-loading-skeletons.mdc)).
+
+## Page root
+
+```tsx
+<div className="flex flex-col min-h-0 p-4 lg:p-6 flex-1">
+  <div className="flex flex-col flex-1 min-h-0">
+    {/* header → filters → body → pagination */}
+  </div>
+</div>
+```
+
+## Header row
+
+- Title: `text-2xl font-semibold text-foreground`
+- Description: `text-muted-foreground mt-1`
+- Layout: `flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6`
+- Primary CTA (Add/Create) in header trailing column; use `Button variant="accent"` or outline per page pattern
+
+## Filters toolbar
+
+- Wrap in glass `Card` with `SearchInput` (debounce ~500ms via `onDebouncedChange`)
+- **Filter** button opens advanced filters in `RightPanel` (`@/components/common/RightPanel`), not inline popovers
+- Highlight active filters on the Filter button (accent border/background when any filter applied)
+- Include `ViewSwitcher` (`@/components/ui/view-switcher`) when page supports grid + list
+
+Extract filters into `<Domain>Filters.tsx` when the toolbar grows (see `UsersFilters`, `SpacesFilters`).
+
+## Body states (in order)
+
+```tsx
+const showSkeleton = loading && displayedItems.length === 0;
+
+{showSkeleton ? (
+  <LoadingSkeleton viewMode={viewMode} />
+) : displayedItems.length === 0 ? (
+  <EmptyState icon={...} title={...} description={...} action={...} />
+) : (
+  <DomainList viewMode={viewMode} items={displayedItems} ... />
+)}
+```
+
+- Do not show skeleton when paginating with existing rows visible
+- Distinguish **empty** vs **filtered empty** in `EmptyState` description when useful
+
+## Pagination
+
+- Use `@/components/common/Pagination` at bottom when server-side pagination exists
+- Wire `currentPage`, `itemsPerPage`, `totalItems`, `onPageChange`, `onItemsPerPageChange`
+
+## Data hook
+
+- Prefer a feature hook (`useUsersPage`, `useSpacesPage`, etc.) that owns search debounce, filter state, pagination, and Redux dispatch
+- Keep the page component mostly orchestration + JSX
+
+## Reference implementations
+
+- `front-end/src/features/users/pages/UsersPage/UsersPage.tsx`
+- `front-end/src/features/spaces/pages/SpacesPage/SpacesPage.tsx`
+- `front-end/src/features/users/pages/UsersPage/components/UsersFilters.tsx`
+- `front-end/src/components/common/RightPanel.tsx`
+- `front-end/src/components/common/Pagination.tsx`
+
+## Verification
+
+```bash
+cd front-end
+npm run type-check
+npm run lint
+```
+
+Manual: verify header, filters panel, skeleton → empty → grid/list, and pagination at mobile + desktop widths.

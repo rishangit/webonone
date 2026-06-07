@@ -1,7 +1,7 @@
 ---
 description: Standard 3-dot (MoreVertical) dropdown menus — match Appointments card pattern across the system
-globs: front-end/**/*.tsx
-alwaysApply: true
+globs: front-end/src/**/*.{ts,tsx}
+alwaysApply: false
 ---
 
 # System 3-dot menu (kebab) UI

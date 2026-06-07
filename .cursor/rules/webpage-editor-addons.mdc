@@ -1,7 +1,7 @@
 ---
 description: Conventions for WebpageEditor content addons (follow the image addon pattern).
 globs: front-end/src/features/website/pages/WebpageEditor/**/*
-alwaysApply: true
+alwaysApply: false
 ---
 
 # WebpageEditor content addons

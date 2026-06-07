@@ -1,7 +1,7 @@
 ---
 description: Standardize responsive card grids on list pages
 globs: front-end/src/features/**/pages/**/*.{ts,tsx}
-alwaysApply: true
+alwaysApply: false
 ---
 
 # List Pages Card View Standards

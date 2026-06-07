@@ -1,7 +1,7 @@
 ---
 description: Dialog window standards with CustomDialog and wizard/tab patterns
-globs: front-end/src/**/*.tsx
-alwaysApply: true
+globs: front-end/src/**/*.{ts,tsx}
+alwaysApply: false
 ---
 
 # Dialog Window Standards
