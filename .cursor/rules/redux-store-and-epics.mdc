@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Redux store, actions, and epics
 
-Narrative and examples: **`front-end/REDUX_RXJS_IMPLEMENTATION.md`**.
+Narrative and examples: **`front-end/REDUX_RXJS_IMPLEMENTATION.md`**. Step-by-step workflow: **`.cursor/skills/frontend-redux-api/SKILL.md`**.
 
 ## Where code lives
 

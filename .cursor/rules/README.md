@@ -17,7 +17,7 @@ Rules live in `.cursor/rules/*.mdc`. **Always-on** rules apply to every chat; **
 | Rule | Globs | Related |
 |------|-------|---------|
 | [front-end-structure.mdc](front-end-structure.mdc) | `front-end/src/**/*.{ts,tsx}` | [redux-store-and-epics.mdc](redux-store-and-epics.mdc) |
-| [redux-store-and-epics.mdc](redux-store-and-epics.mdc) | `front-end/**/store/**/*.ts` | `front-end/REDUX_RXJS_IMPLEMENTATION.md` |
+| [redux-store-and-epics.mdc](redux-store-and-epics.mdc) | `front-end/**/store/**/*.ts` | [frontend-redux-api skill](../skills/frontend-redux-api/SKILL.md) |
 
 ## Front-end UI
 

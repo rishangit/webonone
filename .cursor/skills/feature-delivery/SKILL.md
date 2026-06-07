@@ -27,8 +27,7 @@ Follow [backend-structure.mdc](../../rules/backend-structure.mdc), [backend-api-
 Follow [front-end-structure.mdc](../../rules/front-end-structure.mdc):
 
 - [ ] `features/<domain>/` with `components/`, `pages/`, `services/`, `store/`, `hooks/`, `types/`, `schemas/`, `index.ts`
-- [ ] Redux slice + epics in `store/`; register in `app/store/index.ts` and `rootEpic.ts` ([redux-store-and-epics.mdc](../../rules/redux-store-and-epics.mdc))
-- [ ] API client in `services/`
+- [ ] API + Redux: follow [frontend-redux-api](../../skills/frontend-redux-api/SKILL.md) ([redux-store-and-epics.mdc](../../rules/redux-store-and-epics.mdc))
 - [ ] Wire route in app router / layouts
 
 ## 4. UI patterns
