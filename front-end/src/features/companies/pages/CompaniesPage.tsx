@@ -16,6 +16,18 @@ import { RightPanel } from "@/components/common/RightPanel";
 import { cn } from "@/components/ui/utils";
 import { LIST_CARD_LIST_MEDIA_WIDTH_CLASS } from "@/components/common/CardKebabTrigger";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
+import { buildDomId } from "@/shared/utils/domId";
+
+const ID = {
+  root: buildDomId("companies", "page"),
+  header: buildDomId("companies", "page-header"),
+  body: buildDomId("companies", "page-body"),
+  bodyInner: buildDomId("companies", "page-body-inner"),
+  skeleton: buildDomId("companies", "page-skeleton"),
+  list: buildDomId("companies", "page-list"),
+  pagination: buildDomId("companies", "page-pagination"),
+  emptyState: buildDomId("companies", "page-empty-state"),
+} as const;
 
 interface Tag {
   id: number;
@@ -205,9 +217,9 @@ export function CompaniesPage({ onViewCompany }: CompaniesPageProps) {
   }, [pagination, companies]);
 
   return (
-    <div className="flex-1 p-6 flex flex-col min-h-0">
+    <div id={ID.root} className="flex-1 p-6 flex flex-col min-h-0">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div id={ID.header} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-xl sm:text-2xl font-semibold text-foreground">Company Management</h1>
           <p className="text-muted-foreground mt-1 text-sm sm:text-base">
@@ -307,12 +319,12 @@ export function CompaniesPage({ onViewCompany }: CompaniesPageProps) {
       </Card>
 
       {/* Body Container - Fills rest of screen */}
-      <div className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
+      <div id={ID.body} className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
         {/* Main Content */}
-        <div className="flex flex-col flex-1 min-h-0">
+        <div id={ID.bodyInner} className="flex flex-col flex-1 min-h-0">
           {/* Loading State - Skeleton for Company Cards */}
           {loading && displayedCompanies.length === 0 ? (
-            <div className="flex-1">
+            <div id={ID.skeleton} className="flex-1">
               {/* Skeleton for List View */}
               {viewMode === "list" ? (
             /* Skeleton for List View - Matching CompanyListItem structure */
@@ -443,7 +455,7 @@ export function CompaniesPage({ onViewCompany }: CompaniesPageProps) {
             </div>
       ) : displayedCompanies.length > 0 ? (
         <div className="flex flex-col flex-1 min-h-0">
-          <div className="flex-1">
+          <div id={ID.list} className="flex-1">
             {viewMode === "list" ? (
               <div className="space-y-4">
                 {displayedCompanies.map((company) => (
@@ -469,7 +481,7 @@ export function CompaniesPage({ onViewCompany }: CompaniesPageProps) {
 
           {/* Pagination */}
           {pagination && (
-            <div className="mt-auto pt-4">
+            <div id={ID.pagination} className="mt-auto pt-4">
               <Pagination
                 totalItems={pagination.total}
                 itemsPerPage={itemsPerPage}
@@ -487,6 +499,7 @@ export function CompaniesPage({ onViewCompany }: CompaniesPageProps) {
         </div>
       ) : (
         <EmptyState
+          id={ID.emptyState}
           icon={Building}
           title="No companies found"
           description={

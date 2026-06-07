@@ -34,6 +34,43 @@ Use this pattern for domain **list pages** (users, services, products, spaces, t
 
 Extract filters into `<Domain>Filters.tsx` when the toolbar grows (see `UsersFilters`, `SpacesFilters`).
 
+## Layout IDs
+
+Add stable layout region ids on list page shells using `buildDomId` from `@/shared/utils/domId`. See [dom-element-ids.mdc](mdc:.cursor/rules/dom-element-ids.mdc) for the full vocabulary.
+
+App-level debugging: `APP_LAYOUT_ID` from `domId.ts` (`#app-layout-main-content`, `#app-layout-sidebar`).
+
+Per-page pattern (archetype: [`UsersPage.tsx`](front-end/src/features/users/pages/UsersPage/UsersPage.tsx)):
+
+```tsx
+import { buildDomId } from "@/shared/utils/domId";
+
+const ID = {
+  root: buildDomId("users", "page"),
+  inner: buildDomId("users", "page-inner"),
+  header: buildDomId("users", "page-header"),
+  headerActions: buildDomId("users", "page-header-actions"),
+  stats: buildDomId("users", "page-stats"), // when stats row exists
+  body: buildDomId("users", "page-body"),
+  bodyInner: buildDomId("users", "page-body-inner"),
+  skeleton: buildDomId("users", "page-skeleton"),
+  list: buildDomId("users", "page-list"),
+  pagination: buildDomId("users", "page-pagination"),
+  emptyState: buildDomId("users", "page-empty-state"),
+} as const;
+
+<div id={ID.root} className="flex flex-col min-h-0 p-4 lg:p-6 flex-1">
+  <div id={ID.inner} className="flex flex-col flex-1 min-h-0">
+    <div id={ID.header}>...</div>
+    <div id={ID.body}>...</div>
+  </div>
+</div>
+```
+
+- Wire `EmptyState` and `Pagination` via their `id` props where used.
+- Pass `id` to `RightPanel` for filter panels (e.g. `buildDomId("users", "page-filters-panel")`).
+- Skip regions the page does not have (e.g. no stats row, no pagination).
+
 ## Body states (in order)
 
 ```tsx

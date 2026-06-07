@@ -1,5 +1,6 @@
 import { UserPlus, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { LIST_CARD_LIST_MEDIA_WIDTH_CLASS } from "@/components/common/CardKebabTrigger";
 import { Pagination } from "@/components/common/Pagination";
 import { EmptyState } from "@/components/common/EmptyState";
@@ -13,6 +14,19 @@ import {
   StaffDeleteDialog,
 } from "./components";
 import { StaffPageProps } from "./types";
+import { buildDomId } from "@/shared/utils/domId";
+
+const ID = {
+  root: buildDomId("staff", "page"),
+  header: buildDomId("staff", "page-header"),
+  headerActions: buildDomId("staff", "page-header-actions"),
+  body: buildDomId("staff", "page-body"),
+  bodyInner: buildDomId("staff", "page-body-inner"),
+  skeleton: buildDomId("staff", "page-skeleton"),
+  list: buildDomId("staff", "page-list"),
+  pagination: buildDomId("staff", "page-pagination"),
+  emptyState: buildDomId("staff", "page-empty-state"),
+} as const;
 
 export const StaffPage = ({ currentUser }: StaffPageProps) => {
   const {
@@ -90,25 +104,27 @@ export const StaffPage = ({ currentUser }: StaffPageProps) => {
   const showSkeleton = loading && displayedStaff.length === 0;
 
   return (
-    <div className="flex-1 p-4 lg:p-6 flex flex-col min-h-0">
+    <div id={ID.root} className="flex-1 p-4 lg:p-6 flex flex-col min-h-0">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div id={ID.header} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">Staff Management</h1>
           <p className="text-muted-foreground mt-1">
             Manage your team members, roles, and permissions
           </p>
         </div>
-        <Button 
-          onClick={() => {
-            setSelectedStaff(null);
-            setIsAddStaffDialogOpen(true);
-          }}
-          variant="accent"
-        >
-          <UserPlus className="w-4 h-4 mr-2" />
-          Add Staff
-        </Button>
+        <div id={ID.headerActions}>
+          <Button 
+            onClick={() => {
+              setSelectedStaff(null);
+              setIsAddStaffDialogOpen(true);
+            }}
+            variant="accent"
+          >
+            <UserPlus className="w-4 h-4 mr-2" />
+            Add Staff
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -134,10 +150,10 @@ export const StaffPage = ({ currentUser }: StaffPageProps) => {
       />
 
       {/* Body Container */}
-      <div className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
-        <div className="flex flex-col flex-1 min-h-0">
+      <div id={ID.body} className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
+        <div id={ID.bodyInner} className="flex flex-col flex-1 min-h-0">
           {showSkeleton ? (
-            <div className="flex-1">
+            <div id={ID.skeleton} className="flex-1">
               {viewMode === "list" ? (
                 <div className="space-y-4">
                   {[...Array(6)].map((_, index) => (
@@ -222,7 +238,7 @@ export const StaffPage = ({ currentUser }: StaffPageProps) => {
             </div>
           ) : displayedStaff.length > 0 ? (
             <div className="flex flex-col flex-1 min-h-0">
-              <div className="flex-1">
+              <div id={ID.list} className="flex-1">
                 <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" : "space-y-4"}>
                   {displayedStaff.map((member) => (
                     <StaffCard 
@@ -236,7 +252,7 @@ export const StaffPage = ({ currentUser }: StaffPageProps) => {
                 </div>
               </div>
               {pagination && (
-                <div className="mt-auto pt-4">
+                <div id={ID.pagination} className="mt-auto pt-4">
                   <Pagination
                     totalItems={pagination.total}
                     itemsPerPage={itemsPerPage}
@@ -254,6 +270,7 @@ export const StaffPage = ({ currentUser }: StaffPageProps) => {
             </div>
           ) : (
             <EmptyState
+              id={ID.emptyState}
               icon={UserPlus}
               title="No staff members found"
               description={

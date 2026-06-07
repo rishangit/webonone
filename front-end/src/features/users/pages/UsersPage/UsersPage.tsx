@@ -7,6 +7,7 @@ import { CreateUserDialog } from "../CreateUserDialog";
 import { RoleSelectionDialog } from "@/shared/components/auth";
 import { UserSelectionDialog } from "@/components/common/UserSelectionDialog";
 import { useUsersPage } from "@/features/users/hooks";
+import { buildDomId } from "@/shared/utils/domId";
 import {
   UsersStats,
   UsersFilters,
@@ -18,6 +19,22 @@ import { useAppDispatch } from "@/store/hooks";
 import { fetchUsersRequest } from "@/features/users/store";
 import { usersService } from "@/features/users/services";
 import { toast } from "sonner";
+
+const ID = {
+  root: buildDomId("users", "page"),
+  inner: buildDomId("users", "page-inner"),
+  header: buildDomId("users", "page-header"),
+  headerActions: buildDomId("users", "page-header-actions"),
+  stats: buildDomId("users", "page-stats"),
+  body: buildDomId("users", "page-body"),
+  bodyInner: buildDomId("users", "page-body-inner"),
+  skeleton: buildDomId("users", "page-skeleton"),
+  createUserButton: buildDomId("users", "page", "create-user-button"),
+  addCompanyUserButton: buildDomId("users", "page", "add-company-user-button"),
+  list: buildDomId("users", "page-list"),
+  pagination: buildDomId("users", "page-pagination"),
+  emptyState: buildDomId("users", "page-empty-state"),
+} as const;
 
 export const UsersPage = (props: UsersPageProps) => {
   const dispatch = useAppDispatch();
@@ -77,17 +94,18 @@ export const UsersPage = (props: UsersPageProps) => {
   const showSkeleton = loading && displayedUsers.length === 0;
 
   return (
-    <div className="flex flex-col min-h-0 p-4 lg:p-6 flex-1">
-      <div className="flex flex-col flex-1 min-h-0">
+    <div id={ID.root} className="flex flex-col min-h-0 p-4 lg:p-6 flex-1">
+      <div id={ID.inner} className="flex flex-col flex-1 min-h-0">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div id={ID.header} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl font-semibold text-foreground">{pageTitle}</h1>
             <p className="text-muted-foreground mt-1">{pageDescription}</p>
           </div>
           {!isSystemAdmin && isCompanyOwner && companyId && (
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+            <div id={ID.headerActions} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
               <Button
+                id={ID.createUserButton}
                 variant="outline"
                 size="sm"
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2"
@@ -99,6 +117,7 @@ export const UsersPage = (props: UsersPageProps) => {
                 Create New User
               </Button>
               <Button
+                id={ID.addCompanyUserButton}
                 variant="accent"
                 size="sm"
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2"
@@ -114,12 +133,14 @@ export const UsersPage = (props: UsersPageProps) => {
         </div>
 
         {/* Stats Cards */}
-        <UsersStats
-          totalUsers={pageStats.totalUsers}
-          activeUsers={pageStats.activeUsers}
-          totalCompanyOwners={pageStats.totalCompanyOwners}
-          totalStaffMembers={pageStats.totalStaffMembers}
-        />
+        <div id={ID.stats}>
+          <UsersStats
+            totalUsers={pageStats.totalUsers}
+            activeUsers={pageStats.activeUsers}
+            totalCompanyOwners={pageStats.totalCompanyOwners}
+            totalStaffMembers={pageStats.totalStaffMembers}
+          />
+        </div>
 
         {/* Search and Filters Section */}
         <UsersFilters
@@ -143,8 +164,8 @@ export const UsersPage = (props: UsersPageProps) => {
         />
 
         {/* Body Container */}
-        <div className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
-          <div className="flex flex-col flex-1 min-h-0">
+        <div id={ID.body} className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
+          <div id={ID.bodyInner} className="flex flex-col flex-1 min-h-0">
             {/* Error Message */}
             {usersError && isSystemAdmin && (
               <Card className="p-4 backdrop-blur-sm bg-red-500/10 border border-red-500/30 text-center">
@@ -164,12 +185,12 @@ export const UsersPage = (props: UsersPageProps) => {
 
             {/* Loading State */}
             {showSkeleton ? (
-              <div className="flex-1">
+              <div id={ID.skeleton} className="flex-1">
                 <LoadingSkeleton viewMode={viewMode} />
               </div>
             ) : displayedUsers.length > 0 ? (
               <div className="flex flex-col flex-1 min-h-0">
-                <div className="flex-1">
+                <div id={ID.list} className="flex-1">
                   <UsersList
                     users={displayedUsers}
                     viewMode={viewMode}
@@ -184,6 +205,7 @@ export const UsersPage = (props: UsersPageProps) => {
                 {pagination && pagination.total > 0 && (
                   <div className="mt-auto pt-4">
                     <Pagination
+                      id={ID.pagination}
                       totalItems={pagination.total}
                       itemsPerPage={itemsPerPage}
                       currentPage={currentPage}
@@ -200,6 +222,7 @@ export const UsersPage = (props: UsersPageProps) => {
               </div>
             ) : (
               <EmptyState
+                id={ID.emptyState}
                 icon={Users}
                 title={isSystemAdmin ? "No users found" : "No clients found"}
                 description={

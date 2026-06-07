@@ -22,6 +22,19 @@ import { ServicesPageServiceList } from "./components/ServicesPageServiceList";
 import { ServicesPageFiltersPanel } from "./components/ServicesPageFiltersPanel";
 import { ServicesPageDialogs } from "./components/ServicesPageDialogs";
 import { formatDuration, formatPrice as formatPriceUtil, getImageUrl, getStatusColor } from "./utils";
+import { buildDomId } from "@/shared/utils/domId";
+
+const ID = {
+  root: buildDomId("services", "page"),
+  header: buildDomId("services", "page-header"),
+  headerActions: buildDomId("services", "page-header-actions"),
+  body: buildDomId("services", "page-body"),
+  bodyInner: buildDomId("services", "page-body-inner"),
+  skeleton: buildDomId("services", "page-skeleton"),
+  list: buildDomId("services", "page-list"),
+  pagination: buildDomId("services", "page-pagination"),
+  emptyState: buildDomId("services", "page-empty-state"),
+} as const;
 
 export function ServicesPage() {
   const navigate = useNavigate();
@@ -346,8 +359,10 @@ export function ServicesPage() {
   const formatPrice = (price: number) => formatPriceUtil(price, companyCurrency);
 
   return (
-    <div className="flex-1 p-4 lg:p-6 flex flex-col min-h-0">
+    <div id={ID.root} className="flex-1 p-4 lg:p-6 flex flex-col min-h-0">
       <ServicesPageHeader
+        id={ID.header}
+        headerActionsId={ID.headerActions}
         isSuperAdmin={isSuperAdmin}
         onAddCompanyService={!isSuperAdmin ? openAddCompanyService : undefined}
         onAddSystemService={isSuperAdmin ? openAddSystemService : undefined}
@@ -365,12 +380,17 @@ export function ServicesPage() {
         onViewModeChange={setViewMode}
       />
 
-      <div className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
-        <div className="flex flex-col flex-1 min-h-0">
+      <div id={ID.body} className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
+        <div id={ID.bodyInner} className="flex flex-col flex-1 min-h-0">
           {loading && reduxServices.length === 0 ? (
-            <ServicesPageLoadingSkeleton viewMode={viewMode} />
+            <div id={ID.skeleton}>
+              <ServicesPageLoadingSkeleton viewMode={viewMode} />
+            </div>
           ) : (
             <ServicesPageServiceList
+              listId={ID.list}
+              paginationId={ID.pagination}
+              emptyStateId={ID.emptyState}
               services={filteredServices}
               viewMode={viewMode}
               isSuperAdmin={isSuperAdmin}

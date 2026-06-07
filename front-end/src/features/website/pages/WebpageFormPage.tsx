@@ -17,6 +17,11 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { buildDomId } from "@/shared/utils/domId";
+
+const ID = {
+  nameInput: buildDomId("website", "webpage-form", "name-input"),
+} as const;
 
 const schema = yup.object({
   name: yup.string().required("Webpage name is required"),
@@ -148,12 +153,12 @@ export const WebpageFormPage = () => {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
           <div className="space-y-3">
-            <Label htmlFor="name" className="text-base font-semibold text-foreground flex items-center gap-2">
+            <Label htmlFor={ID.nameInput} className="text-base font-semibold text-foreground flex items-center gap-2">
               <FileText className="w-4 h-4" />
               Webpage Name *
             </Label>
             <Input
-              id="name"
+              id={ID.nameInput}
               {...register("name")}
               placeholder="e.g., Home Page, About Us, Contact"
               className="h-12 text-base bg-background/50 border-2 border-border focus:border-[var(--accent-primary)] focus:ring-2 focus:ring-[var(--accent-primary)]/20 transition-all"

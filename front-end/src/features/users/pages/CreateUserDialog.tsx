@@ -1,4 +1,3 @@
-import React from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -9,6 +8,15 @@ import { Label } from "@/components/ui/label";
 import { Save, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { usersService } from "@/features/users/services";
+import { buildDomId } from "@/shared/utils/domId";
+
+const ID = {
+  dialog: buildDomId("users", "create-dialog"),
+  form: buildDomId("users", "create-dialog", "form"),
+  firstNameInput: buildDomId("users", "create-dialog", "first-name-input"),
+  lastNameInput: buildDomId("users", "create-dialog", "last-name-input"),
+  emailInput: buildDomId("users", "create-dialog", "email-input"),
+} as const;
 
 interface CreateUserDialogProps {
   open: boolean;
@@ -54,6 +62,7 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, companyId }: C
 
   return (
     <CustomDialog
+      id={ID.dialog}
       open={open}
       onOpenChange={(newOpen) => {
         if (!newOpen) reset();
@@ -78,7 +87,7 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, companyId }: C
           </Button>
           <Button
             type="submit"
-            form="create-user-form"
+            form={ID.form}
             variant="accent"
             size="default"
             disabled={isSubmitting}
@@ -90,12 +99,12 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, companyId }: C
         </>
       }
     >
-      <form id="create-user-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form id={ID.form} onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="firstName" className="text-foreground">First Name</Label>
+            <Label htmlFor={ID.firstNameInput} className="text-foreground">First Name</Label>
             <Input
-              id="firstName"
+              id={ID.firstNameInput}
               placeholder="John"
               {...register("firstName")}
               className={`bg-[var(--input-background)] border-[var(--glass-border)] text-foreground placeholder:text-muted-foreground ${errors.firstName ? "border-red-500" : ""}`}
@@ -105,9 +114,9 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, companyId }: C
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="lastName" className="text-foreground">Last Name</Label>
+            <Label htmlFor={ID.lastNameInput} className="text-foreground">Last Name</Label>
             <Input
-              id="lastName"
+              id={ID.lastNameInput}
               placeholder="Doe"
               {...register("lastName")}
               className={`bg-[var(--input-background)] border-[var(--glass-border)] text-foreground placeholder:text-muted-foreground ${errors.lastName ? "border-red-500" : ""}`}
@@ -119,9 +128,9 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, companyId }: C
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-foreground">Email Address</Label>
+          <Label htmlFor={ID.emailInput} className="text-foreground">Email Address</Label>
           <Input
-            id="email"
+            id={ID.emailInput}
             type="email"
             placeholder="john.doe@example.com"
             {...register("email")}

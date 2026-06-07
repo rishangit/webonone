@@ -24,6 +24,7 @@ Rules live in `.cursor/rules/*.mdc`. **Always-on** rules apply to every chat; **
 | Rule | Globs | Related |
 |------|-------|---------|
 | [theme-accent-ui-consistency.mdc](theme-accent-ui-consistency.mdc) | `front-end/src/**/*.{ts,tsx}` | globals.css, Settings accent picker |
+| [dom-element-ids.mdc](dom-element-ids.mdc) | `front-end/src/**/*.{tsx,jsx}` | [list-page-shell.mdc](list-page-shell.mdc), [form-dialogs.mdc](form-dialogs.mdc) |
 | [dialog-windows.mdc](dialog-windows.mdc) | `front-end/src/**/*.{ts,tsx}` | [form-dialogs.mdc](form-dialogs.mdc) |
 | [form-dialogs.mdc](form-dialogs.mdc) | `front-end/src/features/**/*Dialog*.tsx` | [dialog-windows.mdc](dialog-windows.mdc) |
 | [search-input-component.mdc](search-input-component.mdc) | `front-end/src/**/*.{ts,tsx}` | [list-page-shell.mdc](list-page-shell.mdc) |

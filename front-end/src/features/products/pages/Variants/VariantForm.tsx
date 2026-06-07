@@ -5,6 +5,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AlertCircle } from "lucide-react";
 import { VariantFormData } from "@/features/products/schemas";
 import { CompanyProductVariant } from "@/features/products/services/companyProductVariants";
+import { buildDomId } from "@/shared/utils/domId";
+
+const ID = {
+  nameInput: buildDomId("products", "variant-form", "name-input"),
+} as const;
 
 interface VariantFormProps {
   // React Hook Form props (optional - for use with react-hook-form)
@@ -92,9 +97,9 @@ export const VariantForm = ({
       {!hideVariantDetails && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="name" className="text-foreground">Variant Name <span className="text-red-500">*</span></Label>
+            <Label htmlFor={ID.nameInput} className="text-foreground">Variant Name <span className="text-red-500">*</span></Label>
             <Input
-              id="name"
+              id={ID.nameInput}
               {...(register ? register('name') : {})}
               value={isReactHookFormMode ? undefined : getFieldValue('name')}
               onChange={(e) => {

@@ -15,6 +15,19 @@ import { useAppSelector } from "@/store/hooks";
 import { useSalesData } from "@/features/sales/hooks/useSalesData";
 import { SalesStats, SalesCard, SalesFilters } from "@/features/sales/components";
 import { POSSalesPage } from "./POSSalesPage";
+import { buildDomId } from "@/shared/utils/domId";
+
+const ID = {
+  root: buildDomId("sales", "page"),
+  header: buildDomId("sales", "page-header"),
+  headerActions: buildDomId("sales", "page-header-actions"),
+  body: buildDomId("sales", "page-body"),
+  bodyInner: buildDomId("sales", "page-body-inner"),
+  skeleton: buildDomId("sales", "page-skeleton"),
+  list: buildDomId("sales", "page-list"),
+  pagination: buildDomId("sales", "page-pagination"),
+  emptyState: buildDomId("sales", "page-empty-state"),
+} as const;
 
 export const SalesPage = () => {
   const navigate = useNavigate();
@@ -132,8 +145,8 @@ export const SalesPage = () => {
   const resultsCount = pagination?.total ?? salesData.length;
 
   return (
-    <div className="flex-1 p-4 lg:p-6 flex flex-col min-h-0">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+    <div id={ID.root} className="flex-1 p-4 lg:p-6 flex flex-col min-h-0">
+      <div id={ID.header} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-xl sm:text-2xl font-semibold text-foreground">Sales History</h1>
           <p className="text-muted-foreground mt-1">
@@ -141,10 +154,12 @@ export const SalesPage = () => {
           </p>
         </div>
         {isCompanyOwner && (
-          <Button variant="accent" onClick={() => setShowPOS(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Add Sale
-          </Button>
+          <div id={ID.headerActions}>
+            <Button variant="accent" onClick={() => setShowPOS(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Sale
+            </Button>
+          </div>
         )}
       </div>
 
@@ -185,10 +200,10 @@ export const SalesPage = () => {
         </div>
       </Card>
 
-      <div className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
-        <div className="flex flex-col flex-1 min-h-0">
+      <div id={ID.body} className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
+        <div id={ID.bodyInner} className="flex flex-col flex-1 min-h-0">
           {loading && salesData.length === 0 ? (
-            <div className="flex-1">
+            <div id={ID.skeleton} className="flex-1">
               <div className="space-y-4">
                 {[...Array(6)].map((_, index) => (
                   <Card key={index} className="p-6 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
@@ -205,6 +220,7 @@ export const SalesPage = () => {
             </div>
           ) : salesData.length === 0 ? (
             <EmptyState
+              id={ID.emptyState}
               icon={DollarSign}
               title="No Sales Found"
               description={
@@ -225,7 +241,7 @@ export const SalesPage = () => {
             />
           ) : (
             <div className="flex flex-col flex-1 min-h-0">
-              <div className="flex-1 space-y-4">
+              <div id={ID.list} className="flex-1 space-y-4">
                 {salesData.map((sale) => (
                   <SalesCard
                     key={sale.id}
@@ -243,7 +259,7 @@ export const SalesPage = () => {
               </div>
 
               {pagination && pagination.total > 0 && (
-                <div className="mt-auto pt-4">
+                <div id={ID.pagination} className="mt-auto pt-4">
                   <Pagination
                     totalItems={pagination.total}
                     itemsPerPage={itemsPerPage}

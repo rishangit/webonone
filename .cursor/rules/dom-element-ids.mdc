@@ -1,0 +1,113 @@
+---
+description: Meaningful full HTML element ids for developer debugging in DevTools
+globs: front-end/src/**/*.{tsx,jsx}
+alwaysApply: false
+---
+
+# DOM Element IDs
+
+Use **namespaced kebab-case** `id` attributes on **considerable** elements so developers can find them quickly in DevTools (`#users-page-search-input`).
+
+Primary use: **developer debugging** — not E2E `data-testid` (out of scope unless added separately).
+
+Layout ids **complement** control ids (inputs, buttons) — apply both where relevant.
+
+## Helpers
+
+```tsx
+import {
+  APP_LAYOUT_ID,
+  buildDomId,
+  dialogSectionIds,
+  panelSectionIds,
+} from "@/shared/utils/domId";
+```
+
+Implementation: [`front-end/src/shared/utils/domId.ts`](front-end/src/shared/utils/domId.ts).
+
+## Naming
+
+**Format:** `{domain}-{surface}-{element}` — minimum **2 segments**, never bare `name` or `email`.
+
+| Segment | Examples |
+|---------|----------|
+| domain | `users`, `tags`, `company-settings`, `auth-login`, `app` |
+| surface | `page`, `create-dialog`, `filters`, `registration-step-location` |
+| element | `page-header`, `search-input`, `add-button`, `name-input` |
+
+**Control suffixes:** `-input`, `-textarea`, `-submit-button`, `-cancel-button`.
+
+**Layout suffixes:** see table below.
+
+**Dynamic lists:** append entity id — `users-list-row-{userId}`.
+
+**Labels:** `htmlFor` on `Label` must match the control `id` exactly.
+
+## Layout div regions
+
+| Layer | Element suffix | Example |
+|-------|----------------|---------|
+| App | `layout-root`, `layout-body`, `layout-header`, `layout-sidebar`, `layout-sidebar-nav`, `layout-main-content`, `layout-mobile-overlay` | `app-layout-main-content` |
+| Page | `page`, `page-inner`, `page-header`, `page-header-actions`, `page-stats`, `page-filters`, `page-body`, `page-body-inner`, `page-skeleton`, `page-list`, `page-pagination`, `page-empty-state` | `spaces-page-body` |
+| Dialog | `{surface}-dialog`, `{surface}-dialog-header`, `{surface}-dialog-body`, `{surface}-dialog-footer` | `tags-form-dialog-body` |
+| Panel | `{surface}-panel`, `{surface}-panel-header`, `{surface}-panel-body` | `users-page-filters-panel-body` |
+
+### App shell (singleton)
+
+Use `APP_LAYOUT_ID` in [`MainLayout.tsx`](front-end/src/layouts/MainLayout.tsx), [`Header.tsx`](front-end/src/layouts/Header.tsx), [`Sidebar.tsx`](front-end/src/layouts/Sidebar.tsx).
+
+### Page list shell
+
+Per-file `ID` const — see [list-page-shell.mdc](mdc:.cursor/rules/list-page-shell.mdc) and [`UsersPage.tsx`](front-end/src/features/users/pages/UsersPage/UsersPage.tsx).
+
+### Dialog sections
+
+Pass `id` to [`CustomDialog`](front-end/src/components/ui/custom-dialog.tsx); header/body/footer ids are derived as `{id}-header`, `{id}-body`, `{id}-footer`.
+
+### Filter panels
+
+Pass `id` to [`RightPanel`](front-end/src/components/common/RightPanel.tsx); header/body ids derived as `{id}-header`, `{id}-body`.
+
+## What gets an id
+
+1. **Layout regions** — app shell, page root/sections, dialog/panel sections (above)
+2. Dialog/sheet root, form root, footer primary/cancel actions
+3. Form fields (inputs, textareas, selects, checkboxes with labels)
+4. Primary header actions (Add/Create/Save)
+5. Search, filter toggle, view switcher
+
+**Skip:** decorative wrappers, icons, individual skeleton cells, every inner card div.
+
+## Anti-patterns
+
+- Generic single-word ids: `name`, `email`, `address`, `active`
+- Duplicate ids on the same rendered document
+- Replacing shadcn `FormItem` `useId()` — keep opaque ids for a11y wiring; use explicit `buildDomId` for raw `Label`/`Input` dialogs ([form-dialogs.mdc](mdc:.cursor/rules/form-dialogs.mdc))
+
+## Reference implementations
+
+- [`UsersPage.tsx`](front-end/src/features/users/pages/UsersPage/UsersPage.tsx) — full list page layout ids
+- [`SpacesPage.tsx`](front-end/src/features/spaces/pages/SpacesPage/SpacesPage.tsx) — list page layout ids
+- [`TagFormDialog.tsx`](front-end/src/features/tags/pages/TagFormDialog.tsx) — dialog root + derived sections
+- [`UsersFilters.tsx`](front-end/src/features/users/pages/UsersPage/components/UsersFilters.tsx) — filters + RightPanel id
+
+Related: [list-page-shell.mdc](mdc:.cursor/rules/list-page-shell.mdc), [form-dialogs.mdc](mdc:.cursor/rules/form-dialogs.mdc).
+
+## Verification
+
+```bash
+cd front-end
+npm run type-check
+npm run lint
+```
+
+Audit generic control ids (should trend to zero):
+
+```bash
+rg 'id="(name|email|address|phone|city|state|country|description|website|active)"' front-end/src --glob "*.tsx"
+```
+
+Manual DevTools checks:
+1. Any authenticated route → `#app-layout-main-content`
+2. Users list → `#users-page`, `#users-page-header`, `#users-page-body`
+3. Tag dialog → `#tags-form-dialog`, `#tags-form-dialog-body`

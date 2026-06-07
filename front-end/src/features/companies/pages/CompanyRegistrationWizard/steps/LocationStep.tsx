@@ -3,6 +3,15 @@ import { Label } from "@/components/ui/label";
 import { GoogleMapComponent } from "@/components/GoogleMapComponent";
 import { WizardHeader } from "../components/WizardHeader";
 import { CompanyFormData } from "../types";
+import { buildDomId } from "@/shared/utils/domId";
+
+const ID = {
+  addressInput: buildDomId("company", "registration-step-location", "address-input"),
+  cityInput: buildDomId("company", "registration-step-location", "city-input"),
+  stateInput: buildDomId("company", "registration-step-location", "state-input"),
+  postalCodeInput: buildDomId("company", "registration-step-location", "postal-code-input"),
+  countryInput: buildDomId("company", "registration-step-location", "country-input"),
+} as const;
 
 interface LocationStepProps {
   formData: CompanyFormData;
@@ -64,9 +73,9 @@ export const LocationStep = ({ formData, onInputChange, onLocationChange }: Loca
 
         {/* Address Fields */}
         <div className="space-y-2">
-          <Label htmlFor="address" className="text-foreground">Street Address *</Label>
+          <Label htmlFor={ID.addressInput} className="text-foreground">Street Address *</Label>
           <Input
-            id="address"
+            id={ID.addressInput}
             value={formData.address}
             onChange={(e) => onInputChange('address', e.target.value)}
             placeholder="123 Main Street, Suite 100"
@@ -76,9 +85,9 @@ export const LocationStep = ({ formData, onInputChange, onLocationChange }: Loca
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="city" className="text-foreground">City *</Label>
+            <Label htmlFor={ID.cityInput} className="text-foreground">City *</Label>
             <Input
-              id="city"
+              id={ID.cityInput}
               value={formData.city}
               onChange={(e) => onInputChange('city', e.target.value)}
               placeholder="City name"
@@ -87,9 +96,9 @@ export const LocationStep = ({ formData, onInputChange, onLocationChange }: Loca
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="state" className="text-foreground">State/Province *</Label>
+            <Label htmlFor={ID.stateInput} className="text-foreground">State/Province *</Label>
             <Input
-              id="state"
+              id={ID.stateInput}
               value={formData.state}
               onChange={(e) => onInputChange('state', e.target.value)}
               placeholder="State/Province"
@@ -98,9 +107,9 @@ export const LocationStep = ({ formData, onInputChange, onLocationChange }: Loca
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="postalCode" className="text-foreground">Postal Code</Label>
+            <Label htmlFor={ID.postalCodeInput} className="text-foreground">Postal Code</Label>
             <Input
-              id="postalCode"
+              id={ID.postalCodeInput}
               value={formData.postalCode}
               onChange={(e) => onInputChange('postalCode', e.target.value)}
               placeholder="Postal code"
@@ -110,9 +119,9 @@ export const LocationStep = ({ formData, onInputChange, onLocationChange }: Loca
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="country" className="text-foreground">Country *</Label>
+          <Label htmlFor={ID.countryInput} className="text-foreground">Country *</Label>
           <Input
-            id="country"
+            id={ID.countryInput}
             value={formData.country}
             onChange={(e) => onInputChange('country', e.target.value)}
             placeholder="Country"

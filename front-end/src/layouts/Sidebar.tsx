@@ -7,6 +7,7 @@ import { Icon } from "@/components/common/Icon";
 import { config } from "@/config/environment";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { useAppSelector } from "@/store/hooks";
+import { APP_LAYOUT_ID } from "@/shared/utils/domId";
 
 const getNavigationItems = (role: UserRole, selectedEntities?: string[] | null) => {
   const baseItems = [
@@ -206,7 +207,7 @@ export function Sidebar({ currentPage, onPageChange, isOpen, onClose: _onClose, 
   const isCollapsed = !isMobile && collapsed;
 
   return (
-    <div className={`
+    <div id={APP_LAYOUT_ID.sidebar} className={`
       ${isMobile 
         ? `fixed top-16 left-0 bottom-0 z-40 w-64 transform transition-transform duration-300 ease-in-out ${
             isOpen ? 'translate-x-0' : '-translate-x-full'
@@ -215,9 +216,9 @@ export function Sidebar({ currentPage, onPageChange, isOpen, onClose: _onClose, 
       } 
       backdrop-blur-xl bg-sidebar border-r border-sidebar-border flex flex-col overflow-hidden
     `}>
-      <div className={`pt-3 ${isMobile ? 'p-2' : 'p-4'} flex-1 overflow-y-auto custom-scrollbar flex flex-col`}>
+      <div className={`${isMobile ? 'p-2' : 'p-4'} lg:py-6 flex-1 overflow-y-auto custom-scrollbar flex flex-col`}>
         {/* Navigation Menu */}
-        <nav className="space-y-2 flex-1">
+        <nav id={APP_LAYOUT_ID.sidebarNav} className="space-y-2 flex-1">
           {navigationItems.map((item, index) => {
             const ItemIcon = item.icon;
             const itemAny = item as any;

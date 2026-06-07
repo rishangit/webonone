@@ -14,6 +14,7 @@ interface SearchInputProps {
   className?: string;
   showClearButton?: boolean;
   disabled?: boolean;
+  id?: string;
 }
 
 const SearchInputComponent = ({
@@ -25,6 +26,7 @@ const SearchInputComponent = ({
   className,
   showClearButton = true,
   disabled = false,
+  id,
 }: SearchInputProps) => {
   console.log('[SearchInput] Component render', {
     controlledValue,
@@ -200,6 +202,7 @@ const SearchInputComponent = ({
     <div className={cn("relative", className)}>
       <Icon icon={Search} size="sm" color="muted" className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none" />
       <Input
+        id={id}
         ref={inputRef}
         type="text"
         placeholder={placeholder}

@@ -8,6 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { buildDomId } from "@/shared/utils/domId";
+
+const ID = {
+  dialog: buildDomId("website", "webpage-add-dialog"),
+  form: buildDomId("website", "webpage-add-dialog", "form"),
+  nameInput: buildDomId("website", "webpage-add-dialog", "name-input"),
+} as const;
 
 interface WebpageAddDialogProps {
   open: boolean;
@@ -95,14 +102,14 @@ export const WebpageAddDialog = ({
         </div>
       }
     >
-      <form id="add-webpage-form" onSubmit={handleSubmit((data) => onSubmit(data))} className="space-y-6">
+      <form id={ID.form} onSubmit={handleSubmit((data) => onSubmit(data))} className="space-y-6">
         <div className="space-y-3">
-          <Label htmlFor="name" className="text-base font-semibold text-foreground flex items-center gap-2">
+          <Label htmlFor={ID.nameInput} className="text-base font-semibold text-foreground flex items-center gap-2">
             <FileText className="w-4 h-4" />
             Webpage Name *
           </Label>
           <Input
-            id="name"
+            id={ID.nameInput}
             {...register("name")}
             placeholder="e.g., Home Page, About Us, Contact"
             className="h-12 text-base bg-[var(--input-background)] border-[var(--glass-border)] text-foreground"

@@ -12,6 +12,19 @@ import {
   WebpageDeleteDialog,
   WebpageAddDialog,
 } from "./components";
+import { buildDomId } from "@/shared/utils/domId";
+
+const ID = {
+  root: buildDomId("website-webpages", "page"),
+  header: buildDomId("website-webpages", "page-header"),
+  headerActions: buildDomId("website-webpages", "page-header-actions"),
+  body: buildDomId("website-webpages", "page-body"),
+  bodyInner: buildDomId("website-webpages", "page-body-inner"),
+  skeleton: buildDomId("website-webpages", "page-skeleton"),
+  list: buildDomId("website-webpages", "page-list"),
+  pagination: buildDomId("website-webpages", "page-pagination"),
+  emptyState: buildDomId("website-webpages", "page-empty-state"),
+} as const;
 
 export const WebpagesPage = () => {
   const location = useLocation();
@@ -61,9 +74,9 @@ export const WebpagesPage = () => {
   const showSkeleton = loading && displayedWebPages.length === 0;
 
   return (
-    <div className="flex-1 p-4 lg:p-6 flex flex-col min-h-0">
+    <div id={ID.root} className="flex-1 p-4 lg:p-6 flex flex-col min-h-0">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div id={ID.header} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-xl sm:text-2xl font-semibold text-foreground">
             Webpages Management
@@ -72,10 +85,12 @@ export const WebpagesPage = () => {
             Create and manage your website pages
           </p>
         </div>
-        <Button onClick={handleAdd} variant="accent">
-          <Plus className="w-4 h-4 mr-2" />
-          Add Webpage
-        </Button>
+        <div id={ID.headerActions}>
+          <Button onClick={handleAdd} variant="accent">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Webpage
+          </Button>
+        </div>
       </div>
 
       {/* Search and Filters */}
@@ -95,10 +110,10 @@ export const WebpagesPage = () => {
       />
 
       {/* Body */}
-      <div className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
-        <div className="flex flex-col flex-1 min-h-0">
+      <div id={ID.body} className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
+        <div id={ID.bodyInner} className="flex flex-col flex-1 min-h-0">
           {showSkeleton ? (
-            <div className="flex-1">
+            <div id={ID.skeleton} className="flex-1">
               {viewMode === "list" ? (
                 <div className="space-y-4">
                   {[...Array(6)].map((_, i) => (
@@ -141,7 +156,7 @@ export const WebpagesPage = () => {
             </div>
           ) : displayedWebPages.length > 0 ? (
             <div className="flex flex-col flex-1 min-h-0">
-              <div className="flex-1">
+              <div id={ID.list} className="flex-1">
                 {viewMode === "grid" ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {displayedWebPages.map((webPage) => (
@@ -171,7 +186,7 @@ export const WebpagesPage = () => {
                 )}
               </div>
               {pagination.total > 0 && (
-                <div className="mt-auto pt-4">
+                <div id={ID.pagination} className="mt-auto pt-4">
                   <Pagination
                     totalItems={pagination.total}
                     itemsPerPage={itemsPerPage}
@@ -189,6 +204,7 @@ export const WebpagesPage = () => {
             </div>
           ) : (
             <EmptyState
+              id={ID.emptyState}
               icon={FileText}
               title="No webpages found"
               description={

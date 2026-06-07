@@ -8,6 +8,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { CustomDialog } from "@/components/ui/custom-dialog";
 import { CreateSystemProductAttributeData } from "@/features/products/services/systemProductAttributes";
 import { UnitsOfMeasure } from "@/features/products/services/unitsOfMeasure";
+import { buildDomId } from "@/shared/utils/domId";
+
+const ID = {
+  nameInput: buildDomId("products", "attribute-dialog", "name-input"),
+  descriptionTextarea: buildDomId("products", "attribute-dialog", "description-textarea"),
+  activeCheckbox: buildDomId("products", "attribute-dialog", "active-checkbox"),
+} as const;
 
 interface ProductAttributeAddEditDialogProps {
   open: boolean;
@@ -64,9 +71,9 @@ export const ProductAttributeAddEditDialog = ({
     >
       <div className="space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="name" className="text-foreground">Name *</Label>
+          <Label htmlFor={ID.nameInput} className="text-foreground">Name *</Label>
           <Input
-            id="name"
+            id={ID.nameInput}
             value={formData.name}
             onChange={(e) => onFormDataChange({ ...formData, name: e.target.value })}
             placeholder="Attribute name"
@@ -74,9 +81,9 @@ export const ProductAttributeAddEditDialog = ({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="description" className="text-foreground">Description</Label>
+          <Label htmlFor={ID.descriptionTextarea} className="text-foreground">Description</Label>
           <Textarea
-            id="description"
+            id={ID.descriptionTextarea}
             value={formData.description || ""}
             onChange={(e) => onFormDataChange({ ...formData, description: e.target.value })}
             placeholder="Attribute description"
@@ -123,11 +130,11 @@ export const ProductAttributeAddEditDialog = ({
         </div>
         <div className="flex items-center gap-2">
           <Checkbox
-            id="active"
+            id={ID.activeCheckbox}
             checked={formData.isActive}
             onCheckedChange={(checked) => onFormDataChange({ ...formData, isActive: checked as boolean })}
           />
-          <Label htmlFor="active" className="text-foreground cursor-pointer">
+          <Label htmlFor={ID.activeCheckbox} className="text-foreground cursor-pointer">
             Active
           </Label>
         </div>

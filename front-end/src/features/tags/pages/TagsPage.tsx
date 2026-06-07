@@ -14,6 +14,19 @@ import {
 } from "@/features/tags/components";
 import { TagsPageProps } from "@/features/tags/types";
 import { TagFormDialog } from "./TagFormDialog";
+import { buildDomId } from "@/shared/utils/domId";
+
+const ID = {
+  root: buildDomId("tags", "page"),
+  header: buildDomId("tags", "page-header"),
+  headerActions: buildDomId("tags", "page-header-actions"),
+  body: buildDomId("tags", "page-body"),
+  bodyInner: buildDomId("tags", "page-body-inner"),
+  skeleton: buildDomId("tags", "page-skeleton"),
+  list: buildDomId("tags", "page-list"),
+  pagination: buildDomId("tags", "page-pagination"),
+  emptyState: buildDomId("tags", "page-empty-state"),
+} as const;
 
 export const TagsPage = ({ currentUser }: TagsPageProps) => {
   const {
@@ -67,8 +80,8 @@ export const TagsPage = ({ currentUser }: TagsPageProps) => {
   }
 
   return (
-    <div className="flex-1 p-4 lg:p-8 flex flex-col min-h-0">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+    <div id={ID.root} className="flex-1 p-4 lg:p-8 flex flex-col min-h-0">
+      <div id={ID.header} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <div className="flex items-center gap-2 mb-2">
             <h1 className="text-2xl font-semibold text-foreground">Tags Management</h1>
@@ -79,13 +92,15 @@ export const TagsPage = ({ currentUser }: TagsPageProps) => {
           </div>
           <p className="text-muted-foreground">Manage tags for companies and products</p>
         </div>
-        <Button
-          variant="accent"
-          onClick={handleAddTag}
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Tag
-        </Button>
+        <div id={ID.headerActions}>
+          <Button
+            variant="accent"
+            onClick={handleAddTag}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Tag
+          </Button>
+        </div>
       </div>
 
       <TagsStats
@@ -110,10 +125,10 @@ export const TagsPage = ({ currentUser }: TagsPageProps) => {
         onFilterPanelOpenChange={setIsFilterPanelOpen}
       />
 
-      <div className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
-        <div className="flex flex-col flex-1 min-h-0">
+      <div id={ID.body} className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
+        <div id={ID.bodyInner} className="flex flex-col flex-1 min-h-0">
           {loading && displayedTags.length === 0 ? (
-            <div className="flex-1">
+            <div id={ID.skeleton} className="flex-1">
               {viewMode === "list" ? (
                 <div className="space-y-4">
                   {[...Array(6)].map((_, index) => (
@@ -163,6 +178,7 @@ export const TagsPage = ({ currentUser }: TagsPageProps) => {
             </div>
           ) : displayedTags.length === 0 ? (
             <EmptyState
+              id={ID.emptyState}
               icon={TagIcon}
               title="No tags found"
               description={
@@ -179,7 +195,7 @@ export const TagsPage = ({ currentUser }: TagsPageProps) => {
             />
           ) : (
             <div className="flex flex-col flex-1 min-h-0">
-              <div className="flex-1">
+              <div id={ID.list} className="flex-1">
                 <div className={viewMode === "grid"
                   ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
                   : "space-y-4"
@@ -198,7 +214,7 @@ export const TagsPage = ({ currentUser }: TagsPageProps) => {
               </div>
 
               {pagination && (
-                <div className="mt-auto pt-4">
+                <div id={ID.pagination} className="mt-auto pt-4">
                   <Pagination
                     totalItems={pagination.total}
                     itemsPerPage={itemsPerPage}

@@ -14,6 +14,17 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { signUpRequest, clearError } from "@/features/auth/store/authSlice";
 import { signUpSchema, SignUpFormData } from "@/features/auth/schemas";
 import { UserRole } from "@/shared/types/user";
+import { buildDomId } from "@/shared/utils/domId";
+
+const ID = {
+  firstNameInput: buildDomId("auth-signup", "page", "first-name-input"),
+  lastNameInput: buildDomId("auth-signup", "page", "last-name-input"),
+  emailInput: buildDomId("auth-signup", "page", "email-input"),
+  mobileNumberInput: buildDomId("auth-signup", "page", "mobile-number-input"),
+  passwordInput: buildDomId("auth-signup", "page", "password-input"),
+  confirmPasswordInput: buildDomId("auth-signup", "page", "confirm-password-input"),
+  termsCheckbox: buildDomId("auth-signup", "page", "terms-checkbox"),
+} as const;
 
 export function SignUpPage() {
   const navigate = useNavigate();
@@ -161,13 +172,13 @@ export function SignUpPage() {
               {/* Name Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName" className="text-foreground">
+                  <Label htmlFor={ID.firstNameInput} className="text-foreground">
                     First Name
                   </Label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
-                      id="firstName"
+                      id={ID.firstNameInput}
                       type="text"
                       placeholder="John"
                       {...register("firstName")}
@@ -178,13 +189,13 @@ export function SignUpPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="lastName" className="text-foreground">
+                  <Label htmlFor={ID.lastNameInput} className="text-foreground">
                     Last Name
                   </Label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
-                      id="lastName"
+                      id={ID.lastNameInput}
                       type="text"
                       placeholder="Doe"
                       {...register("lastName")}
@@ -197,13 +208,13 @@ export function SignUpPage() {
 
               {/* Email Field */}
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-foreground">
+                <Label htmlFor={ID.emailInput} className="text-foreground">
                   Email Address
                 </Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    id="email"
+                    id={ID.emailInput}
                     type="email"
                     placeholder="john.doe@example.com"
                     {...register("email")}
@@ -215,7 +226,7 @@ export function SignUpPage() {
 
               {/* Mobile Number Field */}
               <div className="space-y-2">
-                <Label htmlFor="mobileNumber" className="text-foreground">
+                <Label htmlFor={ID.mobileNumberInput} className="text-foreground">
                   Mobile Number
                 </Label>
                 <Controller
@@ -223,7 +234,7 @@ export function SignUpPage() {
                   control={control}
                   render={({ field }) => (
                     <PhoneInput
-                      id="mobileNumber"
+                      id={ID.mobileNumberInput}
                       value={field.value || ""}
                       onChange={(value) => {
                         field.onChange(value);
@@ -242,13 +253,13 @@ export function SignUpPage() {
               {/* Password Fields */}
               <div className="grid grid-cols-1 gap-3">
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-foreground">
+                  <Label htmlFor={ID.passwordInput} className="text-foreground">
                     Password
                   </Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
-                      id="password"
+                      id={ID.passwordInput}
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
                       {...register("password")}
@@ -268,13 +279,13 @@ export function SignUpPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-foreground">
+                  <Label htmlFor={ID.confirmPasswordInput} className="text-foreground">
                     Confirm Password
                   </Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
-                      id="confirmPassword"
+                      id={ID.confirmPasswordInput}
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="Confirm your password"
                       {...register("confirmPassword")}
@@ -314,7 +325,7 @@ export function SignUpPage() {
               {/* Terms and Conditions */}
               <div className="flex items-start gap-2">
                 <Checkbox
-                  id="terms"
+                  id={ID.termsCheckbox}
                   checked={!!watch("agreeToTerms")}
                   onCheckedChange={async (checked) => {
                     console.log("Checkbox changed:", checked);
@@ -329,7 +340,7 @@ export function SignUpPage() {
                   }}
                   className="border-border data-[state=checked]:bg-[var(--accent-primary)] data-[state=checked]:border-[var(--accent-primary)] mt-1 flex-shrink-0"
                 />
-                <Label htmlFor="terms" className="text-sm text-muted-foreground leading-relaxed flex-1 block">
+                <Label htmlFor={ID.termsCheckbox} className="text-sm text-muted-foreground leading-relaxed flex-1 block">
                   I agree to the{" "}
                   <Button variant="link" className="text-[var(--accent-text)] hover:text-[var(--accent-primary-hover)] p-0 h-auto text-sm inline-block">
                     Terms and Conditions

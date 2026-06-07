@@ -7,7 +7,15 @@ import { SearchInput } from "@/components/common/SearchInput";
 import { ViewSwitcher } from "@/components/ui/view-switcher";
 import { RightPanel } from "@/components/common/RightPanel";
 import { cn } from "@/components/ui/utils";
+import { buildDomId } from "@/shared/utils/domId";
 import { UsersFiltersProps } from "../types";
+
+const ID = {
+  filters: buildDomId("users", "page-filters"),
+  filtersPanel: buildDomId("users", "page-filters-panel"),
+  searchInput: buildDomId("users", "page-search-input"),
+  filterButton: buildDomId("users", "page-filter-button"),
+} as const;
 
 export const UsersFilters = ({
   searchTerm,
@@ -32,9 +40,10 @@ export const UsersFilters = ({
 
   return (
     <>
-      <Card className="p-4 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] mb-6">
+      <Card id={ID.filters} className="p-4 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] mb-6">
         <div className="space-y-4">
           <SearchInput
+            id={ID.searchInput}
             placeholder="Search users by name, email, or phone..."
             value={searchTerm}
             onChange={onSearchTermChange}
@@ -44,6 +53,7 @@ export const UsersFilters = ({
 
           <div className="flex items-center justify-end gap-3 flex-wrap">
             <Button
+              id={ID.filterButton}
               variant="outline"
               onClick={() => onFilterPanelOpenChange(true)}
               className={cn(
@@ -67,6 +77,7 @@ export const UsersFilters = ({
 
       {/* Filter Right Panel */}
       <RightPanel
+        id={ID.filtersPanel}
         open={isFilterPanelOpen}
         onOpenChange={onFilterPanelOpenChange}
         title="Filters"
