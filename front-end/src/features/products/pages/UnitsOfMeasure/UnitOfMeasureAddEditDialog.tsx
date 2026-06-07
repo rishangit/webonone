@@ -7,6 +7,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { CustomDialog } from "@/components/ui/custom-dialog";
 import { CreateUnitsOfMeasureData } from "@/features/products/services/unitsOfMeasure";
 import { UnitsOfMeasure } from "@/features/products/services/unitsOfMeasure";
+import { buildDomId } from "@/shared/utils/domId";
+
+const ID = {
+  activeCheckbox: buildDomId("products", "unit-of-measure-dialog", "active-checkbox"),
+} as const;
 
 interface UnitOfMeasureAddEditDialogProps {
   open: boolean;
@@ -119,11 +124,11 @@ export const UnitOfMeasureAddEditDialog = ({
         </div>
         <div className="flex items-center gap-2">
           <Checkbox
-            id="active"
+            id={ID.activeCheckbox}
             checked={formData.isActive}
             onCheckedChange={(checked) => onFormDataChange({ ...formData, isActive: checked as boolean })}
           />
-          <Label htmlFor="active" className="text-foreground cursor-pointer">
+          <Label htmlFor={ID.activeCheckbox} className="text-foreground cursor-pointer">
             Active
           </Label>
         </div>

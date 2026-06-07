@@ -4,6 +4,7 @@ import * as React from "react";
 import { X } from "lucide-react";
 import { useIsMobile } from "../ui/use-mobile";
 import { cn } from "../ui/utils";
+import { panelSectionIds } from "@/shared/utils/domId";
 
 interface RightPanelProps {
   open: boolean;
@@ -12,6 +13,8 @@ interface RightPanelProps {
   children: React.ReactNode;
   className?: string;
   contentClassName?: string;
+  /** Optional stable id on the panel root; header/body ids are derived as `{id}-header` and `{id}-body`. */
+  id?: string;
 }
 
 export const RightPanel = ({
@@ -21,8 +24,10 @@ export const RightPanel = ({
   children,
   className,
   contentClassName,
+  id,
 }: RightPanelProps) => {
   const isMobile = useIsMobile();
+  const sectionIds = id ? panelSectionIds(id) : null;
 
   // Debug: Log when component renders
   React.useEffect(() => {
@@ -73,6 +78,7 @@ export const RightPanel = ({
 
       {/* Right Panel - works same way on mobile and desktop, like left sidebar */}
       <div
+        id={id}
         className={cn(
           "fixed top-16 right-0 bottom-0 z-50 w-80 sm:w-96 bg-background border-l border-border shadow-lg overflow-y-auto transform transition-transform duration-300 ease-in-out translate-x-0",
           contentClassName
@@ -83,7 +89,7 @@ export const RightPanel = ({
         }}
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-background border-b border-border p-4 flex items-center justify-between">
+        <div id={sectionIds?.header} className="sticky top-0 z-10 bg-background border-b border-border p-4 flex items-center justify-between">
           {title && (
             <h2 className="text-lg font-semibold text-foreground">{title}</h2>
           )}
@@ -109,7 +115,7 @@ export const RightPanel = ({
         </div>
 
         {/* Content */}
-        <div className={cn("p-4", className)}>{children}</div>
+        <div id={sectionIds?.body} className={cn("p-4", className)}>{children}</div>
       </div>
     </>
   );

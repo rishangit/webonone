@@ -16,6 +16,7 @@ interface EmptyStateProps {
     icon?: LucideIcon | ReactNode;
   };
   className?: string;
+  id?: string;
 }
 
 export const EmptyState = ({
@@ -24,6 +25,7 @@ export const EmptyState = ({
   description,
   action,
   className = "",
+  id,
 }: EmptyStateProps) => {
   // Render icon - Lucide icons are function components, render them directly
   // This matches the pattern used in SpacesPage
@@ -79,7 +81,7 @@ export const EmptyState = ({
   };
 
   return (
-    <Card className={`p-12 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] text-center ${className}`}>
+    <Card id={id} className={`p-12 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] text-center ${className}`}>
       {renderIcon()}
       <h3 className="text-lg font-semibold text-foreground mb-2">{title}</h3>
       {typeof description === "string" ? (

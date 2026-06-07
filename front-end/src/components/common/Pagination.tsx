@@ -26,6 +26,7 @@ interface PaginationProps {
   showItemsPerPageSelector?: boolean;
   itemsPerPageOptions?: number[];
   onItemsPerPageChange?: (itemsPerPage: number) => void;
+  id?: string;
 }
 
 export const Pagination = ({
@@ -38,6 +39,7 @@ export const Pagination = ({
   showItemsPerPageSelector = false,
   itemsPerPageOptions = [10, 20, 50, 100],
   onItemsPerPageChange,
+  id,
 }: PaginationProps) => {
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startItem = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
@@ -110,7 +112,7 @@ export const Pagination = ({
   }
 
   return (
-    <div className={cn("flex flex-col sm:flex-row items-center justify-between gap-4 pt-4", className)}>
+    <div id={id} className={cn("flex flex-col sm:flex-row items-center justify-between gap-4 pt-4", className)}>
       {/* Mobile: Row 1 - Pagination Controls */}
       {/* Desktop: Right side with pagination and per page */}
       <div className="flex items-center justify-center sm:justify-end gap-2 w-full sm:w-auto order-1 sm:order-2">

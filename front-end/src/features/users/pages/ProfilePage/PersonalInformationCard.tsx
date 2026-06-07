@@ -14,6 +14,16 @@ import { User as UserType } from "@/shared/types/user";
 import { profileUpdateSchema, ProfileUpdateFormData } from "@/features/users/schemas";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { updateProfileRequest } from "@/shared/store/auth";
+import { buildDomId } from "@/shared/utils/domId";
+
+const ID = {
+  firstNameInput: buildDomId("users", "profile-personal", "first-name-input"),
+  lastNameInput: buildDomId("users", "profile-personal", "last-name-input"),
+  emailInput: buildDomId("users", "profile-personal", "email-input"),
+  phoneInput: buildDomId("users", "profile-personal", "phone-input"),
+  addressInput: buildDomId("users", "profile-personal", "address-input"),
+  dateOfBirthInput: buildDomId("users", "profile-personal", "date-of-birth-input"),
+} as const;
 
 interface PersonalInformationCardProps {
   user: UserType;
@@ -113,9 +123,9 @@ export const PersonalInformationCard = ({ user, userId }: PersonalInformationCar
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="firstName" className="text-muted-foreground">First Name <span className="text-red-500">*</span></Label>
+              <Label htmlFor={ID.firstNameInput} className="text-muted-foreground">First Name <span className="text-red-500">*</span></Label>
               <Input
-                id="firstName"
+                id={ID.firstNameInput}
                 {...register('firstName')}
                 disabled={isUpdating}
                 placeholder="Enter your first name"
@@ -129,9 +139,9 @@ export const PersonalInformationCard = ({ user, userId }: PersonalInformationCar
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="lastName" className="text-muted-foreground">Last Name <span className="text-red-500">*</span></Label>
+              <Label htmlFor={ID.lastNameInput} className="text-muted-foreground">Last Name <span className="text-red-500">*</span></Label>
               <Input
-                id="lastName"
+                id={ID.lastNameInput}
                 {...register('lastName')}
                 disabled={isUpdating}
                 placeholder="Enter your last name"
@@ -147,9 +157,9 @@ export const PersonalInformationCard = ({ user, userId }: PersonalInformationCar
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-muted-foreground">Email Address <span className="text-red-500">*</span></Label>
+            <Label htmlFor={ID.emailInput} className="text-muted-foreground">Email Address <span className="text-red-500">*</span></Label>
             <Input
-              id="email"
+              id={ID.emailInput}
               type="email"
               {...register('email')}
               disabled={isUpdating}
@@ -165,13 +175,13 @@ export const PersonalInformationCard = ({ user, userId }: PersonalInformationCar
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phone" className="text-muted-foreground">Phone Number <span className="text-red-500">*</span></Label>
+            <Label htmlFor={ID.phoneInput} className="text-muted-foreground">Phone Number <span className="text-red-500">*</span></Label>
             <Controller
               name="phone"
               control={control}
               render={({ field }) => (
                 <PhoneInput
-                  id="phone"
+                  id={ID.phoneInput}
                   value={field.value || ""}
                   onChange={(value) => {
                     field.onChange(value);
@@ -193,9 +203,9 @@ export const PersonalInformationCard = ({ user, userId }: PersonalInformationCar
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="address" className="text-muted-foreground">Address</Label>
+            <Label htmlFor={ID.addressInput} className="text-muted-foreground">Address</Label>
             <Input
-              id="address"
+              id={ID.addressInput}
               {...register('address')}
               disabled={isUpdating}
               placeholder="Enter your address"
@@ -210,13 +220,13 @@ export const PersonalInformationCard = ({ user, userId }: PersonalInformationCar
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="dateOfBirth" className="text-muted-foreground">Date of Birth</Label>
+            <Label htmlFor={ID.dateOfBirthInput} className="text-muted-foreground">Date of Birth</Label>
             <Controller
               name="dateOfBirth"
               control={control}
               render={({ field }) => (
                 <DatePicker
-                  id="dateOfBirth"
+                  id={ID.dateOfBirthInput}
                   value={field.value || undefined}
                   onChange={(date) => {
                     if (date) {

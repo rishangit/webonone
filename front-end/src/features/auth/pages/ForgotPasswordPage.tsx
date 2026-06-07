@@ -8,6 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { authService } from "@/features/auth/services/authService";
+import { buildDomId } from "@/shared/utils/domId";
+
+const ID = {
+  emailInput: buildDomId("auth-forgot-password", "page", "email-input"),
+} as const;
 
 export const ForgotPasswordPage = () => {
   const navigate = useNavigate();
@@ -69,13 +74,13 @@ export const ForgotPasswordPage = () => {
                 <form onSubmit={handleSubmit} className="space-y-4">
                   {/* Email Field */}
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-foreground">
+                    <Label htmlFor={ID.emailInput} className="text-foreground">
                       Email Address
                     </Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input
-                        id="email"
+                        id={ID.emailInput}
                         type="email"
                         placeholder="Enter your email"
                         value={email}

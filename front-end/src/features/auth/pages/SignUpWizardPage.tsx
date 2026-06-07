@@ -15,6 +15,16 @@ import { signUpRequest } from "@/features/auth/store/authSlice";
 import { authService } from "@/features/auth/services/authService";
 import { UserRole } from "@/shared/types/user";
 import * as yup from "yup";
+import { buildDomId } from "@/shared/utils/domId";
+
+const ID = {
+  emailInput: buildDomId("auth-signup-wizard", "page", "email-input"),
+  mobileNumberInput: buildDomId("auth-signup-wizard", "page", "mobile-number-input"),
+  firstNameInput: buildDomId("auth-signup-wizard", "page", "first-name-input"),
+  lastNameInput: buildDomId("auth-signup-wizard", "page", "last-name-input"),
+  passwordInput: buildDomId("auth-signup-wizard", "page", "password-input"),
+  confirmPasswordInput: buildDomId("auth-signup-wizard", "page", "confirm-password-input"),
+} as const;
 
 // Step 1: Email validation schema
 const emailSchema = yup.object({
@@ -263,13 +273,13 @@ export const SignUpWizardPage = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-foreground">
+                <Label htmlFor={ID.emailInput} className="text-foreground">
                   Email Address
                 </Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    id="email"
+                    id={ID.emailInput}
                     type="email"
                     placeholder="john.doe@example.com"
                     {...emailForm.register("email")}
@@ -304,7 +314,7 @@ export const SignUpWizardPage = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="mobileNumber" className="text-foreground">
+                <Label htmlFor={ID.mobileNumberInput} className="text-foreground">
                   Mobile Number
                 </Label>
                 <Controller
@@ -312,7 +322,7 @@ export const SignUpWizardPage = () => {
                   control={mobileForm.control}
                   render={({ field }) => (
                     <PhoneInput
-                      id="mobileNumber"
+                      id={ID.mobileNumberInput}
                       value={field.value || ""}
                       onChange={(value) => {
                         field.onChange(value);
@@ -406,13 +416,13 @@ export const SignUpWizardPage = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName" className="text-foreground">
+                  <Label htmlFor={ID.firstNameInput} className="text-foreground">
                     First Name
                   </Label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
-                      id="firstName"
+                      id={ID.firstNameInput}
                       type="text"
                       placeholder="John"
                       {...nameForm.register("firstName")}
@@ -425,13 +435,13 @@ export const SignUpWizardPage = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="lastName" className="text-foreground">
+                  <Label htmlFor={ID.lastNameInput} className="text-foreground">
                     Last Name
                   </Label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
-                      id="lastName"
+                      id={ID.lastNameInput}
                       type="text"
                       placeholder="Doe"
                       {...nameForm.register("lastName")}
@@ -475,13 +485,13 @@ export const SignUpWizardPage = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-foreground">
+                <Label htmlFor={ID.passwordInput} className="text-foreground">
                   Password
                 </Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    id="password"
+                    id={ID.passwordInput}
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     {...passwordForm.register("password")}
@@ -501,13 +511,13 @@ export const SignUpWizardPage = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-foreground">
+                <Label htmlFor={ID.confirmPasswordInput} className="text-foreground">
                   Confirm Password
                 </Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    id="confirmPassword"
+                    id={ID.confirmPasswordInput}
                     type={showConfirmPassword ? "text" : "password"}
                     placeholder="Confirm your password"
                     {...passwordForm.register("confirmPassword")}

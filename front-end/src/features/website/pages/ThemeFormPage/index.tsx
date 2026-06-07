@@ -23,6 +23,11 @@ import {
   type ThemeButtonSetting,
 } from "@/features/website/services/companyWebThemes";
 import { toast } from "sonner";
+import { buildDomId } from "@/shared/utils/domId";
+
+const ID = {
+  nameInput: buildDomId("website", "theme-form", "name-input"),
+} as const;
 import {
   TextStyleEditDialog,
   type ThemeTextStyle,
@@ -507,9 +512,9 @@ export const ThemeFormPage = () => {
               {activeTab === "basic" && (
                 <div className="space-y-6 mt-6">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Theme Name *</Label>
+                    <Label htmlFor={ID.nameInput}>Theme Name *</Label>
                     <Input
-                      id="name"
+                      id={ID.nameInput}
                       value={formData.name}
                       onChange={(e) =>
                         setFormData({ ...formData, name: e.target.value })

@@ -8,6 +8,17 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/common/EmptyState";
 import { NotificationCard } from "./NotificationCard";
 import { toast } from "sonner";
+import { buildDomId } from "@/shared/utils/domId";
+
+const ID = {
+  root: buildDomId("notifications", "page"),
+  header: buildDomId("notifications", "page-header"),
+  headerActions: buildDomId("notifications", "page-header-actions"),
+  body: buildDomId("notifications", "page-body"),
+  list: buildDomId("notifications", "page-list"),
+  emptyState: buildDomId("notifications", "page-empty-state"),
+  skeleton: buildDomId("notifications", "page-skeleton"),
+} as const;
 
 // Mock notifications data
 const mockNotifications = [
@@ -307,8 +318,8 @@ export function NotificationsPage({ currentUser }: NotificationsPageProps) {
 
   if (loading) {
     return (
-      <div className="flex-1 p-4 lg:p-6">
-        <div className="space-y-6">
+      <div id={ID.root} className="flex-1 p-4 lg:p-6">
+        <div id={ID.skeleton} className="space-y-6">
           {/* Header Skeleton */}
           <div className="flex items-center justify-between">
             <div>
@@ -330,9 +341,9 @@ export function NotificationsPage({ currentUser }: NotificationsPageProps) {
   }
 
   return (
-    <div className="flex-1 space-y-4 md:space-y-6 p-3 sm:p-4 lg:p-6">
+    <div id={ID.root} className="flex-1 space-y-4 md:space-y-6 p-3 sm:p-4 lg:p-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 md:gap-4">
+      <div id={ID.header} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 md:gap-4">
         <div className="min-w-0">
           <h1 className="text-xl md:text-2xl font-semibold text-foreground flex items-center gap-2 flex-wrap">
             <Bell className="w-5 h-5 md:w-6 md:h-6 text-[var(--accent-text)] shrink-0" />
@@ -347,7 +358,7 @@ export function NotificationsPage({ currentUser }: NotificationsPageProps) {
             Stay updated with important alerts and messages
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div id={ID.headerActions} className="flex flex-wrap items-center gap-2">
           <Button 
             variant="outline" 
             size="sm"
@@ -433,7 +444,7 @@ export function NotificationsPage({ currentUser }: NotificationsPageProps) {
       </div>
 
       {/* Content */}
-      <div className="space-y-4">
+      <div id={ID.body} className="space-y-4">
           {/* Search and Filters */}
           <Card className="p-4 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
             <div className="space-y-4">
@@ -504,7 +515,7 @@ export function NotificationsPage({ currentUser }: NotificationsPageProps) {
 
           {/* Notifications List */}
           {filteredNotifications.length > 0 ? (
-            <div className="space-y-4">
+            <div id={ID.list} className="space-y-4">
               {filteredNotifications.map((notification) => (
                 <NotificationCard
                   key={notification.id}
@@ -518,6 +529,7 @@ export function NotificationsPage({ currentUser }: NotificationsPageProps) {
             </div>
           ) : (
             <EmptyState
+              id={ID.emptyState}
               icon={Bell}
               title="No notifications found"
               description={

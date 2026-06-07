@@ -5,6 +5,7 @@ import { LIST_CARD_LIST_MEDIA_WIDTH_CLASS } from "@/components/common/CardKebabT
 import { Pagination } from "@/components/common/Pagination";
 import { EmptyState } from "@/components/common/EmptyState";
 import { useSpacesPage } from "@/features/spaces/hooks";
+import { buildDomId } from "@/shared/utils/domId";
 import {
   SpaceCard,
   SpacesFilters,
@@ -12,6 +13,18 @@ import {
   SpaceViewDialog,
   SpaceDeleteDialog,
 } from "./components";
+
+const ID = {
+  root: buildDomId("spaces", "page"),
+  header: buildDomId("spaces", "page-header"),
+  headerActions: buildDomId("spaces", "page-header-actions"),
+  body: buildDomId("spaces", "page-body"),
+  bodyInner: buildDomId("spaces", "page-body-inner"),
+  skeleton: buildDomId("spaces", "page-skeleton"),
+  list: buildDomId("spaces", "page-list"),
+  pagination: buildDomId("spaces", "page-pagination"),
+  emptyState: buildDomId("spaces", "page-empty-state"),
+} as const;
 
 export const SpacesPage = () => {
   const {
@@ -56,13 +69,14 @@ export const SpacesPage = () => {
   } = useSpacesPage();
 
   return (
-    <div className="flex-1 p-4 lg:p-6 flex flex-col min-h-0">
+    <div id={ID.root} className="flex-1 p-4 lg:p-6 flex flex-col min-h-0">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div id={ID.header} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-xl sm:text-2xl font-semibold text-foreground">Spaces Management</h1>
           <p className="text-muted-foreground mt-1 text-sm sm:text-base">Manage your company's rooms, sections, and facilities</p>
         </div>
+        <div id={ID.headerActions}>
         <Button 
           variant="accent" 
           className="w-full sm:w-auto text-sm" 
@@ -71,6 +85,7 @@ export const SpacesPage = () => {
           <Plus className="w-4 h-4 mr-2" />
           Add Space
         </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -90,10 +105,10 @@ export const SpacesPage = () => {
       />
 
       {/* Body Container */}
-      <div className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
-        <div className="flex flex-col flex-1 min-h-0">
+      <div id={ID.body} className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
+        <div id={ID.bodyInner} className="flex flex-col flex-1 min-h-0">
           {loading && displayedSpaces.length === 0 ? (
-            <div className="flex-1">
+            <div id={ID.skeleton} className="flex-1">
               {viewMode === "list" ? (
                 <div className="space-y-4">
                   {[...Array(6)].map((_, index) => (
@@ -160,7 +175,7 @@ export const SpacesPage = () => {
             </div>
           ) : displayedSpaces.length > 0 ? (
             <div className="flex flex-col flex-1 min-h-0">
-              <div className="flex-1">
+              <div id={ID.list} className="flex-1">
                 {viewMode === "grid" ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {displayedSpaces.map((space) => (
@@ -190,7 +205,7 @@ export const SpacesPage = () => {
                 )}
               </div>
               {pagination && (
-                <div className="mt-auto pt-4">
+                <div id={ID.pagination} className="mt-auto pt-4">
                   <Pagination
                     totalItems={pagination.total}
                     itemsPerPage={itemsPerPage}
@@ -208,6 +223,7 @@ export const SpacesPage = () => {
             </div>
           ) : (
             <EmptyState
+              id={ID.emptyState}
               icon={MapPin}
               title="No spaces found"
               description={

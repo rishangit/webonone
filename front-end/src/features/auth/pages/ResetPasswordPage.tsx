@@ -8,6 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { authService } from "@/features/auth/services/authService";
+import { buildDomId } from "@/shared/utils/domId";
+
+const ID = {
+  newPasswordInput: buildDomId("auth-reset-password", "page", "new-password-input"),
+  confirmPasswordInput: buildDomId("auth-reset-password", "page", "confirm-password-input"),
+} as const;
 
 export const ResetPasswordPage = () => {
   const navigate = useNavigate();
@@ -199,13 +205,13 @@ export const ResetPasswordPage = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* New Password Field */}
               <div className="space-y-2">
-                <Label htmlFor="newPassword" className="text-foreground">
+                <Label htmlFor={ID.newPasswordInput} className="text-foreground">
                   New Password
                 </Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    id="newPassword"
+                    id={ID.newPasswordInput}
                     type={showNewPassword ? "text" : "password"}
                     placeholder="Enter new password"
                     value={newPassword}
@@ -230,13 +236,13 @@ export const ResetPasswordPage = () => {
 
               {/* Confirm Password Field */}
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-foreground">
+                <Label htmlFor={ID.confirmPasswordInput} className="text-foreground">
                   Confirm Password
                 </Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    id="confirmPassword"
+                    id={ID.confirmPasswordInput}
                     type={showConfirmPassword ? "text" : "password"}
                     placeholder="Confirm new password"
                     value={confirmPassword}

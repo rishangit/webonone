@@ -39,6 +39,19 @@ import { isRole, UserRole } from "@/shared/types/user";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { RightPanel } from "@/components/common/RightPanel";
 import { cn } from "@/components/ui/utils";
+import { buildDomId } from "@/shared/utils/domId";
+
+const ID = {
+  root: buildDomId("appointments", "page"),
+  header: buildDomId("appointments", "page-header"),
+  headerActions: buildDomId("appointments", "page-header-actions"),
+  body: buildDomId("appointments", "page-body"),
+  bodyInner: buildDomId("appointments", "page-body-inner"),
+  skeleton: buildDomId("appointments", "page-skeleton"),
+  list: buildDomId("appointments", "page-list"),
+  pagination: buildDomId("appointments", "page-pagination"),
+  emptyState: buildDomId("appointments", "page-empty-state"),
+} as const;
 
 interface User {
   email: string;
@@ -432,9 +445,9 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
   };
 
   return (
-    <div className="flex-1 p-6 flex flex-col min-h-0">
+    <div id={ID.root} className="flex-1 p-6 flex flex-col min-h-0">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div id={ID.header} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-xl sm:text-2xl font-semibold text-foreground">Appointments</h1>
           <p className="text-muted-foreground mt-1 text-sm sm:text-base">
@@ -444,7 +457,7 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
             }
           </p>
         </div>
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+        <div id={ID.headerActions} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
           {/* Add Button - Full width on mobile, auto on desktop */}
           <AppointmentWizard
             currentUser={currentUser}
@@ -462,9 +475,9 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
       </div>
 
       {/* Body Container - Fills rest of screen */}
-      <div className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
+      <div id={ID.body} className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
       {/* Main Content with Tabs */}
-        <div className="flex flex-col flex-1 min-h-0">
+        <div id={ID.bodyInner} className="flex flex-col flex-1 min-h-0">
         {/* Filters and Search */}
         <Card className="p-4 backdrop-blur-sm bg-[var(--glass-bg)] border border-[var(--glass-border)] mb-6">
           <div className="space-y-4">
@@ -559,7 +572,7 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
           <div className="flex flex-col flex-1 min-h-0">
           {/* Loading State - Skeleton for Appointment Cards */}
           {loading && reduxAppointments.length === 0 ? (
-            <div className="flex-1">
+            <div id={ID.skeleton} className="flex-1">
               {/* Skeleton for List View */}
               {viewMode === "list" ? (
                 /* Skeleton for List View - Matching AppointmentCard structure */
@@ -678,7 +691,7 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
             </div>
           ) : (
             /* Appointments List/Grid */
-            <div className="flex-1">
+            <div id={ID.list} className="flex-1">
             {viewMode === "list" ? (
             <div className="space-y-3 sm:space-y-4">
               {filteredAppointments.length > 0 ? (
@@ -710,6 +723,7 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
                 ))
               ) : (
                 <EmptyState
+                  id={ID.emptyState}
                   icon={Calendar}
                   title="No appointments found"
                   description={
@@ -761,6 +775,7 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
               ) : (
                 <div className="col-span-full">
                   <EmptyState
+                    id={ID.emptyState}
                     icon={Calendar}
                     title="No appointments found"
                     description={
@@ -787,7 +802,7 @@ export function AppointmentsPage({ currentUser }: AppointmentsPageProps) {
           )}
 
           {/* Pagination - Use Pagination component for company owners */}
-          <div className="mt-auto pt-4">
+          <div id={ID.pagination} className="mt-auto pt-4">
           {isCompanyOwner && pagination ? (
             <Pagination
               totalItems={pagination.total}

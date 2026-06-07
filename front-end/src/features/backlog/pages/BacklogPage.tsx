@@ -42,6 +42,19 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { buildDomId } from "@/shared/utils/domId";
+
+const ID = {
+  root: buildDomId("backlog", "page"),
+  header: buildDomId("backlog", "page-header"),
+  headerActions: buildDomId("backlog", "page-header-actions"),
+  body: buildDomId("backlog", "page-body"),
+  bodyInner: buildDomId("backlog", "page-body-inner"),
+  skeleton: buildDomId("backlog", "page-skeleton"),
+  list: buildDomId("backlog", "page-list"),
+  pagination: buildDomId("backlog", "page-pagination"),
+  emptyState: buildDomId("backlog", "page-empty-state"),
+} as const;
 
 interface BacklogPageProps {
   currentUser?: UserType | null;
@@ -570,21 +583,23 @@ export const BacklogPage = ({ currentUser }: BacklogPageProps) => {
   }, [pagination, items]);
 
   return (
-    <div className="flex-1 p-4 lg:p-8 flex flex-col min-h-0">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+    <div id={ID.root} className="flex-1 p-4 lg:p-8 flex flex-col min-h-0">
+      <div id={ID.header} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <div className="flex items-center gap-2 mb-2">
             <h1 className="text-2xl font-semibold text-foreground">Issue / Feature Request Backlog</h1>
           </div>
           <p className="text-muted-foreground">Log issues and request new features</p>
         </div>
-        <Button
-          variant="accent"
-          onClick={handleAddItem}
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add New
-        </Button>
+        <div id={ID.headerActions}>
+          <Button
+            variant="accent"
+            onClick={handleAddItem}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add New
+          </Button>
+        </div>
       </div>
 
       <div className="hidden lg:block mb-6">
@@ -717,10 +732,10 @@ export const BacklogPage = ({ currentUser }: BacklogPageProps) => {
         </div>
       </Card>
 
-      <div className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
-        <div className="flex flex-col flex-1 min-h-0">
+      <div id={ID.body} className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
+        <div id={ID.bodyInner} className="flex flex-col flex-1 min-h-0">
           {loading && displayedItems.length === 0 ? (
-            <div className="flex-1">
+            <div id={ID.skeleton} className="flex-1">
               <div className="space-y-4">
                 {[...Array(6)].map((_, index) => (
                   <Card key={index} className="p-4 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
@@ -740,6 +755,7 @@ export const BacklogPage = ({ currentUser }: BacklogPageProps) => {
             </div>
           ) : displayedItems.length === 0 ? (
             <EmptyState
+              id={ID.emptyState}
               icon={Bug}
               title="No backlog items found"
               description={
@@ -756,7 +772,7 @@ export const BacklogPage = ({ currentUser }: BacklogPageProps) => {
             />
           ) : (
             <div className="flex flex-col flex-1 min-h-0">
-              <div className="flex-1">
+              <div id={ID.list} className="flex-1">
                 {viewMode === "grid" ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {displayedItems.map(item => renderItemCard(item))}
@@ -782,7 +798,7 @@ export const BacklogPage = ({ currentUser }: BacklogPageProps) => {
               </div>
 
               {pagination && (
-                <div className="mt-auto pt-4">
+                <div id={ID.pagination} className="mt-auto pt-4">
                   <Pagination
                     totalItems={pagination.total}
                     itemsPerPage={itemsPerPage}

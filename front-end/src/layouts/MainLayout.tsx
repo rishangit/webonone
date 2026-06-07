@@ -3,6 +3,7 @@ import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
 import { useIsMobile } from "@/components/ui/use-mobile";
 import { Toaster } from "@/components/ui/sonner";
+import { APP_LAYOUT_ID } from "@/shared/utils/domId";
 
 import { User } from "@/shared/types/user";
 
@@ -48,7 +49,7 @@ export function MainLayout({
   const sidebarWidth = sidebarCollapsed ? 80 : 256;
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:bg-gradient-to-br dark:from-gray-900 dark:via-black dark:to-gray-800 overflow-hidden">
+    <div id={APP_LAYOUT_ID.root} className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:bg-gradient-to-br dark:from-gray-900 dark:via-black dark:to-gray-800 overflow-hidden">
       <Header 
         onMenuClick={handleMenuClick} 
         onNavigate={handlePageChange}
@@ -56,7 +57,7 @@ export function MainLayout({
         currentUser={currentUser}
       />
       
-      <div className="flex-1 flex flex-col pt-16 min-h-0">
+      <div id={APP_LAYOUT_ID.body} className="flex-1 flex flex-col pt-16 min-h-0">
         <Sidebar 
           currentPage={currentPage} 
           onPageChange={handlePageChange}
@@ -66,8 +67,9 @@ export function MainLayout({
           collapsed={!isMobile && sidebarCollapsed}
         />
         
-        <div 
-          className="flex-1 flex flex-col min-h-0 pb-8 transition-all duration-300 overflow-auto"
+        <div
+          id={APP_LAYOUT_ID.mainContent}
+          className="flex-1 flex flex-col min-h-0 transition-all duration-300 overflow-auto"
           style={!isMobile ? { marginLeft: `${sidebarWidth}px`, width: `calc(100% - ${sidebarWidth}px)` } : { width: '100%' }}
         >
           {children}
@@ -76,7 +78,8 @@ export function MainLayout({
       
       {/* Mobile overlay */}
       {isMobile && sidebarOpen && (
-        <div 
+        <div
+          id={APP_LAYOUT_ID.mobileOverlay}
           className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />

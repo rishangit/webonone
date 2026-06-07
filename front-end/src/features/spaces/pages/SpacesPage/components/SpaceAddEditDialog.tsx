@@ -8,6 +8,12 @@ import { TagSelector } from "@/shared/components/tags";
 import FileUpload from "@/components/ui/file-upload";
 import { formatAvatarUrl } from "../../../../utils";
 import { SpaceAddEditDialogProps, Space } from "../types";
+import { buildDomId } from "@/shared/utils/domId";
+
+const ID = {
+  nameInput: buildDomId("spaces", "add-edit-dialog", "name-input"),
+  descriptionTextarea: buildDomId("spaces", "add-edit-dialog", "description-textarea"),
+} as const;
 
 export const SpaceAddEditDialog = ({
   open,
@@ -69,9 +75,9 @@ export const SpaceAddEditDialog = ({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-3">
-            <Label htmlFor="name" className="text-foreground">Space Name *</Label>
+            <Label htmlFor={ID.nameInput} className="text-foreground">Space Name *</Label>
             <Input
-              id="name"
+              id={ID.nameInput}
               value={formData.name}
               onChange={(e) => handleChange("name", e.target.value)}
               placeholder="Enter space name"
@@ -122,9 +128,9 @@ export const SpaceAddEditDialog = ({
         </div>
 
         <div className="space-y-3">
-          <Label htmlFor="description" className="text-foreground">Description</Label>
+          <Label htmlFor={ID.descriptionTextarea} className="text-foreground">Description</Label>
           <Textarea
-            id="description"
+            id={ID.descriptionTextarea}
             value={formData.description}
             onChange={(e) => handleChange("description", e.target.value)}
             placeholder="Describe the space and its features"

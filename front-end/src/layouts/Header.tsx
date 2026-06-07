@@ -7,6 +7,7 @@ import { User as UserType } from "@/shared/types/user";
 import { formatAvatarUrl } from "@/shared/utils";
 import { UserRoleBadge } from "@/components/UserRoleBadge";
 import { Icon } from "@/components/common/Icon";
+import { APP_LAYOUT_ID } from "@/shared/utils/domId";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -42,7 +43,7 @@ export function Header({ onMenuClick, onNavigate, onLogout, currentUser }: Heade
   }, []);
   
   return (
-    <header className="h-16 backdrop-blur-xl bg-card border-b border-[var(--accent-border)] fixed top-0 left-0 right-0 z-50">
+    <header id={APP_LAYOUT_ID.header} className="h-16 backdrop-blur-xl bg-card border-b border-[var(--accent-border)] fixed top-0 left-0 right-0 z-50">
       <div className="flex items-center justify-between h-full px-4 lg:px-6">
         {/* Left side - Mobile menu + Logo */}
         <div className="flex items-center gap-4">

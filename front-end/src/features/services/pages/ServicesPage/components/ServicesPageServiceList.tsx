@@ -34,6 +34,9 @@ export interface ServicesPageServiceListProps extends ServiceListCallbacks {
   onRefreshPage: () => void;
   /** When set, empty unfiltered list shows “Add system service” for super admins */
   onSuperAdminAddSystemService?: () => void;
+  listId?: string;
+  paginationId?: string;
+  emptyStateId?: string;
 }
 
 export function ServicesPageServiceList({
@@ -60,6 +63,9 @@ export function ServicesPageServiceList({
   onAddService,
   onRefreshPage,
   onSuperAdminAddSystemService,
+  listId,
+  paginationId,
+  emptyStateId,
 }: ServicesPageServiceListProps) {
   if (services.length === 0) {
     const hasFilters = Boolean(debouncedSearchTerm || filterCategory !== "all" || filterStatus !== "all");
@@ -67,6 +73,7 @@ export function ServicesPageServiceList({
 
     return (
       <EmptyState
+        id={emptyStateId}
         icon={Stethoscope}
         title="No services found"
         description={
@@ -88,7 +95,7 @@ export function ServicesPageServiceList({
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      <div className="flex-1">
+      <div id={listId} className="flex-1">
         {viewMode === "grid" ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {services.map((service) => (
@@ -130,7 +137,7 @@ export function ServicesPageServiceList({
         )}
       </div>
       {pagination && pagination.total > 0 && (
-        <div className="mt-auto pt-4">
+        <div id={paginationId} className="mt-auto pt-4">
           <Pagination
             totalItems={pagination.total}
             itemsPerPage={itemsPerPage}

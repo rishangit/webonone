@@ -8,6 +8,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { ImageCropDialog } from "@/components/ui/image-crop-dialog";
+import { buildDomId } from "@/shared/utils/domId";
+
+const ID = {
+  logoUpload: buildDomId("company", "registration-form", "logo-upload"),
+  companyNameInput: buildDomId("company", "registration-form", "company-name-input"),
+  contactPersonInput: buildDomId("company", "registration-form", "contact-person-input"),
+  descriptionTextarea: buildDomId("company", "registration-form", "description-textarea"),
+  emailInput: buildDomId("company", "registration-form", "email-input"),
+  phoneInput: buildDomId("company", "registration-form", "phone-input"),
+  websiteInput: buildDomId("company", "registration-form", "website-input"),
+  addressInput: buildDomId("company", "registration-form", "address-input"),
+  cityInput: buildDomId("company", "registration-form", "city-input"),
+  stateInput: buildDomId("company", "registration-form", "state-input"),
+  postalCodeInput: buildDomId("company", "registration-form", "postal-code-input"),
+  countryInput: buildDomId("company", "registration-form", "country-input"),
+} as const;
 
 interface CompanyFormData {
   companyName: string;
@@ -206,10 +222,10 @@ export function CompanyRegistrationForm({ onSubmit, onCancel }: CompanyRegistrat
                     accept="image/*"
                     onChange={handleLogoUpload}
                     className="hidden"
-                    id="logo-upload"
+                    id={ID.logoUpload}
                   />
                   <Label
-                    htmlFor="logo-upload"
+                    htmlFor={ID.logoUpload}
                     className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg hover:bg-accent text-foreground hover:text-foreground transition-colors"
                   >
                     <Upload className="w-4 h-4" />
@@ -232,9 +248,9 @@ export function CompanyRegistrationForm({ onSubmit, onCancel }: CompanyRegistrat
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="company-name" className="text-foreground">Company Name *</Label>
+                <Label htmlFor={ID.companyNameInput} className="text-foreground">Company Name *</Label>
                 <Input
-                  id="company-name"
+                  id={ID.companyNameInput}
                   value={formData.companyName}
                   onChange={(e) => handleInputChange('companyName', e.target.value)}
                   placeholder="Enter your company name"
@@ -244,9 +260,9 @@ export function CompanyRegistrationForm({ onSubmit, onCancel }: CompanyRegistrat
               </div>
               
               <div>
-                <Label htmlFor="contact-person" className="text-foreground">Contact Person *</Label>
+                <Label htmlFor={ID.contactPersonInput} className="text-foreground">Contact Person *</Label>
                 <Input
-                  id="contact-person"
+                  id={ID.contactPersonInput}
                   value={formData.contactPerson}
                   onChange={(e) => handleInputChange('contactPerson', e.target.value)}
                   placeholder="Primary contact person"
@@ -257,9 +273,9 @@ export function CompanyRegistrationForm({ onSubmit, onCancel }: CompanyRegistrat
             </div>
 
             <div>
-              <Label htmlFor="description" className="text-foreground">Company Description *</Label>
+              <Label htmlFor={ID.descriptionTextarea} className="text-foreground">Company Description *</Label>
               <Textarea
-                id="description"
+                id={ID.descriptionTextarea}
                 value={formData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
                 placeholder="Describe your company and the services you provide..."
@@ -336,9 +352,9 @@ export function CompanyRegistrationForm({ onSubmit, onCancel }: CompanyRegistrat
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="email" className="text-foreground">Email Address *</Label>
+                <Label htmlFor={ID.emailInput} className="text-foreground">Email Address *</Label>
                 <Input
-                  id="email"
+                  id={ID.emailInput}
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
@@ -349,9 +365,9 @@ export function CompanyRegistrationForm({ onSubmit, onCancel }: CompanyRegistrat
               </div>
               
               <div>
-                <Label htmlFor="phone" className="text-foreground">Phone Number *</Label>
+                <Label htmlFor={ID.phoneInput} className="text-foreground">Phone Number *</Label>
                 <Input
-                  id="phone"
+                  id={ID.phoneInput}
                   value={formData.phone}
                   onChange={(e) => handleInputChange('phone', e.target.value)}
                   placeholder="+1 (555) 123-4567"
@@ -362,9 +378,9 @@ export function CompanyRegistrationForm({ onSubmit, onCancel }: CompanyRegistrat
             </div>
 
             <div>
-              <Label htmlFor="website" className="text-foreground">Website URL</Label>
+              <Label htmlFor={ID.websiteInput} className="text-foreground">Website URL</Label>
               <Input
-                id="website"
+                id={ID.websiteInput}
                 value={formData.website}
                 onChange={(e) => handleInputChange('website', e.target.value)}
                 placeholder="https://yourcompany.com"
@@ -383,9 +399,9 @@ export function CompanyRegistrationForm({ onSubmit, onCancel }: CompanyRegistrat
 
           <div className="space-y-4">
             <div>
-              <Label htmlFor="address" className="text-foreground">Street Address *</Label>
+              <Label htmlFor={ID.addressInput} className="text-foreground">Street Address *</Label>
               <Input
-                id="address"
+                id={ID.addressInput}
                 value={formData.address}
                 onChange={(e) => handleInputChange('address', e.target.value)}
                 placeholder="123 Main Street, Suite 100"
@@ -396,9 +412,9 @@ export function CompanyRegistrationForm({ onSubmit, onCancel }: CompanyRegistrat
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <Label htmlFor="city" className="text-foreground">City *</Label>
+                <Label htmlFor={ID.cityInput} className="text-foreground">City *</Label>
                 <Input
-                  id="city"
+                  id={ID.cityInput}
                   value={formData.city}
                   onChange={(e) => handleInputChange('city', e.target.value)}
                   placeholder="City name"
@@ -408,9 +424,9 @@ export function CompanyRegistrationForm({ onSubmit, onCancel }: CompanyRegistrat
               </div>
               
               <div>
-                <Label htmlFor="state" className="text-foreground">State/Province *</Label>
+                <Label htmlFor={ID.stateInput} className="text-foreground">State/Province *</Label>
                 <Input
-                  id="state"
+                  id={ID.stateInput}
                   value={formData.state}
                   onChange={(e) => handleInputChange('state', e.target.value)}
                   placeholder="State/Province"
@@ -420,9 +436,9 @@ export function CompanyRegistrationForm({ onSubmit, onCancel }: CompanyRegistrat
               </div>
               
               <div>
-                <Label htmlFor="postal-code" className="text-foreground">Postal Code</Label>
+                <Label htmlFor={ID.postalCodeInput} className="text-foreground">Postal Code</Label>
                 <Input
-                  id="postal-code"
+                  id={ID.postalCodeInput}
                   value={formData.postalCode}
                   onChange={(e) => handleInputChange('postalCode', e.target.value)}
                   placeholder="12345"
@@ -432,9 +448,9 @@ export function CompanyRegistrationForm({ onSubmit, onCancel }: CompanyRegistrat
             </div>
 
             <div>
-              <Label htmlFor="country" className="text-foreground">Country *</Label>
+              <Label htmlFor={ID.countryInput} className="text-foreground">Country *</Label>
               <Input
-                id="country"
+                id={ID.countryInput}
                 value={formData.country}
                 onChange={(e) => handleInputChange('country', e.target.value)}
                 className="bg-[var(--input-background)] border-[var(--glass-border)] text-foreground"

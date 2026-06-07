@@ -11,6 +11,13 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { loginRequest, clearError, setLoading } from "@/features/auth/store/authSlice";
 import { RoleSelectionDialog } from "@/features/auth/components/RoleSelectionDialog";
 import { cn } from "@/components/ui/utils";
+import { buildDomId } from "@/shared/utils/domId";
+
+const ID = {
+  emailInput: buildDomId("auth-login", "page", "email-input"),
+  passwordInput: buildDomId("auth-login", "page", "password-input"),
+  rememberCheckbox: buildDomId("auth-login", "page", "remember-checkbox"),
+} as const;
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -220,13 +227,13 @@ export function LoginPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Email Field */}
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-foreground">
+                <Label htmlFor={ID.emailInput} className="text-foreground">
                   Email Address
                 </Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    id="email"
+                    id={ID.emailInput}
                     type="email"
                     placeholder="Enter your email"
                     value={email}
@@ -242,13 +249,13 @@ export function LoginPage() {
 
               {/* Password Field */}
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-foreground">
+                <Label htmlFor={ID.passwordInput} className="text-foreground">
                   Password
                 </Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    id="password"
+                    id={ID.passwordInput}
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     value={password}
@@ -281,12 +288,12 @@ export function LoginPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <Checkbox
-                    id="remember"
+                    id={ID.rememberCheckbox}
                     checked={rememberMe}
                     onCheckedChange={(checked) => setRememberMe(checked as boolean)}
                     className="border-border data-[state=checked]:bg-[var(--accent-primary)] data-[state=checked]:border-[var(--accent-primary)]"
                   />
-                  <Label htmlFor="remember" className="text-sm text-muted-foreground">
+                  <Label htmlFor={ID.rememberCheckbox} className="text-sm text-muted-foreground">
                     Remember me
                   </Label>
                 </div>

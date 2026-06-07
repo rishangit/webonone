@@ -8,6 +8,15 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/common/EmptyState";
 import { SearchResultRenderer } from "@/features/search/components/SearchResultRenderer";
 import { toast } from "sonner";
+import { buildDomId } from "@/shared/utils/domId";
+
+const ID = {
+  root: buildDomId("search", "page"),
+  header: buildDomId("search", "page-header"),
+  body: buildDomId("search", "page-body"),
+  list: buildDomId("search", "page-list"),
+  emptyState: buildDomId("search", "page-empty-state"),
+} as const;
 
 const mockSearchData = [
   {
@@ -409,8 +418,8 @@ export function SearchPage({ currentUser, onNavigate }: SearchPageProps) {
   const stats = getSearchStats();
 
   return (
-    <div className="flex-1 space-y-4 md:space-y-6 p-3 sm:p-4 lg:p-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 md:gap-4">
+    <div id={ID.root} className="flex-1 space-y-4 md:space-y-6 p-3 sm:p-4 lg:p-6">
+      <div id={ID.header} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 md:gap-4">
         <div className="min-w-0">
           <h1 className="text-xl md:text-2xl font-semibold text-foreground flex items-center gap-2">
             <Search className="w-5 h-5 md:w-6 md:h-6 text-[var(--accent-text)] shrink-0" />
@@ -537,7 +546,7 @@ export function SearchPage({ currentUser, onNavigate }: SearchPageProps) {
       )}
 
       {searchQuery && (
-        <>
+        <div id={ID.body}>
           {searchResults.length > 0 && (
             <Card className="p-3 md:p-4 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 md:gap-4">
@@ -561,7 +570,7 @@ export function SearchPage({ currentUser, onNavigate }: SearchPageProps) {
           )}
 
           {searchResults.length > 0 ? (
-            <div className="space-y-4">
+            <div id={ID.list} className="space-y-4">
               {searchResults.map((result) => (
                 <SearchResultRenderer
                   key={result.id}
@@ -574,6 +583,7 @@ export function SearchPage({ currentUser, onNavigate }: SearchPageProps) {
             </div>
           ) : searchQuery && !loading ? (
             <EmptyState
+              id={ID.emptyState}
               icon={Search}
               title="No results found"
               description={
@@ -598,7 +608,7 @@ export function SearchPage({ currentUser, onNavigate }: SearchPageProps) {
               }
             />
           ) : null}
-        </>
+        </div>
       )}
     </div>
   );

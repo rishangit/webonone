@@ -16,7 +16,19 @@ import {
   clearTagsError
 } from '@/features/tags/store';
 import { Tag, CreateTagData } from '@/features/tags/services';
+import { buildDomId } from "@/shared/utils/domId";
 import { toast } from "sonner";
+
+const ID = {
+  dialog: buildDomId("tags", "form-dialog"),
+  nameInput: buildDomId("tags", "form-dialog", "name-input"),
+  descriptionTextarea: buildDomId("tags", "form-dialog", "description-textarea"),
+  colorInput: buildDomId("tags", "form-dialog", "color-input"),
+  iconInput: buildDomId("tags", "form-dialog", "icon-input"),
+  activeCheckbox: buildDomId("tags", "form-dialog", "active-checkbox"),
+  cancelButton: buildDomId("tags", "form-dialog", "cancel-button"),
+  submitButton: buildDomId("tags", "form-dialog", "submit-button"),
+} as const;
 
 const tagSchema = yup.object({
   name: yup.string().required("Tag name is required").min(2, "Name must be at least 2 characters"),
@@ -138,6 +150,7 @@ export const TagFormDialog = ({
 
   return (
     <CustomDialog
+      id={ID.dialog}
       open={open}
       onOpenChange={onOpenChange}
       title={mode === "edit" ? "Edit Tag" : "Add Tag"}
@@ -148,6 +161,7 @@ export const TagFormDialog = ({
       footer={
         <div className="flex items-center justify-end gap-2">
           <Button
+            id={ID.cancelButton}
             variant="outline"
             onClick={() => onOpenChange(false)}
             size="default"
@@ -156,6 +170,7 @@ export const TagFormDialog = ({
             Cancel
           </Button>
           <Button
+            id={ID.submitButton}
             onClick={tagForm.handleSubmit(handleSave)}
             size="default"
             variant="accent"
@@ -170,9 +185,9 @@ export const TagFormDialog = ({
     >
       <div className="space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="tag-name" className="text-foreground">Tag Name *</Label>
+          <Label htmlFor={ID.nameInput} className="text-foreground">Tag Name *</Label>
           <Input
-            id="tag-name"
+            id={ID.nameInput}
             {...tagForm.register("name")}
             placeholder="Enter tag name"
             className="bg-[var(--input-background)] border-[var(--glass-border)] text-foreground"
@@ -183,9 +198,9 @@ export const TagFormDialog = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="tag-description" className="text-foreground">Description</Label>
+          <Label htmlFor={ID.descriptionTextarea} className="text-foreground">Description</Label>
           <Textarea
-            id="tag-description"
+            id={ID.descriptionTextarea}
             {...tagForm.register("description")}
             placeholder="Enter tag description"
             className="bg-[var(--input-background)] border-[var(--glass-border)] text-foreground min-h-[80px]"
@@ -194,10 +209,10 @@ export const TagFormDialog = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="tag-color" className="text-foreground">Color *</Label>
+          <Label htmlFor={ID.colorInput} className="text-foreground">Color *</Label>
           <div className="flex items-center gap-4">
             <Input
-              id="tag-color"
+              id={ID.colorInput}
               type="color"
               {...tagForm.register("color")}
               className="w-20 h-10 bg-[var(--input-background)] border-[var(--glass-border)] cursor-pointer"
@@ -227,9 +242,9 @@ export const TagFormDialog = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="tag-icon" className="text-foreground">Icon (Emoji)</Label>
+          <Label htmlFor={ID.iconInput} className="text-foreground">Icon (Emoji)</Label>
           <Input
-            id="tag-icon"
+            id={ID.iconInput}
             {...tagForm.register("icon")}
             placeholder="🏷️ (optional)"
             maxLength={10}
@@ -244,13 +259,13 @@ export const TagFormDialog = ({
             control={tagForm.control}
             render={({ field }) => (
               <Checkbox
-                id="tag-active"
+                id={ID.activeCheckbox}
                 checked={field.value}
                 onCheckedChange={(checked) => field.onChange(checked === true)}
               />
             )}
           />
-          <Label htmlFor="tag-active" className="text-foreground cursor-pointer">
+          <Label htmlFor={ID.activeCheckbox} className="text-foreground cursor-pointer">
             Active (Tag will be available for use)
           </Label>
         </div>

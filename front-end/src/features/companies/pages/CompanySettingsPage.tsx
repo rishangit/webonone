@@ -25,6 +25,29 @@ import { companyUpdateSchema, CompanyUpdateFormData } from "@/features/companies
 import { PhoneInput } from "@/components/common/PhoneInput";
 import { currenciesService, Currency } from "@/shared/services/currencies";
 import { CustomDialog } from "@/components/ui/custom-dialog";
+import { buildDomId } from "@/shared/utils/domId";
+
+const ID = {
+  form: buildDomId("company-settings", "page", "form"),
+  nameInput: buildDomId("company-settings", "page", "name-input"),
+  contactPersonInput: buildDomId("company-settings", "page", "contact-person-input"),
+  descriptionTextarea: buildDomId("company-settings", "page", "description-textarea"),
+  companySizeSelect: buildDomId("company-settings", "page", "company-size-select"),
+  emailInput: buildDomId("company-settings", "page", "email-input"),
+  phoneInput: buildDomId("company-settings", "page", "phone-input"),
+  websiteInput: buildDomId("company-settings", "page", "website-input"),
+  addressInput: buildDomId("company-settings", "page", "address-input"),
+  cityInput: buildDomId("company-settings", "page", "city-input"),
+  stateInput: buildDomId("company-settings", "page", "state-input"),
+  postalCodeInput: buildDomId("company-settings", "page", "postal-code-input"),
+  countryInput: buildDomId("company-settings", "page", "country-input"),
+  currencySelect: buildDomId("company-settings", "page", "currency-select"),
+  currencyForm: buildDomId("company-settings", "page", "currency-form"),
+  currencyNameInput: buildDomId("company-settings", "page", "currency-name-input"),
+  currencySymbolInput: buildDomId("company-settings", "page", "currency-symbol-input"),
+  currencyDecimalsInput: buildDomId("company-settings", "page", "currency-decimals-input"),
+  currencyRoundingInput: buildDomId("company-settings", "page", "currency-rounding-input"),
+} as const;
 
 interface CompanySettingsPageProps {
   onBack?: () => void;
@@ -397,7 +420,7 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
           <Card className="p-6 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)] shadow-lg">
             <CardTitle title="Company Profile" icon={Building}  className="mb-6" />
 
-            <form id="company-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <form id={ID.form} onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {/* Logo Upload */}
               <div className="space-y-2">
                 <Label className="text-foreground">Company Logo</Label>
@@ -429,11 +452,11 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-foreground">Company Name <span className="text-red-500">*</span></Label>
+                  <Label htmlFor={ID.nameInput} className="text-foreground">Company Name <span className="text-red-500">*</span></Label>
                   {isEditing ? (
                     <>
                       <Input
-                        id="name"
+                        id={ID.nameInput}
                         {...register('name')}
                         disabled={isSaving}
                         placeholder="Enter company name"
@@ -452,10 +475,10 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="contactPerson" className="text-foreground">Contact Person</Label>
+                  <Label htmlFor={ID.contactPersonInput} className="text-foreground">Contact Person</Label>
                   {isEditing ? (
                     <Input
-                      id="contactPerson"
+                      id={ID.contactPersonInput}
                       {...register('contactPerson')}
                       disabled={isSaving}
                       placeholder="Enter contact person name"
@@ -468,11 +491,11 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description" className="text-foreground">Company Description <span className="text-red-500">*</span></Label>
+                <Label htmlFor={ID.descriptionTextarea} className="text-foreground">Company Description <span className="text-red-500">*</span></Label>
                 {isEditing ? (
                   <>
                     <Textarea
-                      id="description"
+                      id={ID.descriptionTextarea}
                       {...register('description')}
                       disabled={isSaving}
                       rows={3}
@@ -492,7 +515,7 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="companySize" className="text-foreground">Company Size</Label>
+                <Label htmlFor={ID.companySizeSelect} className="text-foreground">Company Size</Label>
                 {isEditing ? (
                   <Controller
                     name="companySize"
@@ -505,7 +528,7 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
                           field.onChange(value === "" ? undefined : (value as CompanySize));
                         }}
                       >
-                        <SelectTrigger id="companySize" className="bg-[var(--input-background)] border-[var(--glass-border)]">
+                        <SelectTrigger id={ID.companySizeSelect} className="bg-[var(--input-background)] border-[var(--glass-border)]">
                           <SelectValue placeholder="Select company size" />
                         </SelectTrigger>
                         <SelectContent className="bg-popover border-border">
@@ -532,11 +555,11 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-foreground">Email Address <span className="text-red-500">*</span></Label>
+                  <Label htmlFor={ID.emailInput} className="text-foreground">Email Address <span className="text-red-500">*</span></Label>
                   {isEditing ? (
                     <>
                       <Input
-                        id="email"
+                        id={ID.emailInput}
                         type="email"
                         {...register('email')}
                         disabled={isSaving}
@@ -556,7 +579,7 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-foreground">Phone Number <span className="text-red-500">*</span></Label>
+                  <Label htmlFor={ID.phoneInput} className="text-foreground">Phone Number <span className="text-red-500">*</span></Label>
                   {isEditing ? (
                     <>
                       <Controller
@@ -564,7 +587,7 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
                         control={control}
                         render={({ field }) => (
                           <PhoneInput
-                            id="phone"
+                            id={ID.phoneInput}
                             value={field.value || ""}
                             onChange={(value) => {
                               field.onChange(value);
@@ -591,11 +614,11 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="website" className="text-foreground">Website URL</Label>
+                <Label htmlFor={ID.websiteInput} className="text-foreground">Website URL</Label>
                 {isEditing ? (
                   <>
                     <Input
-                      id="website"
+                      id={ID.websiteInput}
                       {...register('website')}
                       disabled={isSaving}
                       placeholder="https://yourcompany.com"
@@ -661,11 +684,11 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
 
               {/* Address Fields */}
               <div className="space-y-2">
-                <Label htmlFor="address" className="text-foreground">Street Address <span className="text-red-500">*</span></Label>
+                <Label htmlFor={ID.addressInput} className="text-foreground">Street Address <span className="text-red-500">*</span></Label>
                 {isEditing ? (
                   <>
                     <Input
-                      id="address"
+                      id={ID.addressInput}
                       {...register('address')}
                       disabled={isSaving}
                       placeholder="Enter street address"
@@ -685,11 +708,11 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="city" className="text-foreground">City <span className="text-red-500">*</span></Label>
+                  <Label htmlFor={ID.cityInput} className="text-foreground">City <span className="text-red-500">*</span></Label>
                   {isEditing ? (
                     <>
                       <Input
-                        id="city"
+                        id={ID.cityInput}
                         {...register('city')}
                         disabled={isSaving}
                         placeholder="Enter city"
@@ -708,11 +731,11 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="state" className="text-foreground">State/Province <span className="text-red-500">*</span></Label>
+                  <Label htmlFor={ID.stateInput} className="text-foreground">State/Province <span className="text-red-500">*</span></Label>
                   {isEditing ? (
                     <>
                       <Input
-                        id="state"
+                        id={ID.stateInput}
                         {...register('state')}
                         disabled={isSaving}
                         placeholder="Enter state/province"
@@ -731,10 +754,10 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="postalCode" className="text-foreground">Postal Code</Label>
+                  <Label htmlFor={ID.postalCodeInput} className="text-foreground">Postal Code</Label>
                   {isEditing ? (
                     <Input
-                      id="postalCode"
+                      id={ID.postalCodeInput}
                       {...register('postalCode')}
                       disabled={isSaving}
                       placeholder="Enter postal code"
@@ -747,10 +770,10 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="country" className="text-foreground">Country</Label>
+                <Label htmlFor={ID.countryInput} className="text-foreground">Country</Label>
                 {isEditing ? (
                   <Input
-                    id="country"
+                    id={ID.countryInput}
                     {...register('country')}
                     disabled={isSaving}
                     placeholder="Enter country"
@@ -1008,7 +1031,7 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
             <div className="space-y-3">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <Label htmlFor="currencyId" className="text-sm text-muted-foreground">Currency</Label>
+                  <Label htmlFor={ID.currencySelect} className="text-sm text-muted-foreground">Currency</Label>
                   {isEditing && (
                     <Button
                       type="button"
@@ -1034,7 +1057,7 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
                         }}
                         disabled={isLoadingCurrencies}
                       >
-                        <SelectTrigger id="currencyId" className="bg-[var(--input-background)] border-[var(--glass-border)] text-foreground">
+                        <SelectTrigger id={ID.currencySelect} className="bg-[var(--input-background)] border-[var(--glass-border)] text-foreground">
                           <SelectValue placeholder={isLoadingCurrencies ? "Loading currencies..." : "Select currency"} />
                         </SelectTrigger>
                         <SelectContent className="bg-popover border-border">
@@ -1118,11 +1141,11 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
           </>
         }
       >
-        <form id="currency-form" onSubmit={handleSubmitCurrency(onCreateCurrency)} className="space-y-4">
+        <form id={ID.currencyForm} onSubmit={handleSubmitCurrency(onCreateCurrency)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="currency-name">Currency Name <span className="text-red-500">*</span></Label>
+            <Label htmlFor={ID.currencyNameInput}>Currency Name <span className="text-red-500">*</span></Label>
             <Input
-              id="currency-name"
+              id={ID.currencyNameInput}
               {...registerCurrency('name', { required: 'Currency name is required' })}
               placeholder="e.g., USD, EUR, GBP"
               className="bg-[var(--input-background)] border-[var(--glass-border)]"
@@ -1133,9 +1156,9 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="currency-symbol">Symbol <span className="text-red-500">*</span></Label>
+            <Label htmlFor={ID.currencySymbolInput}>Symbol <span className="text-red-500">*</span></Label>
             <Input
-              id="currency-symbol"
+              id={ID.currencySymbolInput}
               {...registerCurrency('symbol', { required: 'Symbol is required' })}
               placeholder="e.g., $, €, £"
               className="bg-[var(--input-background)] border-[var(--glass-border)]"
@@ -1147,13 +1170,13 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="currency-decimals">Decimal Places</Label>
+              <Label htmlFor={ID.currencyDecimalsInput}>Decimal Places</Label>
               <Controller
                 name="decimals"
                 control={controlCurrency}
                 render={({ field }) => (
                   <Input
-                    id="currency-decimals"
+                    id={ID.currencyDecimalsInput}
                     type="number"
                     min="0"
                     max="10"
@@ -1166,13 +1189,13 @@ export function CompanySettingsPage({ onBack }: CompanySettingsPageProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="currency-rounding">Rounding</Label>
+              <Label htmlFor={ID.currencyRoundingInput}>Rounding</Label>
               <Controller
                 name="rounding"
                 control={controlCurrency}
                 render={({ field }) => (
                   <Input
-                    id="currency-rounding"
+                    id={ID.currencyRoundingInput}
                     type="number"
                     step="0.01"
                     min="0"

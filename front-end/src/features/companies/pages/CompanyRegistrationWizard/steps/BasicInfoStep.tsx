@@ -3,6 +3,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { WizardHeader } from "../components/WizardHeader";
 import { CompanyFormData } from "../types";
+import { buildDomId } from "@/shared/utils/domId";
+
+const ID = {
+  companyNameInput: buildDomId("company", "registration-step-basic", "company-name-input"),
+  contactPersonInput: buildDomId("company", "registration-step-basic", "contact-person-input"),
+  descriptionTextarea: buildDomId("company", "registration-step-basic", "description-textarea"),
+} as const;
 
 interface BasicInfoStepProps {
   formData: CompanyFormData;
@@ -19,9 +26,9 @@ export const BasicInfoStep = ({ formData, onInputChange }: BasicInfoStepProps) =
       
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="company-name" className="text-foreground">Company Name *</Label>
+          <Label htmlFor={ID.companyNameInput} className="text-foreground">Company Name *</Label>
           <Input
-            id="company-name"
+            id={ID.companyNameInput}
             value={formData.companyName}
             onChange={(e) => onInputChange('companyName', e.target.value)}
             placeholder="Enter your company name"
@@ -30,9 +37,9 @@ export const BasicInfoStep = ({ formData, onInputChange }: BasicInfoStepProps) =
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="contact-person" className="text-foreground">Contact Person *</Label>
+          <Label htmlFor={ID.contactPersonInput} className="text-foreground">Contact Person *</Label>
           <Input
-            id="contact-person"
+            id={ID.contactPersonInput}
             value={formData.contactPerson}
             onChange={(e) => onInputChange('contactPerson', e.target.value)}
             placeholder="Primary contact person"
@@ -41,9 +48,9 @@ export const BasicInfoStep = ({ formData, onInputChange }: BasicInfoStepProps) =
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="description" className="text-foreground">Company Description *</Label>
+          <Label htmlFor={ID.descriptionTextarea} className="text-foreground">Company Description *</Label>
           <Textarea
-            id="description"
+            id={ID.descriptionTextarea}
             value={formData.description}
             onChange={(e) => onInputChange('description', e.target.value)}
             placeholder="Describe your company and services..."

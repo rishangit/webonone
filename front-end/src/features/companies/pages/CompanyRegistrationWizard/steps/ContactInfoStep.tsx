@@ -3,6 +3,13 @@ import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/common/PhoneInput";
 import { WizardHeader } from "../components/WizardHeader";
 import { CompanyFormData } from "../types";
+import { buildDomId } from "@/shared/utils/domId";
+
+const ID = {
+  emailInput: buildDomId("company", "registration-step-contact", "email-input"),
+  phoneInput: buildDomId("company", "registration-step-contact", "phone-input"),
+  websiteInput: buildDomId("company", "registration-step-contact", "website-input"),
+} as const;
 
 interface ContactInfoStepProps {
   formData: CompanyFormData;
@@ -20,9 +27,9 @@ export const ContactInfoStep = ({ formData, onInputChange }: ContactInfoStepProp
       <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-foreground">Email Address *</Label>
+            <Label htmlFor={ID.emailInput} className="text-foreground">Email Address *</Label>
             <Input
-              id="email"
+              id={ID.emailInput}
               type="email"
               value={formData.email}
               onChange={(e) => onInputChange('email', e.target.value)}
@@ -32,9 +39,9 @@ export const ContactInfoStep = ({ formData, onInputChange }: ContactInfoStepProp
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="phone" className="text-foreground">Phone Number *</Label>
+            <Label htmlFor={ID.phoneInput} className="text-foreground">Phone Number *</Label>
             <PhoneInput
-              id="phone"
+              id={ID.phoneInput}
               value={formData.phone || ""}
               onChange={(value) => onInputChange('phone', value)}
               placeholder="Enter phone number"
@@ -44,9 +51,9 @@ export const ContactInfoStep = ({ formData, onInputChange }: ContactInfoStepProp
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="website" className="text-foreground">Website URL</Label>
+          <Label htmlFor={ID.websiteInput} className="text-foreground">Website URL</Label>
           <Input
-            id="website"
+            id={ID.websiteInput}
             value={formData.website}
             onChange={(e) => onInputChange('website', e.target.value)}
             placeholder="https://yourcompany.com"

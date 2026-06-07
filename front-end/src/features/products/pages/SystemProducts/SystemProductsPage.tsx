@@ -87,6 +87,19 @@ const mapProductToSystemProduct = (product: Product): SystemProduct => {
 // Mock data removed - now using Redux
 
 import { UserRole, isRole } from "@/shared/types/user";
+import { buildDomId } from "@/shared/utils/domId";
+
+const ID = {
+  root: buildDomId("system-products", "page"),
+  header: buildDomId("system-products", "page-header"),
+  headerActions: buildDomId("system-products", "page-header-actions"),
+  body: buildDomId("system-products", "page-body"),
+  bodyInner: buildDomId("system-products", "page-body-inner"),
+  skeleton: buildDomId("system-products", "page-skeleton"),
+  list: buildDomId("system-products", "page-list"),
+  pagination: buildDomId("system-products", "page-pagination"),
+  emptyState: buildDomId("system-products", "page-empty-state"),
+} as const;
 
 interface SystemProductsPageProps {
   currentUser?: {
@@ -410,9 +423,9 @@ export function SystemProductsPage({ currentUser, onViewProduct }: SystemProduct
   };
 
   return (
-    <div className="flex-1 p-4 lg:p-6 flex flex-col min-h-0">
+    <div id={ID.root} className="flex-1 p-4 lg:p-6 flex flex-col min-h-0">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div id={ID.header} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <div className="flex items-center gap-2 mb-2">
             <h1 className="text-xl sm:text-2xl font-semibold text-foreground">System Products</h1>
@@ -423,7 +436,7 @@ export function SystemProductsPage({ currentUser, onViewProduct }: SystemProduct
           </div>
           <p className="text-muted-foreground">Manage the master product catalog for all companies</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div id={ID.headerActions} className="flex items-center gap-2">
           <Button 
             onClick={() => setIsCreateDialogOpen(true)}
             variant="accent"
@@ -552,12 +565,12 @@ export function SystemProductsPage({ currentUser, onViewProduct }: SystemProduct
       </Card>
 
       {/* Body Container - Fills rest of screen */}
-      <div className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
+      <div id={ID.body} className="flex flex-col flex-1 min-h-[calc(100vh-300px)]">
         {/* Main Content */}
-        <div className="flex flex-col flex-1 min-h-0">
+        <div id={ID.bodyInner} className="flex flex-col flex-1 min-h-0">
           {/* Products Grid/List */}
           {loading && displayedProducts.length === 0 ? (
-            <div className="flex-1">
+            <div id={ID.skeleton} className="flex-1">
               {viewMode === "list" ? (
             /* Skeleton for List View - Matching ProductCard structure */
             <div className="space-y-4">
@@ -633,7 +646,7 @@ export function SystemProductsPage({ currentUser, onViewProduct }: SystemProduct
             </div>
       ) : displayedProducts.length > 0 ? (
         <div className="flex flex-col flex-1 min-h-0">
-          <div className="flex-1">
+          <div id={ID.list} className="flex-1">
             <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" : "space-y-4"}>
               {displayedProducts.map((product) => (
                 <SystemProductCard
@@ -651,7 +664,7 @@ export function SystemProductsPage({ currentUser, onViewProduct }: SystemProduct
 
           {/* Pagination */}
           {isSuperAdmin && pagination && (
-            <div className="mt-auto pt-4">
+            <div id={ID.pagination} className="mt-auto pt-4">
               <Pagination
                 totalItems={pagination.total}
                 itemsPerPage={itemsPerPage}
@@ -669,6 +682,7 @@ export function SystemProductsPage({ currentUser, onViewProduct }: SystemProduct
         </div>
       ) : (
         <EmptyState
+          id={ID.emptyState}
           icon={Package}
           title="No products found"
           description={

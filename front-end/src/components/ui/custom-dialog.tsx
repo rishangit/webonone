@@ -3,6 +3,7 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { cn } from "./utils";
 import { Icon } from "../common/Icon";
+import { dialogSectionIds } from "@/shared/utils/domId";
 
 type CustomDialogSize = "small" | "medium" | "large" | "xlarge" | "auto";
 
@@ -54,6 +55,8 @@ interface CustomDialogProps {
   hideCloseButton?: boolean;
   noContentPadding?: boolean; // Disable default content padding
   hideHeader?: boolean; // Hide the header completely
+  /** Optional stable id on the dialog content root for DevTools debugging. */
+  id?: string;
 }
 
 export function CustomDialog({
@@ -72,7 +75,8 @@ export function CustomDialog({
   disableContentScroll = false,
   hideCloseButton = false,
   noContentPadding = false,
-  hideHeader = false
+  hideHeader = false,
+  id,
 }: CustomDialogProps) {
   // Generate a unique ID for the dialog description
   const dialogId = React.useId();
@@ -97,12 +101,15 @@ export function CustomDialog({
     return sizeWidthClasses[sizeWidth];
   }, [sizeWidth, maxWidth]);
 
+  const sectionIds = id ? dialogSectionIds(id) : null;
+
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm" />
         <div className="fixed inset-0 z-[100] w-full h-full px-2 py-2 sm:px-4 sm:py-4 pointer-events-none flex justify-center items-center">
           <DialogPrimitive.Content
+            id={id}
             className={cn(
               "bg-background dark:bg-[var(--glass-bg)] border-[var(--glass-border)] backdrop-blur-sm rounded-lg shadow-lg",
               "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 border duration-200",
@@ -116,7 +123,7 @@ export function CustomDialog({
           >
           {/* Header */}
           {!hideHeader && (title || description || icon || customHeader) && (
-            <div className="p-6 pb-4 pr-12 sm:pr-16 border-b border-[var(--glass-border)] relative">
+            <div id={sectionIds?.header} className="p-6 pb-4 pr-12 sm:pr-16 border-b border-[var(--glass-border)] relative">
               {customHeader ? (
                 customHeader
               ) : (
@@ -149,7 +156,9 @@ export function CustomDialog({
           )}
 
           {/* Content */}
-          <div className={cn(
+          <div
+            id={sectionIds?.body}
+            className={cn(
             "h-full",
             disableContentScroll
               ? "overflow-hidden"
@@ -164,7 +173,7 @@ export function CustomDialog({
 
           {/* Footer */}
           {footer && (
-            <div className="px-6 py-3 border-t border-[var(--glass-border)] shrink-0">
+            <div id={sectionIds?.footer} className="px-6 py-3 border-t border-[var(--glass-border)] shrink-0">
               <div className="flex items-center justify-end gap-2">
                 {footer}
               </div>
