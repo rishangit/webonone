@@ -13,7 +13,7 @@ import {
 import type { Service as ServiceType, CreateServiceData } from "@/features/services/services";
 import type { CreateSystemServiceData, SystemService } from "@/features/services/services/systemServices";
 import { currenciesService, Currency } from "@/shared/services/currencies";
-import { companyProductsService, CompanyProduct } from "@/features/products/services/productApi";
+import { companyProductsService, type CompanyProduct } from "@/shared/services/products-company-public";
 import { UserRole, isRole } from "@/shared/types/user";
 import { ServicesPageHeader } from "./components/ServicesPageHeader";
 import { ServicesPageSearchToolbar } from "./components/ServicesPageSearchToolbar";

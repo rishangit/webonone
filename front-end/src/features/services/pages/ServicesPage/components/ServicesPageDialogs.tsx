@@ -1,6 +1,6 @@
 import type { CreateServiceData, Service as ServiceType } from "@/features/services/services";
 import type { CreateSystemServiceData, SystemService } from "@/features/services/services/systemServices";
-import type { CompanyProduct } from "@/features/products/services/productApi";
+import type { CompanyProduct } from "@/shared/services/products-company-public";
 import { ServiceWizardDialog, SelectSystemServiceDialog, SystemServiceWizardDialog } from "@/features/services/components";
 import {
   AlertDialog,

@@ -69,7 +69,7 @@ export const DeleteConfirmationDialog = ({
           </AlertDialogCancel>
           <AlertDialogAction 
             onClick={handleConfirm}
-            className="bg-red-500 hover:bg-red-600 text-white"
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             disabled={isLoading}
           >
             {isLoading ? "Deleting..." : defaultConfirmText}

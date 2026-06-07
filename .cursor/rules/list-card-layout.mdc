@@ -6,7 +6,7 @@ alwaysApply: false
 
 # List Card Layout
 
-Use shared layout primitives from `@/components/common/ListCardLayout` and `@/components/common/CardKebabTrigger` for list-page cards. Pair with [system-kebab-menu.mdc](mdc:.cursor/rules/system-kebab-menu.mdc) for menu items and [list-pages-card-view.mdc](mdc:.cursor/rules/list-pages-card-view.mdc) for grid breakpoints.
+Use shared layout primitives from `@/components/common/ListCardLayout` and `@/components/common/CardKebabTrigger` for list-page cards. Step-by-step skill: [card-list-item-ui](../skills/card-list-item-ui/SKILL.md). Pair with [system-kebab-menu.mdc](mdc:.cursor/rules/system-kebab-menu.mdc) for menu items and [list-pages-card-view.mdc](mdc:.cursor/rules/list-pages-card-view.mdc) for grid breakpoints.
 
 ## Grid vs list
 
@@ -14,6 +14,10 @@ Use shared layout primitives from `@/components/common/ListCardLayout` and `@/co
 - **List row:** use `LIST_CARD_LIST_SHELL` with `ListCardMediaColumn` + `ListCardContent`
 
 Both modes should accept `viewMode: "grid" | "list"` on the same card component when possible.
+
+## No duplicate values
+
+Each fact appears once per card (per view branch). Do not repeat title, description, status, the same price, tags, or contact fields in header, hero overlay, detail grid, and footer. Grid price: hero overlay **or** body meta, not both. Skill: [card-list-item-ui](../skills/card-list-item-ui/SKILL.md).
 
 ## List row structure
 

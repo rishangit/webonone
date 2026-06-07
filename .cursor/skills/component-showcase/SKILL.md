@@ -5,6 +5,7 @@ description: Registers reusable card and list row components in the system Compo
 
 # Component Showcase Registration
 
+Card/list **layout and styling** first: [card-list-item-ui](../card-list-item-ui/SKILL.md).  
 Full rule: [component-showcase.mdc](../../rules/component-showcase.mdc). Route: `/system/showcase` (SYSTEM_ADMIN).
 
 ## When to register

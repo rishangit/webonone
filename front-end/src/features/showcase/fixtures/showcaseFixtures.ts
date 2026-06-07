@@ -280,6 +280,57 @@ export const showcaseTag = {
   ...TAG_DATES,
 };
 
+export const showcaseCustomForm = {
+  id: "showcase-form-1",
+  companyId: "showcase-co",
+  name: "Patient intake form",
+  description: "Collect basic patient details before appointments",
+  isActive: true,
+  definition: {
+    version: 1 as const,
+    canvas: { minHeightPx: 720, rowHeightPx: 60 },
+    fields: [
+      {
+        id: "f1",
+        type: "text" as const,
+        label: "Full name",
+        required: true,
+        layout: { gridRowStart: 1, gridColumnStart: 1, rowSpan: 1, colSpan: 2 },
+      },
+      {
+        id: "f2",
+        type: "date" as const,
+        label: "Date of birth",
+        required: false,
+        layout: { gridRowStart: 2, gridColumnStart: 1, rowSpan: 1, colSpan: 1 },
+      },
+    ],
+  },
+  createdAt: "2024-01-01T00:00:00Z",
+  updatedAt: "2024-06-01T00:00:00Z",
+};
+
+export const showcaseNotification = {
+  id: "showcase-notif-1",
+  type: "appointment" as const,
+  title: "Upcoming appointment reminder",
+  message: "You have an appointment tomorrow at 2:00 PM. Please arrive 15 minutes early.",
+  timestamp: "2026-05-18T14:30:00.000Z",
+  isRead: false,
+  priority: "high" as const,
+  sender: {
+    name: "Dr. Sarah Johnson",
+    avatar: undefined,
+    role: "Dentist",
+  },
+  relatedData: {
+    appointmentId: "showcase-appt-1",
+    userId: "showcase-user-1",
+  },
+  actionRequired: true,
+  actionLabel: "Confirm appointment",
+};
+
 export const showcaseSale = {
   id: "showcase-sale-1",
   type: "product" as const,

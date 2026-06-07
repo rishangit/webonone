@@ -47,7 +47,7 @@ router.get('/:id',
   authenticateToken,
   asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const tag = await Tag.findById(parseInt(id));
+    const tag = await Tag.findById(id);
     
     if (!tag) {
       return res.status(404).json({
@@ -113,9 +113,7 @@ router.put('/:id',
   requirePermission('manage_system'),
   asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const tagId = parseInt(id);
-    
-    const tag = await Tag.findById(tagId);
+    const tag = await Tag.findById(id);
     if (!tag) {
       return res.status(404).json({
         success: false,
@@ -131,7 +129,7 @@ router.put('/:id',
     if (req.body.icon !== undefined) updateData.icon = req.body.icon;
     if (req.body.isActive !== undefined) updateData.isActive = Boolean(req.body.isActive);
 
-    const updatedTag = await Tag.update(tagId, updateData);
+    const updatedTag = await Tag.update(id, updateData);
     
     res.json({
       success: true,
@@ -147,9 +145,7 @@ router.delete('/:id',
   requirePermission('manage_system'),
   asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const tagId = parseInt(id);
-    
-    const tag = await Tag.findById(tagId);
+    const tag = await Tag.findById(id);
     if (!tag) {
       return res.status(404).json({
         success: false,
@@ -157,7 +153,7 @@ router.delete('/:id',
       });
     }
 
-    await Tag.delete(tagId);
+    await Tag.delete(id);
     
     res.json({
       success: true,

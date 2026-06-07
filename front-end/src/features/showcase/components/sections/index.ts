@@ -13,3 +13,6 @@ export { UserShowcaseSection } from "./UserShowcaseSection";
 export { TagShowcaseSection } from "./TagShowcaseSection";
 export { StatusTagsShowcaseSection } from "./StatusTagsShowcaseSection";
 export { RoleBadgesShowcaseSection } from "./RoleBadgesShowcaseSection";
+export { CustomFormShowcaseSection } from "./CustomFormShowcaseSection";
+export { NotificationShowcaseSection } from "./NotificationShowcaseSection";
+export { SalesShowcaseSection } from "./SalesShowcaseSection";

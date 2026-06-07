@@ -9,7 +9,7 @@ import {
   type ProductSelectionItem,
 } from "@/components/common/ProductServiceSelectionDialog";
 import { EmptyState } from "@/components/common/EmptyState";
-import type { CompanyProduct } from "@/features/products/services/productApi";
+import type { CompanyProduct } from "@/shared/services/products-company-public";
 import type { DefaultProductRow } from "../types";
 import { SERVICE_WIZARD_INPUT_SURFACE } from "../constants";
 import { getCompanyProductDefaultUnitPrice, type CompanyProductWithVariants } from "@/features/services/utils/serviceProductPricing";

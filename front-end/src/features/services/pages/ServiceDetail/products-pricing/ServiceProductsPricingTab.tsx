@@ -2,7 +2,7 @@ import { Package } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/common/EmptyState";
 import type { Service } from "@/features/services/services";
-import type { CompanyProduct } from "@/features/products/services/productApi";
+import type { CompanyProduct } from "@/shared/services/products-company-public";
 import { getCompanyProductDefaultUnitPrice } from "@/features/services/utils/serviceProductPricing";
 import { formatAvatarUrl } from "@/shared/utils";
 

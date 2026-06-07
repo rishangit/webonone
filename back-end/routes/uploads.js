@@ -7,6 +7,24 @@ const { asyncHandler } = require('../middleware/errorHandler');
 
 const router = express.Router();
 
+function sanitizeRelativePath(relativePath) {
+  if (!relativePath || typeof relativePath !== 'string') return '';
+  const normalized = path.normalize(relativePath).replace(/\\/g, '/');
+  const parts = normalized.split('/').filter(Boolean).filter((p) => p !== '..');
+  return parts.join('/');
+}
+
+function resolveUploadPath(uploadsDir, relativePath) {
+  const safe = sanitizeRelativePath(relativePath);
+  const fullPath = safe ? path.join(uploadsDir, ...safe.split('/')) : uploadsDir;
+  const resolvedUploads = path.resolve(uploadsDir);
+  const resolvedFull = path.resolve(fullPath);
+  if (!resolvedFull.startsWith(resolvedUploads + path.sep) && resolvedFull !== resolvedUploads) {
+    return null;
+  }
+  return resolvedFull;
+}
+
 // Test route to verify the router is working
 router.get('/test', (req, res) => {
   res.json({ success: true, message: 'Uploads router is working' });
@@ -15,7 +33,8 @@ router.get('/test', (req, res) => {
 // Ensure uploads directory exists
 const ensureUploadsDir = (folderPath) => {
   const uploadsDir = path.join(__dirname, '..', 'uploads');
-  const targetDir = path.join(uploadsDir, folderPath);
+  const safeFolder = sanitizeRelativePath(folderPath || 'general') || 'general';
+  const targetDir = path.join(uploadsDir, ...safeFolder.split('/'));
   
   if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
@@ -31,7 +50,7 @@ const ensureUploadsDir = (folderPath) => {
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const folderPath = req.query.folderPath || 'general';
+    const folderPath = sanitizeRelativePath(req.query.folderPath || 'general') || 'general';
     const targetDir = ensureUploadsDir(folderPath);
     cb(null, targetDir);
   },
@@ -77,7 +96,7 @@ router.post('/upload',
         });
       }
 
-      const folderPath = req.query.folderPath || 'general';
+      const folderPath = sanitizeRelativePath(req.query.folderPath || 'general') || 'general';
       const fileName = req.file.filename;
       const originalName = req.file.originalname;
       const fileSize = req.file.size;
@@ -110,7 +129,7 @@ router.post('/upload',
       
       const fileUrl = `${baseUrl}/uploads/${relativePath}`;
 
-      res.status(200).json({
+      res.status(201).json({
         success: true,
         message: 'File uploaded successfully',
         data: {
@@ -151,57 +170,22 @@ router.delete('/delete/:filePath(*)',
       filePath = decodeURIComponent(filePath);
 
       const uploadsDir = path.join(__dirname, '..', 'uploads');
-      const fullPath = path.join(uploadsDir, filePath.replace(/\//g, path.sep));
+      const fullPath = resolveUploadPath(uploadsDir, filePath);
 
-      // Debug logging
-      console.log('Delete file request:', {
-        originalPath: req.params.filePath,
-        decodedPath: filePath,
-        fullPath: fullPath,
-        exists: fs.existsSync(fullPath)
-      });
-
-      // Check if file exists
-      if (!fs.existsSync(fullPath)) {
-        // Try alternative path formats
-        const altPath1 = path.join(uploadsDir, filePath);
-        const altPath2 = path.join(uploadsDir, ...filePath.split('/'));
-        
-        console.log('Trying alternative paths:', {
-          altPath1: altPath1,
-          altPath1Exists: fs.existsSync(altPath1),
-          altPath2: altPath2,
-          altPath2Exists: fs.existsSync(altPath2)
-        });
-
-        if (fs.existsSync(altPath1)) {
-          fs.unlinkSync(altPath1);
-          return res.status(200).json({
-            success: true,
-            message: 'File deleted successfully'
-          });
-        }
-
-        if (fs.existsSync(altPath2)) {
-          fs.unlinkSync(altPath2);
-          return res.status(200).json({
-            success: true,
-            message: 'File deleted successfully'
-          });
-        }
-
-        return res.status(404).json({
+      if (!fullPath) {
+        return res.status(400).json({
           success: false,
-          message: 'File not found',
-          debug: {
-            requestedPath: filePath,
-            fullPath: fullPath,
-            uploadsDir: uploadsDir
-          }
+          message: 'Invalid file path',
         });
       }
 
-      // Delete file
+      if (!fs.existsSync(fullPath)) {
+        return res.status(404).json({
+          success: false,
+          message: 'File not found',
+        });
+      }
+
       fs.unlinkSync(fullPath);
 
       res.status(200).json({

@@ -53,8 +53,7 @@ const showSkeleton = loading && displayedItems.length === 0;
 
 ## Pagination
 
-- Use `@/components/common/Pagination` at bottom when server-side pagination exists
-- Wire `currentPage`, `itemsPerPage`, `totalItems`, `onPageChange`, `onItemsPerPageChange`
+See [pagination-component.mdc](mdc:.cursor/rules/pagination-component.mdc) — `@/components/common/Pagination`, hook state, API params, and layout.
 
 ## Data hook
 

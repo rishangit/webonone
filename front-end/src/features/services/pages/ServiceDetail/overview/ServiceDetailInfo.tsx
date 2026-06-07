@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Service } from "@/features/services/services";
 import { Currency } from "@/shared/services/currencies";
-import type { CompanyProduct } from "@/features/products/services/productApi";
+import type { CompanyProduct } from "@/shared/services/products-company-public";
 import { getCompanyProductDefaultUnitPrice } from "@/features/services/utils/serviceProductPricing";
 
 interface ServiceDetailInfoProps {

@@ -23,14 +23,16 @@ Rules live in `.cursor/rules/*.mdc`. **Always-on** rules apply to every chat; **
 
 | Rule | Globs | Related |
 |------|-------|---------|
+| [theme-accent-ui-consistency.mdc](theme-accent-ui-consistency.mdc) | `front-end/src/**/*.{ts,tsx}` | globals.css, Settings accent picker |
 | [dialog-windows.mdc](dialog-windows.mdc) | `front-end/src/**/*.{ts,tsx}` | [form-dialogs.mdc](form-dialogs.mdc) |
 | [form-dialogs.mdc](form-dialogs.mdc) | `front-end/src/features/**/*Dialog*.tsx` | [dialog-windows.mdc](dialog-windows.mdc) |
 | [search-input-component.mdc](search-input-component.mdc) | `front-end/src/**/*.{ts,tsx}` | [list-page-shell.mdc](list-page-shell.mdc) |
+| [pagination-component.mdc](pagination-component.mdc) | `front-end/src/**/*.{ts,tsx}` | [list-page-shell.mdc](list-page-shell.mdc) |
 | [system-kebab-menu.mdc](system-kebab-menu.mdc) | `front-end/src/**/*.{ts,tsx}` | [list-card-layout.mdc](list-card-layout.mdc) |
 | [delete-destructive-actions.mdc](delete-destructive-actions.mdc) | always | kebab destructive items |
 | [empty-state-component.mdc](empty-state-component.mdc) | `front-end/**/*.tsx` | [list-page-shell.mdc](list-page-shell.mdc) |
 | [list-pages-card-view.mdc](list-pages-card-view.mdc) | `front-end/src/features/**/pages/**/*.{ts,tsx}` | [list-loading-skeletons.mdc](list-loading-skeletons.mdc) |
-| [list-page-shell.mdc](list-page-shell.mdc) | `front-end/src/features/**/pages/**/*.{ts,tsx}` | search, empty-state, card-view, pagination |
+| [list-page-shell.mdc](list-page-shell.mdc) | `front-end/src/features/**/pages/**/*.{ts,tsx}` | search, empty-state, card-view, [pagination-component](pagination-component.mdc) |
 | [list-card-layout.mdc](list-card-layout.mdc) | `front-end/src/**/*{Card,ListView}*.tsx` | kebab-menu, component-showcase |
 | [list-loading-skeletons.mdc](list-loading-skeletons.mdc) | `front-end/src/features/**/pages/**/*.{ts,tsx}` | list-pages-card-view |
 | [status-badges.mdc](status-badges.mdc) | `front-end/src/**/*.{ts,tsx}` | `shared/utils/statusBadges.ts` |
@@ -38,9 +40,11 @@ Rules live in `.cursor/rules/*.mdc`. **Always-on** rules apply to every chat; **
 
 ## Domain-specific
 
-| Rule | Globs |
-|------|-------|
-| [webpage-editor-addons.mdc](webpage-editor-addons.mdc) | `front-end/src/features/website/pages/WebpageEditor/**/*` |
+| Rule | Globs | Related |
+|------|-------|---------|
+| [webpage-editor-addons.mdc](webpage-editor-addons.mdc) | `front-end/src/features/website/pages/WebpageEditor/**/*` | [website-editor skill](../skills/website-editor/SKILL.md) |
+| [form-editor-fields.mdc](form-editor-fields.mdc) | `front-end/src/features/customForms/pages/FormBuilder/**/*` | [form-editor-field skill](../skills/form-editor-field/SKILL.md) |
+| [media-upload-delete.mdc](media-upload-delete.mdc) | Upload/Media/Gallery paths, `fileUploadService`, upload routes | [media-upload-delete skill](../skills/media-upload-delete/SKILL.md) |
 
 ## Back-end
 
@@ -58,10 +62,11 @@ Multi-step workflows: see [`.cursor/skills/README.md`](../skills/README.md).
 
 When building or refactoring a list page, read in order:
 
-1. [list-page-shell.mdc](list-page-shell.mdc) — page layout, filters, pagination
+1. [list-page-shell.mdc](list-page-shell.mdc) — page layout, filters
 2. [search-input-component.mdc](search-input-component.mdc) — search field
-3. [list-pages-card-view.mdc](list-pages-card-view.mdc) — grid breakpoints
-4. [list-loading-skeletons.mdc](list-loading-skeletons.mdc) — loading state
-5. [empty-state-component.mdc](empty-state-component.mdc) — no-data state
-6. [list-card-layout.mdc](list-card-layout.mdc) — card/list row anatomy
-7. [component-showcase.mdc](component-showcase.mdc) — register reusable cards
+3. [pagination-component.mdc](pagination-component.mdc) — server-side pagination
+4. [list-pages-card-view.mdc](list-pages-card-view.mdc) — grid breakpoints
+5. [list-loading-skeletons.mdc](list-loading-skeletons.mdc) — loading state
+6. [empty-state-component.mdc](empty-state-component.mdc) — no-data state
+7. [list-card-layout.mdc](list-card-layout.mdc) — card/list row anatomy ([card-list-item-ui skill](../skills/card-list-item-ui/SKILL.md))
+8. [component-showcase.mdc](component-showcase.mdc) — register reusable cards

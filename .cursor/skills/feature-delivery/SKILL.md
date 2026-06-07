@@ -34,6 +34,7 @@ Follow [front-end-structure.mdc](../../rules/front-end-structure.mdc):
 
 Apply scoped rules as you build:
 
+- **Theme & accent** → [theme-accent-ui-consistency.mdc](../../rules/theme-accent-ui-consistency.mdc) — tokens, glass surfaces, no hardcoded palette
 - List page → [list-page-shell.mdc](../../rules/list-page-shell.mdc) + related list rules
 - Dialogs → [dialog-windows.mdc](../../rules/dialog-windows.mdc) + [form-dialogs.mdc](../../rules/form-dialogs.mdc)
 - Cards → [list-card-layout.mdc](../../rules/list-card-layout.mdc); register in showcase if reusable

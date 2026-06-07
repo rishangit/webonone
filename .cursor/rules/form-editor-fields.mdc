@@ -1,0 +1,84 @@
+---
+description: Conventions for FormBuilder field modules (follow text/checkbox/radio patterns).
+globs: front-end/src/features/customForms/pages/FormBuilder/**/*
+alwaysApply: false
+---
+
+# FormBuilder field modules
+
+**Base path:** `front-end/src/features/customForms/pages/FormBuilder/`
+
+Use **`fields/shared/createFieldModule.tsx`** as the reference for simple fields (`text`, `textarea`, `number`, `date`, `checkbox`, `radio`, `dropdown`). New field types must match its **`FieldModule`** contract, render contexts, and settings dialog patterns.
+
+## Types (`features/customForms/types/formDefinition.ts`)
+
+1. Add a literal to **`FormFieldType`**.
+2. Extend **`FormField`** only when the new type needs extra persisted fields (prefer reusing `options`, `validation`, `display` when possible).
+3. Keep **`FormDefinition.version`** at `1` unless a migration is planned.
+
+Do not widen field shapes with ad-hoc `as any` at save sites; keep types in `formDefinition.ts`.
+
+## `FieldModule` contract (`fields/types.ts`)
+
+| Field | Rule |
+|-------|------|
+| `type` | Matches `FormFieldType` literal. |
+| `label` / `description` | Shown in **Add field** (`AddFieldDialog`); keep short. |
+| `createDefaultField` | Returns `FormField` with **`id: nanoid(10)`**, sensible defaults, and **`layout`** (see below). |
+| `RenderComponent` | Implements **`FieldRenderProps`**: `field`, `context`, optional `value` / `onChange` / `disabled`. |
+| `EditComponent` | Implements **`FieldEditProps`**: `field`, `open`, `onOpenChange`, `onSave`. |
+
+## Render contexts
+
+`FieldRenderContext`: **`editor`** (canvas, non-interactive), **`preview`** (read-only preview mode), **`fill`** (live input — wire `value` + `onChange`).
+
+- **Editor / preview:** use `pointer-events-none` on the control shell; show label + disabled placeholder like existing modules.
+- **Fill:** render real inputs; honor `required` with a red `*` on the label; use `@/components/ui` controls only.
+
+## Default layout
+
+On add, `VisualFormEditor` assigns layout via **`maxLayoutRowEnd`** + default span. In `createDefaultField`, include:
+
+```ts
+layout: { gridRowStart: 1, gridColumnStart: 1, rowSpan: 2, colSpan: 6 }
+```
+
+Do not duplicate grid math — use **`fieldGridUtils`** (`ensureFieldLayouts`, `layoutToGridStyle`, `computeFieldDisplayZIndex`).
+
+## Settings dialog (`EditComponent`)
+
+- Prefer **`FieldSettingsDialog`** from `createFieldModule.tsx` with flags: `showPlaceholder`, `showValidation`, `showOptions`, `showDisplay`.
+- For custom settings, use **`CustomDialog`** + **`react-hook-form`** + **`yup`** per [form-dialogs.mdc](form-dialogs.mdc) and [dialog-windows.mdc](dialog-windows.mdc).
+- On open, **`reset`** from `field`; on save, **`onSave({ ...field, ...updates })`** + **`onOpenChange(false)`**.
+- Styling: `border-[var(--glass-border)]`, `bg-[var(--input-background)]`, `text-destructive` for errors.
+
+## Simple vs custom modules
+
+| Case | Approach |
+|------|----------|
+| Text-like (single/multi line, number, date) | Export via **`buildTextModule(type, label, description)`** |
+| Choice (radio/dropdown) | Reuse **`ChoiceRender`** + `FieldSettingsDialog` with `showOptions` |
+| Checkbox | Follow **`checkboxFieldModule`** |
+| Unique UX / data shape | New render + edit components; export a **`FieldModule`** constant |
+
+Add the module export in **`fields/shared/createFieldModule.tsx`** or a dedicated file under **`fields/<name>/`** when the implementation is large.
+
+## Registry
+
+In **`fields/registry.ts`**: import the module and append to the **`modules`** array. **`AddFieldDialog`**, **`FormFieldGridEditor`**, and **`FormFieldsRenderer`** discover fields only via this list.
+
+## Validation (fill mode)
+
+When a new type participates in user submission, extend **`validateFormValues`** in `features/customForms/utils/validateFormValues.ts` for `required` and type-specific rules. **`FillCustomFormDialog`** uses this before POST.
+
+## Imports
+
+Use **`@/features/customForms/types`** for `FormField`, `FormFieldType`, etc. Field contracts from **`../types`** (`FieldModule`, `FieldRenderProps`, `FieldEditProps`) inside the FormBuilder tree.
+
+## Verification
+
+```bash
+cd front-end && npm run type-check && npm run lint
+```
+
+Manual: FormBuilder → Add field → drag/resize → edit settings → save form → preview → fill via appointment dialog if applicable.

@@ -19,7 +19,7 @@ import { ServiceProductsPricingTab } from "./products-pricing/ServiceProductsPri
 import { ServiceDetailTabToolbar } from "./ServiceDetailTabToolbar";
 import { AppointmentWizard } from "@/shared/components/appointments";
 import { ServiceWizardDialog } from "@/features/services/components";
-import { companyProductsService, type CompanyProduct } from "@/features/products/services/productApi";
+import { companyProductsService, type CompanyProduct } from "@/shared/services/products-company-public";
 
 interface ServiceDetailPageProps {
   serviceId: string;

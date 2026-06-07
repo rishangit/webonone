@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { Bell, Search, Filter, Check, Trash2, Settings, BellRing, CheckCircle2, Archive, RefreshCw } from "lucide-react";
+import { Bell, Filter, Check, Trash2, Settings, BellRing, CheckCircle2, Archive, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { SearchInput } from "@/components/common/SearchInput";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/common/EmptyState";
@@ -373,7 +373,7 @@ export function NotificationsPage({ currentUser }: NotificationsPageProps) {
             size="sm"
             onClick={handleDeleteAll}
             disabled={notifications.length === 0}
-            className="bg-[var(--glass-bg)] border-[var(--glass-border)] text-red-600 hover:text-red-700 hover:bg-red-500/10"
+            className="bg-[var(--glass-bg)] border-[var(--glass-border)] text-destructive hover:text-destructive hover:bg-destructive/10"
           >
             <Trash2 className="w-4 h-4 mr-2" />
             Clear All
@@ -437,15 +437,11 @@ export function NotificationsPage({ currentUser }: NotificationsPageProps) {
           {/* Search and Filters */}
           <Card className="p-4 backdrop-blur-xl bg-[var(--glass-bg)] border-[var(--glass-border)]">
             <div className="space-y-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                <Input 
-                  placeholder="Search notifications..." 
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-[var(--input-background)] border-[var(--glass-border)] hover:border-[var(--accent-border)] focus:border-[var(--accent-border)]"
-                />
-              </div>
+              <SearchInput
+                placeholder="Search notifications..."
+                value={searchTerm}
+                onChange={setSearchTerm}
+              />
 
               <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
                 <Select value={filterType} onValueChange={setFilterType}>
