@@ -178,7 +178,7 @@ export function NotificationCard({
                   )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem 
-                    className="text-red-600 dark:text-red-400 hover:bg-red-500/10"
+                    className="text-destructive hover:bg-destructive/10"
                     onClick={() => onDelete(notification.id)}
                   >
                     <Icon icon={X} size="sm" className="mr-2" />
@@ -239,7 +239,7 @@ export function NotificationCard({
                   )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem 
-                    className="text-red-600 dark:text-red-400 hover:bg-red-500/10"
+                    className="text-destructive hover:bg-destructive/10"
                     onClick={() => onDelete(notification.id)}
                   >
                     <Icon icon={X} size="sm" className="mr-2" />

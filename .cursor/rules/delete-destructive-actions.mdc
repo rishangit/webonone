@@ -2,7 +2,6 @@
 description: System-wide delete/destructive button and icon colors (OKLCH red, white label)
 alwaysApply: true
 ---
-
 # Delete and destructive actions (system-wide)
 
 Use these colors consistently for **delete** and other **destructive** affordances (buttons, icon buttons, menu items that delete).

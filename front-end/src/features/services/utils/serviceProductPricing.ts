@@ -1,4 +1,4 @@
-import type { CompanyProduct } from "@/features/products/services/productApi";
+import type { CompanyProduct } from "@/shared/services/products-company-public";
 
 export type CompanyProductWithVariants = CompanyProduct & {
   variants?: Array<{

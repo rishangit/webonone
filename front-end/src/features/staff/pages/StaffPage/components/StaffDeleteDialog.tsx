@@ -23,7 +23,7 @@ export const StaffDeleteDialog = ({ open, onOpenChange, member, onDelete }: Staf
           </AlertDialogCancel>
           <AlertDialogAction 
             onClick={onDelete}
-            className="bg-red-500 hover:bg-red-600 text-white"
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
             Remove Staff Member
           </AlertDialogAction>

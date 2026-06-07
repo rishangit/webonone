@@ -15,6 +15,8 @@ import {
   UnitOfMeasureShowcaseSection,
   UserShowcaseSection,
   WebsiteShowcaseSection,
+  CustomFormShowcaseSection,
+  SalesShowcaseSection,
 } from "../sections";
 
 const VIEW = "grid" as const;
@@ -36,6 +38,8 @@ export function ShowcaseCardsTab() {
       <UserShowcaseSection sectionId="showcase-cards-user" viewMode={VIEW} />
       <TagShowcaseSection sectionId="showcase-cards-tag" viewMode={VIEW} />
       <RoleBadgesShowcaseSection />
+      <CustomFormShowcaseSection sectionId="showcase-cards-custom-form" viewMode={VIEW} />
+      <SalesShowcaseSection sectionId="showcase-cards-sales" viewMode={VIEW} />
     </div>
   );
 }

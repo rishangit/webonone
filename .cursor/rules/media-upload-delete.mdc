@@ -1,0 +1,107 @@
+---
+description: Media upload and delete — FileUpload, fileUploadService, company web media library, folder paths, and delete semantics.
+globs: front-end/src/**/*{Upload,upload,Media,Gallery,file-upload}*,front-end/src/shared/services/fileUploadService.ts,back-end/routes/{uploads,companyWebMedia}.js
+alwaysApply: false
+---
+
+# Media upload & delete
+
+Two storage APIs exist. Pick the right one before wiring UI.
+
+## Which API?
+
+| Use case | Front-end | Back-end | Store in DB |
+|----------|-----------|----------|-------------|
+| Entity image (avatar, product, service/space gallery path) | `fileUploadService` + `FileUpload` | `POST/DELETE /api/uploads/*` | Relative **`filePath`** (e.g. `companies/{id}/services/{id}/gallery/foo.jpg`) |
+| Company web media library (folders, bulk, website assets) | `companyWebMediaService` | `/api/company-web-media/*` | Relative path under `companies/{id}/web/media/` |
+| Pick existing library image (WebpageEditor, forms) | `SelectMediaDialog` | list + upload via company web media | Same relative path; display with `getMediaFileUrl` |
+
+Do **not** mix APIs for the same folder. Media library files live under `companies/{companyId}/web/media`; entity uploads use domain-specific paths (see skill).
+
+## `FileUpload` (`@/components/ui/file-upload`)
+
+- **Single image**, crop dialog, client compression (>2 MB), progress bar.
+- Props: `folderPath` (required), `onFileUploaded(filePath, fileUrl)`, optional `onFileDeleted`, `currentImagePath` / `currentImageUrl`, `maxSize` (MB, default 5), `cropAspectPresets`.
+- On upload success: persist **`filePath`** on the entity — not the full URL.
+- Inline delete (X on preview): calls `fileUploadService.deleteFile(currentImagePath)` when path is not an `http` URL.
+
+## `companyWebMediaService` (`@/features/website/services/companyWebMedia`)
+
+- `list`, `createFolder`, `upload(companyId, folderPath, files[])`, `delete(companyId, itemPath, type)`.
+- Multi-file upload (no crop): `MediaUploadDialog` or direct `upload()`.
+- Single image with crop in library: `FileUpload` with `folderPath={`companies/${companyId}/web/media${subPath}`}`.
+- **Delete file/folder:** confirm first (`DeleteConfirmationDialog` or destructive `CustomDialog` footer); then `delete(..., 'file' | 'folder')` and refresh list.
+
+## Display URLs
+
+| Stored value | Helper |
+|--------------|--------|
+| General upload path | `formatAvatarUrl(filePath)` from `@/shared/utils` |
+| Web media library path | `getMediaFileUrl(companyId, filePath)` |
+
+Static files are served at `/uploads/...` (see `server.js`).
+
+## Delete semantics (important)
+
+| Pattern | Disk delete? | Entity update? |
+|---------|--------------|----------------|
+| `FileUpload` X button (has `currentImagePath`) | Yes — `/api/uploads/delete/:filePath` | Parent `onFileDeleted` should clear DB field |
+| Gallery grid remove (`ServiceGalleryTab`, `SpaceGalleryTab`) | **No** — only removes path from entity array | Yes |
+| Media library delete | Yes — `companyWebMediaService.delete` | N/A |
+| Replace image via new upload | Old file may remain orphaned unless you explicitly delete | Yes — save new path |
+
+When removing a **single** entity image (avatar, cover), delete the file **and** clear the DB field. Gallery “remove from gallery” currently unlinks only — document if orphan cleanup is required.
+
+## Folder path conventions
+
+```
+companies/{companyId}/web/media[/{subPath}]   # media library
+companies/{companyId}/services/{serviceId}/gallery
+companies/{companyId}/spaces/{spaceId}/gallery
+users/{userId}/profile
+products                                        # system catalog
+system/services
+```
+
+Match sibling features; include `companyId` when the entity is company-scoped.
+
+## Back-end limits & auth
+
+| Route | Auth | Limits |
+|-------|------|--------|
+| `/api/uploads/upload` | `authenticateToken` | Images only, **5 MB**, field `file` |
+| `/api/company-web-media/upload` | `manage_company` | **20 MB**, up to **20** files, field `files` |
+| Deletes | Same as parent route | Path traversal blocked in company web media (`sanitizeRelativePath`) |
+
+New upload routes: follow [backend-api-routes.mdc](backend-api-routes.mdc); register in `server.js`.
+
+## UI conventions
+
+- Upload triggers: `Button variant="accent"` with `Upload` icon; progress via `ProgressBar variant="upload"`.
+- Delete controls: [delete-destructive-actions.mdc](delete-destructive-actions.mdc) — `variant="destructive"` or OKLCH red for icon buttons.
+- Destructive confirms: `DeleteConfirmationDialog` or `CustomDialog` + `variant="destructive"` Delete in footer.
+- Feedback: `toast.success` / `toast.error`; refresh list or parent state after upload/delete.
+
+## Reference implementations
+
+| File | Pattern |
+|------|---------|
+| `components/ui/file-upload.tsx` | Crop, compress, upload, inline delete |
+| `shared/services/fileUploadService.ts` | XHR upload + delete observable |
+| `features/website/services/companyWebMedia.ts` | Media library API |
+| `features/website/pages/MediaPage/MediaPage.tsx` | Library browse, folder delete confirm |
+| `features/website/pages/MediaPage/components/MediaUploadDialog.tsx` | Crop + multi-upload |
+| `components/common/SelectMediaDialog.tsx` | Pick from library |
+| `features/users/pages/ProfilePage/ProfileHeaderCard.tsx` | Single avatar replace/delete |
+| `features/services/pages/ServiceDetail/gallery/ServiceGalleryTab.tsx` | Gallery upload + array unlink |
+| `back-end/routes/uploads.js`, `companyWebMedia.js` | Server handlers |
+
+Workflow skill: [media-upload-delete skill](../skills/media-upload-delete/SKILL.md).
+
+## Verification
+
+```bash
+cd front-end && npm run type-check && npm run lint
+```
+
+Manual: upload image → confirm preview and stored path → delete/replace → confirm toast and list/entity state. For media library, test file and folder delete confirm.

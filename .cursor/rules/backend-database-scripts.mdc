@@ -1,0 +1,82 @@
+---
+description: Database init scripts, version folders, idempotent migrations, initDatabase wiring
+globs: back-end/scripts/**/*.js
+alwaysApply: false
+---
+
+# Back-end Database Scripts
+
+For **release version bumps**, follow [version-update-workflow.mdc](mdc:.cursor/rules/version-update-workflow.mdc). This rule covers **how to write and wire DB scripts**.
+
+## Script tiers
+
+1. **Core** (top-level `scripts/`): `initDatabase.js`, `seedDatabase.js`, `setup.js`, `verifyDatabase.js`
+2. **Versioned** (`scripts/<semver>/`): e.g. `1.19.0/migrateCompanyServicesSchema.js`
+
+## initDatabase flow
+
+`initDatabase.js` `createTables`:
+
+- Baseline `CREATE TABLE IF NOT EXISTS`
+- Inline idempotent column adds where appropriate
+- **`require()` and invoke** versioned migration modules at end of `createTables`
+- Export `{ createTables, dropTables }`
+
+Every new migration must be wired into `initDatabase.js` or fresh setups will miss schema changes.
+
+## Versioned migration module contract
+
+```js
+/**
+ * Short description. Safe to run multiple times (idempotent).
+ */
+async function migrateSomething(pool) {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    // information_schema checks, CREATE TABLE IF NOT EXISTS, skip-if-exists
+    await connection.commit();
+  } catch (err) {
+    await connection.rollback();
+    throw err;
+  } finally {
+    connection.release();
+  }
+}
+
+module.exports = { migrateSomething };
+
+if (require.main === module) {
+  // optional CLI entry
+}
+```
+
+## Idempotency requirements
+
+- Check `information_schema` before `ALTER TABLE`
+- Use `CREATE TABLE IF NOT EXISTS`
+- Skip steps when migration already applied
+- Safe to run more than once
+
+## New script checklist
+
+1. Create `back-end/scripts/<current-release-version>/<descriptiveName>.js`
+2. Export named async function accepting `pool`
+3. Wire into `initDatabase.js`
+4. Add version-folder README when multiple scripts share a release (see `scripts/1.7.0/README.md`)
+
+## Reference implementations
+
+- `back-end/scripts/initDatabase.js`
+- `back-end/scripts/1.19.0/migrateCompanyServicesSchema.js`
+- `back-end/scripts/1.21.0/setupCompanyCustomFormsTables.js`
+- `back-end/scripts/setup.js`
+
+## Verification
+
+```bash
+cd back-end
+node scripts/verifyDatabase.js
+```
+
+Run the new migration script directly against a dev DB; re-run to confirm idempotency. Smoke `/health` after server restart.

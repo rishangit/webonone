@@ -1,0 +1,52 @@
+---
+description: Semantic status badge colors via statusBadgeClasses tokens
+globs: front-end/src/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Status Badges
+
+Use shared tokens from `@/shared/utils/statusBadges` for lifecycle and domain status labels. Delete/destructive **actions** use [delete-destructive-actions.mdc](mdc:.cursor/rules/delete-destructive-actions.mdc); status badges use the separate semantic palette below.
+
+## Tokens
+
+Import `statusBadgeClasses` and map domain statuses in a small feature helper (e.g. `getServiceStatusColor`), not inline Tailwind in every card:
+
+```tsx
+import { Badge } from "@/components/ui/badge";
+import { statusBadgeClasses } from "@/shared/utils/statusBadges";
+
+<Badge className={`border text-xs px-2 py-1 ${statusBadgeClasses.green}`}>
+  Active
+</Badge>
+```
+
+Available keys: `green`, `gray`, `yellow`, `orange`, `purple`, `blue`, `red`.
+
+## Domain mapping
+
+- Define `Record<YourStatus, keyof typeof statusBadgeClasses>` (or similar) in the feature utils file
+- Reuse labels/colors from `STATUS_BADGE_GROUPS` when adding new statuses — keep showcase catalog in sync
+
+## Do not
+
+- Scatter one-off `bg-green-500/20 text-green-600` strings when a token exists
+- Use status badge red for delete buttons — use destructive action colors instead
+- Mix unrelated status color logic inside card JSX — centralize in utils
+
+## Reference implementations
+
+- `front-end/src/shared/utils/statusBadges.ts`
+- `front-end/src/features/showcase/components/sections/StatusTagsShowcaseSection.tsx`
+- `front-end/src/features/companies/components/CompanyCard/components/CompanyCardHeader.tsx`
+- `front-end/src/features/services/pages/ServicesPage/components/ServiceListView.tsx`
+
+## Verification
+
+```bash
+cd front-end
+npm run type-check
+npm run lint
+```
+
+When adding a new status type, check `/system/showcase` Status Tags section if the status is user-visible.

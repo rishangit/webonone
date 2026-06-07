@@ -1,7 +1,7 @@
 ---
 description: Enforce frontend src and feature module structure
 globs: front-end/src/**/*.{ts,tsx}
-alwaysApply: true
+alwaysApply: false
 ---
 
 # Front-end Structure Standards

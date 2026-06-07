@@ -1,0 +1,84 @@
+---
+description: Theme, accent, and UI token consistency when building front-end features
+globs: front-end/src/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Theme, Accent & UI Consistency
+
+When implementing new UI, **respect the global theme system** so light/dark mode and user-selected accent colors work without per-feature overrides.
+
+Theme is applied at app root via `applyTheme()` (`@/shared/utils/core.ts`): `document.documentElement` gets `.light` / `.dark` and `data-accent-color`. Tokens live in `front-end/src/styles/globals.css`.
+
+## Token layers (use in this order)
+
+| Layer | Use for | Examples |
+|-------|---------|----------|
+| **Semantic** | Base surfaces and text | `bg-background`, `text-foreground`, `text-muted-foreground`, `border-border`, `bg-card` |
+| **Glass** | Cards, panels, filters, dialogs | `bg-[var(--glass-bg)]`, `border-[var(--glass-border)]`, `shadow-[var(--glass-shadow)]` |
+| **Accent (user-selectable)** | CTAs, highlights, active states, links | `var(--accent-primary)`, `--accent-text`, `--accent-bg`, `--accent-border`, `--accent-button-text` |
+| **Destructive** | Delete / irreversible actions only | [delete-destructive-actions.mdc](mdc:.cursor/rules/delete-destructive-actions.mdc) — `Button variant="destructive"` |
+| **Status** | Lifecycle/domain labels | [status-badges.mdc](mdc:.cursor/rules/status-badges.mdc) — `statusBadgeClasses` |
+
+Do **not** mix layers: accent red is not delete red; status green is not accent green.
+
+## Accent usage
+
+- **Primary actions:** `Button variant="accent"` (default in `@/components/ui/button.tsx`).
+- **Secondary / cancel:** `Button variant="outline"` with glass border: `border-[var(--glass-border)]`.
+- **Selected / active UI:** `bg-[var(--accent-bg)] border-[var(--accent-border)] text-[var(--accent-text)]`.
+- **Icons & emphasis:** `text-[var(--accent-text)]` or `text-[var(--accent-primary)]`.
+- **Custom gradients:** only when matching existing patterns — use `from-[var(--accent-secondary)] to-[var(--accent-primary)]` and hover vars; never hardcode `#f97316` / `orange-500`.
+
+Reference CSS variables: `--accent-primary`, `--accent-primary-hover`, `--accent-secondary`, `--accent-bg`, `--accent-border`, `--accent-text`, `--accent-button-text`.
+
+## Do not
+
+- Hardcode theme-specific colors (`bg-gray-900`, `text-white`, `#dc2626`, `dark:bg-slate-800`) when a token exists.
+- Set inline `style={{ color: … }}` or fixed hex backgrounds for brand/accent UI (exception: data viz or third-party embeds).
+- Call `applyTheme` or mutate root theme classes inside feature components — settings/app shell owns that.
+- Add new accent palette keys without updating `globals.css`, `applyTheme` color map, and Settings/Showcase pickers.
+- Use Tailwind `accent` / `primary` shadcn tokens for user-accent CTAs when `--accent-*` vars are intended.
+
+## Reuse before inventing
+
+Match neighboring pages and scoped rules:
+
+- List pages → [list-page-shell.mdc](mdc:.cursor/rules/list-page-shell.mdc)
+- Dialogs → [dialog-windows.mdc](mdc:.cursor/rules/dialog-windows.mdc)
+- Cards → [list-card-layout.mdc](mdc:.cursor/rules/list-card-layout.mdc)
+- Empty states → [empty-state-component.mdc](mdc:.cursor/rules/empty-state-component.mdc)
+- Reusable cards → [component-showcase.mdc](mdc:.cursor/rules/component-showcase.mdc)
+
+Prefer `@/components/ui/*` (Button, Card, Badge, Input) over bespoke styled elements.
+
+## Typography & spacing
+
+- Page titles: `text-2xl font-semibold text-foreground`; descriptions: `text-muted-foreground`.
+- Body copy: `text-foreground`; supporting text: `text-muted-foreground`.
+- Page padding: `p-4 lg:p-6` on list/detail shells (see list-page-shell).
+- Transitions: `transition-all duration-200` on interactive cards/hover states where siblings use it.
+
+## Before you finish a feature
+
+1. Grep changed files for hardcoded palette classes (`orange-`, `red-5`, `gray-9`, `#` hex in className).
+2. Confirm primary buttons use `variant="accent"` and destructive actions use destructive tokens.
+3. Switch **light ↔ dark** and **each accent color** in Settings (or `/system/showcase` Primary tab) — no broken contrast or stuck orange-only styling.
+
+## Verification
+
+```bash
+cd front-end
+npm run type-check
+npm run lint
+```
+
+Manual: Settings → Theme + Accent, then open the new/changed screens.
+
+## Reference implementations
+
+- `front-end/src/styles/globals.css` — token definitions
+- `front-end/src/shared/utils/core.ts` — `applyTheme`
+- `front-end/src/components/ui/button.tsx` — accent button variant
+- `front-end/src/features/showcase/components/primitives/ThemeAccentSection.tsx` — accent selection UI
+- `front-end/src/features/spaces/pages/SpacesPage/components/SpacesStats.tsx` — glass + accent hover card

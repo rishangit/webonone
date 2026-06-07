@@ -2,7 +2,7 @@ import { ServiceDetailImage } from "./ServiceDetailImage";
 import { ServiceDetailInfo } from "./ServiceDetailInfo";
 import { Service } from "@/features/services/services";
 import { Currency } from "@/shared/services/currencies";
-import type { CompanyProduct } from "@/features/products/services/productApi";
+import type { CompanyProduct } from "@/shared/services/products-company-public";
 
 interface ServiceOverviewTabProps {
   service: Service;

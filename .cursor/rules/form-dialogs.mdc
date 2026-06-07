@@ -1,0 +1,63 @@
+---
+description: Form dialogs with react-hook-form, yup, feature schemas, and Redux submit
+globs: front-end/src/features/**/*Dialog*.tsx
+alwaysApply: false
+---
+
+# Form Dialogs
+
+Build create/edit dialogs with **`CustomDialog`** shell rules from [dialog-windows.mdc](mdc:.cursor/rules/dialog-windows.mdc). This rule covers **form wiring** inside the body and footer submit flow.
+
+## Stack
+
+- `react-hook-form` + `@hookform/resolvers/yup` + `yup`
+- Validation schema in `features/<domain>/schemas/` for non-trivial forms (or colocated yup object for small dialogs)
+- `@/components/ui` inputs (`Input`, `Textarea`, `Select`, `Checkbox`, `Label`) — not raw HTML controls
+- Redux dispatch for persist actions; `toast` for slice errors
+
+## Open / reset
+
+Reset form when dialog opens from entity data:
+
+```tsx
+useEffect(() => {
+  if (open) {
+    form.reset(mode === "edit" && entity ? { ...entityFields } : defaultValues);
+    dispatch(clearDomainError());
+  }
+}, [open, mode, entity, form, dispatch]);
+```
+
+## Submit
+
+- `handleSubmit` builds payload, dispatches `createRequest` / `updateRequest`
+- On success: `onOpenChange(false)`, optional `onSuccess()` callback
+- Surface `error` from slice via `useEffect` + `toast.error`
+
+## Footer (CustomDialog)
+
+- Cancel: `variant="outline"`, `h-10`, closes dialog
+- Save/Create: `variant="accent"`, `h-10`, Lucide `Save` icon `w-4 h-4 mr-2` before label
+- Disable submit while `loading` from slice
+
+## Errors
+
+- Field errors: `formState.errors` or `Controller` + `text-destructive` helper text
+- Do not put Save/Cancel in the dialog body
+
+## Reference implementations
+
+- `front-end/src/features/tags/pages/TagFormDialog.tsx` (archetype)
+- `front-end/src/features/backlog/components/BacklogFormDialog.tsx`
+- `front-end/src/features/companies/schemas/companyValidation.ts`
+- `front-end/src/features/products/schemas/variantValidation.ts`
+
+## Verification
+
+```bash
+cd front-end
+npm run type-check
+npm run lint
+```
+
+Manual: open dialog in add and edit modes; confirm reset, validation messages, and toast on API error.

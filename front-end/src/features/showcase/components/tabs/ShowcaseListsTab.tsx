@@ -14,6 +14,8 @@ import {
   SystemServiceShowcaseSection,
   TagShowcaseSection,
   UserShowcaseSection,
+  NotificationShowcaseSection,
+  SalesShowcaseSection,
 } from "../sections";
 
 const VIEW = "list" as const;
@@ -34,6 +36,8 @@ export function ShowcaseListsTab() {
       <WebsiteShowcaseSection sectionId="showcase-lists-website" viewMode={VIEW} />
       <UserShowcaseSection sectionId="showcase-lists-user" viewMode={VIEW} />
       <TagShowcaseSection sectionId="showcase-lists-tag" viewMode={VIEW} />
+      <NotificationShowcaseSection sectionId="showcase-lists-notification" viewMode={VIEW} />
+      <SalesShowcaseSection sectionId="showcase-lists-sales" viewMode={VIEW} />
     </div>
   );
 }

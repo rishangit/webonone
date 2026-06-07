@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import type { Service, CreateServiceData } from "@/features/services/services";
-import type { CompanyProduct } from "@/features/products/services/productApi";
+import type { CompanyProduct } from "@/shared/services/products-company-public";
 import type { CreateSystemServiceData, SystemService } from "@/features/services/services/systemServices";
 
 export interface ServiceWizardStep {

@@ -59,6 +59,8 @@ const cards: ShowcaseCatalogEntry[] = [
   { id: "user-card", name: "UserCard", category: "cards", importPath: "@/shared/components/users", tab: "cards", sectionId: "showcase-cards-user" },
   { id: "tag-card", name: "TagCard", category: "cards", importPath: "@/shared/components/tags", tab: "cards", sectionId: "showcase-cards-tag" },
   { id: "status-tags", name: "Status tags", category: "cards", importPath: "@/shared/utils/statusBadges", tab: "cards", sectionId: "showcase-cards-tag" },
+  { id: "custom-form-card", name: "CustomFormCard", category: "cards", importPath: "@/shared/components/customForms", tab: "cards", sectionId: "showcase-cards-custom-form" },
+  { id: "notification-card", name: "NotificationCard", category: "cards", importPath: "@/shared/components/notifications", tab: "lists", sectionId: "showcase-lists-notification" },
 ];
 
 const lists: ShowcaseCatalogEntry[] = cards.map((c) => ({
@@ -86,7 +88,7 @@ const dialogs: ShowcaseCatalogEntry[] = [
 const common: ShowcaseCatalogEntry[] = [
   { id: "cart-item", name: "CartItemEditorCard", category: "common", importPath: "@/components/common/CartItemEditorCard", tab: "cards", sectionId: "showcase-cards-cart-item" },
   { id: "user-role-badge", name: "UserRoleBadge", category: "common", importPath: "@/components/UserRoleBadge", tab: "cards", sectionId: "showcase-cards-role-badges" },
-  { id: "sales-card", name: "SalesCard", category: "common", importPath: "@/shared/components/sales", tab: "cards", notes: "Optional demo" },
+  { id: "sales-card", name: "SalesCard", category: "common", importPath: "@/shared/components/sales", tab: "cards", sectionId: "showcase-cards-sales" },
 ];
 
 export const SHOWCASE_CATALOG_ENTRIES: ShowcaseCatalogEntry[] = [

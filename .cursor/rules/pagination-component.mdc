@@ -1,0 +1,141 @@
+---
+description: Server-side list pagination — Pagination component, hook state, API params, Redux meta
+globs: front-end/src/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# List pagination (`Pagination`)
+
+Use the shared **`Pagination`** component for **server-side** paginated lists. Do not build custom page controls or client-slice large datasets when the API already returns paginated rows.
+
+**Component:** `front-end/src/components/common/Pagination.tsx`  
+**Import:** `@/components/common/Pagination`  
+**Meta type:** `@/shared/types/pagination` → `PaginationMeta`
+
+## When to use
+
+- Domain list pages (users, services, products, spaces, tags, webpages, etc.)
+- Tab sections that fetch paginated data from the API (e.g. company product tabs)
+
+Skip pagination UI when the endpoint returns all rows in one response and the list is intentionally small.
+
+## UI placement
+
+Inside the list body flex column, after the grid/list content:
+
+```tsx
+<div className="flex flex-col flex-1 min-h-0">
+  <div className="flex-1">{/* grid or list */}</div>
+  {pagination && (
+    <div className="mt-auto pt-4">
+      <Pagination
+        totalItems={pagination.total}
+        itemsPerPage={itemsPerPage}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+        showItemsPerPageSelector={true}
+        itemsPerPageOptions={[12, 24, 48, 96]}
+        onItemsPerPageChange={(newItemsPerPage) => {
+          setItemsPerPage(newItemsPerPage);
+          setCurrentPage(1);
+        }}
+      />
+    </div>
+  )}
+</div>
+```
+
+- Use `mt-auto pt-4` so pagination sticks to the bottom of the scroll area (see [list-page-shell.mdc](mdc:.cursor/rules/list-page-shell.mdc)).
+- Optional guard: `pagination.total > 0` when the control should hide on empty results (see `UsersPage`).
+
+## Component props
+
+| Prop | Usage |
+|------|--------|
+| `totalItems` | `pagination.total` from API |
+| `itemsPerPage` | Local state |
+| `currentPage` | Local state (1-based) |
+| `onPageChange` | Usually `setCurrentPage` |
+| `showItemsPerPageSelector` | `true` on list pages |
+| `itemsPerPageOptions` | `[12, 24, 48, 96]` for card/grid lists |
+| `onItemsPerPageChange` | Update limit **and** reset `currentPage` to `1` |
+
+Default component options (`[10, 20, 50, 100]`) are for generic use only — **list pages use `[12, 24, 48, 96]`**. Extract `ITEMS_PER_PAGE_OPTIONS` in the page hook when reused (see `useWebpagesPage.ts`).
+
+## Page / hook state
+
+Own pagination in the feature hook (`useSpacesPage`, `useUsersPage`, etc.):
+
+```tsx
+const [currentPage, setCurrentPage] = useState(1);
+const [itemsPerPage, setItemsPerPage] = useState(12);
+```
+
+**Reset to page 1** when search or filters change:
+
+```tsx
+useEffect(() => {
+  setCurrentPage(1);
+}, [debouncedSearchTerm, filterStatus /* other filter deps */]);
+```
+
+Also reset page 1 when header search or sessionStorage prefill applies a new query.
+
+## Fetch / Redux wiring
+
+Pass all three params on every fetch:
+
+```tsx
+const offset = (currentPage - 1) * itemsPerPage;
+dispatch(fetchItemsRequest({
+  limit: itemsPerPage,
+  offset,
+  page: currentPage,
+  /* search + filters */
+}));
+```
+
+- Store `pagination: PaginationMeta | null` in the feature slice; set it on fetch success.
+- Render **API rows directly** — do not re-slice client-side when server pagination is active.
+- Re-fetch after create/update/delete so `pagination.total` stays accurate (include current filters + page in the dispatch).
+
+## Backend contract
+
+Routes parse query params and models return a `pagination` object:
+
+```js
+const limit = parseInt(req.query.limit) || 12;
+const offset = parseInt(req.query.offset) || 0;
+const page = parseInt(req.query.page) || Math.floor(offset / limit) + 1;
+```
+
+Response shape (see `PaginationMeta`):
+
+```json
+{
+  "total": 42,
+  "limit": 12,
+  "offset": 0,
+  "totalPages": 4,
+  "currentPage": 1
+}
+```
+
+- Cap `limit` in Joi (typically max `100`; appointments may allow higher for dashboards).
+- Empty results still return `pagination` with `total: 0`.
+
+## Reference implementations
+
+- UI: `SpacesPage.tsx`, `UsersPage.tsx`, `CompaniesPage.tsx`, `ServicesPageServiceList.tsx`
+- Hook: `useSpacesPage.ts`, `useWebpagesPage.ts`, `useUsersPage.ts`
+- Redux: `spacesSlice.ts`, `companyWebPagesSlice.ts`
+- Backend: `back-end/routes/staff.js`, `back-end/models/CompanyStaff.js`
+- Showcase: `@/components/common/Pagination` in `/system/showcase`
+
+## Verification
+
+```bash
+cd front-end && npm run type-check && npm run lint
+```
+
+Manual: change page, change per-page, apply filter (confirm page resets to 1), verify item count text and mobile per-page row.

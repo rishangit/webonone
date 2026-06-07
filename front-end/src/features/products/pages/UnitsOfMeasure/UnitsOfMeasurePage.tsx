@@ -61,6 +61,7 @@ export const UnitsOfMeasurePage = ({ currentUser }: UnitsOfMeasurePageProps) => 
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(12);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState<UnitsOfMeasure | null>(null);
@@ -87,7 +88,7 @@ export const UnitsOfMeasurePage = ({ currentUser }: UnitsOfMeasurePageProps) => 
   useEffect(() => {
     const filters: any = {
       page: currentPage,
-      limit: 12,
+      limit: itemsPerPage,
       search: debouncedSearchTerm || undefined,
     };
 
@@ -96,7 +97,7 @@ export const UnitsOfMeasurePage = ({ currentUser }: UnitsOfMeasurePageProps) => 
     }
 
     dispatch(fetchUnitsOfMeasureRequest(filters));
-  }, [dispatch, debouncedSearchTerm, statusFilter, currentPage]);
+  }, [dispatch, debouncedSearchTerm, statusFilter, currentPage, itemsPerPage]);
 
   // Clear error when component unmounts
   useEffect(() => {
@@ -336,13 +337,19 @@ export const UnitsOfMeasurePage = ({ currentUser }: UnitsOfMeasurePageProps) => 
             </div>
 
             {/* Pagination */}
-            {pagination && pagination.totalPages > 1 && (
+            {pagination && (
               <div className="mt-auto pt-4">
                 <Pagination
                   totalItems={pagination.total}
-                  itemsPerPage={12}
+                  itemsPerPage={itemsPerPage}
                   currentPage={currentPage}
                   onPageChange={setCurrentPage}
+                  showItemsPerPageSelector={true}
+                  itemsPerPageOptions={[12, 24, 48, 96]}
+                  onItemsPerPageChange={(newItemsPerPage) => {
+                    setItemsPerPage(newItemsPerPage);
+                    setCurrentPage(1);
+                  }}
                 />
               </div>
             )}
